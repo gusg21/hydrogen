@@ -1,5 +1,0 @@
-C:/Users/angus.goucher/Desktop/hydrogen/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/angus.goucher/Desktop/hydrogen/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/angus.goucher/Desktop/hydrogen/build/core/CMakeFiles/ALL_BUILD.dir
-C:/Users/angus.goucher/Desktop/hydrogen/build/editor/CMakeFiles/ALL_BUILD.dir
-C:/Users/angus.goucher/Desktop/hydrogen/build/runtime/CMakeFiles/ALL_BUILD.dir
