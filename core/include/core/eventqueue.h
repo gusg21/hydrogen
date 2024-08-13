@@ -5,20 +5,19 @@
 
 #include "core/event.h"
 
-namespace h_core
-{
+namespace h_core {
 class EventQueue {
 public:
     EventQueue();
-    EventQueue(const EventQueue&) = delete;
+    EventQueue(const EventQueue&)            = delete;
     EventQueue& operator=(const EventQueue&) = delete;
 
-    void clear();
-    void postEvent(h_core::Event event);
-    size_t getSize();
+    void           clear();
+    void           postEvent(h_core::Event event);
+    size_t         getSize();
     h_core::Event* getHeadPointer();
 
 private:
-    tinystl::vector<h_core::Event> m_queue {};
+    tinystl::vector<h_core::Event> m_queue{};
 };
-} // namespace h_core
+}  // namespace h_core

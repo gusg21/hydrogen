@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <SDL3/SDL.h>
+#include <bgfx/bgfx.h>
 #include <bx/string.h>
 
 #include "core/engineevents.h"
@@ -11,16 +12,19 @@
 namespace h_core {
 class Window {
 public:
-    Window(bx::StringLiteral title,
-           uint32_t      width,
-           uint32_t      height,
-           bool          fullscreen);
+    Window()                         = default;
     Window(const Window&)            = delete;
     Window& operator=(const Window&) = delete;
 
-    void postEventsToQueue(h_core::EventQueue* queue);
+    uint32_t init(bx::StringLiteral title,
+                  uint32_t          width,
+                  uint32_t          height,
+                  bool              fullscreen);
+    void     destroy();
+    void     postEventsToQueue(h_core::EventQueue* queue);
 
 private:
-    SDL_Window* m_window = nullptr;
+    SDL_Window*  m_sdlWindow   = nullptr;
+    bgfx::ViewId m_clearViewId = 0;
 };
 }  // namespace h_core

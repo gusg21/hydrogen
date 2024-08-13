@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "core/external/bgfx.cmake/bx/include",
                 "core/external/bgfx.cmake/bx/include/bx",
-                "core/external/bgfx.cmake/bx/include/compat/msvc"
+                "core/external/bgfx.cmake/bx/include/compat/msvc",
+                "core/external/bgfx.cmake/bgfx/include"
             ],
             "defines": [
                 "_DEBUG",

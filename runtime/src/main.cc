@@ -9,6 +9,7 @@ int main() {
     h_core::Project project {};
     project.projectName = "Hello World!";
 
-    engine->loadProject(project);
+    engine->init(project);
     engine->run();
+    engine->destroy();
 }
