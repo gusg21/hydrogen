@@ -1,6 +1,8 @@
 #include "core/engine.h"
 
 #include <bgfx/bgfx.h>
+#include <imgui.h>
+#include <imgui_impl_bgfx.h>
 
 h_core::Engine::Engine() {}
 
@@ -10,6 +12,8 @@ h_core::Engine::~Engine() {
 
 void h_core::Engine::init(h_core::Project project) {
     m_project = project;
+
+    ImGui::CreateContext();
 
 #define ENGINE_WINDOW_TITLE_MAX_LENGTH 1024
     char windowTitle[ENGINE_WINDOW_TITLE_MAX_LENGTH] = "hydrogen runtime - ";
@@ -21,10 +25,17 @@ void h_core::Engine::init(h_core::Project project) {
     m_clearView = 0;
     bgfx::setViewClear(m_clearView, BGFX_CLEAR_COLOR);
     bgfx::setViewRect(m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
+
+    ImGui_Implbgfx_Init(255);
 }
 
 void h_core::Engine::destroy() {
+    ImGui_Implbgfx_Shutdown();
+
     m_window->destroy();
+
+    ImGui::DestroyContext();
+    bgfx::shutdown();
 }
 
 void h_core::Engine::run() {
@@ -49,6 +60,13 @@ void h_core::Engine::run() {
                     break;
             }
         }
+
+        ImGui_Implbgfx_NewFrame();
+
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
+        ImGui::Render();
+        ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
 
         // BEGIN PLACEHOLDER RENDERING PLAYGROUND //
 

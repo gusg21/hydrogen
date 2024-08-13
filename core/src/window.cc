@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
+#include <imgui_impl_sdl3.h>
 
 #define WINDOW_INIT_BGFX_INIT_FAIL 1
 
@@ -25,6 +26,8 @@ uint32_t h_core::Window::init(bx::StringLiteral title,
     void*            win32Handle = SDL_GetPointerProperty(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     init.platformData.nwh = win32Handle;
+#else
+#error Non-Windows native window acquisition unimplemented
 #endif
 
     // Set up resolution + backbuffer settings
@@ -33,20 +36,33 @@ uint32_t h_core::Window::init(bx::StringLiteral title,
     init.resolution.reset  = BGFX_RESET_VSYNC;
 
     // Go bgfx, go!
-    if (bgfx::init(init) != 0) {
+    if (!bgfx::init(init)) {
         return WINDOW_INIT_BGFX_INIT_FAIL;
     }
+
+    // Set up imgui
+#if BX_PLATFORM_WINDOWS
+    ImGui_ImplSDL3_InitForD3D(m_sdlWindow);
+#elif BX_PLATFORM_OSX
+    ImGui_ImplSDL3_InitForMetal(m_sdlWindow);
+#elif BX_PLATFORM_LINUX || BX_PLATFORM_EMSCRIPTEN
+    ImGui_ImplSDL3_InitForOpenGL(m_sdlWindow, nullptr);
+#endif  // BX_PLATFORM_WINDOWS ? BX_PLATFORM_OSX ? BX_PLATFORM_LINUX ?
+        // BX_PLATFORM_EMSCRIPTEN
 
     return 0;
 }
 
 void h_core::Window::destroy() {
+    ImGui_ImplSDL3_Shutdown();
     SDL_Quit();
 }
 
 void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent)) {
+        ImGui_ImplSDL3_ProcessEvent(&sdlEvent);
+
         switch (sdlEvent.type) {
             case SDL_EVENT_QUIT:
                 queue->postEvent(h_core::Event(ENGINE_EVENT_QUIT));
@@ -65,4 +81,6 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                 break;
         }
     }
+
+    ImGui_ImplSDL3_NewFrame();
 }
