@@ -5,17 +5,20 @@ cmake_minimum_required(VERSION 3.21)
 # Core sources
 add_library(HydrogenCore STATIC 
 
-                        include/core/actor.h
-                        include/core/asset.h
-    src/assets.cc       include/core/assets.h
-    src/engine.cc       include/core/engine.h
-                        include/core/engineevents.h
-    src/event.cc        include/core/event.h
-    src/eventqueue.cc   include/core/eventqueue.h
-    src/project.cc      include/core/project.h
-    src/scene.cc        include/core/scene.h
-                        include/core/scenespec.h
-    src/window.cc       include/core/window.h
+                                    include/core/actor.h
+                                    include/core/asset.h
+    src/assets.cc                   include/core/assets.h
+    src/engine.cc                   include/core/engine.h
+                                    include/core/engineevents.h
+    src/event.cc                    include/core/event.h
+    src/eventqueue.cc               include/core/eventqueue.h
+    src/project.cc                  include/core/project.h
+    src/scene.cc                    include/core/scene.h
+    src/system.cc                   include/core/system.h
+                                    include/core/scenespec.h
+    src/window.cc                   include/core/window.h
+
+    src/systems/sys_gravity.cc      include/core/systems/sys_gravity.h
 
     )
 

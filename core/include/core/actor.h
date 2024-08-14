@@ -1,20 +1,20 @@
-#pragma once
+// #pragma once
 
-#include <stdint.h>
+// #include <stdint.h>
 
-#include "tinystl/string.h"
+// #include "tinystl/string.h"
 
-namespace h_core {
-typedef uint32_t ComponentBitfield;
+// namespace h_core {
+// typedef uint32_t ComponentBitfield;
 
-class Actor {
-  public:
-    Actor() = default;
+// class Actor {
+//   public:
+//     Actor() = default;
 
-    /// @brief the name of this actor
-    tinystl::string name;
+//     /// @brief the name of this actor
+//     tinystl::string name;
 
-    /// @brief the components attached to this actor
-    h_core::ComponentBitfield componentBitfield;
-};
-}  // namespace h_core
+//     /// @brief the components attached to this actor
+//     h_core::ComponentBitfield componentBitfield;
+// };
+// }  // namespace h_core

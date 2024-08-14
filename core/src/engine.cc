@@ -5,7 +5,11 @@
 #include <imgui_impl_bgfx.h>
 #include <tinystl/string.h>
 
+#include "core/systems/sys_gravity.h"
+
 void h_core::Engine::init(h_core::Project project) {
+    m_systems[0] = new h_core::systems::Gravity();
+
     m_project = project;
 
     ImGui::CreateContext();
@@ -59,6 +63,11 @@ void h_core::Engine::run() {
                 default:
                     break;
             }
+        }
+
+        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+             systemIndex++) {
+            m_scene.runSystem(m_systems[systemIndex]);
         }
 
         ImGui_Implbgfx_NewFrame();

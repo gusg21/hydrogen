@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tinystl/string.h>
+
 namespace h_core {
 class Asset {
   public:

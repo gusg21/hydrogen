@@ -2,13 +2,13 @@
 
 #include <bx/math.h>
 
-#include "core/component.h"
-
 #define TRANSFORM_COMPONENT_BITMASK (1 << 0)
 
 namespace h_core {
-class Transform : public I_Component {
+class Transform {
   public:
+    Transform() : position(0, 0, 0), rotation(0, 0, 0, 1), scale(1, 1, 1) {};
+
     /// @brief position
     bx::Vec3 position;
 

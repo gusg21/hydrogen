@@ -7,7 +7,10 @@
 #include "core/eventqueue.h"
 #include "core/project.h"
 #include "core/scene.h"
+#include "core/system.h"
 #include "core/window.h"
+
+#define ENGINE_SYSTEM_COUNT 1
 
 namespace h_core {
 class Engine {
@@ -32,6 +35,7 @@ class Engine {
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
     h_core::Scene m_scene {};
+    h_core::System* m_systems[ENGINE_SYSTEM_COUNT];
 
     // TODO: Temp rendering variables
     bgfx::ViewId m_clearView = 0;

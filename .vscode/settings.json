@@ -9,8 +9,10 @@
     "xiosbase": "cpp",
     "filesystem": "cpp"
   },
-  "editor.rulers": [80],
+  "editor.rulers": [
+    80
+  ],
   "editor.indentSize": 4,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.formatOnPaste": true
 }

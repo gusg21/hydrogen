@@ -1,11 +1,19 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "core/actor.h"
+#include "core/actorspec.h"
 #include "core/scenespec.h"
+#include "core/transform.h"
+#include "core/system.h"
 
 #define SCENE_MAX_ACTORS 1024
 
 namespace h_core {
+typedef uint32_t ComponentBitmask;
+typedef uint32_t ActorId;
+
 class Scene {
   public:
     Scene() = default;
@@ -14,7 +22,14 @@ class Scene {
     /// @param sceneSpec scene spec to use
     void initFromSceneSpec(const h_core::SceneSpec* const sceneSpec);
 
+    ActorId addActor(h_core::ActorSpec actorSpec);
+
+    void runSystem(h_core::System* system);
+
   private:
-    h_core::Actor m_actors[SCENE_MAX_ACTORS] = {};  // Zero-initialized
+    ActorId m_nextId = 0;
+
+    h_core::ComponentBitmask m_masks[SCENE_MAX_ACTORS] = {};
+    h_core::Transform m_transforms[SCENE_MAX_ACTORS] = {};
 };
 }  // namespace h_core
