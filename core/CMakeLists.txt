@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.21)
 
 
 # Core sources
-add_library(HydrogenCore STATIC src/window.cc src/engine.cc src/project.cc src/eventqueue.cc src/event.cc)
+add_library(HydrogenCore STATIC src/window.cc src/engine.cc src/project.cc src/eventqueue.cc src/event.cc 
+    include/core/window.h  include/core/engine.h  include/core/project.h  include/core/eventqueue.h  include/core/event.h)
 
 # Core include dir
 target_include_directories(HydrogenCore PUBLIC include)
