@@ -4,7 +4,7 @@
 
 namespace h_core {
 class Event {
-public:
+  public:
     Event(uint32_t _type);
 
     uint32_t type = 0;

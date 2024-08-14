@@ -1,9 +1,9 @@
 #include "core/engine.h"
 
 #include <bgfx/bgfx.h>
-#include <tinystl/string.h>
 #include <imgui.h>
 #include <imgui_impl_bgfx.h>
+#include <tinystl/string.h>
 
 h_core::Engine::Engine() {}
 
@@ -51,10 +51,10 @@ void h_core::Engine::run() {
                     engineRunning = false;
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    bgfx::reset(event.newWidth, event.newHeight,
-                                BGFX_RESET_VSYNC);
-                    bgfx::setViewRect(m_clearView, 0, 0,
-                                      bgfx::BackbufferRatio::Equal);
+                    bgfx::reset(
+                        event.newWidth, event.newHeight, BGFX_RESET_VSYNC);
+                    bgfx::setViewRect(
+                        m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
                     break;
                 default:
                     break;

@@ -4,7 +4,7 @@
 
 namespace h_core {
 class Project {
-public:
+  public:
     Project();
 
     tinystl::string projectName = "Unnamed Project";

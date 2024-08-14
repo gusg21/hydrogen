@@ -7,11 +7,11 @@
 
 #define WINDOW_INIT_BGFX_INIT_FAIL 1
 
-uint32_t h_core::Window::init(tinystl::string title,
-                              uint32_t          width,
-                              uint32_t          height,
-                              bool              fullscreen) {
+uint32_t h_core::Window::init(
+    tinystl::string title, uint32_t width, uint32_t height, bool fullscreen) {
+    // Init SDL
     SDL_Init(0);
+
     m_sdlWindow =
         SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE);
 
@@ -22,8 +22,8 @@ uint32_t h_core::Window::init(tinystl::string title,
 
     // Acquire native handle
 #if BX_PLATFORM_WINDOWS
-    SDL_PropertiesID props       = SDL_GetWindowProperties(m_sdlWindow);
-    void*            win32Handle = SDL_GetPointerProperty(
+    SDL_PropertiesID props = SDL_GetWindowProperties(m_sdlWindow);
+    void* win32Handle = SDL_GetPointerProperty(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     init.platformData.nwh = win32Handle;
 #else
@@ -31,14 +31,12 @@ uint32_t h_core::Window::init(tinystl::string title,
 #endif
 
     // Set up resolution + backbuffer settings
-    init.resolution.width  = width;
+    init.resolution.width = width;
     init.resolution.height = height;
-    init.resolution.reset  = BGFX_RESET_VSYNC;
+    init.resolution.reset = BGFX_RESET_VSYNC;
 
     // Go bgfx, go!
-    if (!bgfx::init(init)) {
-        return WINDOW_INIT_BGFX_INIT_FAIL;
-    }
+    if (!bgfx::init(init)) { return WINDOW_INIT_BGFX_INIT_FAIL; }
 
     // Set up imgui
 #if BX_PLATFORM_WINDOWS
@@ -68,11 +66,11 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                 queue->postEvent(h_core::Event(ENGINE_EVENT_QUIT));
                 break;
             case SDL_EVENT_WINDOW_RESIZED: {
-                uint32_t      width  = sdlEvent.window.data1;
-                uint32_t      height = sdlEvent.window.data2;
+                uint32_t width = sdlEvent.window.data1;
+                uint32_t height = sdlEvent.window.data2;
                 h_core::Event hEvent = h_core::Event(ENGINE_EVENT_RESIZED);
-                hEvent.newWidth      = width;
-                hEvent.newHeight     = height;
+                hEvent.newWidth = width;
+                hEvent.newHeight = height;
                 queue->postEvent(hEvent);
                 break;
             }
