@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.mal": "clojure",
+			"*.asm": "gbz80",
+			"*.json": "jsonc",
+			"*.tsx": "xml",
+			"*.h": "cpp",
+			"*.rh": "cpp",
+			"xiosbase": "cpp",
+			"filesystem": "cpp"
+		}
+	}
+}

@@ -24,9 +24,19 @@ target_include_directories(HydrogenCore PUBLIC include)
 
 # SDL
 set(SDL_STATIC ON)
+set(SDL_DISABLE_UNINSTALL ON)
+set(SDL_TEST_LIBRARY OFF)
+set(SDL_TESTS OFF)
+set(SDL_EXAMPLES OFF)
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
 
+set_target_properties(SDL3-shared PROPERTIES FOLDER "SDL")
+set_target_properties(SDL3-static PROPERTIES FOLDER "SDL")
+
 # BGFX
+set(BGFX_CUSTOM_TARGETS OFF)
+set(BGFX_BUILD_TOOLS OFF)
+set(BGFX_INSTALL OFF)
 add_subdirectory(external/bgfx.cmake EXCLUDE_FROM_ALL)
 
 # ImGui integrations
@@ -37,6 +47,8 @@ target_include_directories(HydrogenCore PUBLIC external/bgfx-imgui)
 target_sources(HydrogenCore PRIVATE 
     external/sdl-imgui/imgui_impl_sdl3.cpp external/bgfx-imgui/imgui_impl_bgfx.cpp
     )
+
+set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
 
 # Link
 target_link_libraries(HydrogenCore PUBLIC SDL3::SDL3-static)
