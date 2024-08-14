@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bgfx/bgfx.h>
+#include <bx/allocator.h>
 
 #include "core/project.h"
 #include "core/window.h"

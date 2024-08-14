@@ -1,12 +1,12 @@
 #pragma once
 
-#include "bx/string.h"
+#include "tinystl/string.h"
 
 namespace h_core {
 class Project {
 public:
     Project();
 
-    bx::StringLiteral projectName = "Unnamed Project";
+    tinystl::string projectName = "Unnamed Project";
 };
 }  // namespace h_core

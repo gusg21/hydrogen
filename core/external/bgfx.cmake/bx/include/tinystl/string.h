@@ -30,6 +30,7 @@
 #include <string.h> // strlen
 #include "stddef.h"
 #include "hash.h"
+#include "allocator.h"
 
 namespace tinystl {
 

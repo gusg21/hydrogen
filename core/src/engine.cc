@@ -1,6 +1,7 @@
 #include "core/engine.h"
 
 #include <bgfx/bgfx.h>
+#include <tinystl/string.h>
 #include <imgui.h>
 #include <imgui_impl_bgfx.h>
 
@@ -15,10 +16,9 @@ void h_core::Engine::init(h_core::Project project) {
 
     ImGui::CreateContext();
 
-#define ENGINE_WINDOW_TITLE_MAX_LENGTH 1024
-    char windowTitle[ENGINE_WINDOW_TITLE_MAX_LENGTH] = "hydrogen runtime - ";
-    bx::strCat(windowTitle, ENGINE_WINDOW_TITLE_MAX_LENGTH,
-               project.projectName);
+    tinystl::string windowTitle = "hydrogen runtime - ";
+    windowTitle.append(project.projectName.c_str());
+
     m_window = new h_core::Window();
     m_window->init(windowTitle, 1600, 900, false);
 

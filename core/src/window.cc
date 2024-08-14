@@ -7,13 +7,13 @@
 
 #define WINDOW_INIT_BGFX_INIT_FAIL 1
 
-uint32_t h_core::Window::init(bx::StringLiteral title,
+uint32_t h_core::Window::init(tinystl::string title,
                               uint32_t          width,
                               uint32_t          height,
                               bool              fullscreen) {
     SDL_Init(0);
     m_sdlWindow =
-        SDL_CreateWindow(title.getCPtr(), width, height, SDL_WINDOW_RESIZABLE);
+        SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE);
 
     bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
                           // single-threaded rendering.

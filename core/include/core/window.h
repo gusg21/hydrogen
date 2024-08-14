@@ -4,7 +4,8 @@
 
 #include <SDL3/SDL.h>
 #include <bgfx/bgfx.h>
-#include <bx/string.h>
+#include <tinystl/string.h>
+#include <bx/allocator.h>
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
@@ -16,7 +17,7 @@ public:
     Window(const Window&)            = delete;
     Window& operator=(const Window&) = delete;
 
-    uint32_t init(bx::StringLiteral title,
+    uint32_t init(tinystl::string title,
                   uint32_t          width,
                   uint32_t          height,
                   bool              fullscreen);
