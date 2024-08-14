@@ -2,11 +2,21 @@
 
 #include "tinystl/string.h"
 
+#include "core/assets.h"
+#include "core/scenespec.h"
+
 namespace h_core {
 class Project {
   public:
-    Project();
+    Project() = default;
 
+    /// @brief the name of the project
     tinystl::string projectName = "Unnamed Project";
+
+    /// @brief the assets contained in the project
+    h_core::Assets assets = {};
+
+    /// @brief a pointer to the scene spec to initialize on game start
+    h_core::SceneSpec* initialSceneSpec = nullptr;
 };
 }  // namespace h_core

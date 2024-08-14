@@ -5,12 +5,6 @@
 #include <imgui_impl_bgfx.h>
 #include <tinystl/string.h>
 
-h_core::Engine::Engine() {}
-
-h_core::Engine::~Engine() {
-    delete m_window;
-}
-
 void h_core::Engine::init(h_core::Project project) {
     m_project = project;
 
@@ -27,12 +21,18 @@ void h_core::Engine::init(h_core::Project project) {
     bgfx::setViewRect(m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
 
     ImGui_Implbgfx_Init(255);
+
+    // Set up first scene
+    if (project.initialSceneSpec != nullptr) {
+        m_scene.initFromSceneSpec(project.initialSceneSpec);
+    }
 }
 
 void h_core::Engine::destroy() {
     ImGui_Implbgfx_Shutdown();
 
     m_window->destroy();
+    delete m_window;
 
     ImGui::DestroyContext();
     bgfx::shutdown();

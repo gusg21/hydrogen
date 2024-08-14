@@ -17,10 +17,21 @@ class Window {
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 
+    /// @brief set up a new window
+    /// @param title the window's title
+    /// @param width the width of the window
+    /// @param height the height of the window
+    /// @param fullscreen fullscreen or no
+    /// @return 0 on success, WINDOW_FAIL_* on fail
     uint32_t init(
         tinystl::string title, uint32_t width, uint32_t height,
         bool fullscreen);
+
+    /// @brief clean up the window
     void destroy();
+
+    /// @brief post the window's events to the queue
+    /// @param queue a pointer to the queue to populate
     void postEventsToQueue(h_core::EventQueue* queue);
 
   private:

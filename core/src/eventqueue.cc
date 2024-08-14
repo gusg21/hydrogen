@@ -1,7 +1,5 @@
 #include "core/eventqueue.h"
 
-h_core::EventQueue::EventQueue() {}
-
 void h_core::EventQueue::clear() {
     m_queue.clear();
 }

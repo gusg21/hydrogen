@@ -5,7 +5,7 @@
 #include <bgfx/platform.h>
 #include <imgui_impl_sdl3.h>
 
-#define WINDOW_INIT_BGFX_INIT_FAIL 1
+#define WINDOW_FAIL_INIT_BGFX 1
 
 uint32_t h_core::Window::init(
     tinystl::string title, uint32_t width, uint32_t height, bool fullscreen) {
@@ -36,7 +36,7 @@ uint32_t h_core::Window::init(
     init.resolution.reset = BGFX_RESET_VSYNC;
 
     // Go bgfx, go!
-    if (!bgfx::init(init)) { return WINDOW_INIT_BGFX_INIT_FAIL; }
+    if (!bgfx::init(init)) { return WINDOW_FAIL_INIT_BGFX; }
 
     // Set up imgui
 #if BX_PLATFORM_WINDOWS
@@ -62,13 +62,17 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
         ImGui_ImplSDL3_ProcessEvent(&sdlEvent);
 
         switch (sdlEvent.type) {
-            case SDL_EVENT_QUIT:
-                queue->postEvent(h_core::Event(ENGINE_EVENT_QUIT));
+            case SDL_EVENT_QUIT: {
+                h_core::Event hEvent = h_core::Event();
+                hEvent.type = ENGINE_EVENT_QUIT;
+                queue->postEvent(hEvent);
                 break;
+            }
             case SDL_EVENT_WINDOW_RESIZED: {
                 uint32_t width = sdlEvent.window.data1;
                 uint32_t height = sdlEvent.window.data2;
-                h_core::Event hEvent = h_core::Event(ENGINE_EVENT_RESIZED);
+                h_core::Event hEvent = h_core::Event();
+                hEvent.type = ENGINE_EVENT_RESIZED;
                 hEvent.newWidth = width;
                 hEvent.newHeight = height;
                 queue->postEvent(hEvent);

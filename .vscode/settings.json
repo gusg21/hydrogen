@@ -1,12 +1,16 @@
 {
-    "files.associations": {
-        "*.mal": "clojure",
-        "*.asm": "gbz80",
-        "*.json": "jsonc",
-        "*.tsx": "xml",
-        "*.h": "cpp",
-        "*.rh": "cpp",
-        "xiosbase": "cpp",
-        "filesystem": "cpp"
-    },
+  "files.associations": {
+    "*.mal": "clojure",
+    "*.asm": "gbz80",
+    "*.json": "jsonc",
+    "*.tsx": "xml",
+    "*.h": "cpp",
+    "*.rh": "cpp",
+    "xiosbase": "cpp",
+    "filesystem": "cpp"
+  },
+  "editor.rulers": [80],
+  "editor.indentSize": 4,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true
 }

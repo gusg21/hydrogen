@@ -5,12 +5,15 @@
 namespace h_core {
 class Event {
   public:
-    Event(uint32_t _type);
+    Event() = default;
 
+    /// @brief the type of this event
     uint32_t type = 0;
 
-    // Resized
+    /* Resized */
+    /// @brief the new (resized) window width
     uint32_t newWidth = 0;
+    /// @brief the new (resized) window height
     uint32_t newHeight = 0;
 };
 }  // namespace h_core
