@@ -27,8 +27,8 @@ void h_core::Engine::init(h_core::Project project) {
     ImGui_Implbgfx_Init(255);
 
     // Set up first scene
-    if (project.initialSceneSpec != nullptr) {
-        m_scene.initFromSceneSpec(project.initialSceneSpec);
+    if (project.initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
+        m_scene.initFromSceneSpecAssetIndex(&project.assets, project.initialSceneSpec);
     }
 }
 

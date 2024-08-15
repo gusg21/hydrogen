@@ -1,13 +1,13 @@
 #pragma once
 
-#include <tinystl/string.h>
+#include "tinystl/string.h"
+#include "yaml-cpp/yaml.h"
 
 namespace h_core {
+class Assets;
+
 class Asset {
   public:
-    void loadFromYaml();
-
-    /// @brief the name of the asset
-    tinystl::string name {};
+    void initFromYaml(h_core::Assets* assets, YAML::Node node);
 };
 }  // namespace h_core
