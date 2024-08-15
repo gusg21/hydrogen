@@ -7,8 +7,10 @@
 #include "core/actorspec.h"
 
 namespace h_core {
-class SceneSpec {
+class SceneSpec : public Asset {
   public:
-    tinystl::vector<ActorSpec> actorSpecs;
+    void loadFromYaml(YAML::Node yaml);
+
+    tinystl::vector<ActorSpec*> actorSpecs;
 };
 }  // namespace h_core

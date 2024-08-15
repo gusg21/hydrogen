@@ -53,6 +53,17 @@ target_sources(HydrogenCore PRIVATE
 
 set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
 
+# yaml-cpp
+set(YAML_BUILD_SHARED_LIBS OFF)
+set(YAML_CPP_FORMAT_SOURCE OFF)
+set(YAML_CPP_INSTALL OFF)
+set(YAML_CPP_BUILD_TOOLS OFF)
+add_subdirectory(external/yaml-cpp EXCLUDE_FROM_ALL)
+set_target_properties(yaml-cpp PROPERTIES FOLDER "yaml-cpp")
+set_target_properties(uninstall PROPERTIES FOLDER "yaml-cpp/misc")
+
+target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
+
 # Link
 target_link_libraries(HydrogenCore PUBLIC SDL3::SDL3-static)
 target_link_libraries(HydrogenCore PUBLIC bgfx)

@@ -2,7 +2,7 @@
 
 A small experimental game engine by Xavier Olmstead (@XavOlmst) and Angus Goucher (@gusg21).
 
-Using [Orthodox C++](https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b), [bgfx](https://github.com/bkaradzic/bgfx), [SDL3](https://github.com/libsdl-org/SDL), and [imgui](https://github.com/ocornut/imgui).
+Using C++, [bgfx](https://github.com/bkaradzic/bgfx), [SDL3](https://github.com/libsdl-org/SDL), and [imgui](https://github.com/ocornut/imgui).
 
 ### Project Structure
 

@@ -11,12 +11,12 @@ int main() {
     h_core::ActorSpec actor {};
     actor.mask = 0b1;
     actor.transform.position.y = 10;
-    scene.actorSpecs.push_back(actor);
+    scene.actorSpecs.push_back(&actor);
 
     h_core::ActorSpec actor2 {};
     actor2.mask = 0b1;
     actor2.transform.position.y = 100;
-    scene.actorSpecs.push_back(actor2);
+    scene.actorSpecs.push_back(&actor2);
 
 
     h_core::Project project {};
