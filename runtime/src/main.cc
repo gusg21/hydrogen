@@ -11,7 +11,7 @@ int main() {
     project.projectName = "Hello World!";
     project.initialSceneSpec = project.assets.getOrLoadAsset<h_core::SceneSpec>("assets/test_scene.yml");
 
-    engine->init(project);
+    engine->init(&project);
     engine->run();
     engine->destroy();
 }

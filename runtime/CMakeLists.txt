@@ -5,4 +5,7 @@ add_executable(HydrogenRuntime src/main.cc)
 
 target_link_libraries(HydrogenRuntime PUBLIC HydrogenCore)
 
-file(COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_target(HydrogenRuntime_Assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+)
+add_dependencies(HydrogenRuntime HydrogenRuntime_Assets)

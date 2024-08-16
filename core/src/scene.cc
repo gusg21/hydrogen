@@ -12,9 +12,9 @@ void h_core::Scene::initFromSceneSpecAssetIndex(
         assets->getAssetByIndex<h_core::SceneSpec>(sceneSpecIndex);
 
     for (uint32_t actorSpecIndex = 0;
-         actorSpecIndex < sceneSpec->actorSpecs.size(); actorSpecIndex++) {
+         actorSpecIndex < sceneSpec->actorSpecIndices.size(); actorSpecIndex++) {
         addActor(assets->getAssetByIndex<h_core::ActorSpec>(
-            sceneSpec->actorSpecs[actorSpecIndex]));
+            sceneSpec->actorSpecIndices[actorSpecIndex]));
     }
 }
 

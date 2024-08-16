@@ -22,7 +22,7 @@ class Engine {
 
     /// @brief set up the engine with a given project
     /// @param project the project
-    void init(h_core::Project project);
+    void init(h_core::Project* project);
 
     /// @brief clean up the engine
     void destroy();
@@ -31,7 +31,7 @@ class Engine {
     void run();
 
   private:
-    h_core::Project m_project {};
+    h_core::Project* m_project {};
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
     h_core::Scene m_scene {};

@@ -12,6 +12,6 @@ class SceneSpec : public Asset {
   public:
     void initFromYaml(h_core::Assets* assets, YAML::Node yaml);
 
-    std::vector<h_core::AssetIndex> actorSpecs {};
+    std::vector<h_core::AssetIndex> actorSpecIndices {};
 };
 }  // namespace h_core

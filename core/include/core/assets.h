@@ -54,9 +54,9 @@ class Assets {
     h_core::AssetIndex loadAssetFromFile(
         AssetType* out_asset, std::string filePath);
 
-    h_core::Asset m_assets[ASSETS_MAX_ASSET_COUNT];
+    h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex>
-        m_assetIndexMap {};  // hash -> asset
+        m_assetIndexMap {};  // hash -> asset index
     h_core::AssetIndex m_nextAssetIndex = 0;
 };
 }  // namespace h_core
@@ -94,16 +94,16 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
     }
     else {
         // Load new asset
-        h_core::AssetIndex assetIndex = m_nextAssetIndex;
-        AssetType* asset = static_cast<AssetType*>(&m_assets[assetIndex]);
+        h_core::AssetIndex assetIndex = m_nextAssetIndex++;
+        AssetType* asset = new AssetType();
         uint32_t result = loadAssetFromFile<AssetType>(asset, filePath);
         if (result != 0) {
             printf("ERROR: Failed to load asset %s\n", filePath.c_str());
             return ASSETS_ASSET_INDEX_BAD;
         }
         else {
+            m_assets[assetIndex] = asset;
             m_assetIndexMap[hash] = assetIndex;
-            m_nextAssetIndex++;
             return assetIndex;
         }
     }
@@ -117,5 +117,5 @@ inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) {
         std::is_base_of<h_core::Asset, AssetType>::value,
         "Can't get asset type that does not derive from Asset");
 
-    return static_cast<AssetType*>(&m_assets[index]);
+    return static_cast<AssetType*>(m_assets[index]);
 }
