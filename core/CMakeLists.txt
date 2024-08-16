@@ -55,6 +55,14 @@ target_sources(HydrogenCore PRIVATE
 
 set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
 
+# tinygltf integration
+set(TINYGLTF_INSTALL OFF)
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
+add_subdirectory(external/tinygltf EXCLUDE_FROM_ALL)
+target_link_libraries(HydrogenCore PUBLIC tinygltf)
+
+set_target_properties(tinygltf PROPERTIES FOLDER "tinygltf")
+
 # yaml-cpp
 set(YAML_BUILD_SHARED_LIBS OFF)
 set(YAML_CPP_FORMAT_SOURCE OFF)

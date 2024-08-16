@@ -3,6 +3,10 @@
 #include <bgfx/bgfx.h>
 #include <imgui.h>
 #include <imgui_impl_bgfx.h>
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define TINYGLTF_NOEXCEPTION
+#include <tinygltf/tiny_gltf.h>
 #include <tinystl/string.h>
 
 #include "core/systems/sys_gravity.h"
