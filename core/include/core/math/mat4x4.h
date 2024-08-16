@@ -9,12 +9,13 @@ struct Mat4x4 {
         for(int i = 0; i < 16; i++) {
             matrix[i] = data[i];
         }
-    } //TODO: this is real bad, but I'm tired
+    } //TODO: this is real bad, but I'm tired (felt - gus)
 
     float matrix[16];
 
-    static Mat4x4 lookAtMat(
-        Vector3 position, Vector3 target, bool isRightHanded = true);
+    static h_core::math::Mat4x4 lookAtMat(
+        h_core::math::Vector3 position, h_core::math::Vector3 target,
+        bool isRightHanded);
 };
 }  // namespace math
 }  // namespace h_core

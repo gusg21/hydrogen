@@ -1,24 +1,23 @@
 #include "core/math/mat4x4.h"
 
-h_core::math::Mat4x4 lookAtMat(
+h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
     h_core::math::Vector3 position, h_core::math::Vector3 target,
-    bool isRightHanded = true) {
+    bool isRightHanded) {
     h_core::math::Vector3 view =
-        (isRightHanded ? h_core::math::Vector3::subtract(&position, &target)
-                       : h_core::math::Vector3::subtract(&target, &position));
+        (isRightHanded ? h_core::math::Vector3::subtract(position, target)
+                       : h_core::math::Vector3::subtract(target, position));
 
     h_core::math::Vector3 up = h_core::math::Vector3(0);
     h_core::math::Vector3 right = h_core::math::Vector3(0);
 
-    h_core::math::Vector3 uxv = h_core::math::Vector3::cross(&up, &view);
+    h_core::math::Vector3 uxv = h_core::math::Vector3::cross(up, view);
 
-    if (0.0f == h_core::math::Vector3::dot(&uxv, &uxv)) {
+    if (0.0f == h_core::math::Vector3::dot(uxv, uxv)) {
         right = h_core::math::Vector3(isRightHanded ? 1.0f : -1.0f, 0.0f, 0.0f);
-    } else {
-        right = h_core::math::Vector3::normalize(&up);
     }
+    else { right = h_core::math::Vector3::normalize(up); }
 
-    up = h_core::math::Vector3::cross(&view, &right);
+    up = h_core::math::Vector3::cross(view, right);
 
     float mat[16];
 
@@ -37,9 +36,9 @@ h_core::math::Mat4x4 lookAtMat(
     mat[10] = view.z;
     mat[11] = 0.0f;
 
-    mat[12] = -h_core::math::Vector3::dot(&right, &position);
-    mat[13] = -h_core::math::Vector3::dot(&up, &position);
-    mat[14] = -h_core::math::Vector3::dot(&view, &position);
+    mat[12] = -h_core::math::Vector3::dot(right, position);
+    mat[13] = -h_core::math::Vector3::dot(up, position);
+    mat[14] = -h_core::math::Vector3::dot(view, position);
     mat[15] = 1.0f;
 
     return h_core::math::Mat4x4(mat);

@@ -6,8 +6,8 @@ struct Vector2 {
     Vector2(float value) : x(value), y(value) {}
     Vector2(float x, float y) : x(x), y(y) {}
 
-    static float dot(Vector2* lhs, Vector2* rhs);
-    float dot(Vector2* otherVector);
+    static float dot(Vector2 lhs, Vector2 rhs);
+    float dot(Vector2 otherVector);
 
     float x;
     float y;

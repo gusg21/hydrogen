@@ -1,14 +1,17 @@
 #pragma once
 
-#include <tinystl/allocator.h>
-#include <tinystl/vector.h>
+#include <vector>
+
+#include <yaml-cpp/yaml.h>
 
 #include "core/asset.h"
 #include "core/actorspec.h"
 
 namespace h_core {
-class SceneSpec {
+class SceneSpec : public Asset {
   public:
-    tinystl::vector<ActorSpec> actorSpecs;
+    void initFromYaml(h_core::Assets* assets, YAML::Node yaml);
+
+    std::vector<h_core::AssetIndex> actorSpecIndices {};
 };
 }  // namespace h_core

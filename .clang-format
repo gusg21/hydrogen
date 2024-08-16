@@ -20,6 +20,9 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: 'Yes'
 BinPackArguments: 'true'
 BinPackParameters: 'true'
+BraceWrapping:
+  BeforeElse: 'true'
+BreakBeforeBraces: Custom
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: 'true'
 BreakConstructorInitializers: BeforeColon

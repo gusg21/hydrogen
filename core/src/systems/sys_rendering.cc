@@ -3,9 +3,10 @@
 #include "SDL3/SDL.h"
 #include "bgfx/bgfx.h"
 #include "bgfx/platform.h"
+#include "imgui_impl_sdl3.h"
+
 #include "core/math/mat4x4.h"
 #include "core/model.h"
-#include "imgui_impl_sdl3.h"
 
 #define RENDERING_INIT_FAIL_UNABLE_TO_BGFX 1
 
@@ -34,9 +35,10 @@ uint32_t h_core::system::Rendering::initWindow(
 }
 
 void h_core::system::Rendering::process() {
-    h_core::math::Mat4x4 view = h_core::math::Mat4x4::lookAtMat(cameraPosition, cameraDirection);
+    h_core::math::Mat4x4 view =
+        h_core::math::Mat4x4::lookAtMat(cameraPosition, cameraDirection, true);
 
-    //h_core::math::Mat4x4 proj = 
+    // h_core::math::Mat4x4 proj =
 }
 
 h_core::ComponentBitmask h_core::system::Rendering::getMask() {

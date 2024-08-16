@@ -3,11 +3,14 @@
 #include <bgfx/bgfx.h>
 #include <imgui.h>
 #include <imgui_impl_bgfx.h>
+#define STB_IMAGE_IMPLEMENTATION
+#define TINYGLTF_NOEXCEPTION
+#include <tiny_gltf.h>
 #include <tinystl/string.h>
 
 #include "core/systems/sys_gravity.h"
 
-void h_core::Engine::init(h_core::Project project) {
+void h_core::Engine::init(h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
 
     m_project = project;
@@ -15,7 +18,7 @@ void h_core::Engine::init(h_core::Project project) {
     ImGui::CreateContext();
 
     tinystl::string windowTitle = "hydrogen runtime - ";
-    windowTitle.append(project.projectName.c_str());
+    windowTitle.append(project->projectName.c_str());
 
     m_window = new h_core::Window();
     m_window->init(windowTitle, 1600, 900, false);
@@ -27,8 +30,9 @@ void h_core::Engine::init(h_core::Project project) {
     ImGui_Implbgfx_Init(255);
 
     // Set up first scene
-    if (project.initialSceneSpec != nullptr) {
-        m_scene.initFromSceneSpec(project.initialSceneSpec);
+    if (project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
+        m_scene.initFromSceneSpecAssetIndex(
+            &project->assets, project->initialSceneSpec);
     }
 }
 

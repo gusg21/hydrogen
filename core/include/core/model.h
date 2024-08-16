@@ -4,14 +4,16 @@
 #include "core/math/vector3.h"
 #include "core/math/vector2.h"
 
+#include "core/asset.h"
+
 #define MODEL_COMPONENT_BITMASK (1 << 1)
 
 namespace h_core {
-class Model {
+class Model : public Asset {
   public:
     Model() = default;
 
-    void init();
+    void initFromYaml(h_core::Assets* assets, YAML::Node yaml);
 
   private:
     bgfx::VertexBufferHandle m_vbh;

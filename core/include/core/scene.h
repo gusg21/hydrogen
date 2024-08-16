@@ -20,9 +20,10 @@ class Scene {
 
     /// @brief set up a scene based on a scene spec
     /// @param sceneSpec scene spec to use
-    void initFromSceneSpec(const h_core::SceneSpec* const sceneSpec);
+    void initFromSceneSpecAssetIndex(
+        h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex);
 
-    ActorId addActor(h_core::ActorSpec actorSpec);
+    ActorId addActor(h_core::ActorSpec* actorSpec);
 
     void runSystem(h_core::System* system);
 

@@ -17,6 +17,6 @@ class Project {
     h_core::Assets assets = {};
 
     /// @brief a pointer to the scene spec to initialize on game start
-    h_core::SceneSpec* initialSceneSpec = nullptr;
+    h_core::AssetIndex initialSceneSpec = ASSETS_ASSET_INDEX_BAD;
 };
 }  // namespace h_core
