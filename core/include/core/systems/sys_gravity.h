@@ -8,8 +8,9 @@ class Gravity : public System {
   public:
     Gravity() = default;
 
+    uint32_t init();
     void process();
-    ComponentBitmask getMask();
+    h_core::ComponentBitmask getMask();
 };
 }  // namespace systems
 }  // namespace h_core

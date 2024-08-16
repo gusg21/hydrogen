@@ -13,7 +13,16 @@
 			"*.h": "cpp",
 			"*.rh": "cpp",
 			"xiosbase": "cpp",
-			"filesystem": "cpp"
+			"filesystem": "cpp",
+			"algorithm": "cpp",
+			"chrono": "cpp",
+			"optional": "cpp",
+			"system_error": "cpp",
+			"type_traits": "cpp",
+			"xlocmon": "cpp",
+			"xtr1common": "cpp",
+			"xutility": "cpp",
+			"cmath": "cpp"
 		}
 	}
 }

@@ -15,29 +15,22 @@ uint32_t h_core::Window::init(
     m_sdlWindow =
         SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE);
 
-    bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
-                          // single-threaded rendering.
-
-    bgfx::Init init;
+    
 
     // Acquire native handle
 #if BX_PLATFORM_WINDOWS
     SDL_PropertiesID props = SDL_GetWindowProperties(m_sdlWindow);
     void* win32Handle = SDL_GetPointerProperty(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
-    init.platformData.nwh = win32Handle;
+    
+    m_renderer = new h_core::system::Rendering();
+    m_renderer->initWindow(width, height, win32Handle);
+
 #else
 #error Non-Windows native window acquisition unimplemented
 #endif
 
     // Set up resolution + backbuffer settings
-    init.resolution.width = width;
-    init.resolution.height = height;
-    init.resolution.reset = BGFX_RESET_VSYNC;
-
-    // Go bgfx, go!
-    if (!bgfx::init(init)) { return WINDOW_FAIL_INIT_BGFX; }
-
     // Set up imgui
 #if BX_PLATFORM_WINDOWS
     ImGui_ImplSDL3_InitForD3D(m_sdlWindow);
