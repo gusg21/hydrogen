@@ -9,6 +9,7 @@
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
+#include "core/systems/sys_rendering.h"
 
 namespace h_core {
 class Window {
@@ -37,5 +38,6 @@ class Window {
   private:
     SDL_Window* m_sdlWindow = nullptr;
     bgfx::ViewId m_clearViewId = 0;
+    h_core::system::Rendering* m_renderer = nullptr;
 };
 }  // namespace h_core

@@ -13,14 +13,20 @@ add_library(HydrogenCore STATIC
                                     include/core/engineevents.h
     src/event.cc                    include/core/event.h
     src/eventqueue.cc               include/core/eventqueue.h
+    src/model.cc                    include/core/model.h
     src/project.cc                  include/core/project.h
     src/scene.cc                    include/core/scene.h
     src/system.cc                   include/core/system.h
     src/scenespec.cc                include/core/scenespec.h
     src/transform.cc                include/core/transform.h
     src/window.cc                   include/core/window.h
+                                    
+    src/math/mat4x4.cc              include/core/math/mat4x4.h
+    src/math/vector2.cc             include/core/math/vector2.h
+    src/math/vector3.cc             include/core/math/vector3.h
 
     src/systems/sys_gravity.cc      include/core/systems/sys_gravity.h
+    src/systems/sys_rendering.cc    include/core/systems/sys_rendering.h
 
     )
 
@@ -28,12 +34,13 @@ add_library(HydrogenCore STATIC
 target_include_directories(HydrogenCore PUBLIC include)
 
 # SDL
-set(SDL_STATIC ON)
+set(SDL_STATIC OUTPUT_NAME_<CONFIG>)
 set(SDL_DISABLE_UNINSTALL ON)
 set(SDL_TEST_LIBRARY OFF)
-set(SDL_TESTS OFF)
+set(SDL_TESTS OFF )
 set(SDL_EXAMPLES OFF)
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
+target_link_libraries(HydrogenCore PUBLIC SDL3::SDL3-static)
 
 set_target_properties(SDL3-shared PROPERTIES FOLDER "SDL")
 set_target_properties(SDL3-static PROPERTIES FOLDER "SDL")
@@ -43,12 +50,15 @@ set(BGFX_CUSTOM_TARGETS OFF)
 set(BGFX_BUILD_TOOLS OFF)
 set(BGFX_INSTALL OFF)
 add_subdirectory(external/bgfx.cmake EXCLUDE_FROM_ALL)
+target_link_libraries(HydrogenCore PUBLIC bgfx)
+target_link_libraries(HydrogenCore PRIVATE bx)
+target_link_libraries(HydrogenCore PRIVATE bimg)
 
 # ImGui integrations
 add_subdirectory(external/imgui.cmake EXCLUDE_FROM_ALL)
 target_link_libraries(HydrogenCore PUBLIC imgui.cmake)
-target_include_directories(HydrogenCore PUBLIC external/sdl-imgui)
-target_include_directories(HydrogenCore PUBLIC external/bgfx-imgui)
+target_include_directories(HydrogenCore PRIVATE external/sdl-imgui)
+target_include_directories(HydrogenCore PRIVATE external/bgfx-imgui)
 target_sources(HydrogenCore PRIVATE 
     external/sdl-imgui/imgui_impl_sdl3.cpp external/bgfx-imgui/imgui_impl_bgfx.cpp
     )
@@ -59,7 +69,7 @@ set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
 set(TINYGLTF_INSTALL OFF)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 add_subdirectory(external/tinygltf EXCLUDE_FROM_ALL)
-target_link_libraries(HydrogenCore PUBLIC tinygltf)
+target_link_libraries(HydrogenCore PRIVATE tinygltf)
 
 set_target_properties(tinygltf PROPERTIES FOLDER "tinygltf")
 
@@ -73,9 +83,3 @@ set_target_properties(yaml-cpp PROPERTIES FOLDER "yaml-cpp")
 set_target_properties(uninstall PROPERTIES FOLDER "yaml-cpp/misc")
 
 target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
-
-# Link
-target_link_libraries(HydrogenCore PUBLIC SDL3::SDL3-static)
-target_link_libraries(HydrogenCore PUBLIC bgfx)
-target_link_libraries(HydrogenCore PUBLIC bx)
-target_link_libraries(HydrogenCore PUBLIC bimg)
