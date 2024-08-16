@@ -1,5 +1,7 @@
 #include "core/model.h"
 
+// TODO: move these godless monstrosities to a subf
+
 static h_core::VertexData cubeVertices[] = {
     { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
       h_core::math::Vector2(0) },
@@ -29,7 +31,7 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-void h_core::Model::init() {
+void h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     m_vbh = bgfx::createVertexBuffer(
         bgfx::makeRef(cubeVertices, sizeof(cubeVertices)), VertexData::layout);
 
