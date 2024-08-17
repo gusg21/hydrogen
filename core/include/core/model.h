@@ -1,19 +1,21 @@
 #pragma once
 
 #include "bgfx/bgfx.h"
+
+#include "core/asset.h"
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
 
-#include "core/asset.h"
-
-#define MODEL_COMPONENT_BITMASK (1 << 1)
+#define MODEL_COMPONENT_BITMASK            (1 << 1)
+#define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH 1
+#define MODEL_INIT_FAIL_BAD_GLTF           2
 
 namespace h_core {
 class Model : public Asset {
   public:
     Model() = default;
 
-    void initFromYaml(h_core::Assets* assets, YAML::Node yaml);
+    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
 
     bgfx::VertexBufferHandle getVertexBuffer() {
         return m_vertexBuffer;

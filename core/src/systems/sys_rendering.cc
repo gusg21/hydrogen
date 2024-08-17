@@ -1,8 +1,9 @@
 #include "core/systems/sys_rendering.h"
 
+#include <fstream>
+
 #include "SDL3/SDL.h"
 #include "bgfx/bgfx.h"
-#include "bgfx/entry/entry.h"
 #include "bgfx/platform.h"
 #include "imgui_impl_sdl3.h"
 
@@ -12,53 +13,26 @@
 #define RENDERING_INIT_FAIL_UNABLE_TO_BGFX    1
 #define RENDERING_MEM_LOAD_FAILED_UNABLE_OPEN 1
 
-bgfx::ShaderHandle loadShader(const bx::StringView& shaderName) {
-    bx::FilePath filePath("shaders/");
+bgfx::ShaderHandle loadShader(std::string shaderName) {
+    std::string shaderPath = "generated/";
 
-    switch (bgfx::getRendererType()) {
-        case bgfx::RendererType::Noop:
-        case bgfx::RendererType::Direct3D11:
-        case bgfx::RendererType::Direct3D12:
-            filePath.join("dx11");
-            break;
-        case bgfx::RendererType::Agc:
-        case bgfx::RendererType::Gnm:
-            filePath.join("pssl");
-            break;
-        case bgfx::RendererType::Metal:
-            filePath.join("metal");
-            break;
-        case bgfx::RendererType::Nvn:
-            filePath.join("nvn");
-            break;
-        case bgfx::RendererType::OpenGL:
-            filePath.join("glsl");
-            break;
-        case bgfx::RendererType::OpenGLES:
-            filePath.join("essl");
-            break;
-        case bgfx::RendererType::Vulkan:
-            filePath.join("spirv");
-            break;
+#if defined(_WIN32)
+    shaderPath += "windows/";
+#endif
 
-        case bgfx::RendererType::Count:
-            BX_ASSERT(false, "You should not be here!");
-            break;
-    }
+    std::ifstream shaderCodeFile { shaderPath };
+    std::stringstream shaderCodeStream {};
+    shaderCodeStream << shaderCodeFile.rdbuf();
+    std::string shaderCode = shaderCodeStream.str();
 
-    char fileName[512];
-    bx::strCopy(fileName, BX_COUNTOF(fileName), shaderName);
-    bx::strCat(fileName, BX_COUNTOF(fileName), ".bin");
-
-    filePath.join(fileName);
-
-    handle = bgfx::createShader(bgfx::makeRef(fileName, sizeof(fileName)));
+    bgfx::ShaderHandle handle = bgfx::createShader(
+        bgfx::makeRef(shaderCode.c_str(), shaderCode.size()));
 
     return handle;
 }
 
 bgfx::ProgramHandle loadProgram(
-    const bx::StringView& vsName, const bx::StringView& fsName) {
+    std::string vsName, std::string fsName) {
     return bgfx::createProgram(loadShader(vsName), loadShader(fsName));
 }
 
@@ -101,16 +75,16 @@ void h_core::system::Rendering::process() {
         60.0f, m_width / m_height, 0.1f, 100.0f,
         bgfx::getCaps()->homogeneousDepth, true);
 
-    bgfx::setViewTransform(0, view.matrix, proj.matrix);
+    bgfx::setViewTransform(0, view.m_matrix, proj.m_matrix);
 
     bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height));
 
-    
-    bgfx::setTransform(transform->getMatrix());
-    
+
+    bgfx::setTransform(transform->getMatrix().m_matrix);
+
     bgfx::setVertexBuffer(0, model->getVertexBuffer());
     bgfx::setIndexBuffer(model->getIndexBuffer());
-    
+
     uint64_t state = 0 | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_WRITE_Z |
                      BGFX_STATE_WRITE_RGB;
     bgfx::setState(state);

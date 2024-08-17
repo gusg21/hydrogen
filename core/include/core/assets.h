@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "bx/bx.h"
 #include "yaml-cpp/yaml.h"
 
 #include "core/asset.h"

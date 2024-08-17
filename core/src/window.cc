@@ -8,35 +8,33 @@
 #define WINDOW_FAIL_INIT_BGFX 1
 
 uint32_t h_core::Window::init(
-    tinystl::string title, uint32_t width, uint32_t height, bool fullscreen) {
+    std::string title, uint32_t width, uint32_t height, bool fullscreen) {
     // Init SDL
     SDL_Init(0);
 
     m_sdlWindow =
         SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_RESIZABLE);
 
-    
 
     // Acquire native handle
-#if BX_PLATFORM_WINDOWS
+#if defined(__WIN32__) || defined(_WIN32)
     SDL_PropertiesID props = SDL_GetWindowProperties(m_sdlWindow);
     void* win32Handle = SDL_GetPointerProperty(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
-    
+
     m_renderer = new h_core::system::Rendering();
     m_renderer->initWindow(width, height, win32Handle);
-
 #else
 #error Non-Windows native window acquisition unimplemented
 #endif
 
     // Set up resolution + backbuffer settings
     // Set up imgui
-#if BX_PLATFORM_WINDOWS
+#if defined(__WIN32__) || defined(_WIN32)
     ImGui_ImplSDL3_InitForD3D(m_sdlWindow);
-#elif BX_PLATFORM_OSX
+#elif defined(__APPLE__)
     ImGui_ImplSDL3_InitForMetal(m_sdlWindow);
-#elif BX_PLATFORM_LINUX || BX_PLATFORM_EMSCRIPTEN
+#elif defined(__linux__)
     ImGui_ImplSDL3_InitForOpenGL(m_sdlWindow, nullptr);
 #endif  // BX_PLATFORM_WINDOWS ? BX_PLATFORM_OSX ? BX_PLATFORM_LINUX ?
         // BX_PLATFORM_EMSCRIPTEN

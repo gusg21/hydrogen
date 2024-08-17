@@ -1,7 +1,6 @@
 #pragma once
 
 #include <bgfx/bgfx.h>
-#include <bx/allocator.h>
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"

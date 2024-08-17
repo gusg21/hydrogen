@@ -1,8 +1,8 @@
 #pragma once
 
-#include "bx/math.h"
-#include "core/math/vectors.h"
 #include "yaml-cpp/yaml.h"
+
+#include "core/math/vectors.h"
 
 #define TRANSFORM_COMPONENT_BITMASK (1 << 0)
 

@@ -4,8 +4,6 @@
 
 #include <SDL3/SDL.h>
 #include <bgfx/bgfx.h>
-#include <bx/allocator.h>
-#include <tinystl/string.h>
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
@@ -25,7 +23,7 @@ class Window {
     /// @param fullscreen fullscreen or no
     /// @return 0 on success, WINDOW_FAIL_* on fail
     uint32_t init(
-        tinystl::string title, uint32_t width, uint32_t height,
+        std::string title, uint32_t width, uint32_t height,
         bool fullscreen);
 
     /// @brief clean up the window

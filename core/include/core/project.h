@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tinystl/string.h"
+#include <string>
 
 #include "core/assets.h"
 #include "core/scenespec.h"
@@ -11,7 +11,7 @@ class Project {
     Project() = default;
 
     /// @brief the name of the project
-    tinystl::string projectName = "Unnamed Project";
+    std::string projectName = "Unnamed Project";
 
     /// @brief the assets contained in the project
     h_core::Assets assets = {};

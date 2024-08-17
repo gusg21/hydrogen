@@ -1,7 +1,6 @@
 #pragma once
 
-#include "tinystl/allocator.h"
-#include "tinystl/vector.h"
+#include <vector>
 
 #include "core/event.h"
 
@@ -28,6 +27,6 @@ class EventQueue {
     h_core::Event* getHeadPointer();
 
   private:
-    tinystl::vector<h_core::Event> m_queue {};
+    std::vector<h_core::Event> m_queue {};
 };
 }  // namespace h_core

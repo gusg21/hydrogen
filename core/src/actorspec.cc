@@ -1,7 +1,11 @@
 #include "core/actorspec.h"
 
 
-void h_core::ActorSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::ActorSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+    // TODO: Error handling
+
     mask = yaml["mask"].as<h_core::ComponentBitmask>();
     transform.initFromYaml(yaml["transform"]);
+    
+    return 0;
 }

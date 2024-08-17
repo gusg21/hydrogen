@@ -10,7 +10,7 @@
 namespace h_core {
 class SceneSpec : public Asset {
   public:
-    void initFromYaml(h_core::Assets* assets, YAML::Node yaml);
+    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node yaml);
 
     std::vector<h_core::AssetIndex> actorSpecIndices {};
 };

@@ -22,7 +22,7 @@ h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
     ActorId newId = m_nextId;
     m_masks[newId] = spec->mask;
     m_transforms[newId] = spec->transform;
-    printf("adding actor id %d, mask %d\n", newId, m_masks[newId]);
+    printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, m_masks[newId]);
     m_nextId++;
     return newId;
 }

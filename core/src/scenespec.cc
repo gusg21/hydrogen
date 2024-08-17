@@ -7,7 +7,9 @@
 
 #include "core/assets.h"
 
-void h_core::SceneSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::SceneSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+    // TODO: Error handling
+
     std::vector<YAML::Node> actorSpecYamls =
         yaml["actors"].as<std::vector<YAML::Node>>();
     actorSpecIndices.clear();
@@ -19,4 +21,6 @@ void h_core::SceneSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 
         actorSpecIndices.push_back(actorSpecIndex);
     }
+
+    return 0;
 }

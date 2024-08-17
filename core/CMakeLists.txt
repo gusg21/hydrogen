@@ -49,12 +49,14 @@ set_target_properties(SDL3-static PROPERTIES FOLDER "SDL")
 
 # BGFX
 set(BGFX_CUSTOM_TARGETS OFF)
-set(BGFX_BUILD_TOOLS OFF)
+set(BGFX_BUILD_TOOLS_SHADER ON)
+set(BGFX_BUILD_TOOLS ON)
 set(BGFX_INSTALL OFF)
 add_subdirectory(external/bgfx.cmake EXCLUDE_FROM_ALL)
 target_link_libraries(HydrogenCore PUBLIC bgfx)
 target_link_libraries(HydrogenCore PRIVATE bx)
 target_link_libraries(HydrogenCore PRIVATE bimg)
+add_dependencies(HydrogenCore shaderc)
 
 # ImGui integrations
 add_subdirectory(external/imgui.cmake EXCLUDE_FROM_ALL)

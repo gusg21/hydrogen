@@ -1,5 +1,9 @@
 #include "core/model.h"
 
+#include <string>
+
+#include "tiny_gltf.h"
+
 // TODO: move these godless monstrosities to a subf
 
 static h_core::VertexData cubeVertices[] = {
@@ -31,12 +35,53 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-void h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+    // Parse YAML
+    std::string gltfFilePath = yaml["gltf"].as<std::string>("");
+    bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
+
+    if (gltfFilePath.empty()) {
+        printf("ERROR: MODEL: no gltf key in model YAML\n");
+        return MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH;
+    }
+
+    // Load model
+    tinygltf::TinyGLTF loader {};
+    tinygltf::Model model {};
+    std::string errorText {};
+    std::string warningText {};
+
+    bool success;
+    if (!gltfBinaryMode) {
+        success = loader.LoadASCIIFromFile(
+            &model, &errorText, &warningText, gltfFilePath);
+    }
+    else {
+        success = loader.LoadBinaryFromFile(
+            &model, &errorText, &warningText, gltfFilePath);
+    }
+
+    if (!warningText.empty()) {
+        printf(("WARN: MODEL: " + warningText + "\n").c_str());
+    }
+
+    if (!success) {
+        printf(("ERROR: MODEL: " + errorText + "\n").c_str());
+        return MODEL_INIT_FAIL_BAD_GLTF;
+    }
+
+    // TODO: VERY TESTING. MUCH WOW
+    const uint8_t* buffer = model.buffers.front().data.data();
+    
+
+    // Create data buffers
     m_vertexBuffer = bgfx::createVertexBuffer(
         bgfx::makeRef(cubeVertices, sizeof(cubeVertices)), VertexData::layout);
 
     m_indexBuffer = bgfx::createIndexBuffer(
         bgfx::makeRef(cubeTriList, sizeof(cubeTriList)));
+
+    return 0;
 }
 
 void h_core::VertexData::init() {

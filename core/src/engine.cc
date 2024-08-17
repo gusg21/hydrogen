@@ -17,8 +17,7 @@ void h_core::Engine::init(h_core::Project* project) {
 
     ImGui::CreateContext();
 
-    tinystl::string windowTitle = "hydrogen runtime - ";
-    windowTitle.append(project->projectName.c_str());
+    std::string windowTitle = "hydrogen runtime - " + project->projectName;
 
     m_window = new h_core::Window();
     m_window->init(windowTitle, 1600, 900, false);
