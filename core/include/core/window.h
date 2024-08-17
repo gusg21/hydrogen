@@ -33,9 +33,11 @@ class Window {
     /// @param queue a pointer to the queue to populate
     void postEventsToQueue(h_core::EventQueue* queue);
 
+    h_core::systems::Rendering* getRenderingSystem();
+
   private:
     SDL_Window* m_sdlWindow = nullptr;
     bgfx::ViewId m_clearViewId = 0;
-    h_core::system::Rendering* m_renderer = nullptr;
+    h_core::systems::Rendering* m_renderer = nullptr;
 };
 }  // namespace h_core

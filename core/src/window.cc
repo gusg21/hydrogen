@@ -22,7 +22,7 @@ uint32_t h_core::Window::init(
     void* win32Handle = SDL_GetPointerProperty(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 
-    m_renderer = new h_core::system::Rendering();
+    m_renderer = new h_core::systems::Rendering();
     m_renderer->initFromWindow(width, height, win32Handle);
 #else
 #error Non-Windows native window acquisition unimplemented
@@ -76,4 +76,7 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
     }
 
     ImGui_ImplSDL3_NewFrame();
+}
+h_core::systems::Rendering* h_core::Window::getRenderingSystem() {
+    return m_renderer;
 }

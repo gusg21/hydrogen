@@ -14,5 +14,8 @@
   ],
   "editor.indentSize": 4,
   "editor.formatOnSave": false,
-  "editor.formatOnPaste": true
+  "editor.formatOnPaste": true,
+  "cmake.debugConfig": {
+    "cwd": "${workspaceFolder}/build/runtime/"
+  }
 }

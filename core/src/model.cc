@@ -36,6 +36,11 @@ static const uint16_t cubeTriList[] = {
 
 
 uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+    printf("INFO: MODEL: loading model from YAML spec...\n");
+
+    // Set up vertex layout info
+    h_core::Vertex::init();
+
     // Parse YAML
     std::string gltfFilePath = yaml["gltf"].as<std::string>("");
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
@@ -105,18 +110,21 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 
     for (uint32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
         h_core::Vertex* vertex = &vertexBuffer[vertexIndex];
-        vertex->position = *(
-            const h_core::math::Vector3*)(&posBuffer
-                                              [vertexIndex *
-                                               sizeof(h_core::math::Vector3)]);
-        vertex->normal = *(
-            const h_core::math::Vector3*)(&normalBuffer
-                                              [vertexIndex *
-                                               sizeof(h_core::math::Vector3)]);
-        vertex->uv = *(
-            const h_core::math::Vector2*)(&texCoordBuffer
-                                              [vertexIndex *
-                                               sizeof(h_core::math::Vector2)]);
+        vertex->position =
+            *(const h_core::math::
+                  Vector3*)(&posBuffer
+                                [posBufferView.byteOffset +
+                                 vertexIndex * sizeof(h_core::math::Vector3)]);
+        vertex->normal =
+            *(const h_core::math::
+                  Vector3*)(&normalBuffer
+                                [normalBufferView.byteOffset +
+                                 vertexIndex * sizeof(h_core::math::Vector3)]);
+        vertex->uv =
+            *(const h_core::math::
+                  Vector2*)(&texCoordBuffer
+                                [texCoordBufferView.byteOffset +
+                                 vertexIndex * sizeof(h_core::math::Vector2)]);
     }
 
     // load index buffer
@@ -141,8 +149,11 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 bgfx::VertexLayout h_core::Vertex::layout {};
 
 void h_core::Vertex::init() {
-    layout.begin()
-        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true);
+    if (layout.m_hash == 0) { // TODO: hack :(
+        layout.begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
+            .end();
+    }
 }

@@ -27,7 +27,7 @@ h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
     return newId;
 }
 
-void h_core::Scene::runSystem(h_core::System* system) {
+void h_core::Scene::processSystem(h_core::System* system) {
     for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
         ComponentBitmask requiredMask = system->getMask();
         ComponentBitmask actorMask = m_masks[id];
@@ -35,6 +35,18 @@ void h_core::Scene::runSystem(h_core::System* system) {
         if (requiredMask & actorMask == requiredMask) {
             system->transform = &m_transforms[id];
             system->process();
+        }
+    }
+}
+
+void h_core::Scene::drawSystem(h_core::System* system) {
+    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
+        ComponentBitmask requiredMask = system->getMask();
+        ComponentBitmask actorMask = m_masks[id];
+        // printf("req %d, actor %d\n", requiredMask, actorMask);
+        if (requiredMask & actorMask == requiredMask) {
+            system->transform = &m_transforms[id];
+            system->draw();
         }
     }
 }

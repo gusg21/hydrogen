@@ -25,7 +25,9 @@ class Scene {
 
     ActorId addActor(h_core::ActorSpec* actorSpec);
 
-    void runSystem(h_core::System* system);
+    void processSystem(h_core::System* system);
+
+    void drawSystem(h_core::System* system);
 
   private:
     ActorId m_nextId = 0;

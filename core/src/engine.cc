@@ -9,6 +9,7 @@
 #include <tinystl/string.h>
 
 #include "core/systems/sys_gravity.h"
+#include "core/systems/sys_rendering.h"
 
 void h_core::Engine::init(h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
@@ -21,18 +22,13 @@ void h_core::Engine::init(h_core::Project* project) {
 
     m_window = new h_core::Window();
     m_window->init(windowTitle, 1600, 900, false);
+    m_systems[1] = m_window->getRenderingSystem();
 
     m_clearView = 0;
     bgfx::setViewClear(m_clearView, BGFX_CLEAR_COLOR);
     bgfx::setViewRect(m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
 
     ImGui_Implbgfx_Init(255);
-
-    // Set up first scene
-    if (project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
-        m_scene.initFromSceneSpecAssetIndex(
-            &project->assets, project->initialSceneSpec);
-    }
 }
 
 void h_core::Engine::destroy() {
@@ -46,6 +42,12 @@ void h_core::Engine::destroy() {
 }
 
 void h_core::Engine::run() {
+    // Set up first scene
+    if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
+        m_scene.initFromSceneSpecAssetIndex(
+            &m_project->assets, m_project->initialSceneSpec);
+    }
+
     bool engineRunning = true;
     while (engineRunning) {
         m_window->postEventsToQueue(&m_events);
@@ -70,7 +72,7 @@ void h_core::Engine::run() {
 
         for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
              systemIndex++) {
-            m_scene.runSystem(m_systems[systemIndex]);
+            m_scene.processSystem(m_systems[systemIndex]);
         }
 
         ImGui_Implbgfx_NewFrame();
@@ -84,9 +86,18 @@ void h_core::Engine::run() {
 
         bgfx::touch(m_clearView);
         bgfx::setDebug(BGFX_DEBUG_STATS);
-        bgfx::frame();
+
+        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+             systemIndex++) {
+            m_scene.drawSystem(m_systems[systemIndex]);
+        }
 
         // END PLACEHOLDER RENDERING PLAYGROUND //
+
+        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+             systemIndex++) {
+            m_systems[systemIndex]->endFrame();
+        }
 
         m_events.clear();
     }

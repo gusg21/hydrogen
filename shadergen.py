@@ -7,7 +7,7 @@ def shaderc(platform, profile, shader_name):
     os.mkdir("core/generated/{}".format(platform))
     for shader_type_info in [("fs", "fragment"), ("vs", "vertex")]:
         print("> shader {} type {} for platform {}".format(shader_name, shader_type_info[1], platform))
-        cmd = '"{}" --platform {} -p {} -f core/shaders/{}_{}.sc -o core/generated/{}/{}_{}.bin -i core/external/bgfx.cmake/bgfx/src/ --type {} --varyingdef core/shaders/varying.def.sc'.format(
+        cmd = '"{}" --platform {} -p {} --depends --disasm -f core/shaders/{}_{}.sc -o core/generated/{}/{}_{}.bin -i core/external/bgfx.cmake/bgfx/src/ --type {} --varyingdef core/shaders/varying.def.sc'.format(
             SHADERC,
             platform,
             profile,

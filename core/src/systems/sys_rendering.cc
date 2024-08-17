@@ -13,7 +13,9 @@
 #define RENDERING_INIT_FAIL_UNABLE_TO_BGFX    1
 #define RENDERING_MEM_LOAD_FAILED_UNABLE_OPEN 1
 
-uint32_t loadShader(bgfx::ShaderHandle* out_handle, std::string shaderName) {
+uint32_t loadShader(
+    bgfx::ShaderHandle* out_handle, std::string* out_codeString,
+    std::string shaderName) {
     std::string shaderPath = "generated/";
 
 #if defined(_WIN32)
@@ -33,29 +35,33 @@ uint32_t loadShader(bgfx::ShaderHandle* out_handle, std::string shaderName) {
         return 1;
     }
 
+    printf("INFO: RENDERING: Loaded shader file %s\n", shaderPath.c_str());
+
     std::stringstream shaderCodeStream {};
     shaderCodeStream << shaderCodeFile.rdbuf();
-    std::string shaderCode = shaderCodeStream.str();
+    *out_codeString = shaderCodeStream.str();
 
     *out_handle = bgfx::createShader(
-        bgfx::makeRef(shaderCode.c_str(), shaderCode.size()));
+        bgfx::makeRef(out_codeString->c_str(), out_codeString->size()));
 
     return 0;
 }
 
-bgfx::ProgramHandle loadProgram(
-    std::string vertexName, std::string fragmentName) {
-    bgfx::ShaderHandle vertexHandle, fragmentHandle;
-    loadShader(&vertexHandle, vertexName);
-    loadShader(&fragmentHandle, fragmentName);
-    return bgfx::createProgram(vertexHandle, fragmentHandle);
+void loadProgram(
+    h_core::systems::Shader* out_shader, std::string vertexName,
+    std::string fragmentName) {
+    loadShader(&out_shader->vertexHandle, &out_shader->vertexCode, vertexName);
+    loadShader(
+        &out_shader->fragmentHandle, &out_shader->fragmentCode, fragmentName);
+    out_shader->programHandle = bgfx::createProgram(
+        out_shader->vertexHandle, out_shader->fragmentHandle);
 }
 
-uint32_t h_core::system::Rendering::init() {
+uint32_t h_core::systems::Rendering::init() {
     return 0;
 }
 
-uint32_t h_core::system::Rendering::initFromWindow(
+uint32_t h_core::systems::Rendering::initFromWindow(
     uint32_t width, uint32_t height, void* nwh) {
     bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
                           // single-threaded rendering.
@@ -75,13 +81,17 @@ uint32_t h_core::system::Rendering::initFromWindow(
     m_width = width;
     m_height = height;
 
-    m_program = loadProgram("vs_default", "fs_default");
+    loadProgram(&m_shader, "vs_default", "fs_default");
 
     return 0;
 }
 
 
-void h_core::system::Rendering::process() {
+void h_core::systems::Rendering::process() {}
+
+void h_core::systems::Rendering::draw() {
+    printf("BANG\n");
+
     h_core::math::Mat4x4 view = h_core::math::Mat4x4::lookAtMat(
         cameraPosition,
         h_core::math::Vector3::add(cameraPosition, cameraDirection), true);
@@ -104,10 +114,13 @@ void h_core::system::Rendering::process() {
                      BGFX_STATE_WRITE_RGB;
     bgfx::setState(state);
 
-    bgfx::submit(0, m_program);
+    bgfx::submit(0, m_shader.programHandle);
 }
 
+void h_core::systems::Rendering::endFrame() {
+    bgfx::frame();
+}
 
-h_core::ComponentBitmask h_core::system::Rendering::getMask() {
+h_core::ComponentBitmask h_core::systems::Rendering::getMask() {
     return TRANSFORM_COMPONENT_BITMASK & MODEL_COMPONENT_BITMASK;
 }

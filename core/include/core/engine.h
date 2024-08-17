@@ -9,7 +9,7 @@
 #include "core/system.h"
 #include "core/window.h"
 
-#define ENGINE_SYSTEM_COUNT 1
+#define ENGINE_SYSTEM_COUNT 2
 
 namespace h_core {
 class Engine {

@@ -11,6 +11,8 @@ class System {
   public:
     virtual uint32_t init() = 0;
     virtual void process() {};
+    virtual void draw() {};
+    virtual void endFrame() {};
     virtual h_core::ComponentBitmask getMask() = 0;
 
     h_core::Transform* transform;
