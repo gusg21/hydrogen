@@ -31,7 +31,9 @@ class Model : public Asset {
     bgfx::IndexBufferHandle m_indexBuffer;
 };
 
-struct VertexData {
+struct Vertex {
+    Vertex() = default;
+
     h_core::math::Vector3 position;
     h_core::math::Vector3 normal;
     h_core::math::Vector2 uv;

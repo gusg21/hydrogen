@@ -9,7 +9,10 @@ int main() {
 
     h_core::Project project {};
     project.projectName = "Hello World!";
-    project.initialSceneSpec = project.assets.getOrLoadAsset<h_core::SceneSpec>("assets/test_scene.yml");
+    project.initialSceneSpec = project.assets.getOrLoadAsset<h_core::SceneSpec>(
+        "assets/test_scene.yml");
+
+    project.assets.getOrLoadAsset<h_core::Model>("assets/test_model.yml");
 
     engine->init(&project);
     engine->run();

@@ -23,7 +23,7 @@ uint32_t h_core::Window::init(
         props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 
     m_renderer = new h_core::system::Rendering();
-    m_renderer->initWindow(width, height, win32Handle);
+    m_renderer->initFromWindow(width, height, win32Handle);
 #else
 #error Non-Windows native window acquisition unimplemented
 #endif

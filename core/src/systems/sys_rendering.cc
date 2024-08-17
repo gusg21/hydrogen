@@ -13,34 +13,49 @@
 #define RENDERING_INIT_FAIL_UNABLE_TO_BGFX    1
 #define RENDERING_MEM_LOAD_FAILED_UNABLE_OPEN 1
 
-bgfx::ShaderHandle loadShader(std::string shaderName) {
+uint32_t loadShader(bgfx::ShaderHandle* out_handle, std::string shaderName) {
     std::string shaderPath = "generated/";
 
 #if defined(_WIN32)
     shaderPath += "windows/";
+#elif defined(__APPLE__)
+    shaderPath += "osx/";
 #endif
 
+    shaderPath += shaderName + ".bin";
+
     std::ifstream shaderCodeFile { shaderPath };
+
+    if (!shaderCodeFile.good()) {
+        printf(
+            "ERROR: RENDERING: Failed to open shader file %s\n",
+            shaderPath.c_str());
+        return 1;
+    }
+
     std::stringstream shaderCodeStream {};
     shaderCodeStream << shaderCodeFile.rdbuf();
     std::string shaderCode = shaderCodeStream.str();
 
-    bgfx::ShaderHandle handle = bgfx::createShader(
+    *out_handle = bgfx::createShader(
         bgfx::makeRef(shaderCode.c_str(), shaderCode.size()));
 
-    return handle;
+    return 0;
 }
 
 bgfx::ProgramHandle loadProgram(
-    std::string vsName, std::string fsName) {
-    return bgfx::createProgram(loadShader(vsName), loadShader(fsName));
+    std::string vertexName, std::string fragmentName) {
+    bgfx::ShaderHandle vertexHandle, fragmentHandle;
+    loadShader(&vertexHandle, vertexName);
+    loadShader(&fragmentHandle, fragmentName);
+    return bgfx::createProgram(vertexHandle, fragmentHandle);
 }
 
 uint32_t h_core::system::Rendering::init() {
     return 0;
 }
 
-uint32_t h_core::system::Rendering::initWindow(
+uint32_t h_core::system::Rendering::initFromWindow(
     uint32_t width, uint32_t height, void* nwh) {
     bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
                           // single-threaded rendering.

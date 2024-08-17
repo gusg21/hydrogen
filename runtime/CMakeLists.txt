@@ -9,3 +9,5 @@ add_custom_target(HydrogenRuntime_Assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
 )
 add_dependencies(HydrogenRuntime HydrogenRuntime_Assets)
+
+HydrogenCore_CopyShaders(HydrogenRuntime ${CMAKE_CURRENT_BINARY_DIR})

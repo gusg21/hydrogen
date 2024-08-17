@@ -13,7 +13,7 @@ class Rendering : public System {
     void process();
     h_core::ComponentBitmask getMask();
 
-    uint32_t initWindow(uint32_t width, uint32_t height, void* nwh);
+    uint32_t initFromWindow(uint32_t width, uint32_t height, void* nwh);
 
   private:
     h_core::math::Vector3 cameraPosition = h_core::math::Vector3(0);

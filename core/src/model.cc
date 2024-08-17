@@ -6,7 +6,7 @@
 
 // TODO: move these godless monstrosities to a subf
 
-static h_core::VertexData cubeVertices[] = {
+static h_core::Vertex cubeVertices[] = {
     { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
       h_core::math::Vector2(0) },
     { h_core::math::Vector3(1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
@@ -71,20 +71,76 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     }
 
     // TODO: VERY TESTING. MUCH WOW
-    const uint8_t* buffer = model.buffers.front().data.data();
-    
+    tinygltf::Node node = model.nodes.front();
+    tinygltf::Mesh mesh = model.meshes[node.mesh];
+    tinygltf::Primitive primitiveInfo = mesh.primitives.front();
+
+    // pos attribute
+    uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
+    tinygltf::Accessor posAccessor = model.accessors[posAccessorIndex];
+    tinygltf::BufferView posBufferView =
+        model.bufferViews[posAccessor.bufferView];
+    const uint8_t* posBuffer = model.buffers[posBufferView.buffer].data.data();
+
+    // normal attribute
+    uint32_t normalAccessorIndex = primitiveInfo.attributes["NORMAL"];
+    tinygltf::Accessor normalAccessor = model.accessors[normalAccessorIndex];
+    tinygltf::BufferView normalBufferView =
+        model.bufferViews[normalAccessor.bufferView];
+    const uint8_t* normalBuffer =
+        model.buffers[normalBufferView.buffer].data.data();
+
+    // uv attribute
+    uint32_t texCoordAccessorIndex = primitiveInfo.attributes["TEXCOORD_0"];
+    tinygltf::Accessor texCoordAccessor =
+        model.accessors[texCoordAccessorIndex];
+    tinygltf::BufferView texCoordBufferView =
+        model.bufferViews[texCoordAccessor.bufferView];
+    const uint8_t* texCoordBuffer =
+        model.buffers[texCoordBufferView.buffer].data.data();
+
+    // load vertex data
+    size_t vertexCount = posAccessor.count;
+    h_core::Vertex* vertexBuffer = new h_core::Vertex[vertexCount] {};
+
+    for (uint32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
+        h_core::Vertex* vertex = &vertexBuffer[vertexIndex];
+        vertex->position = *(
+            const h_core::math::Vector3*)(&posBuffer
+                                              [vertexIndex *
+                                               sizeof(h_core::math::Vector3)]);
+        vertex->normal = *(
+            const h_core::math::Vector3*)(&normalBuffer
+                                              [vertexIndex *
+                                               sizeof(h_core::math::Vector3)]);
+        vertex->uv = *(
+            const h_core::math::Vector2*)(&texCoordBuffer
+                                              [vertexIndex *
+                                               sizeof(h_core::math::Vector2)]);
+    }
+
+    // load index buffer
+    uint32_t indexBufferAccessorIndex = primitiveInfo.indices;
+    tinygltf::Accessor indexBufferAccessor =
+        model.accessors[indexBufferAccessorIndex];
+    tinygltf::BufferView indexBufferView =
+        model.bufferViews[indexBufferAccessor.bufferView];
+    std::vector<uint8_t> indexBuffer =
+        model.buffers[indexBufferView.buffer].data;
 
     // Create data buffers
     m_vertexBuffer = bgfx::createVertexBuffer(
-        bgfx::makeRef(cubeVertices, sizeof(cubeVertices)), VertexData::layout);
+        bgfx::makeRef(vertexBuffer, vertexCount), Vertex::layout);
 
     m_indexBuffer = bgfx::createIndexBuffer(
-        bgfx::makeRef(cubeTriList, sizeof(cubeTriList)));
+        bgfx::makeRef(indexBuffer.data(), indexBuffer.size()));
 
     return 0;
 }
 
-void h_core::VertexData::init() {
+bgfx::VertexLayout h_core::Vertex::layout {};
+
+void h_core::Vertex::init() {
     layout.begin()
         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
         .add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)

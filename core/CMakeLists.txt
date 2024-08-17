@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.21)
 # Core sources
 add_library(HydrogenCore STATIC 
 
-                                    include/core/actor.h
     src/actorspec.cc                include/core/actorspec.h
     src/asset.cc                    include/core/asset.h
     src/assets.cc                   include/core/assets.h
@@ -87,3 +86,11 @@ set_target_properties(yaml-cpp PROPERTIES FOLDER "yaml-cpp")
 set_target_properties(uninstall PROPERTIES FOLDER "yaml-cpp/misc")
 
 target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
+
+# generated shader code
+function(HydrogenCore_CopyShaders folder)
+    add_custom_target(HydrogenCore_CopyShaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/generated generated
+    )
+    add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
+endfunction()

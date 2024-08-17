@@ -7,6 +7,8 @@
 #include "core/asset.h"
 #include "core/actorspec.h"
 
+#define SCENESPEC_INIT_FAIL_MISSING_ACTOR_SPEC_PATH 1
+
 namespace h_core {
 class SceneSpec : public Asset {
   public:
