@@ -22,8 +22,10 @@ add_library(HydrogenCore STATIC
     src/window.cc                   include/core/window.h
                                     
     src/math/mat4x4.cc              include/core/math/mat4x4.h
+                                    include/core/math/quaternion.h
     src/math/vector2.cc             include/core/math/vector2.h
     src/math/vector3.cc             include/core/math/vector3.h
+                                    include/core/math/vectors.h
 
     src/systems/sys_gravity.cc      include/core/systems/sys_gravity.h
     src/systems/sys_rendering.cc    include/core/systems/sys_rendering.h

@@ -29,6 +29,11 @@ h_core::math::Vector3 h_core::math::Vector3::subtract(
     return h_core::math::Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 }
 
+h_core::math::Vector3 h_core::math::Vector3::add(
+    h_core::math::Vector3 v1, h_core::math::Vector3 v2) {
+    return h_core::math::Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+}
+
 h_core::math::Vector3 h_core::math::Vector3::normalize(
     h_core::math::Vector3 v) {
     float distance = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);

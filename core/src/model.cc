@@ -32,10 +32,10 @@ static const uint16_t cubeTriList[] = {
 
 
 void h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
-    m_vbh = bgfx::createVertexBuffer(
+    m_vertexBuffer = bgfx::createVertexBuffer(
         bgfx::makeRef(cubeVertices, sizeof(cubeVertices)), VertexData::layout);
 
-    m_ibh = bgfx::createIndexBuffer(
+    m_indexBuffer = bgfx::createIndexBuffer(
         bgfx::makeRef(cubeTriList, sizeof(cubeTriList)));
 }
 

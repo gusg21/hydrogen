@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bx/math.h"
+#include "core/math/vectors.h"
 #include "yaml-cpp/yaml.h"
 
 #define TRANSFORM_COMPONENT_BITMASK (1 << 0)
@@ -12,14 +13,15 @@ class Transform {
 
     // Populate data from a YAML node
     void initFromYaml(YAML::Node yaml);
+    h_core::math::Mat4x4 getMatrix();
 
     /// @brief position
-    bx::Vec3 position;
+    h_core::math::Vector3 position;
 
     /// @brief rotation (as quaternion)
-    bx::Quaternion rotation;
+    h_core::math::Quaternion rotation;
 
     /// @brief scale
-    bx::Vec3 scale;
+    h_core::math::Vector3 scale;
 };
 }  // namespace h_core

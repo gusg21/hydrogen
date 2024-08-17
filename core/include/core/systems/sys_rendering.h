@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/system.h"
 #include "bgfx/bgfx.h"
+#include "core/system.h"
 
 namespace h_core {
 namespace system {
@@ -18,6 +18,10 @@ class Rendering : public System {
   private:
     h_core::math::Vector3 cameraPosition = h_core::math::Vector3(0);
     h_core::math::Vector3 cameraDirection = h_core::math::Vector3(0);
+
+    float m_width = 0;
+    float m_height = 0;
+    bgfx::ProgramHandle m_program;
 };
 }  // namespace system
 }  // namespace h_core
