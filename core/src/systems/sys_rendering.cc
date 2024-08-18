@@ -70,6 +70,7 @@ uint32_t h_core::systems::Rendering::initFromWindow(
 
     // Acquire native handle
     init.platformData.nwh = nwh;
+    init.debug = true;
 
     // Set up resolution + backbuffer settings
     init.resolution.width = width;
