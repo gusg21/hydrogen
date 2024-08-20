@@ -1,7 +1,9 @@
-#include "core/model.h"
+#include "core/mesh.h"
 
 #include <string>
 
+#include "SDL2/SDL.h"
+#include "glad/glad.h"
 #include "tiny_gltf.h"
 
 // TODO: move these godless monstrosities to a subf
@@ -35,7 +37,7 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     printf("INFO: MODEL: loading model from YAML spec...\n");
 
     // Set up vertex layout info
@@ -120,7 +122,7 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
                   Vector3*)(&normalBuffer
                                 [normalBufferView.byteOffset +
                                  vertexIndex * sizeof(h_core::math::Vector3)]);
-        vertex->uv =
+        vertex->texCoord =
             *(const h_core::math::
                   Vector2*)(&texCoordBuffer
                                 [texCoordBufferView.byteOffset +
@@ -137,10 +139,61 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
         model.buffers[indexBufferView.buffer].data;
 
 
-
     return 0;
 }
 
-void h_core::Vertex::init() {
-    
+
+void h_core::Mesh::loadModel(
+    const uint32_t* vertexCount, const h_core::Vertex* vertexBuffer,
+    const uint32_t* inidicesCount, const uint32_t* indexBuffer) {
+    if (!m_initialized) {
+        glGenVertexArrays(1, &m_vao);
+        glBindVertexArray(m_vao);
+
+        glGenBuffers(1, &m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+        glGenBuffers(1, &m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+
+        glVertexAttribPointer(
+            0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+            (const void*)offsetof(h_core::Vertex, position));
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(
+            1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+            (const void*)offsetof(h_core::Vertex, normal));
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(
+            2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+            (const void*)offsetof(h_core::Vertex, texCoord));
+        glEnableVertexAttribArray(2);
+
+        m_initialized = true;
+    }
+
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+
+    if (vertexCount > 0) {
+        glBufferData(
+            GL_ARRAY_BUFFER, sizeof(h_core::Vertex) * (*vertexCount),
+            vertexBuffer, GL_STATIC_DRAW);
+    }
+
+    if (inidicesCount > 0) {
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * (*inidicesCount),
+            indexBuffer, GL_STATIC_DRAW);
+    }
+
+    m_numVerticies = *vertexCount;
+    m_numIndices = *inidicesCount;
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

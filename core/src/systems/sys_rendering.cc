@@ -160,6 +160,8 @@ void h_core::systems::Rendering::draw() {
     // bgfx::submit(0, m_shader.programHandle);
 
     
+
+    
 }
 
 uint32_t h_core::systems::Rendering::initFromWindow(

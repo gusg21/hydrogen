@@ -21,6 +21,6 @@ class System {
 
     h_core::Engine* engine;
     h_core::Transform* transform;
-    h_core::Model* model;
+    h_core::Mesh* model;
 };
 }  // namespace h_core

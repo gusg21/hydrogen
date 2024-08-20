@@ -13,6 +13,6 @@ class ActorSpec : public Asset {
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;
-    h_core::Model model;
+    h_core::Mesh model;
 };
 }  // namespace h_core
