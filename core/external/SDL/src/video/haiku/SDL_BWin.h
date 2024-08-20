@@ -26,7 +26,9 @@
 extern "C" {
 #endif
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
+#include "SDL.h"
+#include "SDL_syswm.h"
 #include "SDL_bframebuffer.h"
 
 #ifdef __cplusplus
@@ -40,7 +42,8 @@ extern "C" {
 #ifdef SDL_VIDEO_OPENGL
 #include <opengl/GLView.h>
 #endif
-#include "../../core/haiku/SDL_BApp.h"
+#include "SDL_events.h"
+#include "../../main/haiku/SDL_BApp.h"
 
 enum WinCommands
 {
@@ -153,12 +156,9 @@ class SDL_BWin : public BWindow
 
     void UpdateCurrentView()
     {
-#ifdef SDL_VIDEO_OPENGL
         if (_SDL_GLView != NULL) {
             SetCurrentView(_SDL_GLView);
-        } else
-#endif
-        if (_SDL_View != NULL) {
+        } else if (_SDL_View != NULL) {
             SetCurrentView(_SDL_View);
         } else {
             SetCurrentView(NULL);
@@ -455,13 +455,10 @@ class SDL_BWin : public BWindow
                 delete pendingMessage;
             }
             if (_bitmap != NULL) {
-#ifdef SDL_VIDEO_OPENGL
-                if (_SDL_GLView != NULL && _cur_view == _SDL_GLView) {
-                    _SDL_GLView->CopyPixelsIn(_bitmap, B_ORIGIN);
-                } else
-#endif
-                if (_SDL_View != NULL && _cur_view == _SDL_View) {
+                if (_SDL_View != NULL && _cur_view == _SDL_View)
                     _SDL_View->Draw(Bounds());
+                else if (_SDL_GLView != NULL && _cur_view == _SDL_GLView) {
+                    _SDL_GLView->CopyPixelsIn(_bitmap, B_ORIGIN);
                 }
             }
             break;
@@ -753,3 +750,5 @@ class SDL_BWin : public BWindow
  *                         buffer provided by DirectConnected() is invalidated.
  */
 #endif /* SDL_BWin_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

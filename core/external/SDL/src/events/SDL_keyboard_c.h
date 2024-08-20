@@ -18,50 +18,50 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 #ifndef SDL_keyboard_c_h_
 #define SDL_keyboard_c_h_
 
-#include "SDL_keymap_c.h"
-
-/* Keyboard events not associated with a specific input device */
-#define SDL_GLOBAL_KEYBOARD_ID     0
-
-/* The default keyboard input device, for platforms that don't have multiple keyboards */
-#define SDL_DEFAULT_KEYBOARD_ID    1
+#include "SDL_keycode.h"
+#include "SDL_events.h"
 
 /* Initialize the keyboard subsystem */
-extern int SDL_InitKeyboard(void);
+extern int SDL_KeyboardInit(void);
 
-/* Return whether a device is actually a keyboard */
-extern SDL_bool SDL_IsKeyboard(Uint16 vendor, Uint16 product, int num_keys);
+/* Get the default keymap */
+extern void SDL_GetDefaultKeymap(SDL_Keycode *keymap);
 
-/* A keyboard has been added to the system */
-extern void SDL_AddKeyboard(SDL_KeyboardID keyboardID, const char *name, SDL_bool send_event);
-
-/* A keyboard has been removed from the system */
-extern void SDL_RemoveKeyboard(SDL_KeyboardID keyboardID, SDL_bool send_event);
+/* Get the default key code for a scancode */
+extern SDL_Keycode SDL_GetDefaultKeyFromScancode(SDL_Scancode scancode);
 
 /* Set the mapping of scancode to key codes */
-extern void SDL_SetKeymap(SDL_Keymap *keymap, SDL_bool send_event);
+extern void SDL_SetKeymap(int start, const SDL_Keycode *keys, int length, SDL_bool send_event);
+
+/* Set a platform-dependent key name, overriding the default platform-agnostic
+   name. Encoded as UTF-8. The string is not copied, thus the pointer given to
+   this function must stay valid forever (or at least until the call to
+   VideoQuit()). */
+extern void SDL_SetScancodeName(SDL_Scancode scancode, const char *name);
 
 /* Set the keyboard focus window */
-extern int SDL_SetKeyboardFocus(SDL_Window *window);
+extern void SDL_SetKeyboardFocus(SDL_Window *window);
 
 /* Send a character from an on-screen keyboard as scancode and modifier key events,
    currently assuming ASCII characters on a US keyboard layout
  */
-extern int SDL_SendKeyboardUnicodeKey(Uint64 timestamp, Uint32 ch);
+extern int SDL_SendKeyboardUnicodeKey(Uint32 ch);
+
+/* Send a key from a virtual key source, like an on-screen keyboard */
+extern int SDL_SendVirtualKeyboardKey(Uint8 state, SDL_Scancode scancode);
 
 /* Send a keyboard key event */
-extern int SDL_SendKeyboardKey(Uint64 timestamp, SDL_KeyboardID keyboardID, int rawcode, SDL_Scancode scancode, Uint8 state);
-extern int SDL_SendKeyboardKeyIgnoreModifiers(Uint64 timestamp, SDL_KeyboardID keyboardID, int rawcode, SDL_Scancode scancode, Uint8 state);
-extern int SDL_SendKeyboardKeyAutoRelease(Uint64 timestamp, SDL_Scancode scancode);
+extern int SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode);
+extern int SDL_SendKeyboardKeyAutoRelease(SDL_Scancode scancode);
 
 /* This is for platforms that don't know the keymap but can report scancode and keycode directly.
    Most platforms should prefer to optionally call SDL_SetKeymap and then use SDL_SendKeyboardKey. */
-extern int SDL_SendKeyboardKeyAndKeycode(Uint64 timestamp, SDL_KeyboardID keyboardID, int rawcode, SDL_Scancode scancode, SDL_Keycode keycode, Uint8 state);
+extern int SDL_SendKeyboardKeyAndKeycode(Uint8 state, SDL_Scancode scancode, SDL_Keycode keycode);
 
 /* Release all the autorelease keys */
 extern void SDL_ReleaseAutoReleaseKeys(void);
@@ -75,13 +75,15 @@ extern int SDL_SendKeyboardText(const char *text);
 /* Send editing text for selected range from start to end */
 extern int SDL_SendEditingText(const char *text, int start, int length);
 
-/* Send editing text candidates, which will be copied into the event */
-int SDL_SendEditingTextCandidates(char **candidates, int num_candidates, int selected_candidate, SDL_bool horizontal);
-
 /* Shutdown the keyboard subsystem */
-extern void SDL_QuitKeyboard(void);
+extern void SDL_KeyboardQuit(void);
+
+/* Convert to UTF-8 */
+extern char *SDL_UCS4ToUTF8(Uint32 ch, char *dst);
 
 /* Toggle on or off pieces of the keyboard mod state. */
 extern void SDL_ToggleModState(const SDL_Keymod modstate, const SDL_bool toggle);
 
 #endif /* SDL_keyboard_c_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

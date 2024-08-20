@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_PS2
 
@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "SDL_error.h"
+#include "SDL_thread.h"
 #include "../SDL_systhread.h"
 #include "../SDL_thread_c.h"
 #include <kernel.h>
@@ -54,9 +56,7 @@ static int childThread(void *arg)
     return res;
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread,
-                         SDL_FunctionPointer pfnBeginThread,
-                         SDL_FunctionPointer pfnEndThread)
+int SDL_SYS_CreateThread(SDL_Thread *thread)
 {
     ee_thread_status_t status;
     ee_thread_t eethread;
@@ -100,9 +100,9 @@ void SDL_SYS_SetupThread(const char *name)
     /* Do nothing. */
 }
 
-SDL_ThreadID SDL_GetCurrentThreadID(void)
+SDL_threadID SDL_ThreadID(void)
 {
-    return (SDL_ThreadID)GetThreadId();
+    return (SDL_threadID)GetThreadId();
 }
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
@@ -135,3 +135,6 @@ int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 }
 
 #endif /* SDL_THREAD_PS2 */
+
+/* vim: ts=4 sw=4
+ */

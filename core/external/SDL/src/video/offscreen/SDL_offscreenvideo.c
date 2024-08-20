@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_OFFSCREEN
 
@@ -30,19 +30,20 @@
  * for automated testing.
  */
 
+#include "SDL_video.h"
+
 #include "SDL_offscreenvideo.h"
 #include "SDL_offscreenevents_c.h"
 #include "SDL_offscreenframebuffer_c.h"
 #include "SDL_offscreenopengles.h"
-#include "SDL_offscreenvulkan.h"
 #include "SDL_offscreenwindow.h"
 
 #define OFFSCREENVID_DRIVER_NAME "offscreen"
 
 /* Initialization/Query functions */
-static int OFFSCREEN_VideoInit(SDL_VideoDevice *_this);
-static int OFFSCREEN_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode);
-static void OFFSCREEN_VideoQuit(SDL_VideoDevice *_this);
+static int OFFSCREEN_VideoInit(_THIS);
+static int OFFSCREEN_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode);
+static void OFFSCREEN_VideoQuit(_THIS);
 
 /* OFFSCREEN driver bootstrap functions */
 
@@ -51,29 +52,15 @@ static void OFFSCREEN_DeleteDevice(SDL_VideoDevice *device)
     SDL_free(device);
 }
 
-static SDL_bool OFFSCREEN_Available(const char *enable_hint)
-{
-    const char *hint = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
-    if (hint) {
-        if (SDL_strcmp(hint, enable_hint) == 0) {
-            return SDL_TRUE;
-        }
-    }
-    return SDL_FALSE;
-}
-
 static SDL_VideoDevice *OFFSCREEN_CreateDevice(void)
 {
     SDL_VideoDevice *device;
 
-    if (!OFFSCREEN_Available(OFFSCREENVID_DRIVER_NAME)) {
-        return NULL;
-    }
-
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
-        return NULL;
+        SDL_OutOfMemory();
+        return 0;
     }
 
     /* General video */
@@ -99,18 +86,9 @@ static SDL_VideoDevice *OFFSCREEN_CreateDevice(void)
     device->GL_SetSwapInterval = OFFSCREEN_GLES_SetSwapInterval;
 #endif
 
-#ifdef SDL_VIDEO_VULKAN
-    device->Vulkan_LoadLibrary = OFFSCREEN_Vulkan_LoadLibrary;
-    device->Vulkan_UnloadLibrary = OFFSCREEN_Vulkan_UnloadLibrary;
-    device->Vulkan_GetInstanceExtensions = OFFSCREEN_Vulkan_GetInstanceExtensions;
-    device->Vulkan_CreateSurface = OFFSCREEN_Vulkan_CreateSurface;
-    device->Vulkan_DestroySurface = OFFSCREEN_Vulkan_DestroySurface;
-#endif
-
     /* "Window" */
     device->CreateSDLWindow = OFFSCREEN_CreateWindow;
     device->DestroyWindow = OFFSCREEN_DestroyWindow;
-    device->SetWindowSize = OFFSCREEN_SetWindowSize;
 
     return device;
 }
@@ -121,30 +99,36 @@ VideoBootStrap OFFSCREEN_bootstrap = {
     NULL /* no ShowMessageBox implementation */
 };
 
-int OFFSCREEN_VideoInit(SDL_VideoDevice *_this)
+int OFFSCREEN_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
 
     /* Use a fake 32-bpp desktop mode */
-    SDL_zero(mode);
-    mode.format = SDL_PIXELFORMAT_XRGB8888;
+    mode.format = SDL_PIXELFORMAT_RGB888;
     mode.w = 1024;
     mode.h = 768;
-    if (SDL_AddBasicVideoDisplay(&mode) == 0) {
+    mode.refresh_rate = 0;
+    mode.driverdata = NULL;
+    if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
+
+    SDL_zero(mode);
+    SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     /* We're done! */
     return 0;
 }
 
-static int OFFSCREEN_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
+static int OFFSCREEN_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
 {
     return 0;
 }
 
-void OFFSCREEN_VideoQuit(SDL_VideoDevice *_this)
+void OFFSCREEN_VideoQuit(_THIS)
 {
 }
 
 #endif /* SDL_VIDEO_DRIVER_OFFSCREEN */
+
+/* vi: set ts=4 sw=4 expandtab: */

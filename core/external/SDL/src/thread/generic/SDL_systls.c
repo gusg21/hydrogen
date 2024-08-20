@@ -19,7 +19,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 #include "../SDL_thread_c.h"
 
 void SDL_SYS_InitTLSData(void)
@@ -42,3 +42,4 @@ void SDL_SYS_QuitTLSData(void)
     SDL_Generic_QuitTLSData();
 }
 
+/* vi: set ts=4 sw=4 expandtab: */

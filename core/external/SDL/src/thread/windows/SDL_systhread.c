@@ -18,12 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_WINDOWS
 
 /* Win32 thread management routines for SDL */
 
+#include "SDL_hints.h"
+#include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
 #include "SDL_systhread_c.h"
@@ -32,15 +34,20 @@
 #define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
 #endif
 
-typedef void (__cdecl * SDL_EndThreadExCallback) (unsigned retval);
-typedef uintptr_t (__cdecl * SDL_BeginThreadExCallback)
-                   (void *security, unsigned stacksize, unsigned (__stdcall *startaddr)(void *),
-                    void * arglist, unsigned initflag, unsigned *threadaddr);
+#ifndef SDL_PASSED_BEGINTHREAD_ENDTHREAD
+/* We'll use the C library from this DLL */
+#include <process.h>
+typedef uintptr_t(__cdecl *pfnSDL_CurrentBeginThread)(void *, unsigned,
+                                                      unsigned(__stdcall *func)(void*),
+                                                      void *arg, unsigned,
+                                                      unsigned *threadID);
+typedef void(__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
+#endif /* !SDL_PASSED_BEGINTHREAD_ENDTHREAD */
 
 static DWORD RunThread(void *data)
 {
     SDL_Thread *thread = (SDL_Thread *)data;
-    SDL_EndThreadExCallback pfnEndThread = (SDL_EndThreadExCallback)thread->endfunc;
+    pfnSDL_CurrentEndThread pfnEndThread = (pfnSDL_CurrentEndThread)thread->endfunc;
     SDL_RunThread(thread);
     if (pfnEndThread) {
         pfnEndThread(0);
@@ -58,16 +65,26 @@ static unsigned __stdcall MINGW32_FORCEALIGN RunThreadViaBeginThreadEx(void *dat
     return (unsigned)RunThread(data);
 }
 
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 int SDL_SYS_CreateThread(SDL_Thread *thread,
-                         SDL_FunctionPointer vpfnBeginThread,
-                         SDL_FunctionPointer vpfnEndThread)
+                         pfnSDL_CurrentBeginThread pfnBeginThread,
+                         pfnSDL_CurrentEndThread pfnEndThread)
 {
-    SDL_BeginThreadExCallback pfnBeginThread = (SDL_BeginThreadExCallback) vpfnBeginThread;
-
+#elif defined(__CYGWIN__) || defined(__WINRT__)
+int SDL_SYS_CreateThread(SDL_Thread *thread)
+{
+    pfnSDL_CurrentBeginThread pfnBeginThread = NULL;
+    pfnSDL_CurrentEndThread pfnEndThread = NULL;
+#else
+int SDL_SYS_CreateThread(SDL_Thread *thread)
+{
+    pfnSDL_CurrentBeginThread pfnBeginThread = (pfnSDL_CurrentBeginThread)_beginthreadex;
+    pfnSDL_CurrentEndThread pfnEndThread = (pfnSDL_CurrentEndThread)_endthreadex;
+#endif /* SDL_PASSED_BEGINTHREAD_ENDTHREAD */
     const DWORD flags = thread->stacksize ? STACK_SIZE_PARAM_IS_A_RESERVATION : 0;
 
     /* Save the function which we will have to call to clear the RTL of calling app! */
-    thread->endfunc = vpfnEndThread;
+    thread->endfunc = pfnEndThread;
 
     /* thread->stacksize == 0 means "system default", same as win32 expects */
     if (pfnBeginThread) {
@@ -97,19 +114,12 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-static LONG NTAPI EmptyVectoredExceptionHandler(EXCEPTION_POINTERS *ExceptionInfo)
-{
-    (void)ExceptionInfo;
-    return EXCEPTION_CONTINUE_EXECUTION;
-}
-
 typedef HRESULT(WINAPI *pfnSetThreadDescription)(HANDLE, PCWSTR);
 
 void SDL_SYS_SetupThread(const char *name)
 {
     if (name) {
-        PVOID exceptionHandlerHandle;
-#ifndef SDL_PLATFORM_WINRT /* !!! FIXME: There's no LoadLibrary() in WinRT; don't know if SetThreadDescription is available there at all at the moment. */
+#ifndef __WINRT__ /* !!! FIXME: There's no LoadLibrary() in WinRT; don't know if SetThreadDescription is available there at all at the moment. */
         static pfnSetThreadDescription pSetThreadDescription = NULL;
         static HMODULE kernel32 = NULL;
 
@@ -117,12 +127,6 @@ void SDL_SYS_SetupThread(const char *name)
             kernel32 = GetModuleHandle(TEXT("kernel32.dll"));
             if (kernel32) {
                 pSetThreadDescription = (pfnSetThreadDescription)GetProcAddress(kernel32, "SetThreadDescription");
-            }
-            if (!kernel32 || !pSetThreadDescription) {
-                HMODULE kernelBase = GetModuleHandle(TEXT("KernelBase.dll"));
-                if (kernelBase) {
-                    pSetThreadDescription = (pfnSetThreadDescription)GetProcAddress(kernelBase, "SetThreadDescription");
-                }
             }
         }
 
@@ -139,9 +143,14 @@ void SDL_SYS_SetupThread(const char *name)
            but we still need to deal with older OSes and debuggers. Set it with the arcane
            exception magic, too. */
 
-        exceptionHandlerHandle = AddVectoredExceptionHandler(1, EmptyVectoredExceptionHandler);
-        if (exceptionHandlerHandle) {
+        if (IsDebuggerPresent()) {
             THREADNAME_INFO inf;
+
+            /* C# and friends will try to catch this Exception, let's avoid it. */
+            if (SDL_GetHintBoolean(SDL_HINT_WINDOWS_DISABLE_THREAD_NAMING, SDL_TRUE)) {
+                return;
+            }
+
             /* This magic tells the debugger to name a thread if it's listening. */
             SDL_zero(inf);
             inf.dwType = 0x1000;
@@ -151,14 +160,13 @@ void SDL_SYS_SetupThread(const char *name)
 
             /* The debugger catches this, renames the thread, continues on. */
             RaiseException(0x406D1388, 0, sizeof(inf) / sizeof(ULONG), (const ULONG_PTR *)&inf);
-            RemoveVectoredExceptionHandler(exceptionHandlerHandle);
         }
     }
 }
 
-SDL_ThreadID SDL_GetCurrentThreadID(void)
+SDL_threadID SDL_ThreadID(void)
 {
-    return (SDL_ThreadID)GetCurrentThreadId();
+    return (SDL_threadID)GetCurrentThreadId();
 }
 
 int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
@@ -192,3 +200,5 @@ void SDL_SYS_DetachThread(SDL_Thread *thread)
 }
 
 #endif /* SDL_THREAD_WINDOWS */
+
+/* vi: set ts=4 sw=4 expandtab: */

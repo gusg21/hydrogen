@@ -18,12 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 #if SDL_HAVE_BLIT_1
 
+#include "SDL_video.h"
 #include "SDL_blit.h"
 #include "SDL_sysvideo.h"
+#include "SDL_endian.h"
 
 /* Functions to blit from 8-bit surfaces to other surfaces */
 
@@ -431,16 +433,16 @@ static void Blit1toNAlpha(SDL_BlitInfo *info)
     int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
     int dstskip = info->dst_skip;
-    const SDL_PixelFormatDetails *dstfmt = info->dst_fmt;
-    const SDL_Color *srcpal = info->src_pal->colors;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    const SDL_Color *srcpal = info->src_fmt->palette->colors;
     int dstbpp;
     Uint32 pixel;
-    unsigned sR, sG, sB, sA;
+    unsigned sR, sG, sB;
     unsigned dR, dG, dB, dA;
     const unsigned A = info->a;
 
     /* Set up some basic variables */
-    dstbpp = dstfmt->bytes_per_pixel;
+    dstbpp = dstfmt->BytesPerPixel;
 
     while (height--) {
         /* *INDENT-OFF* */ /* clang-format off */
@@ -449,9 +451,8 @@ static void Blit1toNAlpha(SDL_BlitInfo *info)
             sR = srcpal[*src].r;
             sG = srcpal[*src].g;
             sB = srcpal[*src].b;
-            sA = (srcpal[*src].a * A) / 255;
             DISEMBLE_RGBA(dst, dstbpp, dstfmt, pixel, dR, dG, dB, dA);
-            ALPHA_BLEND_RGBA(sR, sG, sB, sA, dR, dG, dB, dA);
+            ALPHA_BLEND_RGBA(sR, sG, sB, A, dR, dG, dB, dA);
             ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
             src++;
             dst += dstbpp;
@@ -471,17 +472,17 @@ static void Blit1toNAlphaKey(SDL_BlitInfo *info)
     int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
     int dstskip = info->dst_skip;
-    const SDL_PixelFormatDetails *dstfmt = info->dst_fmt;
-    const SDL_Color *srcpal = info->src_pal->colors;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    const SDL_Color *srcpal = info->src_fmt->palette->colors;
     Uint32 ckey = info->colorkey;
     int dstbpp;
     Uint32 pixel;
-    unsigned sR, sG, sB, sA;
+    unsigned sR, sG, sB;
     unsigned dR, dG, dB, dA;
     const unsigned A = info->a;
 
     /* Set up some basic variables */
-    dstbpp = dstfmt->bytes_per_pixel;
+    dstbpp = dstfmt->BytesPerPixel;
 
     while (height--) {
         /* *INDENT-OFF* */ /* clang-format off */
@@ -491,10 +492,9 @@ static void Blit1toNAlphaKey(SDL_BlitInfo *info)
                 sR = srcpal[*src].r;
                 sG = srcpal[*src].g;
                 sB = srcpal[*src].b;
-                sA = (srcpal[*src].a * A) / 255;
                 DISEMBLE_RGBA(dst, dstbpp, dstfmt, pixel, dR, dG, dB, dA);
-                ALPHA_BLEND_RGBA(sR, sG, sB, sA, dR, dG, dB, dA);
-                ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
+                ALPHA_BLEND_RGBA(sR, sG, sB, A, dR, dG, dB, dA);
+                  ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
             }
             src++;
             dst += dstbpp;
@@ -517,31 +517,24 @@ static const SDL_BlitFunc one_blitkey[] = {
 SDL_BlitFunc SDL_CalculateBlit1(SDL_Surface *surface)
 {
     int which;
+    SDL_PixelFormat *dstfmt;
 
-    if (SDL_BITSPERPIXEL(surface->internal->map.info.dst_fmt->format) < 8) {
+    dstfmt = surface->map->dst->format;
+    if (dstfmt->BitsPerPixel < 8) {
         which = 0;
     } else {
-        which = SDL_BYTESPERPIXEL(surface->internal->map.info.dst_fmt->format);
+        which = dstfmt->BytesPerPixel;
     }
-
-    switch (surface->internal->map.info.flags & ~SDL_COPY_RLE_MASK) {
+    switch (surface->map->info.flags & ~SDL_COPY_RLE_MASK) {
     case 0:
-        if (which < SDL_arraysize(one_blit)) {
-            return one_blit[which];
-        }
-        break;
+        return one_blit[which];
 
     case SDL_COPY_COLORKEY:
-        if (which < SDL_arraysize(one_blitkey)) {
-            return one_blitkey[which];
-        }
-        break;
+        return one_blitkey[which];
 
     case SDL_COPY_COLORKEY | SDL_COPY_BLEND:  /* this is not super-robust but handles a specific case we found sdl12-compat. */
-        return (surface->internal->map.info.a == 255) ? one_blitkey[which] :
-                which >= 2 ? Blit1toNAlphaKey : (SDL_BlitFunc)NULL;
+        return (surface->map->info.a == 255) ? one_blitkey[which] : (SDL_BlitFunc)NULL;
 
-    case SDL_COPY_BLEND:
     case SDL_COPY_MODULATE_ALPHA | SDL_COPY_BLEND:
         /* Supporting 8bpp->8bpp alpha is doable but requires lots of
            tables which consume space and takes time to precompute,
@@ -555,3 +548,5 @@ SDL_BlitFunc SDL_CalculateBlit1(SDL_Surface *surface)
 }
 
 #endif /* SDL_HAVE_BLIT_1 */
+
+/* vi: set ts=4 sw=4 expandtab: */

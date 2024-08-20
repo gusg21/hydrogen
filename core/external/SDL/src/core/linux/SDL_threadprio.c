@@ -18,16 +18,20 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
-#ifdef SDL_PLATFORM_LINUX
+#ifdef __LINUX__
+
+#include "SDL_error.h"
+#include "SDL_stdinc.h"
+#include "SDL_thread.h"
 
 #ifndef SDL_THREADS_DISABLED
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <pthread.h>
-#include <sched.h>
 #include <unistd.h>
+#include "SDL_system.h"
 
 /* RLIMIT_RTTIME requires kernel >= 2.6.25 and is in glibc >= 2.14 */
 #ifndef RLIMIT_RTTIME
@@ -41,6 +45,7 @@
 #include "SDL_dbus.h"
 
 #ifdef SDL_USE_LIBDBUS
+#include <sched.h>
 
 /* d-bus queries to org.freedesktop.RealtimeKit1. */
 #define RTKIT_DBUS_NODE      "org.freedesktop.RealtimeKit1"
@@ -92,7 +97,7 @@ static void set_rtkit_interface(void)
     }
 }
 
-static DBusConnection *get_rtkit_dbus_connection(void)
+static DBusConnection *get_rtkit_dbus_connection()
 {
     SDL_DBusContext *dbus = SDL_DBus_GetContext();
 
@@ -249,7 +254,7 @@ static SDL_bool rtkit_setpriority_realtime(pid_t thread, int rt_priority)
 #endif /* threads */
 
 /* this is a public symbol, so it has to exist even if threads are disabled. */
-int SDL_SetLinuxThreadPriority(Sint64 threadID, int priority)
+int SDL_LinuxSetThreadPriority(Sint64 threadID, int priority)
 {
 #ifdef SDL_THREADS_DISABLED
     return SDL_Unsupported();
@@ -281,7 +286,7 @@ int SDL_SetLinuxThreadPriority(Sint64 threadID, int priority)
 }
 
 /* this is a public symbol, so it has to exist even if threads are disabled. */
-int SDL_SetLinuxThreadPriorityAndPolicy(Sint64 threadID, int sdlPriority, int schedPolicy)
+int SDL_LinuxSetThreadPriorityAndPolicy(Sint64 threadID, int sdlPriority, int schedPolicy)
 {
 #ifdef SDL_THREADS_DISABLED
     return SDL_Unsupported();
@@ -342,4 +347,6 @@ int SDL_SetLinuxThreadPriorityAndPolicy(Sint64 threadID, int sdlPriority, int sc
 #endif
 }
 
-#endif /* SDL_PLATFORM_LINUX */
+#endif /* __LINUX__ */
+
+/* vi: set ts=4 sw=4 expandtab: */

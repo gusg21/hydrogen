@@ -19,11 +19,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_AUDIO_DRIVER_SNDIO
 
-// OpenBSD sndio target
+/* OpenBSD sndio target */
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -36,10 +36,12 @@
 #include <poll.h>
 #include <unistd.h>
 
-#include "../SDL_sysaudio.h"
+#include "SDL_audio.h"
+#include "../SDL_audio_c.h"
 #include "SDL_sndioaudio.h"
 
 #ifdef SDL_AUDIO_DRIVER_SNDIO_DYNAMIC
+#include "SDL_loadso.h"
 #endif
 
 #ifndef INFTIM
@@ -72,13 +74,14 @@ static int load_sndio_sym(const char *fn, void **addr)
 {
     *addr = SDL_LoadFunction(sndio_handle, fn);
     if (!*addr) {
-        return 0;  // Don't call SDL_SetError(): SDL_LoadFunction already did.
+        /* Don't call SDL_SetError(): SDL_LoadFunction already did. */
+        return 0;
     }
 
     return 1;
 }
 
-// cast funcs to char* first, to please GCC's strict aliasing rules.
+/* cast funcs to char* first, to please GCC's strict aliasing rules. */
 #define SDL_SNDIO_SYM(x)                                  \
     if (!load_sndio_sym(#x, (void **)(char *)&SNDIO_##x)) \
     return -1
@@ -122,7 +125,8 @@ static int LoadSNDIOLibrary(void)
     if (!sndio_handle) {
         sndio_handle = SDL_LoadObject(sndio_library);
         if (!sndio_handle) {
-            retval = -1;  // Don't call SDL_SetError(): SDL_LoadObject already did.
+            retval = -1;
+            /* Don't call SDL_SetError(): SDL_LoadObject already did. */
         } else {
             retval = load_sndio_syms();
             if (retval < 0) {
@@ -145,125 +149,127 @@ static int LoadSNDIOLibrary(void)
     return 0;
 }
 
-#endif // SDL_AUDIO_DRIVER_SNDIO_DYNAMIC
+#endif /* SDL_AUDIO_DRIVER_SNDIO_DYNAMIC */
 
-static int SNDIO_WaitDevice(SDL_AudioDevice *device)
+static void SNDIO_WaitDevice(_THIS)
 {
-    const SDL_bool recording = device->recording;
-
-    while (!SDL_AtomicGet(&device->shutdown)) {
-        if (SNDIO_sio_eof(device->hidden->dev)) {
-            return -1;
-        }
-
-        const int nfds = SNDIO_sio_pollfd(device->hidden->dev, device->hidden->pfd, recording ? POLLIN : POLLOUT);
-        if (nfds <= 0 || poll(device->hidden->pfd, nfds, 10) < 0) {
-            return -1;
-        }
-
-        const int revents = SNDIO_sio_revents(device->hidden->dev, device->hidden->pfd);
-        if (recording && (revents & POLLIN)) {
-            break;
-        } else if (!recording && (revents & POLLOUT)) {
-            break;
-        } else if (revents & POLLHUP) {
-            return -1;
-        }
-    }
-
-    return 0;
+    /* no-op; SNDIO_sio_write() blocks if necessary. */
 }
 
-static int SNDIO_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
+static void SNDIO_PlayDevice(_THIS)
 {
-    // !!! FIXME: this should be non-blocking so we can check device->shutdown.
-    // this is set to blocking, because we _have_ to send the entire buffer down, but hopefully WaitDevice took most of the delay time.
-    if (SNDIO_sio_write(device->hidden->dev, buffer, buflen) != buflen) {
-        return -1;  // If we couldn't write, assume fatal error for now
+    const int written = SNDIO_sio_write(this->hidden->dev,
+                                        this->hidden->mixbuf,
+                                        this->hidden->mixlen);
+
+    /* If we couldn't write, assume fatal error for now */
+    if (written == 0) {
+        SDL_OpenedAudioDeviceDisconnected(this);
     }
 #ifdef DEBUG_AUDIO
     fprintf(stderr, "Wrote %d bytes of audio data\n", written);
 #endif
-    return 0;
 }
 
-static int SNDIO_RecordDevice(SDL_AudioDevice *device, void *buffer, int buflen)
+static int SNDIO_CaptureFromDevice(_THIS, void *buffer, int buflen)
 {
-    // We set recording devices non-blocking; this can safely return 0 in SDL3, but we'll check for EOF to cause a device disconnect.
-    const size_t br = SNDIO_sio_read(device->hidden->dev, buffer, buflen);
-    if ((br == 0) && SNDIO_sio_eof(device->hidden->dev)) {
-        return -1;
+    size_t r;
+    int revents;
+    int nfds;
+
+    /* Emulate a blocking read */
+    r = SNDIO_sio_read(this->hidden->dev, buffer, buflen);
+    while (r == 0 && !SNDIO_sio_eof(this->hidden->dev)) {
+        nfds = SNDIO_sio_pollfd(this->hidden->dev, this->hidden->pfd, POLLIN);
+        if (nfds <= 0 || poll(this->hidden->pfd, nfds, INFTIM) < 0) {
+            return -1;
+        }
+        revents = SNDIO_sio_revents(this->hidden->dev, this->hidden->pfd);
+        if (revents & POLLIN) {
+            r = SNDIO_sio_read(this->hidden->dev, buffer, buflen);
+        }
+        if (revents & POLLHUP) {
+            break;
+        }
     }
-    return (int) br;
+    return (int)r;
 }
 
-static void SNDIO_FlushRecording(SDL_AudioDevice *device)
+static void SNDIO_FlushCapture(_THIS)
 {
     char buf[512];
-    while (!SDL_AtomicGet(&device->shutdown) && (SNDIO_sio_read(device->hidden->dev, buf, sizeof(buf)) > 0)) {
-        // do nothing
+
+    while (SNDIO_sio_read(this->hidden->dev, buf, sizeof(buf)) != 0) {
+        /* do nothing */;
     }
 }
 
-static Uint8 *SNDIO_GetDeviceBuf(SDL_AudioDevice *device, int *buffer_size)
+static Uint8 *SNDIO_GetDeviceBuf(_THIS)
 {
-    return device->hidden->mixbuf;
+    return this->hidden->mixbuf;
 }
 
-static void SNDIO_CloseDevice(SDL_AudioDevice *device)
+static void SNDIO_CloseDevice(_THIS)
 {
-    if (device->hidden) {
-        if (device->hidden->dev) {
-            SNDIO_sio_stop(device->hidden->dev);
-            SNDIO_sio_close(device->hidden->dev);
-        }
-        SDL_free(device->hidden->pfd);
-        SDL_free(device->hidden->mixbuf);
-        SDL_free(device->hidden);
-        device->hidden = NULL;
+    if (this->hidden->pfd) {
+        SDL_free(this->hidden->pfd);
     }
+    if (this->hidden->dev) {
+        SNDIO_sio_stop(this->hidden->dev);
+        SNDIO_sio_close(this->hidden->dev);
+    }
+    SDL_free(this->hidden->mixbuf);
+    SDL_free(this->hidden);
 }
 
-static int SNDIO_OpenDevice(SDL_AudioDevice *device)
+static int SNDIO_OpenDevice(_THIS, const char *devname)
 {
-    device->hidden = (struct SDL_PrivateAudioData *) SDL_calloc(1, sizeof(*device->hidden));
-    if (!device->hidden) {
-        return -1;
-    }
+    SDL_AudioFormat test_format;
+    struct sio_par par;
+    SDL_bool iscapture = this->iscapture;
 
-    // Recording devices must be non-blocking for SNDIO_FlushRecording
-    device->hidden->dev = SNDIO_sio_open(SIO_DEVANY,
-                                         device->recording ? SIO_REC : SIO_PLAY, device->recording);
-    if (!device->hidden->dev) {
+    this->hidden = (struct SDL_PrivateAudioData *)
+        SDL_malloc(sizeof(*this->hidden));
+    if (!this->hidden) {
+        return SDL_OutOfMemory();
+    }
+    SDL_zerop(this->hidden);
+
+    this->hidden->mixlen = this->spec.size;
+
+    /* Capture devices must be non-blocking for SNDIO_FlushCapture */
+    this->hidden->dev = SNDIO_sio_open(devname ? devname : SIO_DEVANY,
+                                       iscapture ? SIO_REC : SIO_PLAY, iscapture);
+    if (!this->hidden->dev) {
         return SDL_SetError("sio_open() failed");
     }
 
-    device->hidden->pfd = SDL_malloc(sizeof(struct pollfd) * SNDIO_sio_nfds(device->hidden->dev));
-    if (!device->hidden->pfd) {
-        return -1;
+    /* Allocate the pollfd array for capture devices */
+    if (iscapture) {
+        this->hidden->pfd = SDL_malloc(sizeof(struct pollfd) * SNDIO_sio_nfds(this->hidden->dev));
+        if (!this->hidden->pfd) {
+            return SDL_OutOfMemory();
+        }
     }
 
-    struct sio_par par;
     SNDIO_sio_initpar(&par);
 
-    par.rate = device->spec.freq;
-    par.pchan = device->spec.channels;
-    par.round = device->sample_frames;
+    par.rate = this->spec.freq;
+    par.pchan = this->spec.channels;
+    par.round = this->spec.samples;
     par.appbufsz = par.round * 2;
 
-    // Try for a closest match on audio format
-    SDL_AudioFormat test_format;
-    const SDL_AudioFormat *closefmts = SDL_ClosestAudioFormats(device->spec.format);
-    while ((test_format = *(closefmts++)) != 0) {
+    /* Try for a closest match on audio format */
+    for (test_format = SDL_FirstAudioFormat(this->spec.format); test_format; test_format = SDL_NextAudioFormat()) {
         if (!SDL_AUDIO_ISFLOAT(test_format)) {
             par.le = SDL_AUDIO_ISLITTLEENDIAN(test_format) ? 1 : 0;
             par.sig = SDL_AUDIO_ISSIGNED(test_format) ? 1 : 0;
             par.bits = SDL_AUDIO_BITSIZE(test_format);
 
-            if (SNDIO_sio_setpar(device->hidden->dev, &par) == 0) {
+            if (SNDIO_sio_setpar(this->hidden->dev, &par) == 0) {
                 continue;
             }
-            if (SNDIO_sio_getpar(device->hidden->dev, &par) == 0) {
+            if (SNDIO_sio_getpar(this->hidden->dev, &par) == 0) {
                 return SDL_SetError("sio_getpar() failed");
             }
             if (par.bps != SIO_BPS(par.bits)) {
@@ -276,44 +282,50 @@ static int SNDIO_OpenDevice(SDL_AudioDevice *device)
     }
 
     if (!test_format) {
-        return SDL_SetError("sndio: Unsupported audio format");
+        return SDL_SetError("%s: Unsupported audio format", "sndio");
     }
 
     if ((par.bps == 4) && (par.sig) && (par.le)) {
-        device->spec.format = SDL_AUDIO_S32LE;
+        this->spec.format = AUDIO_S32LSB;
     } else if ((par.bps == 4) && (par.sig) && (!par.le)) {
-        device->spec.format = SDL_AUDIO_S32BE;
+        this->spec.format = AUDIO_S32MSB;
     } else if ((par.bps == 2) && (par.sig) && (par.le)) {
-        device->spec.format = SDL_AUDIO_S16LE;
+        this->spec.format = AUDIO_S16LSB;
     } else if ((par.bps == 2) && (par.sig) && (!par.le)) {
-        device->spec.format = SDL_AUDIO_S16BE;
+        this->spec.format = AUDIO_S16MSB;
+    } else if ((par.bps == 2) && (!par.sig) && (par.le)) {
+        this->spec.format = AUDIO_U16LSB;
+    } else if ((par.bps == 2) && (!par.sig) && (!par.le)) {
+        this->spec.format = AUDIO_U16MSB;
     } else if ((par.bps == 1) && (par.sig)) {
-        device->spec.format = SDL_AUDIO_S8;
+        this->spec.format = AUDIO_S8;
     } else if ((par.bps == 1) && (!par.sig)) {
-        device->spec.format = SDL_AUDIO_U8;
+        this->spec.format = AUDIO_U8;
     } else {
         return SDL_SetError("sndio: Got unsupported hardware audio format.");
     }
 
-    device->spec.freq = par.rate;
-    device->spec.channels = par.pchan;
-    device->sample_frames = par.round;
+    this->spec.freq = par.rate;
+    this->spec.channels = par.pchan;
+    this->spec.samples = par.round;
 
-    // Calculate the final parameters for this audio specification
-    SDL_UpdatedAudioDeviceFormat(device);
+    /* Calculate the final parameters for this audio specification */
+    SDL_CalculateAudioSpec(&this->spec);
 
-    // Allocate mixing buffer
-    device->hidden->mixbuf = (Uint8 *)SDL_malloc(device->buffer_size);
-    if (!device->hidden->mixbuf) {
-        return -1;
+    /* Allocate mixing buffer */
+    this->hidden->mixlen = this->spec.size;
+    this->hidden->mixbuf = (Uint8 *)SDL_malloc(this->hidden->mixlen);
+    if (!this->hidden->mixbuf) {
+        return SDL_OutOfMemory();
     }
-    SDL_memset(device->hidden->mixbuf, device->silence_value, device->buffer_size);
+    SDL_memset(this->hidden->mixbuf, this->spec.silence, this->hidden->mixlen);
 
-    if (!SNDIO_sio_start(device->hidden->dev)) {
+    if (!SNDIO_sio_start(this->hidden->dev)) {
         return SDL_SetError("sio_start() failed");
     }
 
-    return 0;  // We're ready to rock and roll. :-)
+    /* We're ready to rock and roll. :-) */
+    return 0;
 }
 
 static void SNDIO_Deinitialize(void)
@@ -321,10 +333,10 @@ static void SNDIO_Deinitialize(void)
     UnloadSNDIOLibrary();
 }
 
-static void SNDIO_DetectDevices(SDL_AudioDevice **default_playback, SDL_AudioDevice **default_recording)
+static void SNDIO_DetectDevices(void)
 {
-    *default_playback = SDL_AddAudioDevice(SDL_FALSE, DEFAULT_PLAYBACK_DEVNAME, NULL, (void *)0x1);
-    *default_recording = SDL_AddAudioDevice(SDL_TRUE, DEFAULT_RECORDING_DEVNAME, NULL, (void *)0x2);
+    SDL_AddAudioDevice(SDL_FALSE, DEFAULT_OUTPUT_DEVNAME, NULL, (void *)0x1);
+    SDL_AddAudioDevice(SDL_TRUE, DEFAULT_INPUT_DEVNAME, NULL, (void *)0x2);
 }
 
 static SDL_bool SNDIO_Init(SDL_AudioDriverImpl *impl)
@@ -333,24 +345,27 @@ static SDL_bool SNDIO_Init(SDL_AudioDriverImpl *impl)
         return SDL_FALSE;
     }
 
+    /* Set the function pointers */
     impl->OpenDevice = SNDIO_OpenDevice;
     impl->WaitDevice = SNDIO_WaitDevice;
     impl->PlayDevice = SNDIO_PlayDevice;
     impl->GetDeviceBuf = SNDIO_GetDeviceBuf;
     impl->CloseDevice = SNDIO_CloseDevice;
-    impl->WaitRecordingDevice = SNDIO_WaitDevice;
-    impl->RecordDevice = SNDIO_RecordDevice;
-    impl->FlushRecording = SNDIO_FlushRecording;
+    impl->CaptureFromDevice = SNDIO_CaptureFromDevice;
+    impl->FlushCapture = SNDIO_FlushCapture;
     impl->Deinitialize = SNDIO_Deinitialize;
     impl->DetectDevices = SNDIO_DetectDevices;
 
-    impl->HasRecordingSupport = SDL_TRUE;
+    impl->AllowsArbitraryDeviceNames = SDL_TRUE;
+    impl->HasCaptureSupport = SDL_TRUE;
 
-    return SDL_TRUE;
+    return SDL_TRUE; /* this audio target is available. */
 }
 
 AudioBootStrap SNDIO_bootstrap = {
     "sndio", "OpenBSD sndio", SNDIO_Init, SDL_FALSE
 };
 
-#endif // SDL_AUDIO_DRIVER_SNDIO
+#endif /* SDL_AUDIO_DRIVER_SNDIO */
+
+/* vi: set ts=4 sw=4 expandtab: */

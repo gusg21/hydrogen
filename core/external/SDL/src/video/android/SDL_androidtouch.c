@@ -18,12 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_ANDROID
 
 #include <android/log.h>
 
+#include "SDL_hints.h"
+#include "SDL_events.h"
 #include "SDL_androidtouch.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
@@ -56,32 +58,25 @@ void Android_OnTouch(SDL_Window *window, int touch_device_id_in, int pointer_fin
         return;
     }
 
-    /* Touch device -1 appears when using Android emulator, eg:
-     *  adb shell input mouse tap 100 100
-     *  adb shell input touchscreen tap 100 100
-     */
-    touchDeviceId = (SDL_TouchID)(touch_device_id_in + 2);
-
-    /* Finger ID should be greater than 0 */
-    fingerId = (SDL_FingerID)(pointer_finger_id_in + 1);
-
+    touchDeviceId = (SDL_TouchID)touch_device_id_in;
     if (SDL_AddTouch(touchDeviceId, SDL_TOUCH_DEVICE_DIRECT, "") < 0) {
         SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
     }
 
+    fingerId = (SDL_FingerID)pointer_finger_id_in;
     switch (action) {
     case ACTION_DOWN:
     case ACTION_POINTER_DOWN:
-        SDL_SendTouch(0, touchDeviceId, fingerId, window, SDL_TRUE, x, y, p);
+        SDL_SendTouch(touchDeviceId, fingerId, window, SDL_TRUE, x, y, p);
         break;
 
     case ACTION_MOVE:
-        SDL_SendTouchMotion(0, touchDeviceId, fingerId, window, x, y, p);
+        SDL_SendTouchMotion(touchDeviceId, fingerId, window, x, y, p);
         break;
 
     case ACTION_UP:
     case ACTION_POINTER_UP:
-        SDL_SendTouch(0, touchDeviceId, fingerId, window, SDL_FALSE, x, y, p);
+        SDL_SendTouch(touchDeviceId, fingerId, window, SDL_FALSE, x, y, p);
         break;
 
     default:
@@ -90,3 +85,5 @@ void Android_OnTouch(SDL_Window *window, int touch_device_id_in, int pointer_fin
 }
 
 #endif /* SDL_VIDEO_DRIVER_ANDROID */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -24,25 +24,26 @@
  * Based on Jacob Lifshay's SDL_x11vulkan.c.
  */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if defined(SDL_VIDEO_VULKAN) && defined(SDL_VIDEO_DRIVER_KMSDRM)
 
-#include "../SDL_vulkan_internal.h"
-
 #include "SDL_kmsdrmvideo.h"
 #include "SDL_kmsdrmdyn.h"
+#include "SDL_assert.h"
+
+#include "SDL_loadso.h"
 #include "SDL_kmsdrmvulkan.h"
+#include "SDL_syswm.h"
+#include "sys/ioctl.h"
 
-#include <sys/ioctl.h>
-
-#ifdef SDL_PLATFORM_OPENBSD
+#if defined(__OpenBSD__)
 #define DEFAULT_VULKAN "libvulkan.so"
 #else
 #define DEFAULT_VULKAN "libvulkan.so.1"
 #endif
 
-int KMSDRM_Vulkan_LoadLibrary(SDL_VideoDevice *_this, const char *path)
+int KMSDRM_Vulkan_LoadLibrary(_THIS, const char *path)
 {
     VkExtensionProperties *extensions = NULL;
     Uint32 i, extensionCount = 0;
@@ -56,7 +57,7 @@ int KMSDRM_Vulkan_LoadLibrary(SDL_VideoDevice *_this, const char *path)
 
     /* Load the Vulkan library */
     if (!path) {
-        path = SDL_GetHint(SDL_HINT_VULKAN_LIBRARY);
+        path = SDL_getenv("SDL_VULKAN_LIBRARY");
     }
     if (!path) {
         path = DEFAULT_VULKAN;
@@ -122,7 +123,7 @@ fail:
     return -1;
 }
 
-void KMSDRM_Vulkan_UnloadLibrary(SDL_VideoDevice *_this)
+void KMSDRM_Vulkan_UnloadLibrary(_THIS)
 {
     if (_this->vulkan_config.loader_handle) {
         SDL_UnloadObject(_this->vulkan_config.loader_handle);
@@ -140,14 +141,32 @@ void KMSDRM_Vulkan_UnloadLibrary(SDL_VideoDevice *_this)
 /* members of the VkInstanceCreateInfo struct passed to              */
 /* vkCreateInstance().                                               */
 /*********************************************************************/
-char const* const* KMSDRM_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
-                                             Uint32 *count)
+SDL_bool KMSDRM_Vulkan_GetInstanceExtensions(_THIS,
+                                             SDL_Window *window,
+                                             unsigned *count,
+                                             const char **names)
 {
     static const char *const extensionsForKMSDRM[] = {
         VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_DISPLAY_EXTENSION_NAME
     };
-    if(count) { *count = SDL_arraysize(extensionsForKMSDRM); }
-    return extensionsForKMSDRM;
+    if (!_this->vulkan_config.loader_handle) {
+        SDL_SetError("Vulkan is not loaded");
+        return SDL_FALSE;
+    }
+    return SDL_Vulkan_GetInstanceExtensions_Helper(
+        count, names, SDL_arraysize(extensionsForKMSDRM),
+        extensionsForKMSDRM);
+}
+
+void KMSDRM_Vulkan_GetDrawableSize(_THIS, SDL_Window *window, int *w, int *h)
+{
+    if (w) {
+        *w = window->w;
+    }
+
+    if (h) {
+        *h = window->h;
+    }
 }
 
 /***********************************************************************/
@@ -158,11 +177,10 @@ char const* const* KMSDRM_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
 /* KMSDRM_Vulkan_GetInstanceExtensions(), like we do with              */
 /* VK_KHR_DISPLAY_EXTENSION_NAME, which is what we need for x-less VK. */
 /***********************************************************************/
-int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
-                                SDL_Window *window,
-                                VkInstance instance,
-                                const struct VkAllocationCallbacks *allocator,
-                                VkSurfaceKHR *surface)
+SDL_bool KMSDRM_Vulkan_CreateSurface(_THIS,
+                                     SDL_Window *window,
+                                     VkInstance instance,
+                                     VkSurfaceKHR *surface)
 {
     VkPhysicalDevice gpu = NULL;
     uint32_t gpu_count;
@@ -190,13 +208,13 @@ int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
     VkDisplayPlaneAlphaFlagBitsKHR alpha_mode = VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR;
 
     VkResult result;
-    SDL_bool ret = -1;
+    SDL_bool ret = SDL_FALSE;
     SDL_bool valid_gpu = SDL_FALSE;
     SDL_bool mode_found = SDL_FALSE;
     SDL_bool plane_supports_display = SDL_FALSE;
 
     /* Get the display index from the display being used by the window. */
-    int display_index = SDL_GetDisplayIndex(SDL_GetDisplayForWindow(window));
+    int display_index = SDL_atoi(SDL_GetDisplayForWindow(window)->name);
     int i, j;
 
     /* Get the function pointers for the functions we will use. */
@@ -366,7 +384,7 @@ int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
         new_mode_parameters.visibleRegion.height = window->h;
         /* SDL (and DRM, if we look at drmModeModeInfo vrefresh) uses plain integer Hz for
            display mode refresh rate, but Vulkan expects higher precision. */
-        new_mode_parameters.refreshRate = (uint32_t)(window->current_fullscreen_mode.refresh_rate * 1000);
+        new_mode_parameters.refreshRate = window->fullscreen_mode.refresh_rate * 1000;
 
         SDL_zero(display_mode_create_info);
         display_mode_create_info.sType = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR;
@@ -475,7 +493,7 @@ int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
     display_plane_surface_create_info.alphaMode = alpha_mode;
     result = vkCreateDisplayPlaneSurfaceKHR(instance,
                                             &display_plane_surface_create_info,
-                                            allocator,
+                                            NULL,
                                             surface);
     if (result != VK_SUCCESS) {
         SDL_SetError("vkCreateDisplayPlaneSurfaceKHR failed: %s",
@@ -483,7 +501,7 @@ int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
         goto clean;
     }
 
-    ret = 0;  // success!
+    ret = SDL_TRUE;
 
 clean:
     if (physical_devices) {
@@ -505,14 +523,6 @@ clean:
     return ret;
 }
 
-void KMSDRM_Vulkan_DestroySurface(SDL_VideoDevice *_this,
-                                  VkInstance instance,
-                                  VkSurfaceKHR surface,
-                                  const struct VkAllocationCallbacks *allocator)
-{
-    if (_this->vulkan_config.loader_handle) {
-        SDL_Vulkan_DestroySurface_Internal(_this->vulkan_config.vkGetInstanceProcAddr, instance, surface, allocator);
-    }
-}
-
 #endif
+
+/* vim: set ts=4 sw=4 expandtab: */

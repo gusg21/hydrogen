@@ -18,17 +18,21 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
-#if defined(SDL_PLATFORM_WIN32) || defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_GDK)
+#if defined(__WIN32__) || defined(__WINRT__) || defined(__GDK__)
 #include "../core/windows/SDL_windows.h"
 #endif
 
-#if !defined(HAVE_GCC_ATOMICS) && defined(SDL_PLATFORM_SOLARIS)
+#include "SDL_atomic.h"
+#include "SDL_mutex.h"
+#include "SDL_timer.h"
+
+#if !defined(HAVE_GCC_ATOMICS) && defined(__SOLARIS__)
 #include <atomic.h>
 #endif
 
-#if !defined(HAVE_GCC_ATOMICS) && defined(SDL_PLATFORM_RISCOS)
+#if !defined(HAVE_GCC_ATOMICS) && defined(__RISCOS__)
 #include <unixlib/local.h>
 #endif
 
@@ -36,11 +40,11 @@
 #include <xmmintrin.h>
 #endif
 
-#ifdef PS2
+#if defined(PS2)
 #include <kernel.h>
 #endif
 
-#if !defined(HAVE_GCC_ATOMICS) && defined(SDL_PLATFORM_MACOS)
+#if !defined(HAVE_GCC_ATOMICS) && defined(__MACOSX__)
 #include <libkern/OSAtomic.h>
 #endif
 
@@ -57,9 +61,27 @@ extern __inline int _SDL_xchg_watcom(volatile int *a, int v);
 /* *INDENT-ON* */ /* clang-format on */
 
 /* This function is where all the magic happens... */
-SDL_bool SDL_TryLockSpinlock(SDL_SpinLock *lock)
+SDL_bool SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
-#if defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+#ifdef SDL_ATOMIC_DISABLED
+    /* Terrible terrible damage */
+    static SDL_mutex *_spinlock_mutex;
+
+    if (!_spinlock_mutex) {
+        /* Race condition on first lock... */
+        _spinlock_mutex = SDL_CreateMutex();
+    }
+    SDL_LockMutex(_spinlock_mutex);
+    if (*lock == 0) {
+        *lock = 1;
+        SDL_UnlockMutex(_spinlock_mutex);
+        return SDL_TRUE;
+    } else {
+        SDL_UnlockMutex(_spinlock_mutex);
+        return SDL_FALSE;
+    }
+
+#elif defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
     return __sync_lock_test_and_set(lock, 1) == 0;
 
 #elif defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
@@ -79,7 +101,7 @@ SDL_bool SDL_TryLockSpinlock(SDL_SpinLock *lock)
      defined(__ARM_ARCH_5TEJ__))
     int result;
 
-#ifdef SDL_PLATFORM_RISCOS
+#if defined(__RISCOS__)
     if (__cpucap_have_rex()) {
         __asm__ __volatile__(
             "ldrex %0, [%2]\nteq   %0, #0\nstrexeq %0, %1, [%2]"
@@ -115,17 +137,17 @@ SDL_bool SDL_TryLockSpinlock(SDL_SpinLock *lock)
         : "cc", "memory");
     return result == 0;
 
-#elif defined(SDL_PLATFORM_MACOS) || defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_TVOS)
+#elif defined(__MACOSX__) || defined(__IPHONEOS__)
     /* Maybe used for PowerPC, but the Intel asm or gcc atomics are favored. */
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
-#elif defined(SDL_PLATFORM_SOLARIS) && defined(_LP64)
+#elif defined(__SOLARIS__) && defined(_LP64)
     /* Used for Solaris with non-gcc compilers. */
-    return ((int)atomic_cas_64((volatile uint64_t *)lock, 0, 1) == 0);
+    return (SDL_bool)((int)atomic_cas_64((volatile uint64_t *)lock, 0, 1) == 0);
 
-#elif defined(SDL_PLATFORM_SOLARIS) && !defined(_LP64)
+#elif defined(__SOLARIS__) && !defined(_LP64)
     /* Used for Solaris with non-gcc compilers. */
-    return ((int)atomic_cas_32((volatile uint32_t *)lock, 0, 1) == 0);
+    return (SDL_bool)((int)atomic_cas_32((volatile uint32_t *)lock, 0, 1) == 0);
 #elif defined(PS2)
     uint32_t oldintr;
     SDL_bool res = SDL_FALSE;
@@ -142,30 +164,16 @@ SDL_bool SDL_TryLockSpinlock(SDL_SpinLock *lock)
     }
     return res;
 #else
-    /* Terrible terrible damage */
-    static SDL_Mutex *_spinlock_mutex;
-
-    if (!_spinlock_mutex) {
-        /* Race condition on first lock... */
-        _spinlock_mutex = SDL_CreateMutex();
-    }
-    SDL_LockMutex(_spinlock_mutex);
-    if (*lock == 0) {
-        *lock = 1;
-        SDL_UnlockMutex(_spinlock_mutex);
-        return SDL_TRUE;
-    } else {
-        SDL_UnlockMutex(_spinlock_mutex);
-        return SDL_FALSE;
-    }
+#error Please implement for your platform.
+    return SDL_FALSE;
 #endif
 }
 
-void SDL_LockSpinlock(SDL_SpinLock *lock)
+void SDL_AtomicLock(SDL_SpinLock *lock)
 {
     int iterations = 0;
     /* FIXME: Should we have an eventual timeout? */
-    while (!SDL_TryLockSpinlock(lock)) {
+    while (!SDL_AtomicTryLock(lock)) {
         if (iterations < 32) {
             iterations++;
             SDL_CPUPauseInstruction();
@@ -176,7 +184,7 @@ void SDL_LockSpinlock(SDL_SpinLock *lock)
     }
 }
 
-void SDL_UnlockSpinlock(SDL_SpinLock *lock)
+void SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
 #if defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
     __sync_lock_release(lock);
@@ -192,7 +200,7 @@ void SDL_UnlockSpinlock(SDL_SpinLock *lock)
     SDL_CompilerBarrier();
     *lock = 0;
 
-#elif defined(SDL_PLATFORM_SOLARIS)
+#elif defined(__SOLARIS__)
     /* Used for Solaris when not using gcc. */
     *lock = 0;
     membar_producer();
@@ -201,3 +209,5 @@ void SDL_UnlockSpinlock(SDL_SpinLock *lock)
     *lock = 0;
 #endif
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

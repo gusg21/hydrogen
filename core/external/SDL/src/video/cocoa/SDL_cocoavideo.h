@@ -18,17 +18,18 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_cocoavideo_h_
 #define SDL_cocoavideo_h_
 
-#include <SDL3/SDL_opengl.h>
+#include "SDL_opengl.h"
 
 #include <ApplicationServices/ApplicationServices.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #include <Cocoa/Cocoa.h>
 
+#include "SDL_keycode.h"
 #include "../SDL_sysvideo.h"
 
 #include "SDL_cocoaclipboard.h"
@@ -38,7 +39,6 @@
 #include "SDL_cocoamouse.h"
 #include "SDL_cocoaopengl.h"
 #include "SDL_cocoawindow.h"
-#include "SDL_cocoapen.h"
 
 #ifndef MAC_OS_X_VERSION_10_12
 #define DECLARE_EVENT(name) static const NSEventType NSEventType##name = NS##name
@@ -95,22 +95,21 @@ DECLARE_ALERT_STYLE(Critical);
 
 /* Private display data */
 
-@class SDL3TranslatorResponder;
+@class SDLTranslatorResponder;
 
-@interface SDL_CocoaVideoData : NSObject
-@property(nonatomic) int allow_spaces;
-@property(nonatomic) int trackpad_is_touch_only;
-@property(nonatomic) unsigned int modifierFlags;
-@property(nonatomic) void *key_layout;
-@property(nonatomic) SDL3TranslatorResponder *fieldEdit;
-@property(nonatomic) NSInteger clipboard_count;
-@property(nonatomic) IOPMAssertionID screensaver_assertion;
-@property(nonatomic) SDL_Mutex *swaplock;
+@interface SDL_VideoData : NSObject
+    @property (nonatomic) int allow_spaces;
+    @property (nonatomic) int trackpad_is_touch_only;
+    @property (nonatomic) unsigned int modifierFlags;
+    @property (nonatomic) void *key_layout;
+    @property (nonatomic) SDLTranslatorResponder *fieldEdit;
+    @property (nonatomic) NSInteger clipboard_count;
+    @property (nonatomic) IOPMAssertionID screensaver_assertion;
+    @property (nonatomic) SDL_mutex *swaplock;
 @end
 
 /* Utility functions */
-extern SDL_SystemTheme Cocoa_GetSystemTheme(void);
-extern NSImage *Cocoa_CreateImage(SDL_Surface *surface);
+extern NSImage * Cocoa_CreateImage(SDL_Surface * surface);
 
 /* Fix build with the 10.11 SDK */
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
@@ -118,3 +117,5 @@ extern NSImage *Cocoa_CreateImage(SDL_Surface *surface);
 #endif
 
 #endif /* SDL_cocoavideo_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

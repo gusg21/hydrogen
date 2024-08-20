@@ -23,7 +23,12 @@
 #define SDL_render_d3d12_xbox_h_
 
 #include "../../SDL_internal.h"
-#include "../../video/directx/SDL_d3d12.h"
+
+#if defined(__XBOXONE__)
+#include <d3d12_x.h>
+#else /* __XBOXSERIES__ */
+#include <d3d12_xs.h>
+#endif
 
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus

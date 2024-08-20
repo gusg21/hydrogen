@@ -18,12 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
+#include "SDL_hints.h"
+#include "SDL_timer.h"
 #include "SDL_joystick_c.h"
 #include "SDL_steam_virtual_gamepad.h"
 
-#ifdef SDL_PLATFORM_WIN32
+#ifdef __WIN32__
 #include "../core/windows/SDL_windows.h"
 #else
 #include <sys/types.h>
@@ -34,7 +36,7 @@
 
 static char *SDL_steam_virtual_gamepad_info_file SDL_GUARDED_BY(SDL_joystick_lock) = NULL;
 static Uint64 SDL_steam_virtual_gamepad_info_file_mtime SDL_GUARDED_BY(SDL_joystick_lock) = 0;
-static Uint64 SDL_steam_virtual_gamepad_info_check_time SDL_GUARDED_BY(SDL_joystick_lock) = 0;
+static Uint32 SDL_steam_virtual_gamepad_info_check_time SDL_GUARDED_BY(SDL_joystick_lock) = 0;
 static SDL_SteamVirtualGamepadInfo **SDL_steam_virtual_gamepad_info SDL_GUARDED_BY(SDL_joystick_lock) = NULL;
 static int SDL_steam_virtual_gamepad_info_count SDL_GUARDED_BY(SDL_joystick_lock) = 0;
 
@@ -43,7 +45,7 @@ static Uint64 GetFileModificationTime(const char *file)
 {
     Uint64 modification_time = 0;
 
-#ifdef SDL_PLATFORM_WIN32
+#ifdef __WIN32__
     WCHAR *wFile = WIN_UTF8ToStringW(file);
     if (wFile) {
         HANDLE hFile = CreateFileW(wFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -144,7 +146,7 @@ SDL_bool SDL_SteamVirtualGamepadEnabled(void)
 SDL_bool SDL_UpdateSteamVirtualGamepadInfo(void)
 {
     const int UPDATE_CHECK_INTERVAL_MS = 3000;
-    Uint64 now;
+    Uint32 now;
     Uint64 mtime;
     char *data, *end, *next, *line, *value;
     size_t size;
@@ -159,7 +161,7 @@ SDL_bool SDL_UpdateSteamVirtualGamepadInfo(void)
 
     now = SDL_GetTicks();
     if (SDL_steam_virtual_gamepad_info_check_time &&
-        now < (SDL_steam_virtual_gamepad_info_check_time + UPDATE_CHECK_INTERVAL_MS)) {
+        !SDL_TICKS_PASSED(now, (SDL_steam_virtual_gamepad_info_check_time + UPDATE_CHECK_INTERVAL_MS))) {
         return SDL_FALSE;
     }
     SDL_steam_virtual_gamepad_info_check_time = now;
@@ -209,7 +211,7 @@ SDL_bool SDL_UpdateSteamVirtualGamepadInfo(void)
                 } else if (SDL_strcmp(line, "PID") == 0) {
                     info.product_id = (Uint16)SDL_strtoul(value, NULL, 0);
                 } else if (SDL_strcmp(line, "type") == 0) {
-                    info.type = SDL_GetGamepadTypeFromString(value);
+                    info.type = SDL_GetGameControllerTypeFromString(value);
                 } else if (SDL_strcmp(line, "handle") == 0) {
                     info.handle = SDL_strtoull(value, NULL, 0);
                 }

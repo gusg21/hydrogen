@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 typedef struct SDL_SteamVirtualGamepadInfo
 {
@@ -26,7 +26,7 @@ typedef struct SDL_SteamVirtualGamepadInfo
     char *name;
     Uint16 vendor_id;
     Uint16 product_id;
-    SDL_GamepadType type;
+    SDL_GameControllerType type;
 } SDL_SteamVirtualGamepadInfo;
 
 void SDL_InitSteamVirtualGamepadInfo(void);

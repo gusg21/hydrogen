@@ -18,10 +18,9 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <SDL3/SDL_test.h>
-#include <SDL3/SDL_test_common.h>
+#include "SDL_test.h"
+#include "SDL_test_common.h"
 #include "../src/core/windows/SDL_windows.h"
-#include <SDL3/SDL_main.h>
 
 extern "C" {
 #include "../test/testutils.h"
@@ -53,15 +52,24 @@ static struct
     int soundpos;    /* Current play position */
 } wave;
 
-static SDL_AudioStream *stream;
+static SDL_AudioDeviceID device;
+
+static void
+close_audio()
+{
+    if (device != 0) {
+        SDL_CloseAudioDevice(device);
+        device = 0;
+    }
+}
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
 quit(int rc)
 {
     SDL_free(sprites);
-    SDL_DestroyAudioStream(stream);
-    SDL_free(wave.sound);
+    close_audio();
+    SDL_FreeWAV(wave.sound);
     SDLTest_CommonQuit(state);
     /* If rc is 0, just let main return normally rather than calling exit.
      * This allows testing of platforms where SDL_main is required and does meaningful cleanup.
@@ -71,13 +79,49 @@ quit(int rc)
     }
 }
 
-static int fillerup(void)
+static void
+open_audio()
 {
-    const int minimum = (wave.soundlen / SDL_AUDIO_FRAMESIZE(wave.spec)) / 2;
-    if (SDL_GetAudioStreamQueued(stream) < minimum) {
-        SDL_PutAudioStreamData(stream, wave.sound, wave.soundlen);
+    /* Initialize fillerup() variables */
+    device = SDL_OpenAudioDevice(NULL, SDL_FALSE, &wave.spec, NULL, 0);
+    if (!device) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open audio: %s\n", SDL_GetError());
+        SDL_FreeWAV(wave.sound);
+        quit(2);
     }
-    return 0;
+
+    /* Let the audio run */
+    SDL_PauseAudioDevice(device, SDL_FALSE);
+}
+
+static void
+reopen_audio()
+{
+    close_audio();
+    open_audio();
+}
+
+void SDLCALL
+fillerup(void *unused, Uint8 *stream, int len)
+{
+    Uint8 *waveptr;
+    int waveleft;
+
+    /* Set up the pointers */
+    waveptr = wave.sound + wave.soundpos;
+    waveleft = wave.soundlen - wave.soundpos;
+
+    /* Go! */
+    while (waveleft <= len) {
+        SDL_memcpy(stream, waveptr, waveleft);
+        stream += waveleft;
+        len -= waveleft;
+        waveptr = wave.sound;
+        waveleft = wave.soundlen;
+        wave.soundpos = 0;
+    }
+    SDL_memcpy(stream, waveptr, len);
+    wave.soundpos += len;
 }
 
 void
@@ -211,11 +255,10 @@ LoadSprite(const char *file)
 void
 DrawSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 {
-    SDL_Rect viewport;
-    SDL_FRect temp;
+    SDL_Rect viewport, temp;
 
     /* Query the sizes */
-    SDL_GetRenderViewport(renderer, &viewport);
+    SDL_RenderGetViewport(renderer, &viewport);
 
     /* Cycle the color and alpha, if desired */
     if (cycle_color) {
@@ -250,51 +293,51 @@ DrawSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 
     /* Test points */
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderPoint(renderer, 0.0f, 0.0f);
-    SDL_RenderPoint(renderer, (float)(viewport.w - 1), 0.0f);
-    SDL_RenderPoint(renderer, 0.0f, (float)(viewport.h - 1));
-    SDL_RenderPoint(renderer, (float)(viewport.w - 1), (float)(viewport.h - 1));
+    SDL_RenderDrawPoint(renderer, 0, 0);
+    SDL_RenderDrawPoint(renderer, viewport.w-1, 0);
+    SDL_RenderDrawPoint(renderer, 0, viewport.h-1);
+    SDL_RenderDrawPoint(renderer, viewport.w-1, viewport.h-1);
 
     /* Test horizontal and vertical lines */
     SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderLine(renderer, 1.0f, 0.0f, (float)(viewport.w - 2), 0.0f);
-    SDL_RenderLine(renderer, 1.0f, (float)(viewport.h - 1), (float)(viewport.w - 2), (float)(viewport.h - 1));
-    SDL_RenderLine(renderer, 0.0f, 1.0f, 0.0f, (float)(viewport.h - 2));
-    SDL_RenderLine(renderer, (float)(viewport.w - 1), 1, (float)(viewport.w - 1), (float)(viewport.h - 2));
+    SDL_RenderDrawLine(renderer, 1, 0, viewport.w-2, 0);
+    SDL_RenderDrawLine(renderer, 1, viewport.h-1, viewport.w-2, viewport.h-1);
+    SDL_RenderDrawLine(renderer, 0, 1, 0, viewport.h-2);
+    SDL_RenderDrawLine(renderer, viewport.w-1, 1, viewport.w-1, viewport.h-2);
 
     /* Test fill and copy */
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    temp.x = 1.0f;
-    temp.y = 1.0f;
-    temp.w = (float)sprite_w;
-    temp.h = (float)sprite_h;
+    temp.x = 1;
+    temp.y = 1;
+    temp.w = sprite_w;
+    temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
-    SDL_RenderTexture(renderer, sprite, NULL, &temp);
-    temp.x = (float)(viewport.w-sprite_w-1);
-    temp.y = 1.0f;
-    temp.w = (float)sprite_w;
-    temp.h = (float)sprite_h;
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
+    temp.x = viewport.w-sprite_w-1;
+    temp.y = 1;
+    temp.w = sprite_w;
+    temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
-    SDL_RenderTexture(renderer, sprite, NULL, &temp);
-    temp.x = 1.0f;
-    temp.y = (float)(viewport.h-sprite_h-1);
-    temp.w = (float)sprite_w;
-    temp.h = (float)sprite_h;
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
+    temp.x = 1;
+    temp.y = viewport.h-sprite_h-1;
+    temp.w = sprite_w;
+    temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
-    SDL_RenderTexture(renderer, sprite, NULL, &temp);
-    temp.x = (float)(viewport.w-sprite_w-1);
-    temp.y = (float)(viewport.h-sprite_h-1);
-    temp.w = (float)(sprite_w);
-    temp.h = (float)(sprite_h);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
+    temp.x = viewport.w-sprite_w-1;
+    temp.y = viewport.h-sprite_h-1;
+    temp.w = sprite_w;
+    temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
-    SDL_RenderTexture(renderer, sprite, NULL, &temp);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
 
     /* Test diagonal lines */
     SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderLine(renderer, (float)sprite_w, (float)sprite_h,
-                   (float)(viewport.w-sprite_w-2), (float)(viewport.h-sprite_h-2));
-    SDL_RenderLine(renderer, (float)(viewport.w-sprite_w-2), (float)sprite_h,
-                   (float)sprite_w, (float)(viewport.h-sprite_h-2));
+    SDL_RenderDrawLine(renderer, sprite_w, sprite_h,
+                       viewport.w-sprite_w-2, viewport.h-sprite_h-2);
+    SDL_RenderDrawLine(renderer, viewport.w-sprite_w-2, sprite_h,
+                       sprite_w, viewport.h-sprite_h-2);
 
     /* Update the screen! */
     SDL_RenderPresent(renderer);
@@ -308,12 +351,12 @@ loop()
 
     /* Check for events */
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat) {
-            SDL_Log("Initial SDL_EVENT_KEY_DOWN: %s", SDL_GetScancodeName(event.key.scancode));
+        if (event.type == SDL_KEYDOWN && !event.key.repeat) {
+            SDL_Log("Initial SDL_KEYDOWN: %s", SDL_GetScancodeName(event.key.keysym.scancode));
         }
-#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
         /* On Xbox, ignore the keydown event because the features aren't supported */
-        if (event.type != SDL_EVENT_KEY_DOWN) {
+        if (event.type != SDL_KEYDOWN) {
             SDLTest_CommonEvent(state, &event, &done);
         }
 #else
@@ -326,7 +369,6 @@ loop()
         }
         DrawSprites(state->renderers[i], sprites[i]);
     }
-    fillerup();
 }
 
 int
@@ -425,10 +467,12 @@ main(int argc, char *argv[])
     }
 
     /* Load the wave file into memory */
-    if (SDL_LoadWAV(soundname, &wave.spec, &wave.sound, &wave.soundlen) == -1) {
+    if (SDL_LoadWAV(soundname, &wave.spec, &wave.sound, &wave.soundlen) == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't load %s: %s\n", soundname, SDL_GetError());
         quit(1);
     }
+
+    wave.spec.callback = fillerup;
 
     /* Show the list of available drivers */
     SDL_Log("Available audio drivers:");
@@ -438,12 +482,7 @@ main(int argc, char *argv[])
 
     SDL_Log("Using audio driver: %s\n", SDL_GetCurrentAudioDriver());
 
-    stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &wave.spec, NULL, NULL);
-    if (!stream) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create audio stream: %s\n", SDL_GetError());
-        return -1;
-    }
-    SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(stream));
+    open_audio();
 
     /* Main render loop */
     done = 0;
@@ -460,3 +499,5 @@ main(int argc, char *argv[])
     SDL_free(soundname);
     return 0;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #include "SDL_xinput.h"
 
@@ -37,7 +37,7 @@ DWORD SDL_XInputVersion = 0;
 static HMODULE s_pXInputDLL = NULL;
 static int s_XInputDLLRefCount = 0;
 
-#if defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#if defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)
 
 int WIN_LoadXInputDLL(void)
 {
@@ -68,7 +68,7 @@ void WIN_UnloadXInputDLL(void)
 {
 }
 
-#else /* !(defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)) */
+#else /* !(defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)) */
 
 int WIN_LoadXInputDLL(void)
 {
@@ -136,9 +136,11 @@ void WIN_UnloadXInputDLL(void)
     }
 }
 
-#endif /* SDL_PLATFORM_WINRT */
+#endif /* __WINRT__ */
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -18,10 +18,12 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 
+#include "SDL_hints.h"
+#include "SDL_misc.h"
 #include "SDL_x11video.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -70,9 +72,9 @@ static SDL_bool X11_ScancodeIsRemappable(SDL_Scancode scancode)
 }
 
 /* This function only correctly maps letters and numbers for keyboards in US QWERTY layout */
-static SDL_Scancode X11_KeyCodeToSDLScancode(SDL_VideoDevice *_this, KeyCode keycode)
+static SDL_Scancode X11_KeyCodeToSDLScancode(_THIS, KeyCode keycode)
 {
-    const KeySym keysym = X11_KeyCodeToSym(_this, keycode, 0, 0);
+    const KeySym keysym = X11_KeyCodeToSym(_this, keycode, 0);
 
     if (keysym == NoSymbol) {
         return SDL_SCANCODE_UNKNOWN;
@@ -81,15 +83,24 @@ static SDL_Scancode X11_KeyCodeToSDLScancode(SDL_VideoDevice *_this, KeyCode key
     return SDL_GetScancodeFromKeySym(keysym, keycode);
 }
 
-KeySym X11_KeyCodeToSym(SDL_VideoDevice *_this, KeyCode keycode, unsigned char group, unsigned int mod_mask)
+static Uint32 X11_KeyCodeToUcs4(_THIS, KeyCode keycode, unsigned char group)
 {
-    SDL_VideoData *data = _this->internal;
+    KeySym keysym = X11_KeyCodeToSym(_this, keycode, group);
+
+    if (keysym == NoSymbol) {
+        return 0;
+    }
+
+    return SDL_KeySymToUcs4(keysym);
+}
+
+KeySym
+X11_KeyCodeToSym(_THIS, KeyCode keycode, unsigned char group)
+{
+    SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
     KeySym keysym;
-    unsigned int mods_ret[16];
 
-    SDL_zero(mods_ret);
-
-#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBLOOKUPKEYSYM
+#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
     if (data->xkb) {
         int num_groups = XkbKeyNumGroups(data->xkb, keycode);
         unsigned char info = XkbKeyGroupInfo(data->xkb, keycode);
@@ -109,23 +120,20 @@ KeySym X11_KeyCodeToSym(SDL_VideoDevice *_this, KeyCode keycode, unsigned char g
                 group %= num_groups;
             }
         }
-
-        if (X11_XkbLookupKeySym(data->display, keycode, XkbBuildCoreState(mod_mask, group), mods_ret, &keysym) == NoSymbol) {
-            keysym = NoSymbol;
-        }
-    } else
-#endif
-    {
-        /* TODO: Handle groups and modifiers on the legacy path. */
+        keysym = X11_XkbKeycodeToKeysym(data->display, keycode, group, 0);
+    } else {
         keysym = X11_XKeycodeToKeysym(data->display, keycode, 0);
     }
+#else
+    keysym = X11_XKeycodeToKeysym(data->display, keycode, 0);
+#endif
 
     return keysym;
 }
 
-int X11_InitKeyboard(SDL_VideoDevice *_this)
+int X11_InitKeyboard(_THIS)
 {
-    SDL_VideoData *data = _this->internal;
+    SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
     int i = 0;
     int j = 0;
     int min_keycode, max_keycode;
@@ -147,7 +155,7 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
     int distance;
     Bool xkb_repeat = 0;
 
-#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBLOOKUPKEYSYM
+#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
     {
         int xkb_major = XkbMajorVersion;
         int xkb_minor = XkbMinorVersion;
@@ -197,7 +205,7 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
         (void)setlocale(LC_ALL, "");
         X11_XSetLocaleModifiers(new_xmods);
 
-        data->im = X11_XOpenIM(data->display, NULL, NULL, NULL);
+        data->im = X11_XOpenIM(data->display, NULL, data->classname, data->classname);
 
         /* Reset the locale + X locale modifiers back to how they were,
            locale first because the X locale modifiers depend on it. */
@@ -251,6 +259,7 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
         }
     }
     if (best_index >= 0 && best_distance <= 2) {
+        SDL_Keycode default_keymap[SDL_NUM_SCANCODES];
         int table_size;
         const SDL_Scancode *table = SDL_GetScancodeTable(scancode_set[best_index], &table_size);
 
@@ -267,6 +276,8 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
            However, there are a number of extended scancodes that have no standard location, so use
            the X11 mapping for all non-character keys.
          */
+        SDL_GetDefaultKeymap(default_keymap);
+
         for (i = min_keycode; i <= max_keycode; ++i) {
             SDL_Scancode scancode = X11_KeyCodeToSDLScancode(_this, i);
 #ifdef DEBUG_KEYBOARD
@@ -280,7 +291,7 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
             if (scancode == data->key_layout[i]) {
                 continue;
             }
-            if ((SDL_GetKeymapKeycode(NULL, scancode, SDL_KMOD_NONE) & SDLK_SCANCODE_MASK) && X11_ScancodeIsRemappable(scancode)) {
+            if (default_keymap[scancode] >= SDLK_SCANCODE_MASK && X11_ScancodeIsRemappable(scancode)) {
                 /* Not a character key and the scancode is safe to remap */
 #ifdef DEBUG_KEYBOARD
                 SDL_Log("Changing scancode, was %d (%s), now %d (%s)\n", data->key_layout[i], SDL_GetScancodeName(data->key_layout[i]), scancode, SDL_GetScancodeName(scancode));
@@ -326,75 +337,73 @@ int X11_InitKeyboard(SDL_VideoDevice *_this)
     return 0;
 }
 
-void X11_UpdateKeymap(SDL_VideoDevice *_this, SDL_bool send_event)
+void X11_UpdateKeymap(_THIS, SDL_bool send_event)
 {
-    struct Keymod_masks
-    {
-        SDL_Keymod sdl_mask;
-        unsigned int xkb_mask;
-    } const keymod_masks[] = {
-        { SDL_KMOD_NONE, 0 },
-        { SDL_KMOD_SHIFT, ShiftMask },
-        { SDL_KMOD_CAPS, LockMask },
-        { SDL_KMOD_SHIFT | SDL_KMOD_CAPS, ShiftMask | LockMask },
-        { SDL_KMOD_MODE, Mod5Mask },
-        { SDL_KMOD_MODE | SDL_KMOD_SHIFT, Mod5Mask | ShiftMask },
-        { SDL_KMOD_MODE | SDL_KMOD_CAPS, Mod5Mask | LockMask },
-        { SDL_KMOD_MODE | SDL_KMOD_SHIFT | SDL_KMOD_CAPS, Mod5Mask | ShiftMask | LockMask }
-    };
-
-    SDL_VideoData *data = _this->internal;
+    SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
     int i;
     SDL_Scancode scancode;
-    SDL_Keymap *keymap;
+    SDL_Keycode keymap[SDL_NUM_SCANCODES];
+    unsigned char group = 0;
 
-    keymap = SDL_CreateKeymap();
+    SDL_GetDefaultKeymap(keymap);
 
-#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBLOOKUPKEYSYM
+#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
     if (data->xkb) {
         XkbStateRec state;
         X11_XkbGetUpdatedMap(data->display, XkbAllClientInfoMask, data->xkb);
 
         if (X11_XkbGetState(data->display, XkbUseCoreKbd, &state) == Success) {
-            data->xkb_group = state.group;
+            group = state.group;
         }
     }
 #endif
 
-    for (int m = 0; m < SDL_arraysize(keymod_masks); ++m) {
-        for (i = 0; i < SDL_arraysize(data->key_layout); i++) {
-            SDL_Keycode keycode;
+    for (i = 0; i < SDL_arraysize(data->key_layout); i++) {
+        Uint32 key;
 
-            /* Make sure this is a valid scancode */
-            scancode = data->key_layout[i];
-            if (scancode == SDL_SCANCODE_UNKNOWN) {
-                continue;
+        /* Make sure this is a valid scancode */
+        scancode = data->key_layout[i];
+        if (scancode == SDL_SCANCODE_UNKNOWN) {
+            continue;
+        }
+
+        /* See if there is a UCS keycode for this scancode */
+        key = X11_KeyCodeToUcs4(_this, (KeyCode)i, group);
+        if (key) {
+            keymap[scancode] = key;
+        } else {
+            SDL_Scancode keyScancode = X11_KeyCodeToSDLScancode(_this, (KeyCode)i);
+
+            switch (keyScancode) {
+            case SDL_SCANCODE_RETURN:
+                keymap[scancode] = SDLK_RETURN;
+                break;
+            case SDL_SCANCODE_ESCAPE:
+                keymap[scancode] = SDLK_ESCAPE;
+                break;
+            case SDL_SCANCODE_BACKSPACE:
+                keymap[scancode] = SDLK_BACKSPACE;
+                break;
+            case SDL_SCANCODE_TAB:
+                keymap[scancode] = SDLK_TAB;
+                break;
+            case SDL_SCANCODE_DELETE:
+                keymap[scancode] = SDLK_DELETE;
+                break;
+            default:
+                keymap[scancode] = SDL_SCANCODE_TO_KEYCODE(keyScancode);
+                break;
             }
-
-            KeySym keysym = X11_KeyCodeToSym(_this, i, data->xkb_group, keymod_masks[m].xkb_mask);
-
-            /* Note: The default SDL scancode table sets this to right alt instead of AltGr/Mode, so handle it separately. */
-            if (keysym != XK_ISO_Level3_Shift) {
-                keycode = SDL_KeySymToUcs4(keysym);
-            } else {
-                keycode = SDLK_MODE;
-            }
-
-            if (!keycode) {
-                SDL_Scancode keyScancode = SDL_GetScancodeFromKeySym(keysym, (KeyCode)i);
-                keycode = SDL_GetKeymapKeycode(NULL, keyScancode, keymod_masks[m].sdl_mask);
-            }
-            SDL_SetKeymapEntry(keymap, scancode, keymod_masks[m].sdl_mask, keycode);
         }
     }
-    SDL_SetKeymap(keymap, send_event);
+    SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES, send_event);
 }
 
-void X11_QuitKeyboard(SDL_VideoDevice *_this)
+void X11_QuitKeyboard(_THIS)
 {
-    SDL_VideoData *data = _this->internal;
+    SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
 
-#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBLOOKUPKEYSYM
+#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
     if (data->xkb) {
         X11_XkbFreeKeyboard(data->xkb, 0, True);
         data->xkb = NULL;
@@ -406,94 +415,78 @@ void X11_QuitKeyboard(SDL_VideoDevice *_this)
 #endif
 }
 
-static void X11_ResetXIM(SDL_VideoDevice *_this, SDL_Window *window)
+static void X11_ResetXIM(_THIS)
 {
 #ifdef X_HAVE_UTF8_STRING
-    SDL_WindowData *data = window->internal;
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+    int i;
 
-    if (data && data->ic) {
-        /* Clear any partially entered dead keys */
-        char *contents = X11_Xutf8ResetIC(data->ic);
-        if (contents) {
-            X11_XFree(contents);
+    if (videodata && videodata->windowlist) {
+        for (i = 0; i < videodata->numwindows; ++i) {
+            SDL_WindowData *data = videodata->windowlist[i];
+            if (data && data->ic) {
+                /* Clear any partially entered dead keys */
+                char *contents = X11_Xutf8ResetIC(data->ic);
+                if (contents) {
+                    X11_XFree(contents);
+                }
+            }
         }
     }
 #endif
 }
 
-int X11_StartTextInput(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID props)
+void X11_StartTextInput(_THIS)
 {
-    X11_ResetXIM(_this, window);
-
-    return X11_UpdateTextInputArea(_this, window);
+    X11_ResetXIM(_this);
 }
 
-int X11_StopTextInput(SDL_VideoDevice *_this, SDL_Window *window)
+void X11_StopTextInput(_THIS)
 {
-    X11_ResetXIM(_this, window);
+    X11_ResetXIM(_this);
 #ifdef SDL_USE_IME
     SDL_IME_Reset();
 #endif
-    return 0;
 }
 
-int X11_UpdateTextInputArea(SDL_VideoDevice *_this, SDL_Window *window)
+void X11_SetTextInputRect(_THIS, const SDL_Rect *rect)
 {
+    if (!rect) {
+        SDL_InvalidParamError("rect");
+        return;
+    }
+
 #ifdef SDL_USE_IME
-    SDL_IME_UpdateTextInputArea(window);
+    SDL_IME_UpdateTextRect(rect);
 #endif
-    return 0;
 }
 
-SDL_bool X11_HasScreenKeyboardSupport(SDL_VideoDevice *_this)
+SDL_bool X11_HasScreenKeyboardSupport(_THIS)
 {
-    SDL_VideoData *videodata = _this->internal;
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
     return videodata->is_steam_deck;
 }
 
-void X11_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID props)
+void X11_ShowScreenKeyboard(_THIS, SDL_Window *window)
 {
-    SDL_VideoData *videodata = _this->internal;
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
 
     if (videodata->is_steam_deck) {
         /* For more documentation of the URL parameters, see:
          * https://partner.steamgames.com/doc/api/ISteamUtils#ShowFloatingGamepadTextInput
          */
-        const int k_EFloatingGamepadTextInputModeModeSingleLine = 0;    // Enter dismisses the keyboard
-        const int k_EFloatingGamepadTextInputModeModeMultipleLines = 1; // User needs to explicitly dismiss the keyboard
-        const int k_EFloatingGamepadTextInputModeModeEmail = 2;         // Keyboard is displayed in a special mode that makes it easier to enter emails
-        const int k_EFloatingGamepadTextInputModeModeNumeric = 3;       // Numeric keypad is shown
         char deeplink[128];
-        int mode;
-
-        switch (SDL_GetTextInputType(props)) {
-        case SDL_TEXTINPUT_TYPE_TEXT_EMAIL:
-            mode = k_EFloatingGamepadTextInputModeModeEmail;
-            break;
-        case SDL_TEXTINPUT_TYPE_NUMBER:
-        case SDL_TEXTINPUT_TYPE_NUMBER_PASSWORD_HIDDEN:
-        case SDL_TEXTINPUT_TYPE_NUMBER_PASSWORD_VISIBLE:
-            mode = k_EFloatingGamepadTextInputModeModeNumeric;
-            break;
-        default:
-            if (SDL_GetTextInputMultiline(props)) {
-                mode = k_EFloatingGamepadTextInputModeModeMultipleLines;
-            } else {
-                mode = k_EFloatingGamepadTextInputModeModeSingleLine;
-            }
-            break;
-        }
         (void)SDL_snprintf(deeplink, sizeof(deeplink),
                            "steam://open/keyboard?XPosition=0&YPosition=0&Width=0&Height=0&Mode=%d",
-                           mode);
+                           SDL_GetHintBoolean(SDL_HINT_RETURN_KEY_HIDES_IME, SDL_FALSE) ? 0 : 1);
         SDL_OpenURL(deeplink);
         videodata->steam_keyboard_open = SDL_TRUE;
     }
 }
 
-void X11_HideScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
+void X11_HideScreenKeyboard(_THIS, SDL_Window *window)
 {
-    SDL_VideoData *videodata = _this->internal;
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
 
     if (videodata->is_steam_deck) {
         SDL_OpenURL("steam://close/keyboard");
@@ -501,11 +494,13 @@ void X11_HideScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
     }
 }
 
-SDL_bool X11_IsScreenKeyboardShown(SDL_VideoDevice *_this, SDL_Window *window)
+SDL_bool X11_IsScreenKeyboardShown(_THIS, SDL_Window *window)
 {
-    SDL_VideoData *videodata = _this->internal;
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
 
     return videodata->steam_keyboard_open;
 }
 
 #endif /* SDL_VIDEO_DRIVER_X11 */
+
+/* vi: set ts=4 sw=4 expandtab: */

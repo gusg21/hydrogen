@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if SDL_VIDEO_RENDER_SW
 
@@ -31,7 +31,7 @@ static void SDL_DrawLine1(SDL_Surface *dst, int x1, int y1, int x2, int y2, Uint
 {
     if (y1 == y2) {
         int length;
-        int pitch = (dst->pitch / dst->internal->format->bytes_per_pixel);
+        int pitch = (dst->pitch / dst->format->BytesPerPixel);
         Uint8 *pixel;
         if (x1 <= x2) {
             pixel = (Uint8 *)dst->pixels + y1 * pitch + x1;
@@ -64,8 +64,8 @@ static void SDL_DrawLine2(SDL_Surface *dst, int x1, int y1, int x2, int y2, Uint
         DLINE(Uint16, DRAW_FASTSETPIXEL2, draw_end);
     } else {
         Uint8 _r, _g, _b, _a;
-        const SDL_PixelFormatDetails *fmt = dst->internal->format;
-        SDL_GetRGBA(color, fmt, dst->internal->palette, &_r, &_g, &_b, &_a);
+        const SDL_PixelFormat *fmt = dst->format;
+        SDL_GetRGBA(color, fmt, &_r, &_g, &_b, &_a);
         if (fmt->Rmask == 0x7C00) {
             AALINE(x1, y1, x2, y2,
                    DRAW_FASTSETPIXELXY2, DRAW_SETPIXELXY_BLEND_RGB555,
@@ -93,12 +93,12 @@ static void SDL_DrawLine4(SDL_Surface *dst, int x1, int y1, int x2, int y2, Uint
         DLINE(Uint32, DRAW_FASTSETPIXEL4, draw_end);
     } else {
         Uint8 _r, _g, _b, _a;
-        const SDL_PixelFormatDetails *fmt = dst->internal->format;
-        SDL_GetRGBA(color, fmt, dst->internal->palette, &_r, &_g, &_b, &_a);
+        const SDL_PixelFormat *fmt = dst->format;
+        SDL_GetRGBA(color, fmt, &_r, &_g, &_b, &_a);
         if (fmt->Rmask == 0x00FF0000) {
             if (!fmt->Amask) {
                 AALINE(x1, y1, x2, y2,
-                       DRAW_FASTSETPIXELXY4, DRAW_SETPIXELXY_BLEND_XRGB8888,
+                       DRAW_FASTSETPIXELXY4, DRAW_SETPIXELXY_BLEND_RGB888,
                        draw_end);
             } else {
                 AALINE(x1, y1, x2, y2,
@@ -117,11 +117,11 @@ typedef void (*DrawLineFunc)(SDL_Surface *dst,
                              int x1, int y1, int x2, int y2,
                              Uint32 color, SDL_bool draw_end);
 
-static DrawLineFunc SDL_CalculateDrawLineFunc(const SDL_PixelFormatDetails *fmt)
+static DrawLineFunc SDL_CalculateDrawLineFunc(const SDL_PixelFormat *fmt)
 {
-    switch (fmt->bytes_per_pixel) {
+    switch (fmt->BytesPerPixel) {
     case 1:
-        if (fmt->bits_per_pixel < 8) {
+        if (fmt->BitsPerPixel < 8) {
             break;
         }
         return SDL_DrawLine1;
@@ -137,18 +137,18 @@ int SDL_DrawLine(SDL_Surface *dst, int x1, int y1, int x2, int y2, Uint32 color)
 {
     DrawLineFunc func;
 
-    if (!SDL_SurfaceValid(dst)) {
+    if (!dst) {
         return SDL_InvalidParamError("SDL_DrawLine(): dst");
     }
 
-    func = SDL_CalculateDrawLineFunc(dst->internal->format);
+    func = SDL_CalculateDrawLineFunc(dst->format);
     if (!func) {
         return SDL_SetError("SDL_DrawLine(): Unsupported surface format");
     }
 
     /* Perform clipping */
     /* FIXME: We don't actually want to clip, as it may change line slope */
-    if (!SDL_GetRectAndLineIntersection(&dst->internal->clip_rect, &x1, &y1, &x2, &y2)) {
+    if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
         return 0;
     }
 
@@ -165,11 +165,11 @@ int SDL_DrawLines(SDL_Surface *dst, const SDL_Point *points, int count,
     SDL_bool draw_end;
     DrawLineFunc func;
 
-    if (!SDL_SurfaceValid(dst)) {
+    if (!dst) {
         return SDL_InvalidParamError("SDL_DrawLines(): dst");
     }
 
-    func = SDL_CalculateDrawLineFunc(dst->internal->format);
+    func = SDL_CalculateDrawLineFunc(dst->format);
     if (!func) {
         return SDL_SetError("SDL_DrawLines(): Unsupported surface format");
     }
@@ -182,7 +182,7 @@ int SDL_DrawLines(SDL_Surface *dst, const SDL_Point *points, int count,
 
         /* Perform clipping */
         /* FIXME: We don't actually want to clip, as it may change line slope */
-        if (!SDL_GetRectAndLineIntersection(&dst->internal->clip_rect, &x1, &y1, &x2, &y2)) {
+        if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
             continue;
         }
 
@@ -198,3 +198,5 @@ int SDL_DrawLines(SDL_Surface *dst, const SDL_Point *points, int count,
 }
 
 #endif /* SDL_VIDEO_RENDER_SW */
+
+/* vi: set ts=4 sw=4 expandtab: */

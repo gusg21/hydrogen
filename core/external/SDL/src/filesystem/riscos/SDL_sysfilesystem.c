@@ -18,18 +18,20 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_FILESYSTEM_RISCOS
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
-#include "../SDL_sysfilesystem.h"
-
 #include <kernel.h>
 #include <swis.h>
 #include <unixlib/local.h>
+
+#include "SDL_error.h"
+#include "SDL_stdinc.h"
+#include "SDL_filesystem.h"
 
 /* Wrapper around __unixify_std that uses SDL's memory allocators */
 static char *SDL_unixify_std(const char *ro_path, char *buffer, size_t buf_len, int filetype)
@@ -44,6 +46,7 @@ static char *SDL_unixify_std(const char *ro_path, char *buffer, size_t buf_len, 
         buffer = SDL_malloc(buf_len);
 
         if (!buffer) {
+            SDL_OutOfMemory();
             return NULL;
         }
     }
@@ -90,6 +93,7 @@ static char *canonicalisePath(const char *path, const char *pathVar)
     regs.r[5] = 1 - regs.r[5];
     buf = SDL_malloc(regs.r[5]);
     if (!buf) {
+        SDL_OutOfMemory();
         return NULL;
     }
     regs.r[2] = (int)buf;
@@ -125,7 +129,7 @@ static _kernel_oserror *createDirectoryRecursive(char *path)
     return _kernel_swi(OS_File, &regs, &regs);
 }
 
-char *SDL_SYS_GetBasePath(void)
+char *SDL_GetBasePath(void)
 {
     _kernel_swi_regs regs;
     _kernel_oserror *error;
@@ -152,7 +156,7 @@ char *SDL_SYS_GetBasePath(void)
     return retval;
 }
 
-char *SDL_SYS_GetPrefPath(const char *org, const char *app)
+char *SDL_GetPrefPath(const char *org, const char *app)
 {
     char *canon, *dir, *retval;
     size_t len;
@@ -174,6 +178,7 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
     len = SDL_strlen(canon) + SDL_strlen(org) + SDL_strlen(app) + 4;
     dir = (char *)SDL_malloc(len);
     if (!dir) {
+        SDL_OutOfMemory();
         SDL_free(canon);
         return NULL;
     }
@@ -198,11 +203,6 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
     return retval;
 }
 
-/* TODO */
-char *SDL_SYS_GetUserFolder(SDL_Folder folder)
-{
-    SDL_Unsupported();
-    return NULL;
-}
-
 #endif /* SDL_FILESYSTEM_RISCOS */
+
+/* vi: set ts=4 sw=4 expandtab: */

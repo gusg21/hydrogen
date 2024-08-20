@@ -27,26 +27,22 @@
 
 #include <UIKit/UIKit.h>
 
-@interface SDL_UIKitVideoData : NSObject
+@interface SDL_VideoData : NSObject
 
-@property(nonatomic, assign) id pasteboardObserver;
+@property (nonatomic, assign) id pasteboardObserver;
 
 @end
 
-#ifdef SDL_PLATFORM_VISIONOS
-CGRect UIKit_ComputeViewFrame(SDL_Window *window);
-#else
 CGRect UIKit_ComputeViewFrame(SDL_Window *window, UIScreen *screen);
-#endif
 
 #endif /* __OBJC__ */
 
-int UIKit_SuspendScreenSaver(SDL_VideoDevice *_this);
+void UIKit_SuspendScreenSaver(_THIS);
 
 void UIKit_ForceUpdateHomeIndicator(void);
 
 SDL_bool UIKit_IsSystemVersionAtLeast(double version);
 
-SDL_SystemTheme UIKit_GetSystemTheme(void);
-
 #endif /* SDL_uikitvideo_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

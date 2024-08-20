@@ -19,20 +19,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_dbus_h_
 #define SDL_dbus_h_
 
 #ifdef HAVE_DBUS_DBUS_H
 #define SDL_USE_LIBDBUS 1
+#include "SDL_stdinc.h"
 #include <dbus/dbus.h>
 
 #ifndef DBUS_TIMEOUT_USE_DEFAULT
 #define DBUS_TIMEOUT_USE_DEFAULT -1
-#endif
-#ifndef DBUS_TIMEOUT_INFINITE
-#define DBUS_TIMEOUT_INFINITE ((int) 0x7fffffff)
 #endif
 
 typedef struct SDL_DBusContext
@@ -47,7 +45,6 @@ typedef struct SDL_DBusContext
     void (*connection_set_exit_on_disconnect)(DBusConnection *, dbus_bool_t);
     dbus_bool_t (*connection_get_is_connected)(DBusConnection *);
     dbus_bool_t (*connection_add_filter)(DBusConnection *, DBusHandleMessageFunction, void *, DBusFreeFunction);
-    dbus_bool_t (*connection_remove_filter)(DBusConnection *, DBusHandleMessageFunction, void *);
     dbus_bool_t (*connection_try_register_object_path)(DBusConnection *, const char *,
                                                        const DBusObjectPathVTable *, void *, DBusError *);
     dbus_bool_t (*connection_send)(DBusConnection *, DBusMessage *, dbus_uint32_t *);
@@ -59,7 +56,6 @@ typedef struct SDL_DBusContext
     dbus_bool_t (*connection_read_write)(DBusConnection *, int);
     DBusDispatchStatus (*connection_dispatch)(DBusConnection *);
     dbus_bool_t (*message_is_signal)(DBusMessage *, const char *, const char *);
-    dbus_bool_t (*message_has_path)(DBusMessage *, const char *);
     DBusMessage *(*message_new_method_call)(const char *, const char *, const char *, const char *);
     dbus_bool_t (*message_append_args)(DBusMessage *, int, ...);
     dbus_bool_t (*message_append_args_valist)(DBusMessage *, int, va_list);
@@ -104,7 +100,6 @@ extern SDL_bool SDL_DBus_QueryPropertyOnConnection(DBusConnection *conn, const c
 extern void SDL_DBus_ScreensaverTickle(void);
 extern SDL_bool SDL_DBus_ScreensaverInhibit(SDL_bool inhibit);
 
-extern void SDL_DBus_PumpEvents(void);
 extern char *SDL_DBus_GetLocalMachineId(void);
 
 extern char **SDL_DBus_DocumentsPortalRetrieveFiles(const char *key, int *files_count);
@@ -112,3 +107,5 @@ extern char **SDL_DBus_DocumentsPortalRetrieveFiles(const char *key, int *files_
 #endif /* HAVE_DBUS_DBUS_H */
 
 #endif /* SDL_dbus_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

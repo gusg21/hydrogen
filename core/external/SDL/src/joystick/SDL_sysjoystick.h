@@ -18,12 +18,13 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 #ifndef SDL_sysjoystick_h_
 #define SDL_sysjoystick_h_
 
 /* This is the system specific header for the SDL joystick API */
+#include "SDL_joystick.h"
 #include "SDL_joystick_c.h"
 
 /* Set up for C function definitions, even when using C++ */
@@ -32,8 +33,7 @@ extern "C" {
 #endif
 
 /* The SDL joystick structure */
-
-typedef struct SDL_JoystickAxisInfo
+typedef struct _SDL_JoystickAxisInfo
 {
     Sint16 initial_value;           /* Initial axis state */
     Sint16 value;                   /* Current axis state */
@@ -44,13 +44,7 @@ typedef struct SDL_JoystickAxisInfo
     SDL_bool sending_initial_value; /* Whether we are sending the initial axis value */
 } SDL_JoystickAxisInfo;
 
-typedef struct SDL_JoystickBallData
-{
-    int dx;
-    int dy;
-} SDL_JoystickBallData;
-
-typedef struct SDL_JoystickTouchpadFingerInfo
+typedef struct _SDL_JoystickTouchpadFingerInfo
 {
     Uint8 state;
     float x;
@@ -58,40 +52,47 @@ typedef struct SDL_JoystickTouchpadFingerInfo
     float pressure;
 } SDL_JoystickTouchpadFingerInfo;
 
-typedef struct SDL_JoystickTouchpadInfo
+typedef struct _SDL_JoystickTouchpadInfo
 {
     int nfingers;
     SDL_JoystickTouchpadFingerInfo *fingers;
 } SDL_JoystickTouchpadInfo;
 
-typedef struct SDL_JoystickSensorInfo
+typedef struct _SDL_JoystickSensorInfo
 {
     SDL_SensorType type;
     SDL_bool enabled;
     float rate;
-    float data[3]; /* If this needs to expand, update SDL_GamepadSensorEvent */
+    float data[3]; /* If this needs to expand, update SDL_ControllerSensorEvent */
+    Uint64 timestamp_us;
 } SDL_JoystickSensorInfo;
 
 #define _guarded SDL_GUARDED_BY(SDL_joystick_lock)
 
-struct SDL_Joystick
+struct _SDL_Joystick
 {
+    const void *magic _guarded;
+
     SDL_JoystickID instance_id _guarded; /* Device instance, monotonically increasing from 0 */
     char *name _guarded;                 /* Joystick name - system dependent */
     char *path _guarded;                 /* Joystick path - system dependent */
     char *serial _guarded;               /* Joystick serial */
-    SDL_GUID guid _guarded;      /* Joystick guid */
+    SDL_JoystickGUID guid _guarded;      /* Joystick guid */
     Uint16 firmware_version _guarded;    /* Firmware version, if available */
     Uint64 steam_handle _guarded;        /* Steam controller API handle */
 
     int naxes _guarded; /* Number of axis controls on the joystick */
     SDL_JoystickAxisInfo *axes _guarded;
 
-    int nballs _guarded; /* Number of trackballs on the joystick */
-    SDL_JoystickBallData *balls _guarded; /* Current ball motion deltas */
-
     int nhats _guarded;   /* Number of hats on the joystick */
     Uint8 *hats _guarded; /* Current hat states */
+
+    int nballs _guarded; /* Number of trackballs on the joystick */
+    struct balldelta
+    {
+        int dx;
+        int dy;
+    } *balls _guarded; /* Current ball motion deltas */
 
     int nbuttons _guarded;   /* Number of buttons on the joystick */
     Uint8 *buttons _guarded; /* Current button states */
@@ -105,42 +106,30 @@ struct SDL_Joystick
 
     Uint16 low_frequency_rumble _guarded;
     Uint16 high_frequency_rumble _guarded;
-    Uint64 rumble_expiration _guarded;
-    Uint64 rumble_resend _guarded;
+    Uint32 rumble_expiration _guarded;
+    Uint32 rumble_resend _guarded;
 
     Uint16 left_trigger_rumble _guarded;
     Uint16 right_trigger_rumble _guarded;
-    Uint64 trigger_rumble_expiration _guarded;
+    Uint32 trigger_rumble_expiration _guarded;
 
     Uint8 led_red _guarded;
     Uint8 led_green _guarded;
     Uint8 led_blue _guarded;
-    Uint64 led_expiration _guarded;
+    Uint32 led_expiration _guarded;
 
     SDL_bool attached _guarded;
-    SDL_JoystickConnectionState connection_state _guarded;
-    SDL_PowerState battery_state _guarded;
-    int battery_percent _guarded;
-
+    SDL_bool is_game_controller _guarded;
     SDL_bool delayed_guide_button _guarded;      /* SDL_TRUE if this device has the guide button event delayed */
+    SDL_JoystickPowerLevel epowerlevel _guarded; /* power level of this joystick, SDL_JOYSTICK_POWER_UNKNOWN if not supported */
 
-    SDL_SensorID accel_sensor _guarded;
-    SDL_Sensor *accel _guarded;
-    SDL_SensorID gyro_sensor _guarded;
-    SDL_Sensor *gyro _guarded;
-    float sensor_transform[3][3] _guarded;
-
-    Uint64 update_complete _guarded;
-
-    struct SDL_JoystickDriver *driver _guarded;
+    struct _SDL_JoystickDriver *driver _guarded;
 
     struct joystick_hwdata *hwdata _guarded; /* Driver dependent information */
 
-    SDL_PropertiesID props _guarded;
-
     int ref_count _guarded; /* Reference count for multiple opens */
 
-    struct SDL_Joystick *next _guarded; /* pointer to next joystick we have allocated */
+    struct _SDL_Joystick *next _guarded; /* pointer to next joystick we have allocated */
 };
 
 #undef _guarded
@@ -151,10 +140,15 @@ struct SDL_Joystick
 #define SDL_HARDWARE_BUS_BLUETOOTH 0x05
 #define SDL_HARDWARE_BUS_VIRTUAL   0xFF
 
+/* Joystick capability flags for GetCapabilities() */
+#define SDL_JOYCAP_LED             0x01
+#define SDL_JOYCAP_RUMBLE          0x02
+#define SDL_JOYCAP_RUMBLE_TRIGGERS 0x04
+
 /* Macro to combine a USB vendor ID and product ID into a single Uint32 value */
 #define MAKE_VIDPID(VID, PID) (((Uint32)(VID)) << 16 | (PID))
 
-typedef struct SDL_JoystickDriver
+typedef struct _SDL_JoystickDriver
 {
     /* Function to scan the system for joysticks.
      * Joystick 0 should be the system default joystick.
@@ -167,9 +161,6 @@ typedef struct SDL_JoystickDriver
 
     /* Function to cause any queued joystick insertions to be processed */
     void (*Detect)(void);
-
-    /* Function to determine whether a device is currently detected by this driver */
-    SDL_bool (*IsDevicePresent)(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name);
 
     /* Function to get the device-dependent name of a joystick */
     const char *(*GetDeviceName)(int device_index);
@@ -187,7 +178,7 @@ typedef struct SDL_JoystickDriver
     void (*SetDevicePlayerIndex)(int device_index, int player_index);
 
     /* Function to return the stable GUID for a plugged in device */
-    SDL_GUID (*GetDeviceGUID)(int device_index);
+    SDL_JoystickGUID (*GetDeviceGUID)(int device_index);
 
     /* Function to get the current instance id of the joystick located at device_index */
     SDL_JoystickID (*GetDeviceInstanceID)(int device_index);
@@ -202,6 +193,9 @@ typedef struct SDL_JoystickDriver
     /* Rumble functionality */
     int (*Rumble)(SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble);
     int (*RumbleTriggers)(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble);
+
+    /* Capability detection */
+    Uint32 (*GetCapabilities)(SDL_Joystick *joystick);
 
     /* LED functionality */
     int (*SetLED)(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue);
@@ -254,11 +248,11 @@ extern SDL_JoystickDriver SDL_VIRTUAL_JoystickDriver;
 extern SDL_JoystickDriver SDL_WGI_JoystickDriver;
 extern SDL_JoystickDriver SDL_WINDOWS_JoystickDriver;
 extern SDL_JoystickDriver SDL_WINMM_JoystickDriver;
+extern SDL_JoystickDriver SDL_OS2_JoystickDriver;
 extern SDL_JoystickDriver SDL_PS2_JoystickDriver;
 extern SDL_JoystickDriver SDL_PSP_JoystickDriver;
 extern SDL_JoystickDriver SDL_VITA_JoystickDriver;
 extern SDL_JoystickDriver SDL_N3DS_JoystickDriver;
-extern SDL_JoystickDriver SDL_GAMEINPUT_JoystickDriver;
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -266,3 +260,5 @@ extern SDL_JoystickDriver SDL_GAMEINPUT_JoystickDriver;
 #endif
 
 #endif /* SDL_sysjoystick_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

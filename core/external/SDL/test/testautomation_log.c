@@ -1,9 +1,9 @@
 /**
  * Log test suite
  */
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_test.h>
-#include "testautomation_suites.h"
+#include "SDL.h"
+#include "SDL_test.h"
+
 
 static SDL_LogOutputFunction original_function;
 static void *original_userdata;
@@ -17,13 +17,13 @@ static void SDLCALL TestLogOutput(void *userdata, int category, SDL_LogPriority 
 static void EnableTestLog(int *message_count)
 {
     *message_count = 0;
-    SDL_GetLogOutputFunction(&original_function, &original_userdata);
-    SDL_SetLogOutputFunction(TestLogOutput, message_count);
+    SDL_LogGetOutputFunction(&original_function, &original_userdata);
+    SDL_LogSetOutputFunction(TestLogOutput, message_count);
 }
 
 static void DisableTestLog(void)
 {
-    SDL_SetLogOutputFunction(original_function, original_userdata);
+    SDL_LogSetOutputFunction(original_function, original_userdata);
 }
 
 /* Fixture */

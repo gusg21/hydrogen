@@ -18,11 +18,12 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_WINRT
 
 extern "C" {
+#include "SDL_messagebox.h"
 #include "../../core/windows/SDL_windows.h"
 }
 
@@ -34,15 +35,15 @@ using namespace Windows::Foundation;
 using namespace Windows::UI::Popups;
 
 static String ^ WINRT_UTF8ToPlatformString(const char *str) {
-    wchar_t *wstr = WIN_UTF8ToStringW(str);
+    wchar_t *wstr = WIN_UTF8ToString(str);
     String ^ rtstr = ref new String(wstr);
     SDL_free(wstr);
     return rtstr;
 }
 
-extern "C" int WINRT_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID)
+extern "C" int WINRT_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
-#if SDL_WINAPI_FAMILY_PHONE && NTDDI_VERSION == NTDDI_WIN8
+#if SDL_WINAPI_FAMILY_PHONE && (NTDDI_VERSION == NTDDI_WIN8)
     /* Sadly, Windows Phone 8 doesn't include the MessageDialog class that
      * Windows 8.x/RT does, even though MSDN's reference documentation for
      * Windows Phone 8 mentions it.
@@ -99,13 +100,15 @@ extern "C" int WINRT_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, in
     if (operation->Status != Windows::Foundation::AsyncStatus::Completed) {
         return SDL_SetError("An unknown error occurred in displaying the WinRT MessageDialog");
     }
-    if (buttonID) {
+    if (buttonid) {
         IntPtr results = safe_cast<IntPtr>(operation->GetResults()->Id);
         int clicked_index = results.ToInt32();
-        *buttonID = messageboxdata->buttons[clicked_index].buttonID;
+        *buttonid = messageboxdata->buttons[clicked_index].buttonid;
     }
     return 0;
 #endif /* if SDL_WINAPI_FAMILY_PHONE / else */
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */
+
+/* vi: set ts=4 sw=4 expandtab: */

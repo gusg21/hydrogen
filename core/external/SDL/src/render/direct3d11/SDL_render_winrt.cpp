@@ -18,10 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if SDL_VIDEO_RENDER_D3D11
 
+#include "SDL_syswm.h"
 #include "../../video/winrt/SDL_winrtvideo_cpp.h"
 extern "C" {
 #include "../SDL_sysrender.h"
@@ -44,9 +45,27 @@ using namespace Windows::Graphics::Display;
 extern "C" void *
 D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer *renderer)
 {
-    IInspectable *window = (IInspectable *)SDL_GetPointerProperty(SDL_GetWindowProperties(renderer->window), SDL_PROP_WINDOW_WINRT_WINDOW_POINTER, NULL);
+    SDL_Window *sdlWindow = renderer->window;
+    if (!renderer->window) {
+        return NULL;
+    }
+
+    SDL_SysWMinfo sdlWindowInfo;
+    SDL_VERSION(&sdlWindowInfo.version);
+    if ( ! SDL_GetWindowWMInfo(sdlWindow, &sdlWindowInfo) ) {
+        return NULL;
+    }
+
+    if (sdlWindowInfo.subsystem != SDL_SYSWM_WINRT) {
+        return NULL;
+    }
+
+    if (!sdlWindowInfo.info.winrt.window) {
+        return NULL;
+    }
+
     ABI::Windows::UI::Core::ICoreWindow *coreWindow = NULL;
-    if (!window || FAILED(window->QueryInterface(&coreWindow))) {
+    if (FAILED(sdlWindowInfo.info.winrt.window->QueryInterface(&coreWindow))) {
         return NULL;
     }
 
@@ -91,3 +110,5 @@ D3D11_GetCurrentRotation()
 }
 
 #endif /* SDL_VIDEO_RENDER_D3D11 */
+
+/* vi: set ts=4 sw=4 expandtab: */

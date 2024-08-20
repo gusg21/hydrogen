@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_N3DS
 
@@ -42,10 +42,11 @@ static void ThreadEntry(void *arg)
     threadExit(0);
 }
 
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
+#error "SDL_PASSED_BEGINTHREAD_ENDTHREAD is not supported on N3DS"
+#endif
 
-int SDL_SYS_CreateThread(SDL_Thread *thread,
-                         SDL_FunctionPointer pfnBeginThread,
-                         SDL_FunctionPointer pfnEndThread)
+int SDL_SYS_CreateThread(SDL_Thread *thread)
 {
     s32 priority = 0x30;
     int cpu = -1;
@@ -86,11 +87,11 @@ void SDL_SYS_SetupThread(const char *name)
     return;
 }
 
-SDL_ThreadID SDL_GetCurrentThreadID(void)
+SDL_threadID SDL_ThreadID(void)
 {
     u32 thread_ID = 0;
     svcGetThreadId(&thread_ID, CUR_THREAD_HANDLE);
-    return (SDL_ThreadID)thread_ID;
+    return (SDL_threadID)thread_ID;
 }
 
 int SDL_SYS_SetThreadPriority(SDL_ThreadPriority sdl_priority)
@@ -134,3 +135,5 @@ void SDL_SYS_DetachThread(SDL_Thread *thread)
 }
 
 #endif /* SDL_THREAD_N3DS */
+
+/* vi: set sts=4 ts=4 sw=4 expandtab: */

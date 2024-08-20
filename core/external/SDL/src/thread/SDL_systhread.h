@@ -18,13 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 /* These are functions that need to be implemented by a port of SDL */
 
 #ifndef SDL_systhread_h_
 #define SDL_systhread_h_
 
+#include "SDL_thread.h"
 #include "SDL_thread_c.h"
 
 /* Set up for C function definitions, even when using C++ */
@@ -36,9 +37,13 @@ extern "C" {
    saves a system-dependent thread id in thread->id, and returns 0
    on success.
 */
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 extern int SDL_SYS_CreateThread(SDL_Thread *thread,
-                                SDL_FunctionPointer pfnBeginThread,
-                                SDL_FunctionPointer pfnEndThread);
+                                pfnSDL_CurrentBeginThread pfnBeginThread,
+                                pfnSDL_CurrentEndThread pfnEndThread);
+#else
+extern int SDL_SYS_CreateThread(SDL_Thread *thread);
+#endif
 
 /* This function does any necessary setup in the child thread */
 extern void SDL_SYS_SetupThread(const char *name);
@@ -66,8 +71,10 @@ extern int SDL_SYS_SetTLSData(SDL_TLSData *data);
 /* Quit the global TLS data */
 extern void SDL_SYS_QuitTLSData(void);
 
-/* A helper function for setting up a thread with a stack size. */
-extern SDL_Thread *SDL_CreateThreadWithStackSize(SDL_ThreadFunction fn, const char *name, size_t stacksize, void *data);
+/* This is for internal SDL use, so we don't need #ifdefs everywhere. */
+extern SDL_Thread *
+SDL_CreateThreadInternal(int(SDLCALL *fn)(void *), const char *name,
+                         const size_t stacksize, void *data);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -75,3 +82,5 @@ extern SDL_Thread *SDL_CreateThreadWithStackSize(SDL_ThreadFunction fn, const ch
 #endif
 
 #endif /* SDL_systhread_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

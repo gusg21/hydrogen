@@ -10,4 +10,5 @@ add_custom_target(HydrogenRuntime_Assets
 )
 add_dependencies(HydrogenRuntime HydrogenRuntime_Assets)
 
+HydrogenCore_SetupMain(HydrogenRuntime)
 HydrogenCore_CopyShaders(HydrogenRuntime ${CMAKE_CURRENT_BINARY_DIR})

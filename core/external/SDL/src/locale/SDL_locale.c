@@ -19,51 +19,44 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 #include "SDL_syslocale.h"
+#include "SDL_hints.h"
 
-static SDL_Locale **build_locales_from_csv_string(char *csv, int *count)
+static SDL_Locale *build_locales_from_csv_string(char *csv)
 {
-    int i, num_locales;
+    size_t num_locales = 1; /* at least one */
     size_t slen;
     size_t alloclen;
     char *ptr;
     SDL_Locale *loc;
-    SDL_Locale **retval;
+    SDL_Locale *retval;
 
-    if (count) {
-        *count = 0;
-    }
-
-    while (csv && *csv && SDL_isspace(*csv)) {
-        ++csv;
-    }
-    if (!csv || !*csv) {
+    if (!csv || !csv[0]) {
         return NULL; /* nothing to report */
     }
 
-    num_locales = 1; /* at least one */
     for (ptr = csv; *ptr; ptr++) {
         if (*ptr == ',') {
             num_locales++;
         }
     }
 
-    slen = ((size_t)(ptr - csv)) + 1; /* SDL_strlen(csv) + 1 */
-    alloclen = ((num_locales + 1) * sizeof(SDL_Locale *)) + (num_locales * sizeof(SDL_Locale)) + slen;
+    num_locales++; /* one more for terminator */
 
-    retval = (SDL_Locale **)SDL_calloc(1, alloclen);
+    slen = ((size_t)(ptr - csv)) + 1; /* SDL_strlen(csv) + 1 */
+    alloclen = slen + (num_locales * sizeof(SDL_Locale));
+
+    loc = retval = (SDL_Locale *)SDL_calloc(1, alloclen);
     if (!retval) {
+        SDL_OutOfMemory();
         return NULL; /* oh well */
     }
-    loc = (SDL_Locale *)(retval + (num_locales + 1));
-    ptr = (char *)(loc + num_locales);
-    SDL_memcpy(ptr, csv, slen);
+    ptr = (char *)(retval + num_locales);
+    SDL_strlcpy(ptr, csv, slen);
 
-    i = 0;
-    retval[i++] = loc;
     while (SDL_TRUE) { /* parse out the string */
-        while (SDL_isspace(*ptr)) {
+        while (*ptr == ' ') {
             ptr++; /* skip whitespace. */
         }
 
@@ -73,17 +66,17 @@ static SDL_Locale **build_locales_from_csv_string(char *csv, int *count)
         loc->language = ptr++;
         while (SDL_TRUE) {
             const char ch = *ptr;
-            if (ch == '_' || ch == '-') {
+            if (ch == '_') {
                 *(ptr++) = '\0';
                 loc->country = ptr;
-            } else if (SDL_isspace(ch)) {
+            } else if (ch == ' ') {
                 *(ptr++) = '\0'; /* trim ending whitespace and keep going. */
             } else if (ch == ',') {
                 *(ptr++) = '\0';
                 loc++;
-                retval[i++] = loc;
                 break;
             } else if (ch == '\0') {
+                loc++;
                 break;
             } else {
                 ptr++; /* just keep going, still a valid string */
@@ -91,14 +84,10 @@ static SDL_Locale **build_locales_from_csv_string(char *csv, int *count)
         }
     }
 
-    if (count) {
-        *count = num_locales;
-    }
-
     return retval;
 }
 
-SDL_Locale **SDL_GetPreferredLocales(int *count)
+SDL_Locale *SDL_GetPreferredLocales(void)
 {
     char locbuf[128]; /* enough for 21 "xx_YY," language strings. */
     const char *hint = SDL_GetHint(SDL_HINT_PREFERRED_LOCALES);
@@ -108,5 +97,7 @@ SDL_Locale **SDL_GetPreferredLocales(int *count)
         SDL_zeroa(locbuf);
         SDL_SYS_GetPreferredLocales(locbuf, sizeof(locbuf));
     }
-    return build_locales_from_csv_string(locbuf, count);
+    return build_locales_from_csv_string(locbuf);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

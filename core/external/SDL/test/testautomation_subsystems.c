@@ -1,9 +1,9 @@
 /**
- * Events test suite
+ * Subsystem test suite
  */
-#include "testautomation_suites.h"
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_test.h>
+
+#include "SDL.h"
+#include "SDL_test.h"
 
 /* ================= Test Case Implementation ================== */
 
@@ -15,12 +15,12 @@ static void subsystemsSetUp(void *arg)
     /* CHECKME: can we use SDL_Quit here, or this will break the flow of tests? */
     SDL_Quit();
     /* Alternate variant without SDL_Quit:
-        while (SDL_WasInit(0) != 0) {
-            SDL_QuitSubSystem(~0U);
+        while (SDL_WasInit(SDL_INIT_EVERYTHING) != 0) {
+            SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
         }
     */
     SDLTest_AssertPass("Reset all subsystems before subsystems test");
-    SDLTest_AssertCheck(SDL_WasInit(0) == 0, "Check result from SDL_WasInit(0)");
+    SDLTest_AssertCheck(SDL_WasInit(SDL_INIT_EVERYTHING) == 0, "Check result from SDL_WasInit(SDL_INIT_EVERYTHING)");
 }
 
 static void subsystemsTearDown(void *arg)
@@ -34,13 +34,13 @@ static void subsystemsTearDown(void *arg)
 /* Test case functions */
 
 /**
- * Inits and Quits particular subsystem, checking its Init status.
+ * \brief Inits and Quits particular subsystem, checking its Init status.
  *
  * \sa SDL_InitSubSystem
  * \sa SDL_QuitSubSystem
  *
  */
-static int subsystems_referenceCount(void *arg)
+static int subsystems_referenceCount(void)
 {
     const int system = SDL_INIT_VIDEO;
     int result;
@@ -83,14 +83,14 @@ static int subsystems_referenceCount(void *arg)
 }
 
 /**
- * Inits and Quits subsystems that have another as dependency;
+ * \brief Inits and Quits subsystems that have another as dependency;
  *        check that the dependency is not removed before the last of its dependents.
  *
  * \sa SDL_InitSubSystem
  * \sa SDL_QuitSubSystem
  *
  */
-static int subsystems_dependRefCountInitAllQuitByOne(void *arg)
+static int subsystems_dependRefCountInitAllQuitByOne(void)
 {
     int result;
     /* Ensure that we start with reset subsystems. */
@@ -121,14 +121,14 @@ static int subsystems_dependRefCountInitAllQuitByOne(void *arg)
 }
 
 /**
- * Inits and Quits subsystems that have another as dependency;
+ * \brief Inits and Quits subsystems that have another as dependency;
  *        check that the dependency is not removed before the last of its dependents.
  *
  * \sa SDL_InitSubSystem
  * \sa SDL_QuitSubSystem
  *
  */
-static int subsystems_dependRefCountInitByOneQuitAll(void *arg)
+static int subsystems_dependRefCountInitByOneQuitAll(void)
 {
     int result;
     /* Ensure that we start with reset subsystems. */
@@ -155,7 +155,7 @@ static int subsystems_dependRefCountInitByOneQuitAll(void *arg)
 }
 
 /**
- * Inits and Quits subsystems that have another as dependency,
+ * \brief Inits and Quits subsystems that have another as dependency,
  *        but also inits that dependency explicitly, giving it extra ref count.
  *        Check that the dependency is not removed before the last reference is gone.
  *
@@ -163,7 +163,7 @@ static int subsystems_dependRefCountInitByOneQuitAll(void *arg)
  * \sa SDL_QuitSubSystem
  *
  */
-static int subsystems_dependRefCountWithExtraInit(void *arg)
+static int subsystems_dependRefCountWithExtraInit(void)
 {
     int result;
     /* Ensure that we start with reset subsystems. */
@@ -210,19 +210,19 @@ static int subsystems_dependRefCountWithExtraInit(void *arg)
 
 /* Subsystems test cases */
 static const SDLTest_TestCaseReference subsystemsTest1 = {
-    subsystems_referenceCount, "subsystems_referenceCount", "Makes sure that subsystem stays until number of quits matches inits.", TEST_ENABLED
+    (SDLTest_TestCaseFp)subsystems_referenceCount, "subsystems_referenceCount", "Makes sure that subsystem stays until number of quits matches inits.", TEST_ENABLED
 };
 
 static const SDLTest_TestCaseReference subsystemsTest2 = {
-    subsystems_dependRefCountInitAllQuitByOne, "subsystems_dependRefCountInitAllQuitByOne", "Check reference count of subsystem dependencies.", TEST_ENABLED
+    (SDLTest_TestCaseFp)subsystems_dependRefCountInitAllQuitByOne, "subsystems_dependRefCountInitAllQuitByOne", "Check reference count of subsystem dependencies.", TEST_ENABLED
 };
 
 static const SDLTest_TestCaseReference subsystemsTest3 = {
-    subsystems_dependRefCountInitByOneQuitAll, "subsystems_dependRefCountInitByOneQuitAll", "Check reference count of subsystem dependencies.", TEST_ENABLED
+    (SDLTest_TestCaseFp)subsystems_dependRefCountInitByOneQuitAll, "subsystems_dependRefCountInitByOneQuitAll", "Check reference count of subsystem dependencies.", TEST_ENABLED
 };
 
 static const SDLTest_TestCaseReference subsystemsTest4 = {
-    subsystems_dependRefCountWithExtraInit, "subsystems_dependRefCountWithExtraInit", "Check reference count of subsystem dependencies.", TEST_ENABLED
+    (SDLTest_TestCaseFp)subsystems_dependRefCountWithExtraInit, "subsystems_dependRefCountWithExtraInit", "Check reference count of subsystem dependencies.", TEST_ENABLED
 };
 
 /* Sequence of Events test cases */

@@ -18,19 +18,21 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 /* Thread management routines for SDL */
 
 extern "C" {
+#include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
 }
 
+#include <mutex>
 #include <thread>
 #include <system_error>
 
-#ifdef SDL_PLATFORM_WINRT
+#ifdef __WINRT__
 #include <Windows.h>
 #endif
 
@@ -40,16 +42,15 @@ static void RunThread(void *args)
 }
 
 extern "C" int
-SDL_SYS_CreateThread(SDL_Thread *thread,
-                     SDL_FunctionPointer pfnBeginThread,
-                     SDL_FunctionPointer pfnEndThread)
+SDL_SYS_CreateThread(SDL_Thread *thread)
 {
     try {
         // !!! FIXME: no way to set a thread stack size here.
-        thread->handle = (void *)new std::thread(RunThread, thread);
+        std::thread cpp_thread(RunThread, thread);
+        thread->handle = (void *)new std::thread(std::move(cpp_thread));
         return 0;
     } catch (std::system_error &ex) {
-        return SDL_SetError("unable to start a C++ thread: code=%d; %s", ex.code().value(), ex.what());
+        return SDL_SetError("unable to start a C++ thread: code=%d; %s", ex.code(), ex.what());
     } catch (std::bad_alloc &) {
         return SDL_OutOfMemory();
     }
@@ -58,23 +59,36 @@ SDL_SYS_CreateThread(SDL_Thread *thread,
 extern "C" void
 SDL_SYS_SetupThread(const char *name)
 {
-    /* Do nothing. */
+    // Make sure a thread ID gets assigned ASAP, for debugging purposes:
+    SDL_ThreadID();
+    return;
 }
 
-extern "C" SDL_ThreadID
-SDL_GetCurrentThreadID(void)
+extern "C" SDL_threadID
+SDL_ThreadID(void)
 {
-    static_assert(sizeof(std::thread::id) <= sizeof(SDL_ThreadID), "std::thread::id must not be bigger than SDL_ThreadID");
-    SDL_ThreadID thread_id{};
-    const auto cpp_thread_id = std::this_thread::get_id();
-    SDL_memcpy(&thread_id, &cpp_thread_id, sizeof(std::thread::id));
-    return thread_id;
+#ifdef __WINRT__
+    return GetCurrentThreadId();
+#else
+    // HACK: Mimick a thread ID, if one isn't otherwise available.
+    static thread_local SDL_threadID current_thread_id = 0;
+    static SDL_threadID next_thread_id = 1;
+    static std::mutex next_thread_id_mutex;
+
+    if (current_thread_id == 0) {
+        std::lock_guard<std::mutex> lock(next_thread_id_mutex);
+        current_thread_id = next_thread_id;
+        ++next_thread_id;
+    }
+
+    return current_thread_id;
+#endif
 }
 
 extern "C" int
 SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
-#ifdef SDL_PLATFORM_WINRT
+#ifdef __WINRT__
     int value;
 
     if (priority == SDL_THREAD_PRIORITY_LOW) {
@@ -167,3 +181,5 @@ extern "C"
 void SDL_SYS_QuitTLSData(void)
 {
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

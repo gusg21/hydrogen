@@ -18,11 +18,13 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if SDL_VIDEO_RENDER_VITA_GXM
 
+#include "SDL_hints.h"
 #include "../SDL_sysrender.h"
+#include "SDL_log.h"
 
 #include <psp2/kernel/processmgr.h>
 #include <psp2/appmgr.h>
@@ -374,7 +376,7 @@ int gxm_init(SDL_Renderer *renderer)
         .colorMask = SCE_GXM_COLOR_MASK_ALL
     };
 
-    VITA_GXM_RenderData *data = (VITA_GXM_RenderData *)renderer->internal;
+    VITA_GXM_RenderData *data = (VITA_GXM_RenderData *)renderer->driverdata;
 
     SceGxmInitializeParams initializeParams;
     SDL_memset(&initializeParams, 0, sizeof(SceGxmInitializeParams));
@@ -526,7 +528,7 @@ int gxm_init(SDL_Renderer *renderer)
     // set the stencil test reference (this is currently assumed to always remain 1 after here for region clipping)
     sceGxmSetFrontStencilRef(data->gxm_context, 1);
 
-    // set the stencil function (this wouldn't actually be needed, as the set clip rectangle function has to call this at the beginning of every scene)
+    // set the stencil function (this wouldn't actually be needed, as the set clip rectangle function has to call this at the begginning of every scene)
     sceGxmSetFrontStencilFunc(
         data->gxm_context,
         SCE_GXM_STENCIL_FUNC_ALWAYS,
@@ -858,7 +860,7 @@ int gxm_init(SDL_Renderer *renderer)
 
 void gxm_finish(SDL_Renderer *renderer)
 {
-    VITA_GXM_RenderData *data = (VITA_GXM_RenderData *)renderer->internal;
+    VITA_GXM_RenderData *data = (VITA_GXM_RenderData *)renderer->driverdata;
 
     // wait until rendering is done
     sceGxmFinish(data->gxm_context);
@@ -1211,3 +1213,5 @@ void gxm_term_for_common_dialog(void)
 }
 
 #endif /* SDL_VIDEO_RENDER_VITA_GXM */
+
+/* vi: set ts=4 sw=4 expandtab: */

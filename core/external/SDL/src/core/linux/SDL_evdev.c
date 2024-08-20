@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_INPUT_LINUXEV
 
@@ -38,6 +38,9 @@
 #include <sys/ioctl.h>
 #include <linux/input.h>
 
+#include "SDL.h"
+#include "SDL_endian.h"
+#include "SDL_scancode.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_scancode_tables_c.h"
 #include "../../core/linux/SDL_evdev_capabilities.h"
@@ -57,16 +60,6 @@
 #ifndef REL_WHEEL_HI_RES
 #define REL_WHEEL_HI_RES  0x0b
 #define REL_HWHEEL_HI_RES 0x0c
-#endif
-
-/* The field to look up in struct input_event for integer seconds */
-#ifndef input_event_sec
-#define input_event_sec time.tv_sec
-#endif
-
-/* The field to look up in struct input_event for fractional seconds */
-#ifndef input_event_usec
-#define input_event_usec time.tv_usec
 #endif
 
 typedef struct SDL_evdevlist_item
@@ -128,7 +121,9 @@ typedef struct SDL_EVDEV_PrivateData
     SDL_EVDEV_keyboard_state *kbd;
 } SDL_EVDEV_PrivateData;
 
-static SDL_EVDEV_PrivateData *_this = NULL;
+#undef _THIS
+#define _THIS SDL_EVDEV_PrivateData *_this
+static _THIS = NULL;
 
 static SDL_Scancode SDL_EVDEV_translate_keycode(int keycode);
 static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item);
@@ -170,7 +165,7 @@ int SDL_EVDEV_Init(void)
     if (!_this) {
         _this = (SDL_EVDEV_PrivateData *)SDL_calloc(1, sizeof(*_this));
         if (!_this) {
-            return -1;
+            return SDL_OutOfMemory();
         }
 
 #ifdef SDL_USE_LIBUDEV
@@ -198,13 +193,13 @@ int SDL_EVDEV_Init(void)
                where device class is an integer representing the
                SDL_UDEV_deviceclass and path is the full path to
                the event device. */
-            const char *devices = SDL_GetHint(SDL_HINT_EVDEV_DEVICES);
+            const char *devices = SDL_getenv("SDL_EVDEV_DEVICES");
             if (devices) {
                 /* Assume this is the old use of the env var and it is not in
                    ROM. */
                 char *rest = (char *)devices;
                 char *spec;
-                while ((spec = SDL_strtok_r(rest, ",", &rest))) {
+                while ((spec = SDL_strtokr(rest, ",", &rest))) {
                     char *endofcls = 0;
                     long cls = SDL_strtol(spec, &endofcls, 0);
                     if (endofcls) {
@@ -269,7 +264,7 @@ static void SDL_EVDEV_udev_callback(SDL_UDEV_deviceevent udev_event, int udev_cl
 
     switch (udev_event) {
     case SDL_UDEV_DEVICEADDED:
-        if (!(udev_class & (SDL_UDEV_DEVICE_MOUSE | SDL_UDEV_DEVICE_HAS_KEYS | SDL_UDEV_DEVICE_TOUCHSCREEN | SDL_UDEV_DEVICE_TOUCHPAD))) {
+        if (!(udev_class & (SDL_UDEV_DEVICE_MOUSE | SDL_UDEV_DEVICE_KEYBOARD | SDL_UDEV_DEVICE_TOUCHSCREEN | SDL_UDEV_DEVICE_TOUCHPAD))) {
             return;
         }
 
@@ -314,7 +309,7 @@ void SDL_EVDEV_Poll(void)
     struct input_event events[32];
     int i, j, len;
     SDL_evdevlist_item *item;
-    SDL_Scancode scancode;
+    SDL_Scancode scan_code;
     int mouse_button;
     SDL_Mouse *mouse;
     float norm_x, norm_y, norm_pressure;
@@ -335,34 +330,32 @@ void SDL_EVDEV_Poll(void)
         while ((len = read(item->fd, events, sizeof(events))) > 0) {
             len /= sizeof(events[0]);
             for (i = 0; i < len; ++i) {
-                struct input_event *event = &events[i];
-
                 /* special handling for touchscreen, that should eventually be
                    used for all devices */
                 if (item->out_of_sync && item->is_touchscreen &&
-                    event->type == EV_SYN && event->code != SYN_REPORT) {
+                    events[i].type == EV_SYN && events[i].code != SYN_REPORT) {
                     break;
                 }
 
-                switch (event->type) {
+                switch (events[i].type) {
                 case EV_KEY:
-                    if (event->code >= BTN_MOUSE && event->code < BTN_MOUSE + SDL_arraysize(EVDEV_MouseButtons)) {
-                        mouse_button = event->code - BTN_MOUSE;
-                        if (event->value == 0) {
-                            SDL_SendMouseButton(SDL_EVDEV_GetEventTimestamp(event), mouse->focus, (SDL_MouseID)item->fd, SDL_RELEASED, EVDEV_MouseButtons[mouse_button]);
-                        } else if (event->value == 1) {
-                            SDL_SendMouseButton(SDL_EVDEV_GetEventTimestamp(event), mouse->focus, (SDL_MouseID)item->fd, SDL_PRESSED, EVDEV_MouseButtons[mouse_button]);
+                    if (events[i].code >= BTN_MOUSE && events[i].code < BTN_MOUSE + SDL_arraysize(EVDEV_MouseButtons)) {
+                        mouse_button = events[i].code - BTN_MOUSE;
+                        if (events[i].value == 0) {
+                            SDL_SendMouseButton(mouse->focus, (SDL_MouseID)item->fd, SDL_RELEASED, EVDEV_MouseButtons[mouse_button]);
+                        } else if (events[i].value == 1) {
+                            SDL_SendMouseButton(mouse->focus, (SDL_MouseID)item->fd, SDL_PRESSED, EVDEV_MouseButtons[mouse_button]);
                         }
                         break;
                     }
 
-                    /* BTN_TOUCH event value 1 indicates there is contact with
+                    /* BTH_TOUCH event value 1 indicates there is contact with
                        a touchscreen or trackpad (earlist finger's current
                        position is sent in EV_ABS ABS_X/ABS_Y, switching to
                        next finger after earlist is released) */
-                    if (item->is_touchscreen && event->code == BTN_TOUCH) {
+                    if (item->is_touchscreen && events[i].code == BTN_TOUCH) {
                         if (item->touchscreen_data->max_slots == 1) {
-                            if (event->value) {
+                            if (events[i].value) {
                                 item->touchscreen_data->slots[0].delta = EVDEV_TOUCH_SLOTDELTA_DOWN;
                             } else {
                                 item->touchscreen_data->slots[0].delta = EVDEV_TOUCH_SLOTDELTA_UP;
@@ -372,28 +365,30 @@ void SDL_EVDEV_Poll(void)
                     }
 
                     /* Probably keyboard */
-                    scancode = SDL_EVDEV_translate_keycode(event->code);
-                    if (event->value == 0) {
-                        SDL_SendKeyboardKey(SDL_EVDEV_GetEventTimestamp(event), (SDL_KeyboardID)item->fd, event->code, scancode, SDL_RELEASED);
-                    } else if (event->value == 1 || event->value == 2 /* key repeated */) {
-                        SDL_SendKeyboardKey(SDL_EVDEV_GetEventTimestamp(event), (SDL_KeyboardID)item->fd, event->code, scancode, SDL_PRESSED);
+                    scan_code = SDL_EVDEV_translate_keycode(events[i].code);
+                    if (scan_code != SDL_SCANCODE_UNKNOWN) {
+                        if (events[i].value == 0) {
+                            SDL_SendKeyboardKey(SDL_RELEASED, scan_code);
+                        } else if (events[i].value == 1 || events[i].value == 2 /* key repeated */) {
+                            SDL_SendKeyboardKey(SDL_PRESSED, scan_code);
+                        }
                     }
-                    SDL_EVDEV_kbd_keycode(_this->kbd, event->code, event->value);
+                    SDL_EVDEV_kbd_keycode(_this->kbd, events[i].code, events[i].value);
                     break;
                 case EV_ABS:
-                    switch (event->code) {
+                    switch (events[i].code) {
                     case ABS_MT_SLOT:
                         if (!item->is_touchscreen) { /* FIXME: temp hack */
                             break;
                         }
-                        item->touchscreen_data->current_slot = event->value;
+                        item->touchscreen_data->current_slot = events[i].value;
                         break;
                     case ABS_MT_TRACKING_ID:
                         if (!item->is_touchscreen) { /* FIXME: temp hack */
                             break;
                         }
-                        if (event->value >= 0) {
-                            item->touchscreen_data->slots[item->touchscreen_data->current_slot].tracking_id = event->value + 1;
+                        if (events[i].value >= 0) {
+                            item->touchscreen_data->slots[item->touchscreen_data->current_slot].tracking_id = events[i].value;
                             item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta = EVDEV_TOUCH_SLOTDELTA_DOWN;
                         } else {
                             item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta = EVDEV_TOUCH_SLOTDELTA_UP;
@@ -403,7 +398,7 @@ void SDL_EVDEV_Poll(void)
                         if (!item->is_touchscreen) { /* FIXME: temp hack */
                             break;
                         }
-                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].x = event->value;
+                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].x = events[i].value;
                         if (item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta == EVDEV_TOUCH_SLOTDELTA_NONE) {
                             item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta = EVDEV_TOUCH_SLOTDELTA_MOVE;
                         }
@@ -412,7 +407,7 @@ void SDL_EVDEV_Poll(void)
                         if (!item->is_touchscreen) { /* FIXME: temp hack */
                             break;
                         }
-                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].y = event->value;
+                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].y = events[i].value;
                         if (item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta == EVDEV_TOUCH_SLOTDELTA_NONE) {
                             item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta = EVDEV_TOUCH_SLOTDELTA_MOVE;
                         }
@@ -421,7 +416,7 @@ void SDL_EVDEV_Poll(void)
                         if (!item->is_touchscreen) { /* FIXME: temp hack */
                             break;
                         }
-                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].pressure = event->value;
+                        item->touchscreen_data->slots[item->touchscreen_data->current_slot].pressure = events[i].value;
                         if (item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta == EVDEV_TOUCH_SLOTDELTA_NONE) {
                             item->touchscreen_data->slots[item->touchscreen_data->current_slot].delta = EVDEV_TOUCH_SLOTDELTA_MOVE;
                         }
@@ -431,9 +426,9 @@ void SDL_EVDEV_Poll(void)
                             if (item->touchscreen_data->max_slots != 1) {
                                 break;
                             }
-                            item->touchscreen_data->slots[0].x = event->value;
+                            item->touchscreen_data->slots[0].x = events[i].value;
                         } else if (!item->relative_mouse) {
-                            item->mouse_x = event->value;
+                            item->mouse_x = events[i].value;
                         }
                         break;
                     case ABS_Y:
@@ -441,9 +436,9 @@ void SDL_EVDEV_Poll(void)
                             if (item->touchscreen_data->max_slots != 1) {
                                 break;
                             }
-                            item->touchscreen_data->slots[0].y = event->value;
+                            item->touchscreen_data->slots[0].y = events[i].value;
                         } else if (!item->relative_mouse) {
-                            item->mouse_y = event->value;
+                            item->mouse_y = events[i].value;
                         }
                         break;
                     default:
@@ -451,70 +446,59 @@ void SDL_EVDEV_Poll(void)
                     }
                     break;
                 case EV_REL:
-                    switch (event->code) {
+                    switch (events[i].code) {
                     case REL_X:
                         if (item->relative_mouse) {
-                            item->mouse_x += event->value;
+                            item->mouse_x += events[i].value;
                         }
                         break;
                     case REL_Y:
                         if (item->relative_mouse) {
-                            item->mouse_y += event->value;
+                            item->mouse_y += events[i].value;
                         }
                         break;
                     case REL_WHEEL:
                         if (!item->high_res_wheel) {
-                            item->mouse_wheel += event->value;
+                            item->mouse_wheel += events[i].value;
                         }
                         break;
                     case REL_WHEEL_HI_RES:
                         SDL_assert(item->high_res_wheel);
-                        item->mouse_wheel += event->value;
+                        item->mouse_wheel += events[i].value;
                         break;
                     case REL_HWHEEL:
                         if (!item->high_res_hwheel) {
-                            item->mouse_hwheel += event->value;
+                            item->mouse_hwheel += events[i].value;
                         }
                         break;
                     case REL_HWHEEL_HI_RES:
                         SDL_assert(item->high_res_hwheel);
-                        item->mouse_hwheel += event->value;
+                        item->mouse_hwheel += events[i].value;
                         break;
                     default:
                         break;
                     }
                     break;
                 case EV_SYN:
-                    switch (event->code) {
+                    switch (events[i].code) {
                     case SYN_REPORT:
                         /* Send mouse axis changes together to ensure consistency and reduce event processing overhead */
                         if (item->relative_mouse) {
                             if (item->mouse_x != 0 || item->mouse_y != 0) {
-                                SDL_SendMouseMotion(SDL_EVDEV_GetEventTimestamp(event), mouse->focus, (SDL_MouseID)item->fd, item->relative_mouse, (float)item->mouse_x, (float)item->mouse_y);
+                                SDL_SendMouseMotion(mouse->focus, (SDL_MouseID)item->fd, item->relative_mouse, item->mouse_x, item->mouse_y);
                                 item->mouse_x = item->mouse_y = 0;
                             }
                         } else if (item->range_x > 0 && item->range_y > 0) {
-                            int screen_w = 0, screen_h = 0;
-                            const SDL_DisplayMode *mode = NULL;
-
-                            if (mouse->focus) {
-                                mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(mouse->focus));
-                            }
-                            if (!mode) {
-                                mode = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
-                            }
-                            if (mode) {
-                                screen_w = mode->w;
-                                screen_h = mode->h;
-                            }
-                            SDL_SendMouseMotion(SDL_EVDEV_GetEventTimestamp(event), mouse->focus, (SDL_MouseID)item->fd, item->relative_mouse,
-                                (float)(item->mouse_x - item->min_x) * screen_w / item->range_x,
-                                (float)(item->mouse_y - item->min_y) * screen_h / item->range_y);
+                            /* TODO: test with multiple display scenarios */
+                            SDL_DisplayMode mode;
+                            SDL_GetCurrentDisplayMode(0, &mode);
+                            SDL_SendMouseMotion(mouse->focus, (SDL_MouseID)item->fd, item->relative_mouse,
+                                (item->mouse_x - item->min_x) * mode.w / item->range_x,
+                                (item->mouse_y - item->min_y) * mode.h / item->range_y);
                         }
 
                         if (item->mouse_wheel != 0 || item->mouse_hwheel != 0) {
-                            SDL_SendMouseWheel(SDL_EVDEV_GetEventTimestamp(event),
-                                               mouse->focus, (SDL_MouseID)item->fd,
+                            SDL_SendMouseWheel(mouse->focus, (SDL_MouseID)item->fd,
                                                item->mouse_hwheel / (item->high_res_hwheel ? 120.0f : 1.0f),
                                                item->mouse_wheel / (item->high_res_wheel ? 120.0f : 1.0f),
                                                SDL_MOUSEWHEEL_NORMAL);
@@ -544,16 +528,16 @@ void SDL_EVDEV_Poll(void)
                              * be window-relative in that case. */
                             switch (item->touchscreen_data->slots[j].delta) {
                             case EVDEV_TOUCH_SLOTDELTA_DOWN:
-                                SDL_SendTouch(SDL_EVDEV_GetEventTimestamp(event), item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, SDL_TRUE, norm_x, norm_y, norm_pressure);
+                                SDL_SendTouch(item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, SDL_TRUE, norm_x, norm_y, norm_pressure);
                                 item->touchscreen_data->slots[j].delta = EVDEV_TOUCH_SLOTDELTA_NONE;
                                 break;
                             case EVDEV_TOUCH_SLOTDELTA_UP:
-                                SDL_SendTouch(SDL_EVDEV_GetEventTimestamp(event), item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, SDL_FALSE, norm_x, norm_y, norm_pressure);
-                                item->touchscreen_data->slots[j].tracking_id = 0;
+                                SDL_SendTouch(item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, SDL_FALSE, norm_x, norm_y, norm_pressure);
+                                item->touchscreen_data->slots[j].tracking_id = -1;
                                 item->touchscreen_data->slots[j].delta = EVDEV_TOUCH_SLOTDELTA_NONE;
                                 break;
                             case EVDEV_TOUCH_SLOTDELTA_MOVE:
-                                SDL_SendTouchMotion(SDL_EVDEV_GetEventTimestamp(event), item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, norm_x, norm_y, norm_pressure);
+                                SDL_SendTouchMotion(item->fd, item->touchscreen_data->slots[j].tracking_id, NULL, norm_x, norm_y, norm_pressure);
                                 item->touchscreen_data->slots[j].delta = EVDEV_TOUCH_SLOTDELTA_NONE;
                                 break;
                             default:
@@ -603,33 +587,10 @@ static SDL_Scancode SDL_EVDEV_translate_keycode(int keycode)
     return scancode;
 }
 
-static int SDL_EVDEV_init_keyboard(SDL_evdevlist_item *item, int udev_class)
-{
-    char name[128];
-
-    name[0] = '\0';
-    ioctl(item->fd, EVIOCGNAME(sizeof(name)), name);
-
-    SDL_AddKeyboard((SDL_KeyboardID)item->fd, name, SDL_TRUE);
-
-    return 0;
-}
-
-static void SDL_EVDEV_destroy_keyboard(SDL_evdevlist_item *item)
-{
-    SDL_RemoveKeyboard((SDL_KeyboardID)item->fd, SDL_TRUE);
-}
-
 static int SDL_EVDEV_init_mouse(SDL_evdevlist_item *item, int udev_class)
 {
-    char name[128];
     int ret;
     struct input_absinfo abs_info;
-
-    name[0] = '\0';
-    ioctl(item->fd, EVIOCGNAME(sizeof(name)), name);
-
-    SDL_AddMouse((SDL_MouseID)item->fd, name, SDL_TRUE);
 
     ret = ioctl(item->fd, EVIOCGABS(ABS_X), &abs_info);
     if (ret < 0) {
@@ -652,14 +613,9 @@ static int SDL_EVDEV_init_mouse(SDL_evdevlist_item *item, int udev_class)
     return 0;
 }
 
-static void SDL_EVDEV_destroy_mouse(SDL_evdevlist_item *item)
-{
-    SDL_RemoveMouse((SDL_MouseID)item->fd, SDL_TRUE);
-}
-
 static int SDL_EVDEV_init_touchscreen(SDL_evdevlist_item *item, int udev_class)
 {
-    int ret;
+    int ret, i;
     unsigned long xreq, yreq;
     char name[64];
     struct input_absinfo abs_info;
@@ -670,7 +626,7 @@ static int SDL_EVDEV_init_touchscreen(SDL_evdevlist_item *item, int udev_class)
 
     item->touchscreen_data = SDL_calloc(1, sizeof(*item->touchscreen_data));
     if (!item->touchscreen_data) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     ret = ioctl(item->fd, EVIOCGNAME(sizeof(name)), name);
@@ -682,7 +638,7 @@ static int SDL_EVDEV_init_touchscreen(SDL_evdevlist_item *item, int udev_class)
     item->touchscreen_data->name = SDL_strdup(name);
     if (!item->touchscreen_data->name) {
         SDL_free(item->touchscreen_data);
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     ret = ioctl(item->fd, EVIOCGABS(ABS_MT_SLOT), &abs_info);
@@ -738,7 +694,11 @@ static int SDL_EVDEV_init_touchscreen(SDL_evdevlist_item *item, int udev_class)
     if (!item->touchscreen_data->slots) {
         SDL_free(item->touchscreen_data->name);
         SDL_free(item->touchscreen_data);
-        return -1;
+        return SDL_OutOfMemory();
+    }
+
+    for (i = 0; i < item->touchscreen_data->max_slots; i++) {
+        item->touchscreen_data->slots[i].tracking_id = -1;
     }
 
     ret = SDL_AddTouch(item->fd, /* I guess our fd is unique enough */
@@ -814,13 +774,13 @@ static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item)
          * SDL_EVDEV_Poll to tell SDL, the current structure of this code doesn't
          * allow it. Lets just pray to God it doesn't happen.
          */
-        if (item->touchscreen_data->slots[i].tracking_id == 0 &&
+        if (item->touchscreen_data->slots[i].tracking_id < 0 &&
             mt_req_values[i] >= 0) {
-            item->touchscreen_data->slots[i].tracking_id = mt_req_values[i] + 1;
+            item->touchscreen_data->slots[i].tracking_id = mt_req_values[i];
             item->touchscreen_data->slots[i].delta = EVDEV_TOUCH_SLOTDELTA_DOWN;
-        } else if (item->touchscreen_data->slots[i].tracking_id != 0 &&
+        } else if (item->touchscreen_data->slots[i].tracking_id >= 0 &&
                    mt_req_values[i] < 0) {
-            item->touchscreen_data->slots[i].tracking_id = 0;
+            item->touchscreen_data->slots[i].tracking_id = -1;
             item->touchscreen_data->slots[i].delta = EVDEV_TOUCH_SLOTDELTA_UP;
         }
     }
@@ -832,7 +792,7 @@ static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item)
         return;
     }
     for (i = 0; i < item->touchscreen_data->max_slots; i++) {
-        if (item->touchscreen_data->slots[i].tracking_id != 0 &&
+        if (item->touchscreen_data->slots[i].tracking_id >= 0 &&
             item->touchscreen_data->slots[i].x != mt_req_values[i]) {
             item->touchscreen_data->slots[i].x = mt_req_values[i];
             if (item->touchscreen_data->slots[i].delta ==
@@ -850,7 +810,7 @@ static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item)
         return;
     }
     for (i = 0; i < item->touchscreen_data->max_slots; i++) {
-        if (item->touchscreen_data->slots[i].tracking_id != 0 &&
+        if (item->touchscreen_data->slots[i].tracking_id >= 0 &&
             item->touchscreen_data->slots[i].y != mt_req_values[i]) {
             item->touchscreen_data->slots[i].y = mt_req_values[i];
             if (item->touchscreen_data->slots[i].delta ==
@@ -868,7 +828,7 @@ static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item)
         return;
     }
     for (i = 0; i < item->touchscreen_data->max_slots; i++) {
-        if (item->touchscreen_data->slots[i].tracking_id != 0 &&
+        if (item->touchscreen_data->slots[i].tracking_id >= 0 &&
             item->touchscreen_data->slots[i].pressure != mt_req_values[i]) {
             item->touchscreen_data->slots[i].pressure = mt_req_values[i];
             if (item->touchscreen_data->slots[i].delta ==
@@ -893,6 +853,7 @@ static void SDL_EVDEV_sync_device(SDL_evdevlist_item *item)
 
 static int SDL_EVDEV_device_added(const char *dev_path, int udev_class)
 {
+    int ret;
     SDL_evdevlist_item *item;
     unsigned long relbit[NBITS(REL_MAX)] = { 0 };
 
@@ -905,7 +866,7 @@ static int SDL_EVDEV_device_added(const char *dev_path, int udev_class)
 
     item = (SDL_evdevlist_item *)SDL_calloc(1, sizeof(SDL_evdevlist_item));
     if (!item) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     item->fd = open(dev_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
@@ -918,7 +879,7 @@ static int SDL_EVDEV_device_added(const char *dev_path, int udev_class)
     if (!item->path) {
         close(item->fd);
         SDL_free(item);
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     item->udev_class = udev_class;
@@ -931,7 +892,6 @@ static int SDL_EVDEV_device_added(const char *dev_path, int udev_class)
 
     /* For now, we just treat a touchpad like a touchscreen */
     if (udev_class & (SDL_UDEV_DEVICE_TOUCHSCREEN | SDL_UDEV_DEVICE_TOUCHPAD)) {
-        int ret;
         item->is_touchscreen = SDL_TRUE;
         ret = SDL_EVDEV_init_touchscreen(item, udev_class);
         if (ret < 0) {
@@ -941,15 +901,7 @@ static int SDL_EVDEV_device_added(const char *dev_path, int udev_class)
             return ret;
         }
     } else if (udev_class & SDL_UDEV_DEVICE_MOUSE) {
-        int ret = SDL_EVDEV_init_mouse(item, udev_class);
-        if (ret < 0) {
-            close(item->fd);
-            SDL_free(item->path);
-            SDL_free(item);
-            return ret;
-        }
-    } else if (udev_class & SDL_UDEV_DEVICE_KEYBOARD) {
-        int ret = SDL_EVDEV_init_keyboard(item, udev_class);
+        ret = SDL_EVDEV_init_mouse(item, udev_class);
         if (ret < 0) {
             close(item->fd);
             SDL_free(item->path);
@@ -991,10 +943,6 @@ static int SDL_EVDEV_device_removed(const char *dev_path)
             }
             if (item->is_touchscreen) {
                 SDL_EVDEV_destroy_touchscreen(item);
-            } else if (item->udev_class & SDL_UDEV_DEVICE_MOUSE) {
-                SDL_EVDEV_destroy_mouse(item);
-            } else if (item->udev_class & SDL_UDEV_DEVICE_KEYBOARD) {
-                SDL_EVDEV_destroy_keyboard(item);
             }
             close(item->fd);
             SDL_free(item->path);
@@ -1009,28 +957,6 @@ static int SDL_EVDEV_device_removed(const char *dev_path)
     return -1;
 }
 
-Uint64 SDL_EVDEV_GetEventTimestamp(struct input_event *event)
-{
-    static Uint64 timestamp_offset;
-    Uint64 timestamp;
-    Uint64 now = SDL_GetTicksNS();
-
-    /* The kernel internally has nanosecond timestamps, but converts it
-       to microseconds when delivering the events */
-    timestamp = event->input_event_sec;
-    timestamp *= SDL_NS_PER_SECOND;
-    timestamp += SDL_US_TO_NS(event->input_event_usec);
-
-    if (!timestamp_offset) {
-        timestamp_offset = (now - timestamp);
-    }
-    timestamp += timestamp_offset;
-
-    if (timestamp > now) {
-        timestamp_offset -= (timestamp - now);
-        timestamp = now;
-    }
-    return timestamp;
-}
-
 #endif /* SDL_INPUT_LINUXEV */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_PSP
 
@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "SDL_error.h"
+#include "SDL_thread.h"
 #include "../SDL_systhread.h"
 #include "../SDL_thread_c.h"
 #include <pspkerneltypes.h>
@@ -38,9 +40,7 @@ static int ThreadEntry(SceSize args, void *argp)
     return 0;
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread,
-                         SDL_FunctionPointer pfnBeginThread,
-                         SDL_FunctionPointer pfnEndThread)
+int SDL_SYS_CreateThread(SDL_Thread *thread)
 {
     SceKernelThreadInfo status;
     int priority = 32;
@@ -67,9 +67,9 @@ void SDL_SYS_SetupThread(const char *name)
     /* Do nothing. */
 }
 
-SDL_ThreadID SDL_GetCurrentThreadID(void)
+SDL_threadID SDL_ThreadID(void)
 {
-    return (SDL_ThreadID)sceKernelGetThreadId();
+    return (SDL_threadID)sceKernelGetThreadId();
 }
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
@@ -107,3 +107,6 @@ int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 }
 
 #endif /* SDL_THREAD_PSP */
+
+/* vim: ts=4 sw=4
+ */

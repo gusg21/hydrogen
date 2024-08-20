@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_shaders_gles2_h_
 #define SDL_shaders_gles2_h_
@@ -44,11 +44,17 @@ typedef enum
     GLES2_SHADER_FRAGMENT_TEXTURE_BGR,
     GLES2_SHADER_FRAGMENT_TEXTURE_RGB,
 #if SDL_HAVE_YUV
-    GLES2_SHADER_FRAGMENT_TEXTURE_YUV,
-    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RA,
-    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RG,
-    GLES2_SHADER_FRAGMENT_TEXTURE_NV21_RA,
-    GLES2_SHADER_FRAGMENT_TEXTURE_NV21_RG,
+    GLES2_SHADER_FRAGMENT_TEXTURE_YUV_JPEG,
+    GLES2_SHADER_FRAGMENT_TEXTURE_YUV_BT601,
+    GLES2_SHADER_FRAGMENT_TEXTURE_YUV_BT709,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_JPEG,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RA_BT601,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RG_BT601,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RA_BT709,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV12_RG_BT709,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV21_JPEG,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV21_BT601,
+    GLES2_SHADER_FRAGMENT_TEXTURE_NV21_BT709,
 #endif
     /* Shaders beyond this point are optional and not cached at render creation */
     GLES2_SHADER_FRAGMENT_TEXTURE_EXTERNAL_OES,
@@ -63,3 +69,5 @@ extern GLES2_ShaderIncludeType GLES2_GetTexCoordPrecisionEnumFromHint(void);
 #endif /* SDL_VIDEO_RENDER_OGL_ES2 */
 
 #endif /* SDL_shaders_gles2_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

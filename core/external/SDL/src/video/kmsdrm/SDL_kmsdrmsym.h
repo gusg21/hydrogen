@@ -65,6 +65,10 @@ SDL_KMSDRM_SYM(drmModeCrtcPtr,drmModeGetCrtc,(int fd, uint32_t crtcId))
 SDL_KMSDRM_SYM(int,drmModeSetCrtc,(int fd, uint32_t crtcId, uint32_t bufferId,
                                    uint32_t x, uint32_t y, uint32_t *connectors, int count,
                                    drmModeModeInfoPtr mode))
+SDL_KMSDRM_SYM(int,drmModeCrtcGetGamma,(int fd, uint32_t crtc_id, uint32_t size,
+                                        uint16_t *red, uint16_t *green, uint16_t *blue))
+SDL_KMSDRM_SYM(int,drmModeCrtcSetGamma,(int fd, uint32_t crtc_id, uint32_t size,
+                                        const uint16_t *red, const uint16_t *green, const uint16_t *blue))
 SDL_KMSDRM_SYM(int,drmModeSetCursor,(int fd, uint32_t crtcId, uint32_t bo_handle,
                                      uint32_t width, uint32_t height))
 SDL_KMSDRM_SYM(int,drmModeSetCursor2,(int fd, uint32_t crtcId, uint32_t bo_handle,
@@ -136,3 +140,5 @@ SDL_KMSDRM_SYM(union gbm_bo_handle,gbm_bo_get_handle_for_plane,(struct gbm_bo *b
 #undef SDL_KMSDRM_SYM_CONST
 
 /* *INDENT-ON* */ /* clang-format on */
+
+/* vi: set ts=4 sw=4 expandtab: */

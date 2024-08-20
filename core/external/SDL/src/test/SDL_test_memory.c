@@ -18,28 +18,16 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include <SDL3/SDL_test.h>
+#include "SDL_config.h"
+#include "SDL_assert.h"
+#include "SDL_stdinc.h"
+#include "SDL_log.h"
+#include "SDL_test_crc32.h"
+#include "SDL_test_memory.h"
 
 #ifdef HAVE_LIBUNWIND_H
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
-#endif
-
-#ifdef SDL_PLATFORM_WIN32
-#include <windows.h>
-#include <dbghelp.h>
-
-static struct {
-    HMODULE module;
-    BOOL (WINAPI *pSymInitialize)(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess);
-    BOOL (WINAPI *pSymFromAddr)(HANDLE hProcess, DWORD64 Address, PDWORD64 Displacement, PSYMBOL_INFO Symbol);
-    BOOL (WINAPI *pSymGetLineFromAddr64)(HANDLE hProcess, DWORD64 qwAddr, PDWORD pdwDisplacement, PIMAGEHLP_LINE64 Line);
-} dyn_dbghelp;
-
-/* older SDKs might not have this: */
-__declspec(dllimport) USHORT WINAPI RtlCaptureStackBackTrace(ULONG FramesToSkip, ULONG FramesToCapture, PVOID* BackTrace, PULONG BackTraceHash);
-#define CaptureStackBackTrace RtlCaptureStackBackTrace
-
 #endif
 
 /* This is a simple tracking allocator to demonstrate the use of SDL's
@@ -49,13 +37,12 @@ __declspec(dllimport) USHORT WINAPI RtlCaptureStackBackTrace(ULONG FramesToSkip,
    for production code.
 */
 
-#define MAXIMUM_TRACKED_STACK_DEPTH 32
-
 typedef struct SDL_tracked_allocation
 {
     void *mem;
     size_t size;
-    Uint64 stack[MAXIMUM_TRACKED_STACK_DEPTH];
+    Uint64 stack[10];
+    char stack_names[10][256];
     struct SDL_tracked_allocation *next;
 } SDL_tracked_allocation;
 
@@ -66,17 +53,6 @@ static SDL_realloc_func SDL_realloc_orig = NULL;
 static SDL_free_func SDL_free_orig = NULL;
 static int s_previous_allocations = 0;
 static SDL_tracked_allocation *s_tracked_allocations[256];
-static SDL_bool s_randfill_allocations = SDL_FALSE;
-static SDL_AtomicInt s_lock;
-
-#define LOCK_ALLOCATOR()                               \
-    do {                                               \
-        if (SDL_AtomicCompareAndSwap(&s_lock, 0, 1)) { \
-            break;                                     \
-        }                                              \
-        SDL_CPUPauseInstruction();                     \
-    } while (SDL_TRUE)
-#define UNLOCK_ALLOCATOR() do { SDL_AtomicSet(&s_lock, 0); } while (0)
 
 static unsigned int get_allocation_bucket(void *mem)
 {
@@ -87,31 +63,16 @@ static unsigned int get_allocation_bucket(void *mem)
     return index;
 }
 
-static SDL_tracked_allocation* SDL_GetTrackedAllocation(void *mem)
+static SDL_bool SDL_IsAllocationTracked(void *mem)
 {
     SDL_tracked_allocation *entry;
-    LOCK_ALLOCATOR();
     int index = get_allocation_bucket(mem);
     for (entry = s_tracked_allocations[index]; entry; entry = entry->next) {
         if (mem == entry->mem) {
-            UNLOCK_ALLOCATOR();
-            return entry;
+            return SDL_TRUE;
         }
     }
-    UNLOCK_ALLOCATOR();
-    return NULL;
-}
-
-static size_t SDL_GetTrackedAllocationSize(void *mem)
-{
-    SDL_tracked_allocation *entry = SDL_GetTrackedAllocation(mem);
-
-    return entry ? entry->size : SIZE_MAX;
-}
-
-static SDL_bool SDL_IsAllocationTracked(void *mem)
-{
-    return SDL_GetTrackedAllocation(mem) != NULL;
+    return SDL_FALSE;
 }
 
 static void SDL_TrackAllocation(void *mem, size_t size)
@@ -126,7 +87,6 @@ static void SDL_TrackAllocation(void *mem, size_t size)
     if (!entry) {
         return;
     }
-    LOCK_ALLOCATOR();
     entry->mem = mem;
     entry->size = size;
 
@@ -143,11 +103,15 @@ static void SDL_TrackAllocation(void *mem, size_t size)
 
         stack_index = 0;
         while (unw_step(&cursor) > 0) {
-            unw_word_t pc;
+            unw_word_t offset, pc;
+            char sym[236];
 
             unw_get_reg(&cursor, UNW_REG_IP, &pc);
             entry->stack[stack_index] = pc;
 
+            if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
+                SDL_snprintf(entry->stack_names[stack_index], sizeof(entry->stack_names[stack_index]), "%s+0x%llx", sym, (unsigned long long)offset);
+            }
             ++stack_index;
 
             if (stack_index == SDL_arraysize(entry->stack)) {
@@ -155,24 +119,10 @@ static void SDL_TrackAllocation(void *mem, size_t size)
             }
         }
     }
-#elif defined(SDL_PLATFORM_WIN32)
-    {
-        Uint32 count;
-        PVOID frames[63];
-        Uint32 i;
-
-        count = CaptureStackBackTrace(1, SDL_arraysize(frames), frames, NULL);
-
-        count = SDL_min(count, MAXIMUM_TRACKED_STACK_DEPTH);
-        for (i = 0; i < count; i++) {
-            entry->stack[i] = (Uint64)(uintptr_t)frames[i];
-        }
-    }
 #endif /* HAVE_LIBUNWIND_H */
 
     entry->next = s_tracked_allocations[index];
     s_tracked_allocations[index] = entry;
-    UNLOCK_ALLOCATOR();
 }
 
 static void SDL_UntrackAllocation(void *mem)
@@ -180,7 +130,6 @@ static void SDL_UntrackAllocation(void *mem)
     SDL_tracked_allocation *entry, *prev;
     int index = get_allocation_bucket(mem);
 
-    LOCK_ALLOCATOR();
     prev = NULL;
     for (entry = s_tracked_allocations[index]; entry; entry = entry->next) {
         if (mem == entry->mem) {
@@ -190,24 +139,9 @@ static void SDL_UntrackAllocation(void *mem)
                 s_tracked_allocations[index] = entry->next;
             }
             SDL_free_orig(entry);
-            UNLOCK_ALLOCATOR();
             return;
         }
         prev = entry;
-    }
-    UNLOCK_ALLOCATOR();
-}
-
-static void rand_fill_memory(void* ptr, size_t start, size_t end)
-{
-    Uint8* mem = (Uint8*) ptr;
-    size_t i;
-
-    if (!s_randfill_allocations)
-        return;
-
-    for (i = start; i < end; ++i) {
-        mem[i] = SDLTest_RandomUint8();
     }
 }
 
@@ -218,7 +152,6 @@ static void *SDLCALL SDLTest_TrackedMalloc(size_t size)
     mem = SDL_malloc_orig(size);
     if (mem) {
         SDL_TrackAllocation(mem, size);
-        rand_fill_memory(mem, 0, size);
     }
     return mem;
 }
@@ -237,20 +170,14 @@ static void *SDLCALL SDLTest_TrackedCalloc(size_t nmemb, size_t size)
 static void *SDLCALL SDLTest_TrackedRealloc(void *ptr, size_t size)
 {
     void *mem;
-    size_t old_size = 0;
-    if (ptr) {
-         old_size = SDL_GetTrackedAllocationSize(ptr);
-         SDL_assert(old_size != SIZE_MAX);
-    }
+
+    SDL_assert(ptr == NULL || SDL_IsAllocationTracked(ptr));
     mem = SDL_realloc_orig(ptr, size);
-    if (ptr) {
-        SDL_UntrackAllocation(ptr);
-    }
-    if (mem) {
-        SDL_TrackAllocation(mem, size);
-        if (size > old_size) {
-            rand_fill_memory(mem, old_size, size);
+    if (mem && mem != ptr) {
+        if (ptr) {
+            SDL_UntrackAllocation(ptr);
         }
+        SDL_TrackAllocation(mem, size);
     }
     return mem;
 }
@@ -268,10 +195,10 @@ static void SDLCALL SDLTest_TrackedFree(void *ptr)
     SDL_free_orig(ptr);
 }
 
-void SDLTest_TrackAllocations(void)
+int SDLTest_TrackAllocations(void)
 {
     if (SDL_malloc_orig) {
-        return;
+        return 0;
     }
 
     SDLTest_Crc32Init(&s_crc32_context);
@@ -280,29 +207,6 @@ void SDLTest_TrackAllocations(void)
     if (s_previous_allocations != 0) {
         SDL_Log("SDLTest_TrackAllocations(): There are %d previous allocations, disabling free() validation", s_previous_allocations);
     }
-#ifdef SDL_PLATFORM_WIN32
-    do {
-        dyn_dbghelp.module = SDL_LoadObject("dbghelp.dll");
-        if (!dyn_dbghelp.module) {
-            goto dbghelp_failed;
-        }
-        dyn_dbghelp.pSymInitialize = (void *)SDL_LoadFunction(dyn_dbghelp.module, "SymInitialize");
-        dyn_dbghelp.pSymFromAddr = (void *)SDL_LoadFunction(dyn_dbghelp.module, "SymFromAddr");
-        dyn_dbghelp.pSymGetLineFromAddr64 = (void *)SDL_LoadFunction(dyn_dbghelp.module, "SymGetLineFromAddr64");
-        if (!dyn_dbghelp.pSymInitialize || !dyn_dbghelp.pSymFromAddr || !dyn_dbghelp.pSymGetLineFromAddr64) {
-            goto dbghelp_failed;
-        }
-        if (!dyn_dbghelp.pSymInitialize(GetCurrentProcess(), NULL, TRUE)) {
-            goto dbghelp_failed;
-        }
-        break;
-dbghelp_failed:
-        if (dyn_dbghelp.module) {
-            SDL_UnloadObject(dyn_dbghelp.module);
-            dyn_dbghelp.module = NULL;
-        }
-    } while (0);
-#endif
 
     SDL_GetMemoryFunctions(&SDL_malloc_orig,
                            &SDL_calloc_orig,
@@ -313,13 +217,7 @@ dbghelp_failed:
                            SDLTest_TrackedCalloc,
                            SDLTest_TrackedRealloc,
                            SDLTest_TrackedFree);
-}
-
-void SDLTest_RandFillAllocations(void)
-{
-    SDLTest_TrackAllocations();
-
-    s_randfill_allocations = SDL_TRUE;
+    return 0;
 }
 
 void SDLTest_LogAllocations(void)
@@ -352,6 +250,8 @@ void SDLTest_LogAllocations(void)
 
     SDL_strlcpy(line, "Memory allocations:\n", sizeof(line));
     ADD_LINE();
+    SDL_strlcpy(line, "Expect 2 allocations from within SDL_GetErrBuf()\n", sizeof(line));
+    ADD_LINE();
 
     count = 0;
     total_allocated = 0;
@@ -361,45 +261,10 @@ void SDLTest_LogAllocations(void)
             ADD_LINE();
             /* Start at stack index 1 to skip our tracking functions */
             for (stack_index = 1; stack_index < SDL_arraysize(entry->stack); ++stack_index) {
-                char stack_entry_description[256] = "???";
-
                 if (!entry->stack[stack_index]) {
                     break;
                 }
-#ifdef HAVE_LIBUNWIND_H
-                {
-#ifdef unw_get_proc_name_by_ip
-                    unw_word_t offset = 0;
-                    char name[256] = "???";
-                    unw_get_proc_name_by_ip(unw_local_addr_space, entry->stack[stack_index], name, sizeof(name), &offset, NULL);
-                    (void)SDL_snprintf(stack_entry_description, sizeof(stack_entry_description), "%s+0x%llx", name, (long long unsigned int)offset);
-#endif
-                }
-#elif defined(SDL_PLATFORM_WIN32)
-                {
-                    DWORD64 dwDisplacement = 0;
-                    char symbol_buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-                    PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)symbol_buffer;
-                    DWORD lineColumn = 0;
-                    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-                    pSymbol->MaxNameLen = MAX_SYM_NAME;
-                    IMAGEHLP_LINE64 dbg_line;
-                    dbg_line.SizeOfStruct = sizeof(dbg_line);
-                    dbg_line.FileName = "";
-                    dbg_line.LineNumber = 0;
-
-                    if (dyn_dbghelp.module) {
-                        if (!dyn_dbghelp.pSymFromAddr(GetCurrentProcess(), entry->stack[stack_index], &dwDisplacement, pSymbol)) {
-                            SDL_strlcpy(pSymbol->Name, "???", MAX_SYM_NAME);
-                            dwDisplacement = 0;
-                        }
-                        dyn_dbghelp.pSymGetLineFromAddr64(GetCurrentProcess(), (DWORD64)entry->stack[stack_index], &lineColumn, &dbg_line);
-                    }
-                    SDL_snprintf(stack_entry_description, sizeof(stack_entry_description), "%s+0x%I64x %s:%u", pSymbol->Name, dwDisplacement, dbg_line.FileName, (Uint32)dbg_line.LineNumber);
-                }
-#endif
-                (void)SDL_snprintf(line, sizeof(line), "\t0x%" SDL_PRIx64 ": %s\n", entry->stack[stack_index], stack_entry_description);
-
+                (void)SDL_snprintf(line, sizeof(line), "\t0x%" SDL_PRIx64 ": %s\n", entry->stack[stack_index], entry->stack_names[stack_index]);
                 ADD_LINE();
             }
             total_allocated += entry->size;
@@ -412,3 +277,5 @@ void SDLTest_LogAllocations(void)
 
     SDL_Log("%s", message);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

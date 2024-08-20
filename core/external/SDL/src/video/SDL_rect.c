@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
+#include "SDL_rect.h"
 #include "SDL_rect_c.h"
 
 /* There's no float version of this at the moment, because it's not a public API
@@ -90,27 +91,25 @@ SDL_bool SDL_GetSpanEnclosingRect(int width, int height,
 #define SCALARTYPE               int
 #define BIGSCALARTYPE            Sint64
 #define COMPUTEOUTCODE           ComputeOutCode
-#define ENCLOSEPOINTS_EPSILON    1
-#define SDL_RECT_CAN_OVERFLOW    SDL_RectCanOverflow
-#define SDL_HASINTERSECTION      SDL_HasRectIntersection
-#define SDL_INTERSECTRECT        SDL_GetRectIntersection
+#define SDL_HASINTERSECTION      SDL_HasIntersection
+#define SDL_INTERSECTRECT        SDL_IntersectRect
 #define SDL_RECTEMPTY            SDL_RectEmpty
-#define SDL_UNIONRECT            SDL_GetRectUnion
-#define SDL_ENCLOSEPOINTS        SDL_GetRectEnclosingPoints
-#define SDL_INTERSECTRECTANDLINE SDL_GetRectAndLineIntersection
+#define SDL_UNIONRECT            SDL_UnionRect
+#define SDL_ENCLOSEPOINTS        SDL_EnclosePoints
+#define SDL_INTERSECTRECTANDLINE SDL_IntersectRectAndLine
 #include "SDL_rect_impl.h"
 
 #define RECTTYPE                 SDL_FRect
 #define POINTTYPE                SDL_FPoint
 #define SCALARTYPE               float
 #define BIGSCALARTYPE            double
-#define COMPUTEOUTCODE           ComputeOutCodeFloat
-#define ENCLOSEPOINTS_EPSILON    0.0f
-#define SDL_RECT_CAN_OVERFLOW    SDL_RectCanOverflowFloat
-#define SDL_HASINTERSECTION      SDL_HasRectIntersectionFloat
-#define SDL_INTERSECTRECT        SDL_GetRectIntersectionFloat
-#define SDL_RECTEMPTY            SDL_RectEmptyFloat
-#define SDL_UNIONRECT            SDL_GetRectUnionFloat
-#define SDL_ENCLOSEPOINTS        SDL_GetRectEnclosingPointsFloat
-#define SDL_INTERSECTRECTANDLINE SDL_GetRectAndLineIntersectionFloat
+#define COMPUTEOUTCODE           ComputeOutCodeF
+#define SDL_HASINTERSECTION      SDL_HasIntersectionF
+#define SDL_INTERSECTRECT        SDL_IntersectFRect
+#define SDL_RECTEMPTY            SDL_FRectEmpty
+#define SDL_UNIONRECT            SDL_UnionFRect
+#define SDL_ENCLOSEPOINTS        SDL_EncloseFPoints
+#define SDL_INTERSECTRECTANDLINE SDL_IntersectFRectAndLine
 #include "SDL_rect_impl.h"
+
+/* vi: set ts=4 sw=4 expandtab: */

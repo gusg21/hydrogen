@@ -30,41 +30,46 @@ add_library(HydrogenCore STATIC
     src/systems/sys_rendering.cc    include/core/systems/sys_rendering.h
 
     )
+if (MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:library")
+endif()
+target_compile_definitions(HydrogenCore PRIVATE "HCORE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 
 # Core include dir
 target_include_directories(HydrogenCore PUBLIC include)
 
 # SDL
-set(SDL_STATIC OUTPUT_NAME_<CONFIG>)
+set(SDL_STATIC ON)
 set(SDL_DISABLE_UNINSTALL ON)
 set(SDL_TEST_LIBRARY OFF)
-set(SDL_TESTS OFF )
+set(SDL_TESTS OFF)
 set(SDL_EXAMPLES OFF)
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
-target_link_libraries(HydrogenCore PUBLIC SDL3::SDL3-static)
+target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-static)
+if(TARGET SDL2::SDL2main)
+    target_link_libraries(HydrogenCore PRIVATE SDL2::SDL2main)
+endif()
 
-set_target_properties(SDL3-shared PROPERTIES FOLDER "SDL")
-set_target_properties(SDL3-static PROPERTIES FOLDER "SDL")
+set_target_properties(SDL2-static PROPERTIES FOLDER "SDL")
 
-# BGFX
-set(BGFX_CUSTOM_TARGETS OFF)
-set(BGFX_BUILD_TOOLS_SHADER ON)
-set(BGFX_BUILD_TOOLS ON)
-set(BGFX_INSTALL OFF)
-set(BX_CONFIG_DEBUG ON)
-add_subdirectory(external/bgfx.cmake EXCLUDE_FROM_ALL)
-target_link_libraries(HydrogenCore PUBLIC bgfx)
-target_link_libraries(HydrogenCore PRIVATE bx)
-target_link_libraries(HydrogenCore PRIVATE bimg)
-add_dependencies(HydrogenCore shaderc)
+# OpenGL
+find_package(OpenGL REQUIRED)
+target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
+
+# GLAD
+add_subdirectory(external/glad)
+target_link_libraries(HydrogenCore PUBLIC glad)
 
 # ImGui integrations
 add_subdirectory(external/imgui.cmake EXCLUDE_FROM_ALL)
 target_link_libraries(HydrogenCore PUBLIC imgui.cmake)
 target_include_directories(HydrogenCore PRIVATE external/sdl-imgui)
-target_include_directories(HydrogenCore PRIVATE external/bgfx-imgui)
+target_include_directories(HydrogenCore PRIVATE external/opengl-imgui)
+
 target_sources(HydrogenCore PRIVATE 
-    external/sdl-imgui/imgui_impl_sdl3.cpp external/bgfx-imgui/imgui_impl_bgfx.cpp
+    external/sdl-imgui/imgui_impl_sdl2.cpp
+    external/opengl-imgui/imgui_impl_opengl3.cpp
     )
 
 set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
@@ -91,7 +96,13 @@ target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
 # generated shader code
 function(HydrogenCore_CopyShaders folder)
     add_custom_target(HydrogenCore_CopyShaders
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/generated generated
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
     )
     add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
+endfunction()
+
+function(HydrogenCore_SetupMain target)
+    if(TARGET SDL2::SDL2main)
+        target_link_libraries(${target} PRIVATE SDL2::SDL2main)
+    endif()
 endfunction()

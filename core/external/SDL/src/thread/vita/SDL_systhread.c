@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_VITA
 
@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "SDL_error.h"
+#include "SDL_thread.h"
 #include "../SDL_systhread.h"
 #include "../SDL_thread_c.h"
 #include <psp2/types.h>
@@ -48,10 +50,7 @@ static int ThreadEntry(SceSize args, void *argp)
     return 0;
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread,
-                         SDL_FunctionPointer pfnBeginThread,
-                         SDL_FunctionPointer pfnEndThread)
-
+int SDL_SYS_CreateThread(SDL_Thread *thread)
 {
     char thread_name[VITA_THREAD_NAME_MAX];
     size_t stack_size = VITA_THREAD_STACK_SIZE_DEFAULT;
@@ -77,7 +76,7 @@ int SDL_SYS_CreateThread(SDL_Thread *thread,
         ThreadEntry, // function to run
         0,           // priority. 0 means priority of calling thread
         stack_size,  // stack size
-        0,           // attributes. always 0
+        0,           // attibutes. always 0
         0,           // cpu affinity mask. 0 = all CPUs
         NULL         // opt. always NULL
     );
@@ -95,9 +94,9 @@ void SDL_SYS_SetupThread(const char *name)
     /* Do nothing. */
 }
 
-SDL_ThreadID SDL_GetCurrentThreadID(void)
+SDL_threadID SDL_ThreadID(void)
 {
-    return (SDL_ThreadID)sceKernelGetThreadId();
+    return (SDL_threadID)sceKernelGetThreadId();
 }
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
@@ -134,3 +133,5 @@ int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 }
 
 #endif /* SDL_THREAD_VITA */
+
+/* vi: set ts=4 sw=4 expandtab: */

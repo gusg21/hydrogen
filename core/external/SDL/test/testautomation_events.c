@@ -1,133 +1,105 @@
 /**
  * Events test suite
  */
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_test.h>
-#include "testautomation_suites.h"
+
+#include <stdio.h>
+
+#include "SDL.h"
+#include "SDL_test.h"
 
 /* ================= Test Case Implementation ================== */
 
 /* Test case functions */
 
 /* Flag indicating if the userdata should be checked */
-static int g_userdataCheck = 0;
+int _userdataCheck = 0;
 
 /* Userdata value to check */
-static int g_userdataValue = 0;
+int _userdataValue = 0;
 
 /* Flag indicating that the filter was called */
-static int g_eventFilterCalled = 0;
+int _eventFilterCalled = 0;
 
 /* Userdata values for event */
-static int g_userdataValue1 = 1;
-static int g_userdataValue2 = 2;
-
-#define MAX_ITERATIONS 100
+int _userdataValue1 = 1;
+int _userdataValue2 = 2;
 
 /* Event filter that sets some flags and optionally checks userdata */
-static SDL_bool SDLCALL events_sampleNullEventFilter(void *userdata, SDL_Event *event)
+int SDLCALL _events_sampleNullEventFilter(void *userdata, SDL_Event *event)
 {
-    g_eventFilterCalled = 1;
+    _eventFilterCalled = 1;
 
-    if (g_userdataCheck != 0) {
+    if (_userdataCheck != 0) {
         SDLTest_AssertCheck(userdata != NULL, "Check userdata pointer, expected: non-NULL, got: %s", (userdata != NULL) ? "non-NULL" : "NULL");
         if (userdata != NULL) {
-            SDLTest_AssertCheck(*(int *)userdata == g_userdataValue, "Check userdata value, expected: %i, got: %i", g_userdataValue, *(int *)userdata);
+            SDLTest_AssertCheck(*(int *)userdata == _userdataValue, "Check userdata value, expected: %i, got: %i", _userdataValue, *(int *)userdata);
         }
     }
 
-    return SDL_TRUE;
+    return 0;
 }
 
 /**
- * Test pumping and peeking events.
+ * @brief Test pumping and peeking events.
  *
- * \sa SDL_PumpEvents
- * \sa SDL_PollEvent
+ * @sa http://wiki.libsdl.org/SDL_PumpEvents
+ * @sa http://wiki.libsdl.org/SDL_PollEvent
  */
-static int events_pushPumpAndPollUserevent(void *arg)
+int events_pushPumpAndPollUserevent(void *arg)
 {
-    SDL_Event event_in;
-    SDL_Event event_out;
+    SDL_Event event1;
+    SDL_Event event2;
     int result;
-    int i;
-    Sint32 ref_code = SDLTest_RandomSint32();
-    SDL_Window *event_window;
-
-    /* Flush all events */
-    SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
-    SDLTest_AssertCheck(!SDL_HasEvents(SDL_EVENT_USER, SDL_EVENT_USER), "Check SDL_HasEvents returns false");
 
     /* Create user event */
-    event_in.type = SDL_EVENT_USER;
-    event_in.user.windowID = 0;
-    event_in.common.timestamp = 0;
-    event_in.user.code = ref_code;
-    event_in.user.data1 = (void *)&g_userdataValue1;
-    event_in.user.data2 = (void *)&g_userdataValue2;
+    event1.type = SDL_USEREVENT;
+    event1.user.code = SDLTest_RandomSint32();
+    event1.user.data1 = (void *)&_userdataValue1;
+    event1.user.data2 = (void *)&_userdataValue2;
 
     /* Push a user event onto the queue and force queue update */
-    SDL_PushEvent(&event_in);
+    SDL_PushEvent(&event1);
     SDLTest_AssertPass("Call to SDL_PushEvent()");
     SDL_PumpEvents();
     SDLTest_AssertPass("Call to SDL_PumpEvents()");
 
-    SDLTest_AssertCheck(SDL_HasEvents(SDL_EVENT_USER, SDL_EVENT_USER), "Check SDL_HasEvents returns true");
-
-    /* Poll until we get a user event. */
-    for (i = 0; i < MAX_ITERATIONS; i++) {
-        result = SDL_PollEvent(&event_out);
-        SDLTest_AssertPass("Call to SDL_PollEvent()");
-        SDLTest_AssertCheck(result == 1, "Check result from SDL_PollEvent, expected: 1, got: %d", result);
-        if (!result) {
-            break;
-        }
-        if (event_out.type == SDL_EVENT_USER) {
-            break;
-        }
-    }
-    SDLTest_AssertCheck(i < MAX_ITERATIONS, "Check the user event is seen in less then %d polls, got %d poll", MAX_ITERATIONS, i + 1);
-
-    SDLTest_AssertCheck(SDL_EVENT_USER == event_out.type, "Check event type is SDL_EVENT_USER, expected: 0x%x, got: 0x%" SDL_PRIx32, SDL_EVENT_USER, event_out.type);
-    SDLTest_AssertCheck(ref_code == event_out.user.code, "Check SDL_Event.user.code, expected: 0x%" SDL_PRIx32 ", got: 0x%" SDL_PRIx32 , ref_code, event_out.user.code);
-    SDLTest_AssertCheck(0 == event_out.user.windowID, "Check SDL_Event.user.windowID, expected: NULL , got: %" SDL_PRIu32, event_out.user.windowID);
-    SDLTest_AssertCheck((void *)&g_userdataValue1 == event_out.user.data1, "Check SDL_Event.user.data1, expected: %p, got: %p", (void *)&g_userdataValue1, event_out.user.data1);
-    SDLTest_AssertCheck((void *)&g_userdataValue2 == event_out.user.data2, "Check SDL_Event.user.data2, expected: %p, got: %p", (void *)&g_userdataValue2, event_out.user.data2);
-    event_window = SDL_GetWindowFromEvent(&event_out);
-    SDLTest_AssertCheck(NULL == SDL_GetWindowFromEvent(&event_out), "Check SDL_GetWindowFromEvent returns the window id from a user event, expected: NULL, got: %p", event_window);
+    /* Poll for user event */
+    result = SDL_PollEvent(&event2);
+    SDLTest_AssertPass("Call to SDL_PollEvent()");
+    SDLTest_AssertCheck(result == 1, "Check result from SDL_PollEvent, expected: 1, got: %d", result);
 
     /* Need to finish getting all events and sentinel, otherwise other tests that rely on event are in bad state */
-    SDL_FlushEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST);
+    while (SDL_PollEvent(&event2)) {
+    }
 
     return TEST_COMPLETED;
 }
 
 /**
- * Adds and deletes an event watch function with NULL userdata
+ * @brief Adds and deletes an event watch function with NULL userdata
  *
- * \sa SDL_AddEventWatch
- * \sa SDL_DelEventWatch
+ * @sa http://wiki.libsdl.org/SDL_AddEventWatch
+ * @sa http://wiki.libsdl.org/SDL_DelEventWatch
  *
  */
-static int events_addDelEventWatch(void *arg)
+int events_addDelEventWatch(void *arg)
 {
     SDL_Event event;
 
     /* Create user event */
-    event.type = SDL_EVENT_USER;
-    event.common.timestamp = 0;
+    event.type = SDL_USEREVENT;
     event.user.code = SDLTest_RandomSint32();
-    event.user.data1 = (void *)&g_userdataValue1;
-    event.user.data2 = (void *)&g_userdataValue2;
+    event.user.data1 = (void *)&_userdataValue1;
+    event.user.data2 = (void *)&_userdataValue2;
 
     /* Disable userdata check */
-    g_userdataCheck = 0;
+    _userdataCheck = 0;
 
     /* Reset event filter call tracker */
-    g_eventFilterCalled = 0;
+    _eventFilterCalled = 0;
 
     /* Add watch */
-    SDL_AddEventWatch(events_sampleNullEventFilter, NULL);
+    SDL_AddEventWatch(_events_sampleNullEventFilter, NULL);
     SDLTest_AssertPass("Call to SDL_AddEventWatch()");
 
     /* Push a user event onto the queue and force queue update */
@@ -135,50 +107,49 @@ static int events_addDelEventWatch(void *arg)
     SDLTest_AssertPass("Call to SDL_PushEvent()");
     SDL_PumpEvents();
     SDLTest_AssertPass("Call to SDL_PumpEvents()");
-    SDLTest_AssertCheck(g_eventFilterCalled == 1, "Check that event filter was called");
+    SDLTest_AssertCheck(_eventFilterCalled == 1, "Check that event filter was called");
 
     /* Delete watch */
-    SDL_DelEventWatch(events_sampleNullEventFilter, NULL);
+    SDL_DelEventWatch(_events_sampleNullEventFilter, NULL);
     SDLTest_AssertPass("Call to SDL_DelEventWatch()");
 
     /* Push a user event onto the queue and force queue update */
-    g_eventFilterCalled = 0;
+    _eventFilterCalled = 0;
     SDL_PushEvent(&event);
     SDLTest_AssertPass("Call to SDL_PushEvent()");
     SDL_PumpEvents();
     SDLTest_AssertPass("Call to SDL_PumpEvents()");
-    SDLTest_AssertCheck(g_eventFilterCalled == 0, "Check that event filter was NOT called");
+    SDLTest_AssertCheck(_eventFilterCalled == 0, "Check that event filter was NOT called");
 
     return TEST_COMPLETED;
 }
 
 /**
- * Adds and deletes an event watch function with userdata
+ * @brief Adds and deletes an event watch function with userdata
  *
- * \sa SDL_AddEventWatch
- * \sa SDL_DelEventWatch
+ * @sa http://wiki.libsdl.org/SDL_AddEventWatch
+ * @sa http://wiki.libsdl.org/SDL_DelEventWatch
  *
  */
-static int events_addDelEventWatchWithUserdata(void *arg)
+int events_addDelEventWatchWithUserdata(void *arg)
 {
     SDL_Event event;
 
     /* Create user event */
-    event.type = SDL_EVENT_USER;
-    event.common.timestamp = 0;
+    event.type = SDL_USEREVENT;
     event.user.code = SDLTest_RandomSint32();
-    event.user.data1 = (void *)&g_userdataValue1;
-    event.user.data2 = (void *)&g_userdataValue2;
+    event.user.data1 = (void *)&_userdataValue1;
+    event.user.data2 = (void *)&_userdataValue2;
 
     /* Enable userdata check and set a value to check */
-    g_userdataCheck = 1;
-    g_userdataValue = SDLTest_RandomIntegerInRange(-1024, 1024);
+    _userdataCheck = 1;
+    _userdataValue = SDLTest_RandomIntegerInRange(-1024, 1024);
 
     /* Reset event filter call tracker */
-    g_eventFilterCalled = 0;
+    _eventFilterCalled = 0;
 
     /* Add watch */
-    SDL_AddEventWatch(events_sampleNullEventFilter, (void *)&g_userdataValue);
+    SDL_AddEventWatch(_events_sampleNullEventFilter, (void *)&_userdataValue);
     SDLTest_AssertPass("Call to SDL_AddEventWatch()");
 
     /* Push a user event onto the queue and force queue update */
@@ -186,19 +157,19 @@ static int events_addDelEventWatchWithUserdata(void *arg)
     SDLTest_AssertPass("Call to SDL_PushEvent()");
     SDL_PumpEvents();
     SDLTest_AssertPass("Call to SDL_PumpEvents()");
-    SDLTest_AssertCheck(g_eventFilterCalled == 1, "Check that event filter was called");
+    SDLTest_AssertCheck(_eventFilterCalled == 1, "Check that event filter was called");
 
     /* Delete watch */
-    SDL_DelEventWatch(events_sampleNullEventFilter, (void *)&g_userdataValue);
+    SDL_DelEventWatch(_events_sampleNullEventFilter, (void *)&_userdataValue);
     SDLTest_AssertPass("Call to SDL_DelEventWatch()");
 
     /* Push a user event onto the queue and force queue update */
-    g_eventFilterCalled = 0;
+    _eventFilterCalled = 0;
     SDL_PushEvent(&event);
     SDLTest_AssertPass("Call to SDL_PushEvent()");
     SDL_PumpEvents();
     SDLTest_AssertPass("Call to SDL_PumpEvents()");
-    SDLTest_AssertCheck(g_eventFilterCalled == 0, "Check that event filter was NOT called");
+    SDLTest_AssertCheck(_eventFilterCalled == 0, "Check that event filter was NOT called");
 
     return TEST_COMPLETED;
 }
@@ -206,24 +177,21 @@ static int events_addDelEventWatchWithUserdata(void *arg)
 /* ================= Test References ================== */
 
 /* Events test cases */
-static const SDLTest_TestCaseReference eventsTest_pushPumpAndPollUserevent = {
-    events_pushPumpAndPollUserevent, "events_pushPumpAndPollUserevent", "Pushes, pumps and polls a user event", TEST_ENABLED
+static const SDLTest_TestCaseReference eventsTest1 = {
+    (SDLTest_TestCaseFp)events_pushPumpAndPollUserevent, "events_pushPumpAndPollUserevent", "Pushes, pumps and polls a user event", TEST_ENABLED
 };
 
-static const SDLTest_TestCaseReference eventsTest_addDelEventWatch = {
-    events_addDelEventWatch, "events_addDelEventWatch", "Adds and deletes an event watch function with NULL userdata", TEST_ENABLED
+static const SDLTest_TestCaseReference eventsTest2 = {
+    (SDLTest_TestCaseFp)events_addDelEventWatch, "events_addDelEventWatch", "Adds and deletes an event watch function with NULL userdata", TEST_ENABLED
 };
 
-static const SDLTest_TestCaseReference eventsTest_addDelEventWatchWithUserdata = {
-    events_addDelEventWatchWithUserdata, "events_addDelEventWatchWithUserdata", "Adds and deletes an event watch function with userdata", TEST_ENABLED
+static const SDLTest_TestCaseReference eventsTest3 = {
+    (SDLTest_TestCaseFp)events_addDelEventWatchWithUserdata, "events_addDelEventWatchWithUserdata", "Adds and deletes an event watch function with userdata", TEST_ENABLED
 };
 
 /* Sequence of Events test cases */
 static const SDLTest_TestCaseReference *eventsTests[] = {
-    &eventsTest_pushPumpAndPollUserevent,
-    &eventsTest_addDelEventWatch,
-    &eventsTest_addDelEventWatchWithUserdata,
-    NULL
+    &eventsTest1, &eventsTest2, &eventsTest3, NULL
 };
 
 /* Events test suite (global) */

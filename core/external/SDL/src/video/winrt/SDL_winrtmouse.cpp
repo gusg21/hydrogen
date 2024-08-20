@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_WINRT
 
@@ -37,6 +37,7 @@ extern "C" {
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
 #include "../SDL_sysvideo.h"
+#include "SDL_events.h"
 }
 
 #include "../../core/winrt/SDL_winrtapp_direct3d.h"
@@ -54,10 +55,10 @@ static SDL_Cursor *WINRT_CreateSystemCursor(SDL_SystemCursor id)
     default:
         SDL_assert(0);
         return NULL;
-    case SDL_SYSTEM_CURSOR_DEFAULT:
+    case SDL_SYSTEM_CURSOR_ARROW:
         cursorType = CoreCursorType::Arrow;
         break;
-    case SDL_SYSTEM_CURSOR_TEXT:
+    case SDL_SYSTEM_CURSOR_IBEAM:
         cursorType = CoreCursorType::IBeam;
         break;
     case SDL_SYSTEM_CURSOR_WAIT:
@@ -66,53 +67,29 @@ static SDL_Cursor *WINRT_CreateSystemCursor(SDL_SystemCursor id)
     case SDL_SYSTEM_CURSOR_CROSSHAIR:
         cursorType = CoreCursorType::Cross;
         break;
-    case SDL_SYSTEM_CURSOR_PROGRESS:
+    case SDL_SYSTEM_CURSOR_WAITARROW:
         cursorType = CoreCursorType::Wait;
         break;
-    case SDL_SYSTEM_CURSOR_NWSE_RESIZE:
+    case SDL_SYSTEM_CURSOR_SIZENWSE:
         cursorType = CoreCursorType::SizeNorthwestSoutheast;
         break;
-    case SDL_SYSTEM_CURSOR_NESW_RESIZE:
+    case SDL_SYSTEM_CURSOR_SIZENESW:
         cursorType = CoreCursorType::SizeNortheastSouthwest;
         break;
-    case SDL_SYSTEM_CURSOR_EW_RESIZE:
+    case SDL_SYSTEM_CURSOR_SIZEWE:
         cursorType = CoreCursorType::SizeWestEast;
         break;
-    case SDL_SYSTEM_CURSOR_NS_RESIZE:
+    case SDL_SYSTEM_CURSOR_SIZENS:
         cursorType = CoreCursorType::SizeNorthSouth;
         break;
-    case SDL_SYSTEM_CURSOR_MOVE:
+    case SDL_SYSTEM_CURSOR_SIZEALL:
         cursorType = CoreCursorType::SizeAll;
         break;
-    case SDL_SYSTEM_CURSOR_NOT_ALLOWED:
+    case SDL_SYSTEM_CURSOR_NO:
         cursorType = CoreCursorType::UniversalNo;
         break;
-    case SDL_SYSTEM_CURSOR_POINTER:
+    case SDL_SYSTEM_CURSOR_HAND:
         cursorType = CoreCursorType::Hand;
-        break;
-    case SDL_SYSTEM_CURSOR_NW_RESIZE:
-        cursorType = CoreCursorType::SizeNorthwestSoutheast;
-        break;
-    case SDL_SYSTEM_CURSOR_N_RESIZE:
-        cursorType = CoreCursorType::SizeNorthSouth;
-        break;
-    case SDL_SYSTEM_CURSOR_NE_RESIZE:
-        cursorType = CoreCursorType::SizeNortheastSouthwest;
-        break;
-    case SDL_SYSTEM_CURSOR_E_RESIZE:
-        cursorType = CoreCursorType::SizeWestEast;
-        break;
-    case SDL_SYSTEM_CURSOR_SE_RESIZE:
-        cursorType = CoreCursorType::SizeNorthwestSoutheast;
-        break;
-    case SDL_SYSTEM_CURSOR_S_RESIZE:
-        cursorType = CoreCursorType::SizeNorthSouth;
-        break;
-    case SDL_SYSTEM_CURSOR_SW_RESIZE:
-        cursorType = CoreCursorType::SizeNortheastSouthwest;
-        break;
-    case SDL_SYSTEM_CURSOR_W_RESIZE:
-        cursorType = CoreCursorType::SizeWestEast;
         break;
     }
 
@@ -120,12 +97,14 @@ static SDL_Cursor *WINRT_CreateSystemCursor(SDL_SystemCursor id)
     if (cursor) {
         /* Create a pointer to a COM reference to a cursor.  The extra
            pointer is used (on top of the COM reference) to allow the cursor
-           to be referenced by the SDL_cursor's internal field, which is
+           to be referenced by the SDL_cursor's driverdata field, which is
            a void pointer.
         */
         CoreCursor ^ *theCursor = new CoreCursor ^ (nullptr);
         *theCursor = ref new CoreCursor(cursorType, 0);
-        cursor->internal = (SDL_CursorData *)theCursor;
+        cursor->driverdata = (void *)theCursor;
+    } else {
+        SDL_OutOfMemory();
     }
 
     return cursor;
@@ -133,13 +112,13 @@ static SDL_Cursor *WINRT_CreateSystemCursor(SDL_SystemCursor id)
 
 static SDL_Cursor *WINRT_CreateDefaultCursor()
 {
-    return WINRT_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
+    return WINRT_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
 }
 
 static void WINRT_FreeCursor(SDL_Cursor *cursor)
 {
-    if (cursor->internal) {
-        CoreCursor ^ *theCursor = (CoreCursor ^ *)cursor->internal;
+    if (cursor->driverdata) {
+        CoreCursor ^ *theCursor = (CoreCursor ^ *)cursor->driverdata;
         *theCursor = nullptr; // Release the COM reference to the CoreCursor
         delete theCursor;     // Delete the pointer to the COM reference
     }
@@ -155,7 +134,7 @@ static int WINRT_ShowCursor(SDL_Cursor *cursor)
 
     CoreWindow ^ coreWindow = CoreWindow::GetForCurrentThread();
     if (cursor) {
-        CoreCursor ^ *theCursor = (CoreCursor ^ *)cursor->internal;
+        CoreCursor ^ *theCursor = (CoreCursor ^ *)cursor->driverdata;
         coreWindow->PointerCursor = *theCursor;
     } else {
         // HACK ALERT: TL;DR - Hiding the cursor in WinRT/UWP apps is weird, and
@@ -198,8 +177,8 @@ static int WINRT_ShowCursor(SDL_Cursor *cursor)
         // Tech notes:
         //  - SDL's blank cursor resource uses a resource ID of 5000.
         //  - SDL's cursor resources consist of the following two files:
-        //     - src/main/winrt/SDL3-WinRTResource_BlankCursor.cur -- cursor pixel data
-        //     - src/main/winrt/SDL3-WinRTResources.rc             -- declares the cursor resource, and its ID (of 5000)
+        //     - src/main/winrt/SDL2-WinRTResource_BlankCursor.cur -- cursor pixel data
+        //     - src/main/winrt/SDL2-WinRTResources.rc             -- declares the cursor resource, and its ID (of 5000)
         //
 
         const unsigned int win32CursorResourceID = 5000;
@@ -226,7 +205,7 @@ static int WINRT_SetRelativeMouseMode(SDL_bool enabled)
     return 0;
 }
 
-void WINRT_InitMouse(SDL_VideoDevice *_this)
+void WINRT_InitMouse(_THIS)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
@@ -248,8 +227,10 @@ void WINRT_InitMouse(SDL_VideoDevice *_this)
 #endif
 }
 
-void WINRT_QuitMouse(SDL_VideoDevice *_this)
+void WINRT_QuitMouse(_THIS)
 {
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_windowsvideo_h_
 #define SDL_windowsvideo_h_
@@ -27,13 +27,7 @@
 
 #include "../SDL_sysvideo.h"
 
-#ifdef HAVE_DXGI_H
-#define CINTERFACE
-#define COBJMACROS
-#include <dxgi.h>
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 #include <msctf.h>
 #else
 #include "SDL_msctf.h"
@@ -47,11 +41,9 @@
 
 #include "SDL_windowsclipboard.h"
 #include "SDL_windowsevents.h"
-#include "SDL_windowsgameinput.h"
 #include "SDL_windowsopengl.h"
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-#include "SDL_windowsshape.h"
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 #include "SDL_windowskeyboard.h"
 #include "SDL_windowsmodes.h"
 #include "SDL_windowsmouse.h"
@@ -59,10 +51,8 @@
 #endif
 
 #include "SDL_windowswindow.h"
-
-#ifndef USER_DEFAULT_SCREEN_DPI
-#define USER_DEFAULT_SCREEN_DPI 96
-#endif
+#include "SDL_events.h"
+#include "SDL_loadso.h"
 
 #if WINVER < 0x0601
 /* Touch input definitions */
@@ -372,22 +362,17 @@ typedef struct tagINPUTCONTEXT2
     DWORD fdwInit;
     DWORD dwReserve[3];
 } INPUTCONTEXT2, *PINPUTCONTEXT2, NEAR *NPINPUTCONTEXT2, FAR *LPINPUTCONTEXT2;
-#endif
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 
 /* Private display data */
 
-struct SDL_VideoData
+typedef struct SDL_VideoData
 {
     int render;
 
-    SDL_bool coinitialized;
-#if !(defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES))
-    SDL_bool oleinitialized;
-#endif /* !(defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)) */
-
     DWORD clipboard_count;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES) /* Xbox doesn't support user32/shcore*/
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__) /* Xbox doesn't support user32/shcore*/
     /* Touch input functions */
     void *userDLL;
     /* *INDENT-OFF* */ /* clang-format off */
@@ -404,10 +389,6 @@ struct SDL_VideoData
     UINT (WINAPI *GetDpiForWindow)( HWND );
     BOOL (WINAPI *AreDpiAwarenessContextsEqual)(DPI_AWARENESS_CONTEXT, DPI_AWARENESS_CONTEXT);
     BOOL (WINAPI *IsValidDpiAwarenessContext)(DPI_AWARENESS_CONTEXT);
-    /* DisplayConfig functions */
-    LONG (WINAPI *GetDisplayConfigBufferSizes)( UINT32, UINT32*, UINT32* );
-    LONG (WINAPI *QueryDisplayConfig)( UINT32, UINT32*, DISPLAYCONFIG_PATH_INFO*, UINT32*, DISPLAYCONFIG_MODE_INFO*, DISPLAYCONFIG_TOPOLOGY_ID*);
-    LONG (WINAPI *DisplayConfigGetDeviceInfo)( DISPLAYCONFIG_DEVICE_INFO_HEADER*);
     /* *INDENT-ON* */ /* clang-format on */
 
     void *shcoreDLL;
@@ -418,62 +399,42 @@ struct SDL_VideoData
                                         UINT             *dpiY );
     HRESULT (WINAPI *SetProcessDpiAwareness)(PROCESS_DPI_AWARENESS dpiAwareness);
     /* *INDENT-ON* */ /* clang-format on */
-#endif                /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif                /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
-#ifdef HAVE_DXGI_H
-    void *dxgiDLL;
-    IDXGIFactory *pDXGIFactory;
-#endif
-
+    SDL_bool dpi_scaling_enabled;
     SDL_bool cleared;
 
-    BYTE *rawinput;
-    UINT rawinput_offset;
-    UINT rawinput_size;
-    UINT rawinput_count;
-    Uint64 last_rawinput_poll;
-    SDL_Point last_raw_mouse_position;
-    SDL_bool raw_mouse_enabled;
-    SDL_bool raw_keyboard_enabled;
-    SDL_bool pending_E1_key_sequence;
-    Uint32 raw_input_enabled;
-
-    WIN_GameInputData *gameinput_context;
-
 #ifndef SDL_DISABLE_WINDOWS_IME
+    SDL_bool ime_com_initialized;
+    struct ITfThreadMgr *ime_threadmgr;
     SDL_bool ime_initialized;
     SDL_bool ime_enabled;
     SDL_bool ime_available;
-    SDL_bool ime_internal_composition;
-    SDL_bool ime_internal_candidates;
     HWND ime_hwnd_main;
     HWND ime_hwnd_current;
-    SDL_bool ime_needs_clear_composition;
+    SDL_bool ime_suppress_endcomposition_event;
     HIMC ime_himc;
 
     WCHAR *ime_composition;
     int ime_composition_length;
     WCHAR ime_readingstring[16];
     int ime_cursor;
-    int ime_selected_start;
-    int ime_selected_length;
 
-    SDL_bool ime_candidates_open;
-    SDL_bool ime_update_candidates;
-    char *ime_candidates[MAX_CANDLIST];
-    int ime_candcount;
+    SDL_bool ime_candlist;
+    WCHAR *ime_candidates;
+    DWORD ime_candcount;
     DWORD ime_candref;
     DWORD ime_candsel;
+    UINT ime_candpgsize;
     int ime_candlistindexbase;
-    SDL_bool ime_horizontal_candidates;
-#endif
+    SDL_bool ime_candvertical;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-    COMPOSITIONFORM ime_composition_area;
-    CANDIDATEFORM ime_candidate_area;
-#endif /* !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES) */
+    SDL_bool ime_dirty;
+    SDL_Rect ime_rect;
+    SDL_Rect ime_candlistrect;
+    int ime_winwidth;
+    int ime_winheight;
 
-#ifndef SDL_DISABLE_WINDOWS_IME
     HKL ime_hkl;
     void *ime_himm32;
     /* *INDENT-OFF* */ /* clang-format off */
@@ -485,11 +446,20 @@ struct SDL_VideoData
     BOOL (WINAPI *ImmUnlockIMCC)(HIMCC himcc);
     /* *INDENT-ON* */ /* clang-format on */
 
+    SDL_bool ime_uiless;
+    struct ITfThreadMgrEx *ime_threadmgrex;
+    DWORD ime_uielemsinkcookie;
+    DWORD ime_alpnsinkcookie;
+    DWORD ime_openmodesinkcookie;
+    DWORD ime_convmodesinkcookie;
+    TSFSink *ime_uielemsink;
+    TSFSink *ime_ippasink;
+    LONG ime_uicontext;
 #endif /* !SDL_DISABLE_WINDOWS_IME */
 
     BYTE pre_hook_key_state[256];
     UINT _SDL_WAKEUP;
-};
+} SDL_VideoData;
 
 extern SDL_bool g_WindowsEnableMessageLoop;
 extern SDL_bool g_WindowsEnableMenuMnemonics;
@@ -498,7 +468,8 @@ extern SDL_bool g_WindowFrameUsableWhileCursorHidden;
 typedef struct IDirect3D9 IDirect3D9;
 extern SDL_bool D3D_LoadDLL(void **pD3DDLL, IDirect3D9 **pDirect3D9Interface);
 
-extern SDL_SystemTheme WIN_GetSystemTheme(void);
-extern SDL_bool WIN_IsPerMonitorV2DPIAware(SDL_VideoDevice *_this);
+extern SDL_bool WIN_IsPerMonitorV2DPIAware(_THIS);
 
 #endif /* SDL_windowsvideo_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

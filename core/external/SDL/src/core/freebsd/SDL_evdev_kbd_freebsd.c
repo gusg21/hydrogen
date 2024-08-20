@@ -19,9 +19,10 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #include "../linux/SDL_evdev_kbd.h"
+#include "SDL_hints.h"
 
 #ifdef SDL_INPUT_FBSDKBIO
 
@@ -77,7 +78,7 @@ static int kbd_cleanup_atexit_installed = 0;
 static struct sigaction old_sigaction[NSIG];
 
 static int fatal_signals[] = {
-    /* Handlers for SIGTERM and SIGINT are installed in SDL_InitQuit. */
+    /* Handlers for SIGTERM and SIGINT are installed in SDL_QuitInit. */
     SIGHUP, SIGQUIT, SIGILL, SIGABRT,
     SIGFPE, SIGSEGV, SIGPIPE, SIGBUS,
     SIGSYS
@@ -135,7 +136,7 @@ static void kbd_cleanup_signal_action(int signum, siginfo_t *info, void *ucontex
 
 static void kbd_unregister_emerg_cleanup(void)
 {
-    int tabidx;
+    int tabidx, signum;
 
     kbd_cleanup_state = NULL;
 
@@ -147,7 +148,7 @@ static void kbd_unregister_emerg_cleanup(void)
     for (tabidx = 0; tabidx < sizeof(fatal_signals) / sizeof(fatal_signals[0]); ++tabidx) {
         struct sigaction *old_action_p;
         struct sigaction cur_action;
-        int signum = fatal_signals[tabidx];
+        signum = fatal_signals[tabidx];
         old_action_p = &(old_sigaction[signum]);
 
         /* Examine current signal action */
@@ -155,7 +156,7 @@ static void kbd_unregister_emerg_cleanup(void)
             continue;
         }
 
-        /* Check if action installed and not modified */
+        /* Check if action installed and not modifed */
         if (!(cur_action.sa_flags & SA_SIGINFO) || cur_action.sa_sigaction != &kbd_cleanup_signal_action) {
             continue;
         }
@@ -176,7 +177,7 @@ static void kbd_cleanup_atexit(void)
 
 static void kbd_register_emerg_cleanup(SDL_EVDEV_keyboard_state *kbd)
 {
-    int tabidx;
+    int tabidx, signum;
 
     if (kbd_cleanup_state) {
         return;
@@ -200,7 +201,7 @@ static void kbd_register_emerg_cleanup(SDL_EVDEV_keyboard_state *kbd)
     for (tabidx = 0; tabidx < sizeof(fatal_signals) / sizeof(fatal_signals[0]); ++tabidx) {
         struct sigaction *old_action_p;
         struct sigaction new_action;
-        int signum = fatal_signals[tabidx];
+        signum = fatal_signals[tabidx];
         old_action_p = &(old_sigaction[signum]);
         if (sigaction(signum, NULL, old_action_p)) {
             continue;
@@ -264,8 +265,8 @@ SDL_EVDEV_keyboard_state *SDL_EVDEV_kbd_init(void)
             SDL_free(kbd->key_map);
             kbd->key_map = &keymap_default_us_acc;
         }
-
-        if (SDL_GetHintBoolean(SDL_HINT_MUTE_CONSOLE_KEYBOARD, SDL_TRUE)) {
+        /* Allow inhibiting keyboard mute with env. variable for debugging etc. */
+        if (SDL_getenv("SDL_INPUT_FREEBSD_KEEP_KBD") == NULL) {
             /* Take keyboard from console and open the actual keyboard device.
              * Ensures that the keystrokes do not leak through to the console.
              */
@@ -542,7 +543,6 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
-                SDL_FALLTHROUGH;
             case LSH: /* left shift */
             case RSH: /* right shift */
                 k_shift(kbd, 0, down == 0);
@@ -552,7 +552,6 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
-                SDL_FALLTHROUGH;
             case LCTR: /* left ctrl */
             case RCTR: /* right ctrl */
                 k_shift(kbd, 1, down == 0);
@@ -562,7 +561,6 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
-                SDL_FALLTHROUGH;
             case LALT: /* left alt */
             case RALT: /* right alt */
                 k_shift(kbd, 2, down == 0);
@@ -611,3 +609,5 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
 }
 
 #endif /* SDL_INPUT_FBSDKBIO */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -136,24 +136,11 @@ uint32_t h_core::Model::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     std::vector<uint8_t> indexBuffer =
         model.buffers[indexBufferView.buffer].data;
 
-    // Create data buffers
-    m_vertexBuffer = bgfx::createVertexBuffer(
-        bgfx::makeRef(vertexBuffer, vertexCount), Vertex::layout);
 
-    m_indexBuffer = bgfx::createIndexBuffer(
-        bgfx::makeRef(indexBuffer.data(), indexBuffer.size()));
 
     return 0;
 }
 
-bgfx::VertexLayout h_core::Vertex::layout {};
-
 void h_core::Vertex::init() {
-    if (layout.m_hash == 0) { // TODO: hack :(
-        layout.begin()
-            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
-            .end();
-    }
+    
 }

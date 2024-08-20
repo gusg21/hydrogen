@@ -18,14 +18,12 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_FILESYSTEM_VITA
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
-
-#include "../SDL_sysfilesystem.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -36,12 +34,19 @@
 #include <limits.h>
 #include <fcntl.h>
 
-char *SDL_SYS_GetBasePath(void)
+#include "SDL_error.h"
+#include "SDL_stdinc.h"
+#include "SDL_filesystem.h"
+#include "SDL_rwops.h"
+
+char *SDL_GetBasePath(void)
 {
-    return SDL_strdup("app0:/");
+    const char *basepath = "app0:/";
+    char *retval = SDL_strdup(basepath);
+    return retval;
 }
 
-char *SDL_SYS_GetPrefPath(const char *org, const char *app)
+char *SDL_GetPrefPath(const char *org, const char *app)
 {
     const char *envr = "ux0:/data/";
     char *retval = NULL;
@@ -61,6 +66,7 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
     len += SDL_strlen(org) + SDL_strlen(app) + 3;
     retval = (char *)SDL_malloc(len);
     if (!retval) {
+        SDL_OutOfMemory();
         return NULL;
     }
 
@@ -82,11 +88,6 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
     return retval;
 }
 
-/* TODO */
-char *SDL_SYS_GetUserFolder(SDL_Folder folder)
-{
-    SDL_Unsupported();
-    return NULL;
-}
-
 #endif /* SDL_FILESYSTEM_VITA */
+
+/* vi: set ts=4 sw=4 expandtab: */

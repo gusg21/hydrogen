@@ -18,9 +18,17 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+
+#if defined(__clang_analyzer__) && !defined(SDL_DISABLE_ANALYZE_MACROS)
+#define SDL_DISABLE_ANALYZE_MACROS 1
+#endif
+
+#include "../SDL_internal.h"
 
 /* This file contains portable memory management functions for SDL */
+#include "SDL_stdinc.h"
+#include "SDL_atomic.h"
+#include "SDL_error.h"
 
 #ifndef HAVE_MALLOC
 #define LACKS_SYS_TYPES_H
@@ -496,13 +504,13 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #define MMAP_CLEARS 0 /* WINCE and some others apparently don't clear */
 #endif  /* WIN32 */
 
-#ifdef SDL_PLATFORM_OS2
+#ifdef __OS2__
 #define INCL_DOS
 #include <os2.h>
 #define HAVE_MMAP 1
 #define HAVE_MORECORE 0
 #define LACKS_SYS_MMAN_H
-#endif  /* SDL_PLATFORM_OS2 */
+#endif  /* __OS2__ */
 
 #if defined(DARWIN) || defined(_DARWIN)
 /* Mac OSX docs advise not to use sbrk; it seems better to use mmap */
@@ -1238,7 +1246,7 @@ int mspace_mallopt(int, int);
 #ifndef LACKS_UNISTD_H
 #include <unistd.h>     /* for sbrk */
 #else /* LACKS_UNISTD_H */
-#if !defined(SDL_PLATFORM_FREEBSD) && !defined(SDL_PLATFORM_OPENBSD) && !defined(SDL_PLATFORM_NETBSD) && !defined(__DragonFly__)
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__)
 extern void*     sbrk(ptrdiff_t);
 #endif /* FreeBSD etc */
 #endif /* LACKS_UNISTD_H */
@@ -1342,7 +1350,7 @@ extern void*     sbrk(ptrdiff_t);
 #define IS_MMAPPED_BIT       (SIZE_T_ONE)
 #define USE_MMAP_BIT         (SIZE_T_ONE)
 
-#if !defined(WIN32) && !defined(SDL_PLATFORM_OS2)
+#if !defined(WIN32) && !defined(__OS2__)
 #define CALL_MUNMAP(a, s)    munmap((a), (s))
 #define MMAP_PROT            (PROT_READ|PROT_WRITE)
 #if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
@@ -1366,7 +1374,7 @@ static int dev_zero_fd = -1; /* Cached file descriptor for /dev/zero. */
 
 #define DIRECT_MMAP(s)       CALL_MMAP(s)
 
-#elif defined(SDL_PLATFORM_OS2)
+#elif defined(__OS2__)
 
 /* OS/2 MMAP via DosAllocMem */
 static void* os2mmap(size_t size) {
@@ -1477,7 +1485,7 @@ static int win32munmap(void* ptr, size_t size) {
     unique mparams values are initialized only once.
 */
 
-#if !defined(WIN32) && !defined(SDL_PLATFORM_OS2)
+#if !defined(WIN32) && !defined(__OS2__)
 /* By default use posix locks */
 #include <pthread.h>
 #define MLOCK_T pthread_mutex_t
@@ -1491,7 +1499,7 @@ static MLOCK_T morecore_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static MLOCK_T magic_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-#elif defined(SDL_PLATFORM_OS2)
+#elif defined(__OS2__)
 #define MLOCK_T HMTX
 #define INITIAL_LOCK(l)      DosCreateMutexSem(0, l, 0, FALSE)
 #define ACQUIRE_LOCK(l)      DosRequestMutexSem(*l, SEM_INDEFINITE_WAIT)
@@ -2534,7 +2542,7 @@ static int init_mparams(void) {
       if ((fd = open("/dev/urandom", O_RDONLY)) < 0) {
         s = 0;
       } else {
-        s = read(fd, buf, sizeof(buf));
+	s = read(fd, buf, sizeof(buf));
         close(fd);
       }
       if (s == sizeof(buf))
@@ -2559,11 +2567,11 @@ static int init_mparams(void) {
     }
     RELEASE_MAGIC_INIT_LOCK();
 
-#if !defined(WIN32) && !defined(SDL_PLATFORM_OS2)
+#if !defined(WIN32) && !defined(__OS2__)
     mparams.page_size = malloc_getpagesize;
     mparams.granularity = ((DEFAULT_GRANULARITY != 0)?
                            DEFAULT_GRANULARITY : mparams.page_size);
-#elif defined (SDL_PLATFORM_OS2)
+#elif defined (__OS2__)
     /* if low-memory is used, os2munmap() would break
        if it were anything other than 64k */
     mparams.page_size = 4096u;
@@ -4276,7 +4284,7 @@ void* dlmalloc(size_t bytes) {
 
 void dlfree(void* mem) {
   /*
-     Consolidate freed chunks with preceding or succeeding bordering
+     Consolidate freed chunks with preceeding or succeeding bordering
      free chunks, if they exist, and then place in a bin.  Intermixed
      with special cases for top, dv, mmapped chunks, and usage errors.
   */
@@ -4464,7 +4472,7 @@ struct mallinfo dlmallinfo(void) {
 }
 #endif /* NO_MALLINFO */
 
-void dlmalloc_stats() {
+void dlmalloc_stats(void) {
   internal_malloc_stats(gm);
 }
 
@@ -5113,10 +5121,10 @@ History:
         Wolfram Gloger (Gloger@lrz.uni-muenchen.de).
       * Use last_remainder in more cases.
       * Pack bins using idea from  colin@nyx10.cs.du.edu
-      * Use ordered bins instead of best-fit threshold
+      * Use ordered bins instead of best-fit threshhold
       * Eliminate block-local decls to simplify tracing and debugging.
       * Support another case of realloc via move into top
-      * Fix error occurring when initial sbrk_base not word-aligned.
+      * Fix error occuring when initial sbrk_base not word-aligned.
       * Rely on page size for units instead of SBRK_UNIT to
         avoid surprises about sbrk alignment conventions.
       * Add mallinfo, mallopt. Thanks to Raymond Nijssen
@@ -5203,7 +5211,7 @@ static struct
     SDL_calloc_func calloc_func;
     SDL_realloc_func realloc_func;
     SDL_free_func free_func;
-    SDL_AtomicInt num_allocations;
+    SDL_atomic_t num_allocations;
 } s_mem = {
     real_malloc, real_calloc, real_realloc, real_free, { 0 }
 };
@@ -5287,10 +5295,7 @@ void *SDL_malloc(size_t size)
     mem = s_mem.malloc_func(size);
     if (mem) {
         SDL_AtomicIncRef(&s_mem.num_allocations);
-    } else {
-        SDL_OutOfMemory();
     }
-
     return mem;
 }
 
@@ -5306,10 +5311,7 @@ void *SDL_calloc(size_t nmemb, size_t size)
     mem = s_mem.calloc_func(nmemb, size);
     if (mem) {
         SDL_AtomicIncRef(&s_mem.num_allocations);
-    } else {
-        SDL_OutOfMemory();
     }
-
     return mem;
 }
 
@@ -5324,10 +5326,7 @@ void *SDL_realloc(void *ptr, size_t size)
     mem = s_mem.realloc_func(ptr, size);
     if (mem && !ptr) {
         SDL_AtomicIncRef(&s_mem.num_allocations);
-    } else if (!mem) {
-        SDL_OutOfMemory();
     }
-
     return mem;
 }
 
@@ -5340,3 +5339,5 @@ void SDL_free(void *ptr)
     s_mem.free_func(ptr);
     (void)SDL_AtomicDecRef(&s_mem.num_allocations);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

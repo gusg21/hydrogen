@@ -18,14 +18,32 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
+
+#include "SDL_main.h"
+#include "SDL_system.h"
+#include "SDL_winrtapp_direct3d.h"
+#include "SDL_winrtapp_xaml.h"
 
 #include <wrl.h>
 
 int (*WINRT_SDLAppEntryPoint)(int, char **) = NULL;
 
-extern "C"
-SDL_WinRT_DeviceFamily SDL_GetWinRTDeviceFamily()
+extern "C" DECLSPEC int
+SDL_WinRTRunApp(SDL_main_func mainFunction, void *xamlBackgroundPanel)
+{
+    if (xamlBackgroundPanel) {
+        return SDL_WinRTInitXAMLApp(mainFunction, xamlBackgroundPanel);
+    } else {
+        if (FAILED(Windows::Foundation::Initialize(RO_INIT_MULTITHREADED))) {
+            return 1;
+        }
+        return SDL_WinRTInitNonXAMLApp(mainFunction);
+    }
+}
+
+extern "C" DECLSPEC SDL_WinRT_DeviceFamily
+SDL_WinRTGetDeviceFamily()
 {
 #if NTDDI_VERSION >= NTDDI_WIN10 /* !!! FIXME: I have no idea if this is the right test. This is a UWP API, I think. Older windows should...just return "mobile"? I don't know. --ryan. */
     Platform::String ^ deviceFamily = Windows::System::Profile::AnalyticsInfo::VersionInfo->DeviceFamily;

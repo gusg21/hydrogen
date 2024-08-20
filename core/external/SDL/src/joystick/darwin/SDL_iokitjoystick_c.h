@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_JOYSTICK_IOKIT_H
 #define SDL_JOYSTICK_IOKIT_H
@@ -70,7 +70,7 @@ struct joystick_hwdata
     SDL_bool runLoopAttached; /* is 'deviceRef' attached to a CFRunLoop? */
 
     int instance_id;
-    SDL_GUID guid;
+    SDL_JoystickGUID guid;
     int steam_virtual_gamepad_slot;
 
     struct joystick_hwdata *pNext; /* next device */
@@ -78,3 +78,5 @@ struct joystick_hwdata
 typedef struct joystick_hwdata recDevice;
 
 #endif /* SDL_JOYSTICK_IOKIT_H */
+
+/* vi: set ts=4 sw=4 expandtab: */

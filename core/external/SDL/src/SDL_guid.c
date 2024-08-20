@@ -20,6 +20,9 @@
 */
 #include "SDL_internal.h"
 
+
+#include "SDL_guid.h"
+
 /* convert the guid to a printable string */
 void SDL_GUIDToString(SDL_GUID guid, char *pszGUID, int cbGUID)
 {
@@ -66,7 +69,7 @@ static unsigned char nibble(unsigned char c)
 }
 
 /* convert the string version of a guid to the struct */
-SDL_GUID SDL_StringToGUID(const char *pchGUID)
+SDL_GUID SDL_GUIDFromString(const char *pchGUID)
 {
     SDL_GUID guid;
     int maxoutputbytes = sizeof(guid);

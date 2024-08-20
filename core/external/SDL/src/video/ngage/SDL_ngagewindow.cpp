@@ -19,7 +19,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_NGAGE
 
@@ -29,18 +29,18 @@
 
 const TUint32 WindowClientHandle = 9210;
 
-void DisableKeyBlocking(SDL_VideoDevice *_this);
-void ConstructWindowL(SDL_VideoDevice *_this);
+void DisableKeyBlocking(_THIS);
+void ConstructWindowL(_THIS);
 
-int NGAGE_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props)
+int NGAGE_CreateWindow(_THIS, SDL_Window *window)
 {
     NGAGE_Window *ngage_window = (NGAGE_Window *)SDL_calloc(1, sizeof(NGAGE_Window));
 
     if (!ngage_window) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
-    window->internal = ngage_window;
+    window->driverdata = ngage_window;
 
     if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         window->x = 0;
@@ -57,33 +57,33 @@ int NGAGE_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
     return 0;
 }
 
-void NGAGE_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
+void NGAGE_DestroyWindow(_THIS, SDL_Window *window)
 {
-    NGAGE_Window *ngage_window = (NGAGE_Window *)window->internal;
+    NGAGE_Window *ngage_window = (NGAGE_Window *)window->driverdata;
 
     if (ngage_window) {
         SDL_free(ngage_window);
     }
 
-    window->internal = NULL;
+    window->driverdata = NULL;
 }
 
 /*****************************************************************************/
 /* Internal                                                                  */
 /*****************************************************************************/
 
-void DisableKeyBlocking(SDL_VideoDevice *_this)
+void DisableKeyBlocking(_THIS)
 {
-    SDL_VideoData *phdata = _this->internal;
+    SDL_VideoData *phdata = (SDL_VideoData *)_this->driverdata;
     TRawEvent event;
 
     event.Set((TRawEvent::TType) /*EDisableKeyBlock*/ 51);
     phdata->NGAGE_WsSession.SimulateRawEvent(event);
 }
 
-void ConstructWindowL(SDL_VideoDevice *_this)
+void ConstructWindowL(_THIS)
 {
-    SDL_VideoData *phdata = _this->internal;
+    SDL_VideoData *phdata = (SDL_VideoData *)_this->driverdata;
     TInt error;
 
     error = phdata->NGAGE_WsSession.Connect();
@@ -123,3 +123,5 @@ void ConstructWindowL(SDL_VideoDevice *_this)
 }
 
 #endif /* SDL_VIDEO_DRIVER_NGAGE */
+
+/* vi: set ts=4 sw=4 expandtab: */

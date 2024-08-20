@@ -6,19 +6,22 @@
  * Released under Public Domain.
  */
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_test.h>
-#include "testautomation_suites.h"
+#include "SDL.h"
+#include "SDL_test.h"
 
-/**
- * Tests SDL_InitSubSystem() and SDL_QuitSubSystem()
- * \sa SDL_Init
- * \sa SDL_Quit
+/* !
+ * \brief Tests SDL_InitSubSystem() and SDL_QuitSubSystem()
+ * \sa
+ * http://wiki.libsdl.org/SDL_Init
+ * http://wiki.libsdl.org/SDL_Quit
  */
 static int main_testInitQuitSubSystem(void *arg)
 {
+#if defined SDL_JOYSTICK_DISABLED || defined SDL_HAPTIC_DISABLED || defined SDL_GAMECONTROLLER_DISABLED
+    return TEST_SKIPPED;
+#else
     int i;
-    int subsystems[] = { SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC, SDL_INIT_GAMEPAD };
+    int subsystems[] = { SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC, SDL_INIT_GAMECONTROLLER };
 
     for (i = 0; i < SDL_arraysize(subsystems); ++i) {
         int initialized_system;
@@ -36,16 +39,20 @@ static int main_testInitQuitSubSystem(void *arg)
     }
 
     return TEST_COMPLETED;
+#endif
 }
 
-static const int joy_and_controller = SDL_INIT_JOYSTICK | SDL_INIT_GAMEPAD;
+const int joy_and_controller = SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
 static int main_testImpliedJoystickInit(void *arg)
 {
+#if defined SDL_JOYSTICK_DISABLED || defined SDL_GAMECONTROLLER_DISABLED
+    return TEST_SKIPPED;
+#else
     int initialized_system;
 
     /* First initialize the controller */
     SDLTest_AssertCheck((SDL_WasInit(joy_and_controller) & joy_and_controller) == 0, "SDL_WasInit() before init should be false for joystick & controller");
-    SDLTest_AssertCheck(SDL_InitSubSystem(SDL_INIT_GAMEPAD) == 0, "SDL_InitSubSystem(SDL_INIT_GAMEPAD)");
+    SDLTest_AssertCheck(SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == 0, "SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)");
 
     /* Then make sure this implicitly initialized the joystick subsystem */
     initialized_system = SDL_WasInit(joy_and_controller);
@@ -53,21 +60,25 @@ static int main_testImpliedJoystickInit(void *arg)
 
     /* Then quit the controller, and make sure that implicitly also quits the */
     /* joystick subsystem */
-    SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
+    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
     initialized_system = SDL_WasInit(joy_and_controller);
     SDLTest_AssertCheck((initialized_system & joy_and_controller) == 0, "SDL_WasInit() should be false for joystick & controller (%x)", initialized_system);
 
     return TEST_COMPLETED;
+#endif
 }
 
 static int main_testImpliedJoystickQuit(void *arg)
 {
+#if defined SDL_JOYSTICK_DISABLED || defined SDL_GAMECONTROLLER_DISABLED
+    return TEST_SKIPPED;
+#else
     int initialized_system;
 
     /* First initialize the controller and the joystick (explicitly) */
     SDLTest_AssertCheck((SDL_WasInit(joy_and_controller) & joy_and_controller) == 0, "SDL_WasInit() before init should be false for joystick & controller");
     SDLTest_AssertCheck(SDL_InitSubSystem(SDL_INIT_JOYSTICK) == 0, "SDL_InitSubSystem(SDL_INIT_JOYSTICK)");
-    SDLTest_AssertCheck(SDL_InitSubSystem(SDL_INIT_GAMEPAD) == 0, "SDL_InitSubSystem(SDL_INIT_GAMEPAD)");
+    SDLTest_AssertCheck(SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == 0, "SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)");
 
     /* Then make sure they're both initialized properly */
     initialized_system = SDL_WasInit(joy_and_controller);
@@ -75,13 +86,14 @@ static int main_testImpliedJoystickQuit(void *arg)
 
     /* Then quit the controller, and make sure that it does NOT quit the */
     /* explicitly initialized joystick subsystem. */
-    SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
+    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
     initialized_system = SDL_WasInit(joy_and_controller);
     SDLTest_AssertCheck((initialized_system & joy_and_controller) == SDL_INIT_JOYSTICK, "SDL_WasInit() should be false for joystick & controller (%x)", initialized_system);
 
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
     return TEST_COMPLETED;
+#endif
 }
 
 #if defined(__GNUC__) || defined(__clang__)

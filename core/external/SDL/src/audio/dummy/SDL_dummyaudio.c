@@ -18,82 +18,51 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
-// Output audio to nowhere...
+#ifdef SDL_AUDIO_DRIVER_DUMMY
 
-#include "../SDL_sysaudio.h"
+/* Output audio to nowhere... */
+
+#include "SDL_timer.h"
+#include "SDL_audio.h"
+#include "../SDL_audio_c.h"
 #include "SDL_dummyaudio.h"
 
-static int DUMMYAUDIO_WaitDevice(SDL_AudioDevice *device)
+static int DUMMYAUDIO_OpenDevice(_THIS, const char *devname)
 {
-    SDL_Delay(device->hidden->io_delay);
-    return 0;
+    _this->hidden = (void *)0x1; /* just something non-NULL */
+
+    return 0; /* always succeeds. */
 }
 
-static int DUMMYAUDIO_OpenDevice(SDL_AudioDevice *device)
+static int DUMMYAUDIO_CaptureFromDevice(_THIS, void *buffer, int buflen)
 {
-    device->hidden = (struct SDL_PrivateAudioData *) SDL_calloc(1, sizeof(*device->hidden));
-    if (!device->hidden) {
-        return -1;
-    }
+    /* Delay to make this sort of simulate real audio input. */
+    SDL_Delay((_this->spec.samples * 1000) / _this->spec.freq);
 
-    if (!device->recording) {
-        device->hidden->mixbuf = (Uint8 *) SDL_malloc(device->buffer_size);
-        if (!device->hidden->mixbuf) {
-            return -1;
-        }
-    }
-
-    device->hidden->io_delay = ((device->sample_frames * 1000) / device->spec.freq);
-
-    const char *hint = SDL_GetHint(SDL_HINT_AUDIO_DUMMY_TIMESCALE);
-    if (hint) {
-        double scale = SDL_atof(hint);
-        if (scale >= 0.0) {
-            device->hidden->io_delay = (Uint32)SDL_round(device->hidden->io_delay * scale);
-        }
-    }
-    return 0; // we're good; don't change reported device format.
-}
-
-static void DUMMYAUDIO_CloseDevice(SDL_AudioDevice *device)
-{
-    if (device->hidden) {
-        SDL_free(device->hidden->mixbuf);
-        SDL_free(device->hidden);
-        device->hidden = NULL;
-    }
-}
-
-static Uint8 *DUMMYAUDIO_GetDeviceBuf(SDL_AudioDevice *device, int *buffer_size)
-{
-    return device->hidden->mixbuf;
-}
-
-static int DUMMYAUDIO_RecordDevice(SDL_AudioDevice *device, void *buffer, int buflen)
-{
-    // always return a full buffer of silence.
-    SDL_memset(buffer, device->silence_value, buflen);
+    /* always return a full buffer of silence. */
+    SDL_memset(buffer, _this->spec.silence, buflen);
     return buflen;
 }
 
 static SDL_bool DUMMYAUDIO_Init(SDL_AudioDriverImpl *impl)
 {
+    /* Set the function pointers */
     impl->OpenDevice = DUMMYAUDIO_OpenDevice;
-    impl->CloseDevice = DUMMYAUDIO_CloseDevice;
-    impl->WaitDevice = DUMMYAUDIO_WaitDevice;
-    impl->GetDeviceBuf = DUMMYAUDIO_GetDeviceBuf;
-    impl->WaitRecordingDevice = DUMMYAUDIO_WaitDevice;
-    impl->RecordDevice = DUMMYAUDIO_RecordDevice;
+    impl->CaptureFromDevice = DUMMYAUDIO_CaptureFromDevice;
 
-    impl->OnlyHasDefaultPlaybackDevice = SDL_TRUE;
-    impl->OnlyHasDefaultRecordingDevice = SDL_TRUE;
-    impl->HasRecordingSupport = SDL_TRUE;
+    impl->OnlyHasDefaultOutputDevice = SDL_TRUE;
+    impl->OnlyHasDefaultCaptureDevice = SDL_TRUE;
+    impl->HasCaptureSupport = SDL_TRUE;
 
-    return SDL_TRUE;
+    return SDL_TRUE; /* this audio target is available. */
 }
 
 AudioBootStrap DUMMYAUDIO_bootstrap = {
     "dummy", "SDL dummy audio driver", DUMMYAUDIO_Init, SDL_TRUE
 };
+
+#endif
+
+/* vi: set ts=4 sw=4 expandtab: */

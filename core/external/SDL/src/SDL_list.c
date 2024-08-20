@@ -18,17 +18,18 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "./SDL_internal.h"
 
+#include "SDL.h"
 #include "./SDL_list.h"
 
 /* Push */
 int SDL_ListAdd(SDL_ListNode **head, void *ent)
 {
-    SDL_ListNode *node = (SDL_ListNode *)SDL_malloc(sizeof(*node));
+    SDL_ListNode *node = SDL_malloc(sizeof(*node));
 
     if (!node) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     node->entry = ent;
@@ -84,3 +85,5 @@ void SDL_ListClear(SDL_ListNode **head)
         SDL_free(tmp);
     }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

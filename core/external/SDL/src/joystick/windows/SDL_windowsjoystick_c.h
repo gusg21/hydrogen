@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
+#include "SDL_events.h"
 #include "../SDL_sysjoystick.h"
 #include "../../core/windows/SDL_windows.h"
 #include "../../core/windows/SDL_directx.h"
@@ -33,7 +34,7 @@ extern "C" {
 
 typedef struct JoyStick_DeviceData
 {
-    SDL_GUID guid;
+    SDL_JoystickGUID guid;
     char *joystickname;
     Uint8 send_add_event;
     SDL_JoystickID nInstanceID;
@@ -70,7 +71,7 @@ typedef struct input_t
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
 {
-    SDL_GUID guid;
+    SDL_JoystickGUID guid;
 
 #ifdef SDL_JOYSTICK_DINPUT
     LPDIRECTINPUTDEVICE8 InputDevice;
@@ -101,3 +102,5 @@ extern void WINDOWS_AddJoystickDevice(JoyStick_DeviceData *device);
 #ifdef __cplusplus
 }
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

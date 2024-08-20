@@ -24,8 +24,10 @@
 
 #ifdef SDL_VIDEO_DRIVER_VITA
 
-extern int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID);
+extern int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
 #endif /* SDL_VIDEO_DRIVER_VITA */
 
 #endif /* SDL_vitamessagebox_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

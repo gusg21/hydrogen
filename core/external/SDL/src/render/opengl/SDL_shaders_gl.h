@@ -22,7 +22,7 @@
 #ifndef SDL_shaders_gl_h_
 #define SDL_shaders_gl_h_
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 /* OpenGL shader implementation */
 
@@ -34,11 +34,17 @@ typedef enum
     SHADER_RGB,
     SHADER_RGBA,
 #if SDL_HAVE_YUV
-    SHADER_YUV,
-    SHADER_NV12_RA,
-    SHADER_NV12_RG,
-    SHADER_NV21_RA,
-    SHADER_NV21_RG,
+    SHADER_YUV_JPEG,
+    SHADER_YUV_BT601,
+    SHADER_YUV_BT709,
+    SHADER_NV12_JPEG,
+    SHADER_NV12_RA_BT601,
+    SHADER_NV12_RG_BT601,
+    SHADER_NV12_RA_BT709,
+    SHADER_NV12_RG_BT709,
+    SHADER_NV21_JPEG,
+    SHADER_NV21_BT601,
+    SHADER_NV21_BT709,
 #endif
     NUM_SHADERS
 } GL_Shader;
@@ -46,7 +52,9 @@ typedef enum
 typedef struct GL_ShaderContext GL_ShaderContext;
 
 extern GL_ShaderContext *GL_CreateShaderContext(void);
-extern void GL_SelectShader(GL_ShaderContext *ctx, GL_Shader shader, const float *shader_params);
+extern void GL_SelectShader(GL_ShaderContext *ctx, GL_Shader shader);
 extern void GL_DestroyShaderContext(GL_ShaderContext *ctx);
 
 #endif /* SDL_shaders_gl_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

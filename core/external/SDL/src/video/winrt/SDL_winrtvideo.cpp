@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_WINRT
 
@@ -34,10 +34,10 @@
 
 /* Windows includes */
 #include <agile.h>
-#include <dxgi.h>
-#include <dxgi1_2.h>
 #include <windows.graphics.display.h>
 #include <windows.system.display.h>
+#include <dxgi.h>
+#include <dxgi1_2.h>
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
@@ -50,37 +50,45 @@ static const GUID SDL_IID_IDXGIFactory2 = { 0x50c83a1c, 0xe072, 0x4c48, { 0x87, 
 
 /* SDL includes */
 extern "C" {
-#include "../../core/windows/SDL_windows.h"
+#include "SDL_video.h"
+#include "SDL_mouse.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
 #include "../../render/SDL_sysrender.h"
-#include "../SDL_pixels_c.h"
-#include "../SDL_sysvideo.h"
+#include "SDL_syswm.h"
 #include "SDL_winrtopengles.h"
+#include "../../core/windows/SDL_windows.h"
 #include "SDL_winrtmessagebox.h"
 }
 
 #include "../../core/winrt/SDL_winrtapp_direct3d.h"
 #include "../../core/winrt/SDL_winrtapp_xaml.h"
+#include "SDL_winrtvideo_cpp.h"
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtgamebar_cpp.h"
 #include "SDL_winrtmouse_c.h"
-#include "SDL_winrtvideo_cpp.h"
+#include "SDL_main.h"
+#include "SDL_system.h"
+#include "SDL_hints.h"
 
 /* Initialization/Query functions */
-static int WINRT_VideoInit(SDL_VideoDevice *_this);
-static int WINRT_InitModes(SDL_VideoDevice *_this);
-static int WINRT_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode);
-static void WINRT_VideoQuit(SDL_VideoDevice *_this);
+static int WINRT_VideoInit(_THIS);
+static int WINRT_InitModes(_THIS);
+static int WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode);
+static void WINRT_VideoQuit(_THIS);
 
 /* Window functions */
-static int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props);
-static void WINRT_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window);
-static int WINRT_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window, SDL_VideoDisplay *display, SDL_FullscreenOp fullscreen);
-static void WINRT_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window);
+static int WINRT_CreateWindow(_THIS, SDL_Window * window);
+static void WINRT_SetWindowSize(_THIS, SDL_Window * window);
+static void WINRT_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
+static void WINRT_DestroyWindow(_THIS, SDL_Window * window);
+static SDL_bool WINRT_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info);
+
 
 /* Misc functions */
-static ABI::Windows::System::Display::IDisplayRequest *WINRT_CreateDisplayRequest(SDL_VideoDevice *_this);
-extern int WINRT_SuspendScreenSaver(SDL_VideoDevice *_this);
+static ABI::Windows::System::Display::IDisplayRequest *WINRT_CreateDisplayRequest(_THIS);
+extern void WINRT_SuspendScreenSaver(_THIS);
 
 /* SDL-internal globals: */
 SDL_Window *WINRT_GlobalSDLWindow = NULL;
@@ -89,8 +97,8 @@ SDL_Window *WINRT_GlobalSDLWindow = NULL;
 
 static void WINRT_DeleteDevice(SDL_VideoDevice *device)
 {
-    if (device->internal) {
-        SDL_VideoData *video_data = device->internal;
+    if (device->driverdata) {
+        SDL_VideoData *video_data = (SDL_VideoData *)device->driverdata;
         if (video_data->winrtEglWindow) {
             video_data->winrtEglWindow->Release();
         }
@@ -108,15 +116,17 @@ static SDL_VideoDevice *WINRT_CreateDevice(void)
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
-        return NULL;
+        SDL_OutOfMemory();
+        return 0;
     }
 
     data = (SDL_VideoData *)SDL_calloc(1, sizeof(SDL_VideoData));
     if (!data) {
+        SDL_OutOfMemory();
         SDL_free(device);
-        return NULL;
+        return 0;
     }
-    device->internal = data;
+    device->driverdata = data;
 
     /* Set the function pointers */
     device->VideoInit = WINRT_VideoInit;
@@ -127,6 +137,7 @@ static SDL_VideoDevice *WINRT_CreateDevice(void)
     device->DestroyWindow = WINRT_DestroyWindow;
     device->SetDisplayMode = WINRT_SetDisplayMode;
     device->PumpEvents = WINRT_PumpEvents;
+    device->GetWindowWMInfo = WINRT_GetWindowWMInfo;
     device->SuspendScreenSaver = WINRT_SuspendScreenSaver;
 
 #if NTDDI_VERSION >= NTDDI_WIN10
@@ -220,9 +231,9 @@ static void SDLCALL WINRT_SetDisplayOrientationsPreference(void *userdata, const
     WINRT_DISPLAY_PROPERTY(AutoRotationPreferences) = (DisplayOrientations)orientationFlags;
 }
 
-int WINRT_VideoInit(SDL_VideoDevice *_this)
+int WINRT_VideoInit(_THIS)
 {
-    SDL_VideoData *internal = _this->internal;
+    SDL_VideoData *driverdata = (SDL_VideoData *)_this->driverdata;
     if (WINRT_InitModes(_this) < 0) {
         return -1;
     }
@@ -234,36 +245,31 @@ int WINRT_VideoInit(SDL_VideoDevice *_this)
     WINRT_InitMouse(_this);
     WINRT_InitTouch(_this);
     WINRT_InitGameBar(_this);
-    if (internal) {
+    if (driverdata) {
         /* Initialize screensaver-disabling support */
-        internal->displayRequest = WINRT_CreateDisplayRequest(_this);
+        driverdata->displayRequest = WINRT_CreateDisplayRequest(_this);
     }
-
-    /* Assume we have a mouse and keyboard */
-    SDL_AddKeyboard(SDL_DEFAULT_KEYBOARD_ID, NULL, SDL_FALSE);
-    SDL_AddMouse(SDL_DEFAULT_MOUSE_ID, NULL, SDL_FALSE);
-
     return 0;
 }
 
-extern "C" SDL_PixelFormat D3D11_DXGIFormatToSDLPixelFormat(DXGI_FORMAT dxgiFormat);
+extern "C" Uint32 D3D11_DXGIFormatToSDLPixelFormat(DXGI_FORMAT dxgiFormat);
 
 static void WINRT_DXGIModeToSDLDisplayMode(const DXGI_MODE_DESC *dxgiMode, SDL_DisplayMode *sdlMode)
 {
     SDL_zerop(sdlMode);
     sdlMode->w = dxgiMode->Width;
     sdlMode->h = dxgiMode->Height;
-    sdlMode->refresh_rate_numerator = dxgiMode->RefreshRate.Numerator;
-    sdlMode->refresh_rate_denominator = dxgiMode->RefreshRate.Denominator;
+    sdlMode->refresh_rate = dxgiMode->RefreshRate.Numerator / dxgiMode->RefreshRate.Denominator;
     sdlMode->format = D3D11_DXGIFormatToSDLPixelFormat(dxgiMode->Format);
 }
 
-static int WINRT_AddDisplaysForOutput(SDL_VideoDevice *_this, IDXGIAdapter1 *dxgiAdapter1, int outputIndex)
+static int WINRT_AddDisplaysForOutput(_THIS, IDXGIAdapter1 *dxgiAdapter1, int outputIndex)
 {
     HRESULT hr;
     IDXGIOutput *dxgiOutput = NULL;
     DXGI_OUTPUT_DESC dxgiOutputDesc;
     SDL_VideoDisplay display;
+    char *displayName = NULL;
     UINT numModes;
     DXGI_MODE_DESC *dxgiModes = NULL;
     int functionResult = -1; /* -1 for failure, 0 for success */
@@ -301,26 +307,37 @@ static int WINRT_AddDisplaysForOutput(SDL_VideoDevice *_this, IDXGIAdapter1 *dxg
         */
         SDL_DisplayMode mode;
         SDL_zero(mode);
-        display.name = SDL_strdup("Windows Simulator / Terminal Services Display");
+        display.name = "Windows Simulator / Terminal Services Display";
         mode.w = (dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left);
         mode.h = (dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top);
-        mode.format = D3D11_DXGIFormatToSDLPixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
+        mode.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        mode.refresh_rate = 0; /* Display mode is unknown, so just fill in zero, as specified by SDL's header files */
         display.desktop_mode = mode;
+        display.current_mode = mode;
+        if (!SDL_AddDisplayMode(&display, &mode)) {
+            goto done;
+        }
     } else if (FAILED(hr)) {
         WIN_SetErrorFromHRESULT(__FUNCTION__ ", IDXGIOutput::FindClosestMatchingMode failed", hr);
         goto done;
     } else {
-        display.name = WIN_StringToUTF8W(dxgiOutputDesc.DeviceName);
+        displayName = WIN_StringToUTF8(dxgiOutputDesc.DeviceName);
+        display.name = displayName;
         WINRT_DXGIModeToSDLDisplayMode(&closestMatch, &display.desktop_mode);
+        display.current_mode = display.desktop_mode;
 
         hr = dxgiOutput->GetDisplayModeList(DXGI_FORMAT_B8G8R8A8_UNORM, 0, &numModes, NULL);
         if (FAILED(hr)) {
+            if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
+                // TODO, WinRT: make sure display mode(s) are added when using Terminal Services / Windows Simulator
+            }
             WIN_SetErrorFromHRESULT(__FUNCTION__ ", IDXGIOutput::GetDisplayModeList [get mode list size] failed", hr);
             goto done;
         }
 
         dxgiModes = (DXGI_MODE_DESC *)SDL_calloc(numModes, sizeof(DXGI_MODE_DESC));
         if (!dxgiModes) {
+            SDL_OutOfMemory();
             goto done;
         }
 
@@ -333,11 +350,11 @@ static int WINRT_AddDisplaysForOutput(SDL_VideoDevice *_this, IDXGIAdapter1 *dxg
         for (UINT i = 0; i < numModes; ++i) {
             SDL_DisplayMode sdlMode;
             WINRT_DXGIModeToSDLDisplayMode(&dxgiModes[i], &sdlMode);
-            SDL_AddFullscreenDisplayMode(&display, &sdlMode);
+            SDL_AddDisplayMode(&display, &sdlMode);
         }
     }
 
-    if (SDL_AddVideoDisplay(&display, SDL_FALSE) == 0) {
+    if (SDL_AddVideoDisplay(&display, SDL_FALSE) < 0) {
         goto done;
     }
 
@@ -349,13 +366,13 @@ done:
     if (dxgiOutput) {
         dxgiOutput->Release();
     }
-    if (display.name) {
-        SDL_free(display.name);
+    if (displayName) {
+        SDL_free(displayName);
     }
     return functionResult;
 }
 
-static int WINRT_AddDisplaysForAdapter(SDL_VideoDevice *_this, IDXGIFactory2 *dxgiFactory2, int adapterIndex)
+static int WINRT_AddDisplaysForAdapter(_THIS, IDXGIFactory2 *dxgiFactory2, int adapterIndex)
 {
     HRESULT hr;
     IDXGIAdapter1 *dxgiAdapter1;
@@ -388,13 +405,13 @@ static int WINRT_AddDisplaysForAdapter(SDL_VideoDevice *_this, IDXGIFactory2 *dx
             if (adapterIndex == 0 && outputIndex == 0) {
                 SDL_VideoDisplay display;
                 SDL_DisplayMode mode;
-#if SDL_WINRT_USE_APPLICATIONVIEW
+#ifdef SDL_WINRT_USE_APPLICATIONVIEW
                 ApplicationView ^ appView = ApplicationView::GetForCurrentView();
 #endif
                 CoreWindow ^ coreWin = CoreWindow::GetForCurrentThread();
                 SDL_zero(display);
                 SDL_zero(mode);
-                display.name = SDL_strdup("DXGI Display-detection Workaround");
+                display.name = "DXGI Display-detection Workaround";
 
                 /* HACK: ApplicationView's VisibleBounds property, appeared, via testing, to
                    give a better approximation of display-size, than did CoreWindow's
@@ -403,25 +420,23 @@ static int WINRT_AddDisplaysForAdapter(SDL_VideoDevice *_this, IDXGIFactory2 *dx
                    failing test), whereas CoreWindow might not.  -- DavidL
                 */
 
-#if (NTDDI_VERSION >= NTDDI_WIN10) || (SDL_WINRT_USE_APPLICATIONVIEW && SDL_WINAPI_FAMILY_PHONE)
-                mode.w = (int)SDL_floorf(appView->VisibleBounds.Width);
-                mode.h = (int)SDL_floorf(appView->VisibleBounds.Height);
+#if (NTDDI_VERSION >= NTDDI_WIN10) || (defined(SDL_WINRT_USE_APPLICATIONVIEW) && SDL_WINAPI_FAMILY_PHONE)
+                mode.w = WINRT_DIPS_TO_PHYSICAL_PIXELS(appView->VisibleBounds.Width);
+                mode.h = WINRT_DIPS_TO_PHYSICAL_PIXELS(appView->VisibleBounds.Height);
 #else
                 /* On platform(s) that do not support VisibleBounds, such as Windows 8.1,
                    fall back to CoreWindow's Bounds property.
                 */
-                mode.w = (int)SDL_floorf(coreWin->Bounds.Width);
-                mode.h = (int)SDL_floorf(coreWin->Bounds.Height);
+                mode.w = WINRT_DIPS_TO_PHYSICAL_PIXELS(coreWin->Bounds.Width);
+                mode.h = WINRT_DIPS_TO_PHYSICAL_PIXELS(coreWin->Bounds.Height);
 #endif
-                mode.pixel_density = WINRT_DISPLAY_PROPERTY(LogicalDpi) / 96.0f;
-                mode.format = D3D11_DXGIFormatToSDLPixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
 
+                mode.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+                mode.refresh_rate = 0; /* Display mode is unknown, so just fill in zero, as specified by SDL's header files */
                 display.desktop_mode = mode;
-                bool error = (SDL_AddVideoDisplay(&display, SDL_FALSE) == 0);
-                if (display.name) {
-                    SDL_free(display.name);
-                }
-                if (error) {
+                display.current_mode = mode;
+                if ((SDL_AddDisplayMode(&display, &mode) < 0) ||
+                    (SDL_AddVideoDisplay(&display, SDL_FALSE) < 0)) {
                     return SDL_SetError("Failed to apply DXGI Display-detection workaround");
                 }
             }
@@ -434,7 +449,7 @@ static int WINRT_AddDisplaysForAdapter(SDL_VideoDevice *_this, IDXGIFactory2 *dx
     return 0;
 }
 
-int WINRT_InitModes(SDL_VideoDevice *_this)
+int WINRT_InitModes(_THIS)
 {
     /* HACK: Initialize a single display, for whatever screen the app's
          CoreApplicationView is on.
@@ -459,46 +474,46 @@ int WINRT_InitModes(SDL_VideoDevice *_this)
     return 0;
 }
 
-static int WINRT_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
+static int WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
 {
     return 0;
 }
 
-void WINRT_VideoQuit(SDL_VideoDevice *_this)
+void WINRT_VideoQuit(_THIS)
 {
-    SDL_VideoData *internal = _this->internal;
-    if (internal && internal->displayRequest) {
-        internal->displayRequest->Release();
-        internal->displayRequest = NULL;
+    SDL_VideoData *driverdata = (SDL_VideoData *)_this->driverdata;
+    if (driverdata && driverdata->displayRequest) {
+        driverdata->displayRequest->Release();
+        driverdata->displayRequest = NULL;
     }
     WINRT_QuitGameBar(_this);
     WINRT_QuitMouse(_this);
 }
 
-static const SDL_WindowFlags WINRT_DetectableFlags = SDL_WINDOW_MAXIMIZED | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_HIDDEN | SDL_WINDOW_MOUSE_FOCUS;
+static const Uint32 WINRT_DetectableFlags = SDL_WINDOW_MAXIMIZED | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SHOWN | SDL_WINDOW_HIDDEN | SDL_WINDOW_MOUSE_FOCUS;
 
-extern "C" SDL_WindowFlags
+extern "C" Uint32
 WINRT_DetectWindowFlags(SDL_Window *window)
 {
-    SDL_WindowFlags latestFlags = 0;
-    SDL_WindowData *data = window->internal;
+    Uint32 latestFlags = 0;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     bool is_fullscreen = false;
 
-#if SDL_WINRT_USE_APPLICATIONVIEW
+#ifdef SDL_WINRT_USE_APPLICATIONVIEW
     if (data->appView) {
         is_fullscreen = data->appView->IsFullScreenMode;
     }
-#elif SDL_WINAPI_FAMILY_PHONE || NTDDI_VERSION == NTDDI_WIN8
+#elif SDL_WINAPI_FAMILY_PHONE || (NTDDI_VERSION == NTDDI_WIN8)
     is_fullscreen = true;
 #endif
 
     if (data->coreWindow.Get()) {
         if (is_fullscreen) {
-            SDL_VideoDisplay *display = SDL_GetVideoDisplayForWindow(window);
+            SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
             int w = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Width);
             int h = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Height);
 
-#if !SDL_WINAPI_FAMILY_PHONE || NTDDI_VERSION > NTDDI_WIN8
+#if !SDL_WINAPI_FAMILY_PHONE || (NTDDI_VERSION > NTDDI_WIN8)
             // On all WinRT platforms, except for WinPhone 8.0, rotate the
             // window size.  This is needed to properly calculate
             // fullscreen vs. maximized.
@@ -522,17 +537,17 @@ WINRT_DetectWindowFlags(SDL_Window *window)
             if (display->desktop_mode.w != w || display->desktop_mode.h != h) {
                 latestFlags |= SDL_WINDOW_MAXIMIZED;
             } else {
-                latestFlags |= SDL_WINDOW_FULLSCREEN;
+                latestFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
             }
         }
 
         if (data->coreWindow->Visible) {
-            latestFlags &= ~SDL_WINDOW_HIDDEN;
+            latestFlags |= SDL_WINDOW_SHOWN;
         } else {
             latestFlags |= SDL_WINDOW_HIDDEN;
         }
 
-#if SDL_WINAPI_FAMILY_PHONE && NTDDI_VERSION < NTDDI_WINBLUE
+#if SDL_WINAPI_FAMILY_PHONE && (NTDDI_VERSION < NTDDI_WINBLUE)
         // data->coreWindow->PointerPosition is not supported on WinPhone 8.0
         latestFlags |= SDL_WINDOW_MOUSE_FOCUS;
 #else
@@ -546,11 +561,14 @@ WINRT_DetectWindowFlags(SDL_Window *window)
 }
 
 // TODO, WinRT: consider removing WINRT_UpdateWindowFlags, and just calling WINRT_DetectWindowFlags as-appropriate (with appropriate calls to SDL_SendWindowEvent)
-void WINRT_UpdateWindowFlags(SDL_Window *window, SDL_WindowFlags mask)
+void WINRT_UpdateWindowFlags(SDL_Window *window, Uint32 mask)
 {
     mask &= WINRT_DetectableFlags;
     if (window) {
         Uint32 apply = WINRT_DetectWindowFlags(window);
+        if ((apply & mask) & SDL_WINDOW_FULLSCREEN) {
+            window->last_fullscreen_flags = window->flags; // seems necessary to programmatically un-fullscreen, via SDL APIs
+        }
         window->flags = (window->flags & ~mask) | (apply & mask);
     }
 }
@@ -580,7 +598,7 @@ static bool WINRT_IsCoreWindowActive(CoreWindow ^ coreWindow)
     return true;
 }
 
-int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props)
+int WINRT_CreateWindow(_THIS, SDL_Window *window)
 {
     // Make sure that only one window gets created, at least until multimonitor
     // support is added.
@@ -592,9 +610,8 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
     if (!data) {
         return SDL_OutOfMemory();
     }
-    window->internal = data;
+    window->driverdata = data;
     data->sdlWindow = window;
-    data->high_surrogate = L'\0';
 
     /* To note, when XAML support is enabled, access to the CoreWindow will not
        be possible, at least not via the SDL/XAML thread.  Attempts to access it
@@ -604,11 +621,10 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
     */
     if (!WINRT_XAMLWasEnabled) {
         data->coreWindow = CoreWindow::GetForCurrentThread();
-#if SDL_WINRT_USE_APPLICATIONVIEW
+#ifdef SDL_WINRT_USE_APPLICATIONVIEW
         data->appView = ApplicationView::GetForCurrentView();
 #endif
     }
-    SDL_SetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WINRT_WINDOW_POINTER, reinterpret_cast<IInspectable *>(data->coreWindow.Get()));
 
     /* Make note of the requested window flags, before they start getting changed. */
     const Uint32 requestedFlags = window->flags;
@@ -619,8 +635,8 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
         /* OpenGL ES 2 wasn't requested.  Don't set up an EGL surface. */
         data->egl_surface = EGL_NO_SURFACE;
     } else {
-        /* OpenGL ES 2 was requested.  Set up an EGL surface. */
-        SDL_VideoData *video_data = _this->internal;
+        /* OpenGL ES 2 was reuqested.  Set up an EGL surface. */
+        SDL_VideoData *video_data = (SDL_VideoData *)_this->driverdata;
 
         /* Call SDL_EGL_ChooseConfig and eglCreateWindowSurface directly,
          * rather than via SDL_EGL_CreateSurface, as older versions of
@@ -678,7 +694,7 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
         /* TODO, WinRT: set SDL_Window size, maybe position too, from XAML control */
         window->x = 0;
         window->y = 0;
-        window->flags &= ~SDL_WINDOW_HIDDEN;
+        window->flags |= SDL_WINDOW_SHOWN;
         SDL_SetMouseFocus(NULL);    // TODO: detect this
         SDL_SetKeyboardFocus(NULL); // TODO: detect this
     } else {
@@ -687,27 +703,28 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
            user choice of various things.  For now, just adapt the SDL_Window to
            whatever Windows set-up as the native-window's geometry.
         */
-        window->x = (int)SDL_lroundf(data->coreWindow->Bounds.Left);
-        window->y = (int)SDL_lroundf(data->coreWindow->Bounds.Top);
+        window->x = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Left);
+        window->y = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Top);
 #if NTDDI_VERSION < NTDDI_WIN10
         /* On WinRT 8.x / pre-Win10, just use the size we were given. */
-        window->w = (int)SDL_floorf(data->coreWindow->Bounds.Width);
-        window->h = (int)SDL_floorf(data->coreWindow->Bounds.Height);
+        window->w = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Width);
+        window->h = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Height);
 #else
         /* On Windows 10, we occasionally get control over window size.  For windowed
            mode apps, try this.
         */
         bool didSetSize = false;
-        if ((requestedFlags & SDL_WINDOW_FULLSCREEN) == 0) {
-            const Windows::Foundation::Size size((float)window->w, (float)window->h);
+        if (!(requestedFlags & SDL_WINDOW_FULLSCREEN)) {
+            const Windows::Foundation::Size size(WINRT_PHYSICAL_PIXELS_TO_DIPS(window->w),
+                                                 WINRT_PHYSICAL_PIXELS_TO_DIPS(window->h));
             didSetSize = data->appView->TryResizeView(size);
         }
         if (!didSetSize) {
             /* We either weren't able to set the window size, or a request for
                fullscreen was made.  Get window-size info from the OS.
             */
-            window->w = (int)SDL_floorf(data->coreWindow->Bounds.Width);
-            window->h = (int)SDL_floorf(data->coreWindow->Bounds.Height);
+            window->w = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Width);
+            window->h = WINRT_DIPS_TO_PHYSICAL_PIXELS(data->coreWindow->Bounds.Height);
         }
 #endif
 
@@ -732,26 +749,25 @@ int WINRT_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Propertie
     return 0;
 }
 
-void WINRT_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
+void WINRT_SetWindowSize(_THIS, SDL_Window *window)
 {
 #if NTDDI_VERSION >= NTDDI_WIN10
-    SDL_WindowData *data = window->internal;
-    const Windows::Foundation::Size size((float)window->floating.w, (float)window->floating.h);
-    if (data->appView->TryResizeView(size)) {
-        SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, window->floating.w, window->floating.h);
-    }
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
+    const Windows::Foundation::Size size(WINRT_PHYSICAL_PIXELS_TO_DIPS(window->w),
+                                         WINRT_PHYSICAL_PIXELS_TO_DIPS(window->h));
+    data->appView->TryResizeView(size); // TODO, WinRT: return failure (to caller?) from TryResizeView()
 #endif
 }
 
-int WINRT_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window, SDL_VideoDisplay *display, SDL_FullscreenOp fullscreen)
+void WINRT_SetWindowFullscreen(_THIS, SDL_Window *window, SDL_VideoDisplay *display, SDL_bool fullscreen)
 {
 #if NTDDI_VERSION >= NTDDI_WIN10
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     bool isWindowActive = WINRT_IsCoreWindowActive(data->coreWindow.Get());
     if (isWindowActive) {
         if (fullscreen) {
             if (!data->appView->IsFullScreenMode) {
-                return data->appView->TryEnterFullScreenMode() ? 0 : -1;
+                data->appView->TryEnterFullScreenMode(); // TODO, WinRT: return failure (to caller?) from TryEnterFullScreenMode()
             }
         } else {
             if (data->appView->IsFullScreenMode) {
@@ -760,13 +776,11 @@ int WINRT_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window, SDL_Vi
         }
     }
 #endif
-
-    return 0;
 }
 
-void WINRT_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
+void WINRT_DestroyWindow(_THIS, SDL_Window *window)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
 
     if (WINRT_GlobalSDLWindow == window) {
         WINRT_GlobalSDLWindow = NULL;
@@ -776,14 +790,30 @@ void WINRT_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
         // Delete the internal window data:
         delete data;
         data = NULL;
-        window->internal = NULL;
+        window->driverdata = NULL;
     }
 }
 
-static ABI::Windows::System::Display::IDisplayRequest *WINRT_CreateDisplayRequest(SDL_VideoDevice *_this)
+SDL_bool WINRT_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
+{
+    SDL_WindowData * data = (SDL_WindowData *) window->driverdata;
+
+    if (info->version.major <= SDL_MAJOR_VERSION) {
+        info->subsystem = SDL_SYSWM_WINRT;
+        info->info.winrt.window = reinterpret_cast<IInspectable *>(data->coreWindow.Get());
+        return SDL_TRUE;
+    } else {
+        SDL_SetError("Application not compiled with SDL %d",
+                     SDL_MAJOR_VERSION);
+        return SDL_FALSE;
+    }
+    return SDL_FALSE;
+}
+
+static ABI::Windows::System::Display::IDisplayRequest *WINRT_CreateDisplayRequest(_THIS)
 {
     /* Setup a WinRT DisplayRequest object, usable for enabling/disabling screensaver requests */
-    const wchar_t *wClassName = L"Windows.System.Display.DisplayRequest";
+    wchar_t *wClassName = L"Windows.System.Display.DisplayRequest";
     HSTRING hClassName;
     IActivationFactory *pActivationFactory = NULL;
     IInspectable *pDisplayRequestRaw = nullptr;
@@ -824,18 +854,19 @@ done:
     return pDisplayRequest;
 }
 
-int WINRT_SuspendScreenSaver(SDL_VideoDevice *_this)
+void WINRT_SuspendScreenSaver(_THIS)
 {
-    SDL_VideoData *internal = _this->internal;
-    if (internal && internal->displayRequest) {
-        ABI::Windows::System::Display::IDisplayRequest *displayRequest = (ABI::Windows::System::Display::IDisplayRequest *)internal->displayRequest;
+    SDL_VideoData *driverdata = (SDL_VideoData *)_this->driverdata;
+    if (driverdata && driverdata->displayRequest) {
+        ABI::Windows::System::Display::IDisplayRequest *displayRequest = (ABI::Windows::System::Display::IDisplayRequest *)driverdata->displayRequest;
         if (_this->suspend_screensaver) {
             displayRequest->RequestActive();
         } else {
             displayRequest->RequestRelease();
         }
     }
-    return 0;
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */
+
+/* vi: set ts=4 sw=4 expandtab: */

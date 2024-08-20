@@ -18,22 +18,26 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_WINDOWS
 
 #include "SDL_windowsvideo.h"
+#include "SDL_windowsshape.h"
+#include "SDL_system.h"
+#include "SDL_syswm.h"
+#include "SDL_timer.h"
+#include "SDL_vkeys.h"
+#include "SDL_hints.h"
+#include "SDL_main.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_touch_c.h"
 #include "../../events/scancodes_windows.h"
-#include "../../main/SDL_main_callbacks.h"
-#include "../../core/windows/SDL_hid.h"
+#include "SDL_hints.h"
+#include "SDL_log.h"
 
 /* Dropfile support */
 #include <shellapi.h>
-
-/* Device names */
-#include <setupapi.h>
 
 /* For GET_X_LPARAM, GET_Y_LPARAM. */
 #include <windowsx.h>
@@ -43,19 +47,26 @@
 #include <tpcshrd.h>
 #endif /* HAVE_TPCSHRD_H */
 
-#if 0
-#define WMMSG_DEBUG
-#endif
+/* #define WMMSG_DEBUG */
 #ifdef WMMSG_DEBUG
 #include <stdio.h>
 #include "wmmsg.h"
 #endif
 
-#ifdef SDL_PLATFORM_GDK
+#ifdef __GDK__
 #include "../../core/gdk/SDL_gdk.h"
 #endif
 
 /* #define HIGHDPI_DEBUG */
+
+/* Masks for processing the windows KEYDOWN and KEYUP messages */
+#define REPEATED_KEYMASK (1 << 30)
+#define EXTENDED_KEYMASK (1 << 24)
+
+#define VK_ENTER 10 /* Keypad Enter ... no VKEY defined? */
+#ifndef VK_OEM_NEC_EQUAL
+#define VK_OEM_NEC_EQUAL 0x92
+#endif
 
 /* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
 #ifndef WM_XBUTTONDOWN
@@ -76,9 +87,6 @@
 #ifndef WM_MOUSEHWHEEL
 #define WM_MOUSEHWHEEL 0x020E
 #endif
-#ifndef RI_MOUSE_HWHEEL
-#define RI_MOUSE_HWHEEL 0x0800
-#endif
 #ifndef WM_POINTERUPDATE
 #define WM_POINTERUPDATE 0x0245
 #endif
@@ -95,122 +103,236 @@
 #define TOUCHEVENTF_PEN 0x0040
 #endif
 
-#ifndef MAPVK_VK_TO_VSC_EX
-#define MAPVK_VK_TO_VSC_EX 4
-#endif
-
-#ifndef WC_ERR_INVALID_CHARS
-#define WC_ERR_INVALID_CHARS 0x00000080
-#endif
-
 #ifndef IS_HIGH_SURROGATE
 #define IS_HIGH_SURROGATE(x) (((x) >= 0xd800) && ((x) <= 0xdbff))
+#endif
+#ifndef IS_LOW_SURROGATE
+#define IS_LOW_SURROGATE(x) (((x) >= 0xdc00) && ((x) <= 0xdfff))
+#endif
+#ifndef IS_SURROGATE_PAIR
+#define IS_SURROGATE_PAIR(h, l) (IS_HIGH_SURROGATE(h) && IS_LOW_SURROGATE(l))
 #endif
 
 #ifndef USER_TIMER_MINIMUM
 #define USER_TIMER_MINIMUM 0x0000000A
 #endif
 
-/* Used to compare Windows message timestamps */
-#define SDL_TICKS_PASSED(A, B) ((Sint32)((B) - (A)) <= 0)
-
-#ifdef _WIN64
-typedef Uint64 QWORD; // Needed for NEXTRAWINPUTBLOCK()
-#endif
-
-static SDL_bool SDL_processing_messages;
-static DWORD message_tick;
-static Uint64 timestamp_offset;
-
-static void WIN_SetMessageTick(DWORD tick)
+static SDL_Scancode VKeytoScancodeFallback(WPARAM vkey)
 {
-    message_tick = tick;
+    switch (vkey) {
+    case VK_LEFT:
+        return SDL_SCANCODE_LEFT;
+    case VK_UP:
+        return SDL_SCANCODE_UP;
+    case VK_RIGHT:
+        return SDL_SCANCODE_RIGHT;
+    case VK_DOWN:
+        return SDL_SCANCODE_DOWN;
+    case VK_CONTROL:
+        return SDL_SCANCODE_LCTRL;
+    case VK_V:
+        return SDL_SCANCODE_V;
+
+    default:
+        return SDL_SCANCODE_UNKNOWN;
+    }
 }
 
-static Uint64 WIN_GetEventTimestamp(void)
+static SDL_Scancode VKeytoScancode(WPARAM vkey)
 {
-    const Uint64 TIMESTAMP_WRAP_OFFSET = SDL_MS_TO_NS(0x100000000LL);
-    Uint64 timestamp, now;
+    switch (vkey) {
+    case VK_BACK:
+        return SDL_SCANCODE_BACKSPACE;
+    case VK_CAPITAL:
+        return SDL_SCANCODE_CAPSLOCK;
 
-    if (!SDL_processing_messages) {
-        /* message_tick isn't valid, just use the current time */
-        return 0;
-    }
+    case VK_MODECHANGE:
+        return SDL_SCANCODE_MODE;
+    case VK_SELECT:
+        return SDL_SCANCODE_SELECT;
+    case VK_EXECUTE:
+        return SDL_SCANCODE_EXECUTE;
+    case VK_HELP:
+        return SDL_SCANCODE_HELP;
+    case VK_PAUSE:
+        return SDL_SCANCODE_PAUSE;
+    case VK_NUMLOCK:
+        return SDL_SCANCODE_NUMLOCKCLEAR;
 
-    now = SDL_GetTicksNS();
-    timestamp = SDL_MS_TO_NS(message_tick);
-    timestamp += timestamp_offset;
-    if (!timestamp_offset) {
-        // Initializing timestamp offset
-        //SDL_Log("Initializing timestamp offset\n");
-        timestamp_offset = (now - timestamp);
-        timestamp = now;
-    } else if ((Sint64)(now - timestamp - TIMESTAMP_WRAP_OFFSET) >= 0) {
-        // The windows message tick wrapped
-        //SDL_Log("Adjusting timestamp offset for wrapping tick\n");
-        timestamp_offset += TIMESTAMP_WRAP_OFFSET;
-        timestamp += TIMESTAMP_WRAP_OFFSET;
-    } else if (timestamp > now) {
-        // We got a newer timestamp, but it can't be newer than now, so adjust our offset
-        //SDL_Log("Adjusting timestamp offset, %.2f ms newer\n", (double)(timestamp - now) / SDL_NS_PER_MS);
-        timestamp_offset -= (timestamp - now);
-        timestamp = now;
+    case VK_F13:
+        return SDL_SCANCODE_F13;
+    case VK_F14:
+        return SDL_SCANCODE_F14;
+    case VK_F15:
+        return SDL_SCANCODE_F15;
+    case VK_F16:
+        return SDL_SCANCODE_F16;
+    case VK_F17:
+        return SDL_SCANCODE_F17;
+    case VK_F18:
+        return SDL_SCANCODE_F18;
+    case VK_F19:
+        return SDL_SCANCODE_F19;
+    case VK_F20:
+        return SDL_SCANCODE_F20;
+    case VK_F21:
+        return SDL_SCANCODE_F21;
+    case VK_F22:
+        return SDL_SCANCODE_F22;
+    case VK_F23:
+        return SDL_SCANCODE_F23;
+    case VK_F24:
+        return SDL_SCANCODE_F24;
+
+    case VK_OEM_NEC_EQUAL:
+        return SDL_SCANCODE_KP_EQUALS;
+    case VK_BROWSER_BACK:
+        return SDL_SCANCODE_AC_BACK;
+    case VK_BROWSER_FORWARD:
+        return SDL_SCANCODE_AC_FORWARD;
+    case VK_BROWSER_REFRESH:
+        return SDL_SCANCODE_AC_REFRESH;
+    case VK_BROWSER_STOP:
+        return SDL_SCANCODE_AC_STOP;
+    case VK_BROWSER_SEARCH:
+        return SDL_SCANCODE_AC_SEARCH;
+    case VK_BROWSER_FAVORITES:
+        return SDL_SCANCODE_AC_BOOKMARKS;
+    case VK_BROWSER_HOME:
+        return SDL_SCANCODE_AC_HOME;
+    case VK_VOLUME_MUTE:
+        return SDL_SCANCODE_MUTE;
+    case VK_VOLUME_DOWN:
+        return SDL_SCANCODE_VOLUMEDOWN;
+    case VK_VOLUME_UP:
+        return SDL_SCANCODE_VOLUMEUP;
+
+    case VK_MEDIA_NEXT_TRACK:
+        return SDL_SCANCODE_AUDIONEXT;
+    case VK_MEDIA_PREV_TRACK:
+        return SDL_SCANCODE_AUDIOPREV;
+    case VK_MEDIA_STOP:
+        return SDL_SCANCODE_AUDIOSTOP;
+    case VK_MEDIA_PLAY_PAUSE:
+        return SDL_SCANCODE_AUDIOPLAY;
+    case VK_LAUNCH_MAIL:
+        return SDL_SCANCODE_MAIL;
+    case VK_LAUNCH_MEDIA_SELECT:
+        return SDL_SCANCODE_MEDIASELECT;
+
+    case VK_OEM_102:
+        return SDL_SCANCODE_NONUSBACKSLASH;
+
+    case VK_ATTN:
+        return SDL_SCANCODE_SYSREQ;
+    case VK_CRSEL:
+        return SDL_SCANCODE_CRSEL;
+    case VK_EXSEL:
+        return SDL_SCANCODE_EXSEL;
+    case VK_OEM_CLEAR:
+        return SDL_SCANCODE_CLEAR;
+
+    case VK_LAUNCH_APP1:
+        return SDL_SCANCODE_APP1;
+    case VK_LAUNCH_APP2:
+        return SDL_SCANCODE_APP2;
+
+    default:
+        return SDL_SCANCODE_UNKNOWN;
     }
-    return timestamp;
 }
 
-static SDL_Scancode WindowsScanCodeToSDLScanCode(LPARAM lParam, WPARAM wParam, Uint16 *rawcode, SDL_bool *virtual_key)
+static SDL_Scancode WindowsScanCodeToSDLScanCode(LPARAM lParam, WPARAM wParam)
 {
     SDL_Scancode code;
-    Uint8 index;
-    Uint16 keyFlags = HIWORD(lParam);
-    Uint16 scanCode = LOBYTE(keyFlags);
+    int nScanCode = (lParam >> 16) & 0xFF;
+    SDL_bool bIsExtended = (lParam & (1 << 24)) != 0;
 
-    /* On-Screen Keyboard can send wrong scan codes with high-order bit set (key break code).
-     * Strip high-order bit. */
-    scanCode &= ~0x80;
+    code = VKeytoScancode(wParam);
 
-    *virtual_key = (scanCode == 0);
+    if (code == SDL_SCANCODE_UNKNOWN && nScanCode <= 127) {
+        code = windows_scancode_table[nScanCode];
 
-    if (scanCode != 0) {
-        if ((keyFlags & KF_EXTENDED) == KF_EXTENDED) {
-            scanCode = MAKEWORD(scanCode, 0xe0);
-        } else if (scanCode == 0x45) {
-            /* Pause */
-            scanCode = 0xe046;
-        }
-    } else {
-        Uint16 vkCode = LOWORD(wParam);
-
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-        /* Windows may not report scan codes for some buttons (multimedia buttons etc).
-         * Get scan code from the VK code.*/
-        scanCode = LOWORD(MapVirtualKey(vkCode, WIN_IsWindowsXP() ? MAPVK_VK_TO_VSC : MAPVK_VK_TO_VSC_EX));
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
-
-        /* Pause/Break key have a special scan code with 0xe1 prefix.
-         * Use Pause scan code that is used in Win32. */
-        if (scanCode == 0xe11d) {
-            scanCode = 0xe046;
+        if (bIsExtended) {
+            switch (code) {
+            case SDL_SCANCODE_RETURN:
+                code = SDL_SCANCODE_KP_ENTER;
+                break;
+            case SDL_SCANCODE_LALT:
+                code = SDL_SCANCODE_RALT;
+                break;
+            case SDL_SCANCODE_LCTRL:
+                code = SDL_SCANCODE_RCTRL;
+                break;
+            case SDL_SCANCODE_SLASH:
+                code = SDL_SCANCODE_KP_DIVIDE;
+                break;
+            case SDL_SCANCODE_CAPSLOCK:
+                code = SDL_SCANCODE_KP_PLUS;
+                break;
+            default:
+                break;
+            }
+        } else {
+            switch (code) {
+            case SDL_SCANCODE_HOME:
+                code = SDL_SCANCODE_KP_7;
+                break;
+            case SDL_SCANCODE_UP:
+                code = SDL_SCANCODE_KP_8;
+                break;
+            case SDL_SCANCODE_PAGEUP:
+                code = SDL_SCANCODE_KP_9;
+                break;
+            case SDL_SCANCODE_LEFT:
+                code = SDL_SCANCODE_KP_4;
+                break;
+            case SDL_SCANCODE_RIGHT:
+                code = SDL_SCANCODE_KP_6;
+                break;
+            case SDL_SCANCODE_END:
+                code = SDL_SCANCODE_KP_1;
+                break;
+            case SDL_SCANCODE_DOWN:
+                code = SDL_SCANCODE_KP_2;
+                break;
+            case SDL_SCANCODE_PAGEDOWN:
+                code = SDL_SCANCODE_KP_3;
+                break;
+            case SDL_SCANCODE_INSERT:
+                code = SDL_SCANCODE_KP_0;
+                break;
+            case SDL_SCANCODE_DELETE:
+                code = SDL_SCANCODE_KP_PERIOD;
+                break;
+            case SDL_SCANCODE_PRINTSCREEN:
+                code = SDL_SCANCODE_KP_MULTIPLY;
+                break;
+            default:
+                break;
+            }
         }
     }
 
-    /* Pack scan code into one byte to make the index. */
-    index = LOBYTE(scanCode) | (HIBYTE(scanCode) ? 0x80 : 0x00);
-    code = windows_scancode_table[index];
-    *rawcode = scanCode;
+    /* The on-screen keyboard can generate VK_LEFT and VK_RIGHT events without a scancode
+     * value set, however we cannot simply map these in VKeytoScancode() or we will be
+     * incorrectly handling the arrow keys on the number pad when NumLock is disabled
+     * (which also generate VK_LEFT, VK_RIGHT, etc in that scenario). Instead, we'll only
+     * map them if none of the above special number pad mappings applied. */
+    if (code == SDL_SCANCODE_UNKNOWN) {
+        code = VKeytoScancodeFallback(wParam);
+    }
 
     return code;
 }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-static SDL_bool WIN_ShouldIgnoreFocusClick(SDL_WindowData *data)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+static SDL_bool WIN_ShouldIgnoreFocusClick(void)
 {
-    return !SDL_WINDOW_IS_POPUP(data->window) &&
-           !SDL_GetHintBoolean(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, SDL_FALSE);
+    return !SDL_GetHintBoolean(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, SDL_FALSE);
 }
 
-static void WIN_CheckWParamMouseButton(Uint64 timestamp, SDL_bool bwParamMousePressed, Uint32 mouseFlags, SDL_bool bSwapButtons, SDL_WindowData *data, Uint8 button, SDL_MouseID mouseID)
+static void WIN_CheckWParamMouseButton(SDL_bool bwParamMousePressed, Uint32 mouseFlags, SDL_bool bSwapButtons, SDL_WindowData *data, Uint8 button, SDL_MouseID mouseID)
 {
     if (bSwapButtons) {
         if (button == SDL_BUTTON_LEFT) {
@@ -226,15 +348,15 @@ static void WIN_CheckWParamMouseButton(Uint64 timestamp, SDL_bool bwParamMousePr
             data->focus_click_pending &= ~SDL_BUTTON(button);
             WIN_UpdateClipCursor(data->window);
         }
-        if (WIN_ShouldIgnoreFocusClick(data)) {
+        if (WIN_ShouldIgnoreFocusClick()) {
             return;
         }
     }
 
     if (bwParamMousePressed && !(mouseFlags & SDL_BUTTON(button))) {
-        SDL_SendMouseButton(timestamp, data->window, mouseID, SDL_PRESSED, button);
+        SDL_SendMouseButton(data->window, mouseID, SDL_PRESSED, button);
     } else if (!bwParamMousePressed && (mouseFlags & SDL_BUTTON(button))) {
-        SDL_SendMouseButton(timestamp, data->window, mouseID, SDL_RELEASED, button);
+        SDL_SendMouseButton(data->window, mouseID, SDL_RELEASED, button);
     }
 }
 
@@ -242,25 +364,70 @@ static void WIN_CheckWParamMouseButton(Uint64 timestamp, SDL_bool bwParamMousePr
  * Some windows systems fail to send a WM_LBUTTONDOWN sometimes, but each mouse move contains the current button state also
  *  so this function reconciles our view of the world with the current buttons reported by windows
  */
-static void WIN_CheckWParamMouseButtons(Uint64 timestamp, WPARAM wParam, SDL_WindowData *data, SDL_MouseID mouseID)
+static void WIN_CheckWParamMouseButtons(WPARAM wParam, SDL_WindowData *data, SDL_MouseID mouseID)
 {
     if (wParam != data->mouse_button_flags) {
-        SDL_MouseButtonFlags mouseFlags = SDL_GetMouseState(NULL, NULL);
+        Uint32 mouseFlags = SDL_GetMouseState(NULL, NULL);
 
         /* WM_LBUTTONDOWN and friends handle button swapping for us. No need to check SM_SWAPBUTTON here.  */
-        WIN_CheckWParamMouseButton(timestamp, (wParam & MK_LBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_LEFT, mouseID);
-        WIN_CheckWParamMouseButton(timestamp, (wParam & MK_MBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_MIDDLE, mouseID);
-        WIN_CheckWParamMouseButton(timestamp, (wParam & MK_RBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_RIGHT, mouseID);
-        WIN_CheckWParamMouseButton(timestamp, (wParam & MK_XBUTTON1), mouseFlags, SDL_FALSE, data, SDL_BUTTON_X1, mouseID);
-        WIN_CheckWParamMouseButton(timestamp, (wParam & MK_XBUTTON2), mouseFlags, SDL_FALSE, data, SDL_BUTTON_X2, mouseID);
+        WIN_CheckWParamMouseButton((wParam & MK_LBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_LEFT, mouseID);
+        WIN_CheckWParamMouseButton((wParam & MK_MBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_MIDDLE, mouseID);
+        WIN_CheckWParamMouseButton((wParam & MK_RBUTTON), mouseFlags, SDL_FALSE, data, SDL_BUTTON_RIGHT, mouseID);
+        WIN_CheckWParamMouseButton((wParam & MK_XBUTTON1), mouseFlags, SDL_FALSE, data, SDL_BUTTON_X1, mouseID);
+        WIN_CheckWParamMouseButton((wParam & MK_XBUTTON2), mouseFlags, SDL_FALSE, data, SDL_BUTTON_X2, mouseID);
 
         data->mouse_button_flags = wParam;
     }
 }
 
-static void WIN_CheckAsyncMouseRelease(Uint64 timestamp, SDL_WindowData *data)
+static void WIN_CheckRawMouseButtons(HANDLE hDevice, ULONG rawButtons, SDL_WindowData *data, SDL_MouseID mouseID)
 {
-    SDL_MouseID mouseID = SDL_GLOBAL_MOUSE_ID;
+    // Add a flag to distinguish raw mouse buttons from wParam above
+    rawButtons |= 0x8000000;
+
+    if (rawButtons != data->mouse_button_flags) {
+        Uint32 mouseFlags = SDL_GetMouseState(NULL, NULL);
+        SDL_bool swapButtons = GetSystemMetrics(SM_SWAPBUTTON) != 0;
+        if (swapButtons && hDevice == NULL) {
+            /* Touchpad, already has buttons swapped */
+            swapButtons = SDL_FALSE;
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_1_DOWN) {
+            WIN_CheckWParamMouseButton((rawButtons & RI_MOUSE_BUTTON_1_DOWN), mouseFlags, swapButtons, data, SDL_BUTTON_LEFT, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_1_UP) {
+            WIN_CheckWParamMouseButton(!(rawButtons & RI_MOUSE_BUTTON_1_UP), mouseFlags, swapButtons, data, SDL_BUTTON_LEFT, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_2_DOWN) {
+            WIN_CheckWParamMouseButton((rawButtons & RI_MOUSE_BUTTON_2_DOWN), mouseFlags, swapButtons, data, SDL_BUTTON_RIGHT, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_2_UP) {
+            WIN_CheckWParamMouseButton(!(rawButtons & RI_MOUSE_BUTTON_2_UP), mouseFlags, swapButtons, data, SDL_BUTTON_RIGHT, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_3_DOWN) {
+            WIN_CheckWParamMouseButton((rawButtons & RI_MOUSE_BUTTON_3_DOWN), mouseFlags, swapButtons, data, SDL_BUTTON_MIDDLE, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_3_UP) {
+            WIN_CheckWParamMouseButton(!(rawButtons & RI_MOUSE_BUTTON_3_UP), mouseFlags, swapButtons, data, SDL_BUTTON_MIDDLE, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_4_DOWN) {
+            WIN_CheckWParamMouseButton((rawButtons & RI_MOUSE_BUTTON_4_DOWN), mouseFlags, swapButtons, data, SDL_BUTTON_X1, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_4_UP) {
+            WIN_CheckWParamMouseButton(!(rawButtons & RI_MOUSE_BUTTON_4_UP), mouseFlags, swapButtons, data, SDL_BUTTON_X1, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_5_DOWN) {
+            WIN_CheckWParamMouseButton((rawButtons & RI_MOUSE_BUTTON_5_DOWN), mouseFlags, swapButtons, data, SDL_BUTTON_X2, mouseID);
+        }
+        if (rawButtons & RI_MOUSE_BUTTON_5_UP) {
+            WIN_CheckWParamMouseButton(!(rawButtons & RI_MOUSE_BUTTON_5_UP), mouseFlags, swapButtons, data, SDL_BUTTON_X2, mouseID);
+        }
+        data->mouse_button_flags = rawButtons;
+    }
+}
+
+static void WIN_CheckAsyncMouseRelease(SDL_WindowData *data)
+{
     Uint32 mouseFlags;
     SHORT keyState;
     SDL_bool swapButtons;
@@ -273,33 +440,33 @@ static void WIN_CheckAsyncMouseRelease(Uint64 timestamp, SDL_WindowData *data)
 
     keyState = GetAsyncKeyState(VK_LBUTTON);
     if (!(keyState & 0x8000)) {
-        WIN_CheckWParamMouseButton(timestamp, SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_LEFT, mouseID);
+        WIN_CheckWParamMouseButton(SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_LEFT, 0);
     }
     keyState = GetAsyncKeyState(VK_RBUTTON);
     if (!(keyState & 0x8000)) {
-        WIN_CheckWParamMouseButton(timestamp, SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_RIGHT, mouseID);
+        WIN_CheckWParamMouseButton(SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_RIGHT, 0);
     }
     keyState = GetAsyncKeyState(VK_MBUTTON);
     if (!(keyState & 0x8000)) {
-        WIN_CheckWParamMouseButton(timestamp, SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_MIDDLE, mouseID);
+        WIN_CheckWParamMouseButton(SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_MIDDLE, 0);
     }
     keyState = GetAsyncKeyState(VK_XBUTTON1);
     if (!(keyState & 0x8000)) {
-        WIN_CheckWParamMouseButton(timestamp, SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_X1, mouseID);
+        WIN_CheckWParamMouseButton(SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_X1, 0);
     }
     keyState = GetAsyncKeyState(VK_XBUTTON2);
     if (!(keyState & 0x8000)) {
-        WIN_CheckWParamMouseButton(timestamp, SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_X2, mouseID);
+        WIN_CheckWParamMouseButton(SDL_FALSE, mouseFlags, swapButtons, data, SDL_BUTTON_X2, 0);
     }
     data->mouse_button_flags = (WPARAM)-1;
 }
 
 static void WIN_UpdateFocus(SDL_Window *window, SDL_bool expect_focus)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     HWND hwnd = data->hwnd;
-    SDL_bool had_focus = (SDL_GetKeyboardFocus() == window);
-    SDL_bool has_focus = (GetForegroundWindow() == hwnd);
+    SDL_bool had_focus = (SDL_GetKeyboardFocus() == window) ? SDL_TRUE : SDL_FALSE;
+    SDL_bool has_focus = (GetForegroundWindow() == hwnd) ? SDL_TRUE : SDL_FALSE;
 
     if (had_focus == has_focus || has_focus != expect_focus) {
         return;
@@ -325,16 +492,20 @@ static void WIN_UpdateFocus(SDL_Window *window, SDL_bool expect_focus)
             data->focus_click_pending |= SDL_BUTTON_X2MASK;
         }
 
-        SDL_SetKeyboardFocus(data->keyboard_focus ? data->keyboard_focus : window);
+        SDL_SetKeyboardFocus(window);
 
         /* In relative mode we are guaranteed to have mouse focus if we have keyboard focus */
         if (!SDL_GetMouse()->relative_mode) {
+            SDL_Point point;
             GetCursorPos(&cursorPos);
             ScreenToClient(hwnd, &cursorPos);
-            SDL_SendMouseMotion(WIN_GetEventTimestamp(), window, SDL_GLOBAL_MOUSE_ID, SDL_FALSE, (float)cursorPos.x, (float)cursorPos.y);
+            point.x = cursorPos.x;
+            point.y = cursorPos.y;
+            WIN_ClientPointToSDL(data->window, &point.x, &point.y);
+            SDL_SendMouseMotion(window, 0, 0, point.x, point.y);
         }
 
-        WIN_CheckAsyncMouseRelease(WIN_GetEventTimestamp(), data);
+        WIN_CheckAsyncMouseRelease(data);
         WIN_UpdateClipCursor(window);
 
         /*
@@ -342,9 +513,9 @@ static void WIN_UpdateFocus(SDL_Window *window, SDL_bool expect_focus)
          */
         WIN_CheckClipboardUpdate(data->videodata);
 
-        SDL_ToggleModState(SDL_KMOD_CAPS, (GetKeyState(VK_CAPITAL) & 0x0001) ? SDL_TRUE : SDL_FALSE);
-        SDL_ToggleModState(SDL_KMOD_NUM, (GetKeyState(VK_NUMLOCK) & 0x0001) ? SDL_TRUE : SDL_FALSE);
-        SDL_ToggleModState(SDL_KMOD_SCROLL, (GetKeyState(VK_SCROLL) & 0x0001) ? SDL_TRUE : SDL_FALSE);
+        SDL_ToggleModState(KMOD_CAPS, (GetKeyState(VK_CAPITAL) & 0x0001) ? SDL_TRUE : SDL_FALSE);
+        SDL_ToggleModState(KMOD_NUM, (GetKeyState(VK_NUMLOCK) & 0x0001) ? SDL_TRUE : SDL_FALSE);
+        SDL_ToggleModState(KMOD_SCROLL, (GetKeyState(VK_SCROLL) & 0x0001) ? SDL_TRUE : SDL_FALSE);
 
         WIN_UpdateWindowICCProfile(data->window, SDL_TRUE);
     } else {
@@ -367,29 +538,47 @@ static void WIN_UpdateFocus(SDL_Window *window, SDL_bool expect_focus)
         data->in_window_deactivation = SDL_FALSE;
     }
 }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
+
+static BOOL WIN_ConvertUTF32toUTF8(UINT32 codepoint, char *text)
+{
+    if (codepoint <= 0x7F) {
+        text[0] = (char)codepoint;
+        text[1] = '\0';
+    } else if (codepoint <= 0x7FF) {
+        text[0] = 0xC0 | (char)((codepoint >> 6) & 0x1F);
+        text[1] = 0x80 | (char)(codepoint & 0x3F);
+        text[2] = '\0';
+    } else if (codepoint <= 0xFFFF) {
+        text[0] = 0xE0 | (char)((codepoint >> 12) & 0x0F);
+        text[1] = 0x80 | (char)((codepoint >> 6) & 0x3F);
+        text[2] = 0x80 | (char)(codepoint & 0x3F);
+        text[3] = '\0';
+    } else if (codepoint <= 0x10FFFF) {
+        text[0] = 0xF0 | (char)((codepoint >> 18) & 0x0F);
+        text[1] = 0x80 | (char)((codepoint >> 12) & 0x3F);
+        text[2] = 0x80 | (char)((codepoint >> 6) & 0x3F);
+        text[3] = 0x80 | (char)(codepoint & 0x3F);
+        text[4] = '\0';
+    } else {
+        return SDL_FALSE;
+    }
+    return SDL_TRUE;
+}
+
+static BOOL WIN_ConvertUTF16toUTF8(UINT32 high_surrogate, UINT32 low_surrogate, char *text)
+{
+    const UINT32 SURROGATE_OFFSET = 0x10000 - (0xD800 << 10) - 0xDC00;
+    const UINT32 codepoint = (high_surrogate << 10) + low_surrogate + SURROGATE_OFFSET;
+    return WIN_ConvertUTF32toUTF8(codepoint, text);
+}
 
 static SDL_bool ShouldGenerateWindowCloseOnAltF4(void)
 {
-    return SDL_GetHintBoolean(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, SDL_TRUE);
+    return !SDL_GetHintBoolean(SDL_HINT_WINDOWS_NO_CLOSE_ON_ALT_F4, SDL_FALSE);
 }
 
-static SDL_bool ShouldClearWindowOnEraseBackground(SDL_WindowData *data)
-{
-    switch (data->hint_erase_background_mode) {
-    case SDL_ERASEBACKGROUNDMODE_NEVER:
-        return SDL_FALSE;
-    case SDL_ERASEBACKGROUNDMODE_INITIAL:
-        return !data->videodata->cleared;
-    case SDL_ERASEBACKGROUNDMODE_ALWAYS:
-        return SDL_TRUE;
-    default:
-        // Unexpected value, fallback to default behaviour
-        return !data->videodata->cleared;
-    }
-}
-
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 /* We want to generate mouse events from mouse and pen, and touch events from touchscreens */
 #define MI_WP_SIGNATURE      0xFF515700
 #define MI_WP_SIGNATURE_MASK 0xFFFFFF00
@@ -403,11 +592,12 @@ typedef enum
     SDL_MOUSE_EVENT_SOURCE_PEN,
 } SDL_MOUSE_EVENT_SOURCE;
 
-static SDL_MOUSE_EVENT_SOURCE GetMouseMessageSource(ULONG extrainfo)
+static SDL_MOUSE_EVENT_SOURCE GetMouseMessageSource(void)
 {
+    LPARAM extrainfo = GetMessageExtraInfo();
     /* Mouse data (ignoring synthetic mouse events generated for touchscreens) */
     /* Versions below Vista will set the low 7 bits to the Mouse ID and don't use bit 7:
-       Check bits 8-31 for the signature (which will indicate a Tablet PC Pen or Touch Device).
+       Check bits 8-32 for the signature (which will indicate a Tablet PC Pen or Touch Device).
        Only check bit 7 when Vista and up(Cleared=Pen, Set=Touch(which we need to filter out)),
        when the signature is set. The Mouse ID will be zero for an actual mouse. */
     if (IsTouchEvent(extrainfo)) {
@@ -417,14 +607,9 @@ static SDL_MOUSE_EVENT_SOURCE GetMouseMessageSource(ULONG extrainfo)
             return SDL_MOUSE_EVENT_SOURCE_PEN;
         }
     }
-    /* Sometimes WM_INPUT events won't have the correct touch signature,
-      so we have to rely purely on the touch bit being set. */
-    if (SDL_TouchDevicesAvailable() && extrainfo & 0x80) {
-        return SDL_MOUSE_EVENT_SOURCE_TOUCH;
-    }
     return SDL_MOUSE_EVENT_SOURCE_MOUSE;
 }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
 static SDL_WindowData *WIN_GetWindowDataFromHWND(HWND hwnd)
 {
@@ -433,7 +618,7 @@ static SDL_WindowData *WIN_GetWindowDataFromHWND(HWND hwnd)
 
     if (_this) {
         for (window = _this->windows; window; window = window->next) {
-            SDL_WindowData *data = window->internal;
+            SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
             if (data && data->hwnd == hwnd) {
                 return data;
             }
@@ -442,20 +627,20 @@ static SDL_WindowData *WIN_GetWindowDataFromHWND(HWND hwnd)
     return NULL;
 }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 LRESULT CALLBACK
 WIN_KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     KBDLLHOOKSTRUCT *hookData = (KBDLLHOOKSTRUCT *)lParam;
-    SDL_VideoData *data = SDL_GetVideoDevice()->internal;
+    SDL_VideoData *data = SDL_GetVideoDevice()->driverdata;
     SDL_Scancode scanCode;
 
     if (nCode < 0 || nCode != HC_ACTION) {
         return CallNextHookEx(NULL, nCode, wParam, lParam);
     }
     if (hookData->scanCode == 0x21d) {
-        // Skip fake LCtrl when RAlt is pressed
-        return 1;
+	    // Skip fake LCtrl when RAlt is pressed
+	    return 1;
     }
 
     switch (hookData->vkCode) {
@@ -491,13 +676,9 @@ WIN_KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
     }
 
     if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
-        if (!data->raw_keyboard_enabled) {
-            SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, hookData->scanCode, scanCode, SDL_PRESSED);
-        }
+        SDL_SendKeyboardKey(SDL_PRESSED, scanCode);
     } else {
-        if (!data->raw_keyboard_enabled) {
-            SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, hookData->scanCode, scanCode, SDL_RELEASED);
-        }
+        SDL_SendKeyboardKey(SDL_RELEASED, scanCode);
 
         /* If the key was down prior to our hook being installed, allow the
            key up message to pass normally the first time. This ensures other
@@ -513,535 +694,64 @@ WIN_KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-static SDL_bool WIN_SwapButtons(HANDLE hDevice)
-{
-    if (hDevice == NULL) {
-        /* Touchpad, already has buttons swapped */
-        return SDL_FALSE;
-    }
-    return GetSystemMetrics(SM_SWAPBUTTON) != 0;
-}
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
-static void WIN_HandleRawMouseInput(Uint64 timestamp, SDL_VideoData *data, HANDLE hDevice, RAWMOUSE *rawmouse)
-{
-    if (!data->raw_mouse_enabled) {
-        return;
-    }
 
-    // Relative mouse motion is delivered to the window with keyboard focus
-    SDL_Window *window = SDL_GetKeyboardFocus();
-    if (!window) {
-        return;
-    }
-
-    if (GetMouseMessageSource(rawmouse->ulExtraInformation) == SDL_MOUSE_EVENT_SOURCE_TOUCH) {
-        return;
-    }
-
-    SDL_MouseID mouseID = (SDL_MouseID)(uintptr_t)hDevice;
-    SDL_WindowData *windowdata = window->internal;
-
-    if ((rawmouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE) {
-        if (rawmouse->lLastX || rawmouse->lLastY) {
-            SDL_SendMouseMotion(timestamp, window, mouseID, SDL_TRUE, (float)rawmouse->lLastX, (float)rawmouse->lLastY);
-        }
-    } else if (rawmouse->lLastX || rawmouse->lLastY) {
-        /* This is absolute motion, either using a tablet or mouse over RDP
-
-            Notes on how RDP appears to work, as of Windows 10 2004:
-            - SetCursorPos() calls are cached, with multiple calls coalesced into a single call that's sent to the RDP client. If the last call to SetCursorPos() has the same value as the last one that was sent to the client, it appears to be ignored and not sent. This means that we need to jitter the SetCursorPos() position slightly in order for the recentering to work correctly.
-            - User mouse motion is coalesced with SetCursorPos(), so the WM_INPUT positions we see will not necessarily match the position we requested with SetCursorPos().
-            - SetCursorPos() outside of the bounds of the focus window appears not to do anything.
-            - SetCursorPos() while the cursor is NULL doesn't do anything
-
-            We handle this by creating a safe area within the application window, and when the mouse leaves that safe area, we warp back to the opposite side. Any single motion > 50% of the safe area is assumed to be a warp and ignored.
-        */
-        SDL_bool remote_desktop = GetSystemMetrics(SM_REMOTESESSION) ? SDL_TRUE : SDL_FALSE;
-        SDL_bool virtual_desktop = (rawmouse->usFlags & MOUSE_VIRTUAL_DESKTOP) ? SDL_TRUE : SDL_FALSE;
-        SDL_bool normalized_coordinates = !(rawmouse->usFlags & 0x40) ? SDL_TRUE : SDL_FALSE;
-        int w = GetSystemMetrics(virtual_desktop ? SM_CXVIRTUALSCREEN : SM_CXSCREEN);
-        int h = GetSystemMetrics(virtual_desktop ? SM_CYVIRTUALSCREEN : SM_CYSCREEN);
-        int x = normalized_coordinates ? (int)(((float)rawmouse->lLastX / 65535.0f) * w) : (int)rawmouse->lLastX;
-        int y = normalized_coordinates ? (int)(((float)rawmouse->lLastY / 65535.0f) * h) : (int)rawmouse->lLastY;
-        int relX, relY;
-
-        /* Calculate relative motion */
-        if (data->last_raw_mouse_position.x == 0 && data->last_raw_mouse_position.y == 0) {
-            data->last_raw_mouse_position.x = x;
-            data->last_raw_mouse_position.y = y;
-        }
-        relX = x - data->last_raw_mouse_position.x;
-        relY = y - data->last_raw_mouse_position.y;
-
-        if (remote_desktop) {
-            if (!windowdata->in_title_click && !windowdata->focus_click_pending) {
-                static int wobble;
-                float floatX = (float)x / w;
-                float floatY = (float)y / h;
-
-                /* See if the mouse is at the edge of the screen, or in the RDP title bar area */
-                if (floatX <= 0.01f || floatX >= 0.99f || floatY <= 0.01f || floatY >= 0.99f || y < 32) {
-                    /* Wobble the cursor position so it's not ignored if the last warp didn't have any effect */
-                    RECT rect = windowdata->cursor_clipped_rect;
-                    int warpX = rect.left + ((rect.right - rect.left) / 2) + wobble;
-                    int warpY = rect.top + ((rect.bottom - rect.top) / 2);
-
-                    WIN_SetCursorPos(warpX, warpY);
-
-                    ++wobble;
-                    if (wobble > 1) {
-                        wobble = -1;
-                    }
-                } else {
-                    /* Send relative motion if we didn't warp last frame (had good position data)
-                       We also sometimes get large deltas due to coalesced mouse motion and warping,
-                       so ignore those.
-                     */
-                    const int MAX_RELATIVE_MOTION = (h / 6);
-                    if (SDL_abs(relX) < MAX_RELATIVE_MOTION &&
-                        SDL_abs(relY) < MAX_RELATIVE_MOTION) {
-                        SDL_SendMouseMotion(timestamp, window, mouseID, SDL_TRUE, (float)relX, (float)relY);
-                    }
-                }
-            }
-        } else {
-            const int MAXIMUM_TABLET_RELATIVE_MOTION = 32;
-            if (SDL_abs(relX) > MAXIMUM_TABLET_RELATIVE_MOTION ||
-                SDL_abs(relY) > MAXIMUM_TABLET_RELATIVE_MOTION) {
-                /* Ignore this motion, probably a pen lift and drop */
-            } else {
-                SDL_SendMouseMotion(timestamp, window, mouseID, SDL_TRUE, (float)relX, (float)relY);
-            }
-        }
-
-        data->last_raw_mouse_position.x = x;
-        data->last_raw_mouse_position.y = y;
-    }
-
-    if (rawmouse->usButtonFlags) {
-        static struct {
-            USHORT usButtonFlags;
-            Uint8 button;
-            Uint8 state;
-        } raw_buttons[] = {
-            { RI_MOUSE_LEFT_BUTTON_DOWN, SDL_BUTTON_LEFT, SDL_PRESSED },
-            { RI_MOUSE_LEFT_BUTTON_UP, SDL_BUTTON_LEFT, SDL_RELEASED },
-            { RI_MOUSE_RIGHT_BUTTON_DOWN, SDL_BUTTON_RIGHT, SDL_PRESSED },
-            { RI_MOUSE_RIGHT_BUTTON_UP, SDL_BUTTON_RIGHT, SDL_RELEASED },
-            { RI_MOUSE_MIDDLE_BUTTON_DOWN, SDL_BUTTON_MIDDLE, SDL_PRESSED },
-            { RI_MOUSE_MIDDLE_BUTTON_UP, SDL_BUTTON_MIDDLE, SDL_RELEASED },
-            { RI_MOUSE_BUTTON_4_DOWN, SDL_BUTTON_X1, SDL_PRESSED },
-            { RI_MOUSE_BUTTON_4_UP, SDL_BUTTON_X1, SDL_RELEASED },
-            { RI_MOUSE_BUTTON_5_DOWN, SDL_BUTTON_X2, SDL_PRESSED },
-            { RI_MOUSE_BUTTON_5_UP, SDL_BUTTON_X2, SDL_RELEASED }
-        };
-
-        for (int i = 0; i < SDL_arraysize(raw_buttons); ++i) {
-            if (rawmouse->usButtonFlags & raw_buttons[i].usButtonFlags) {
-                Uint8 button = raw_buttons[i].button;
-                Uint8 state = raw_buttons[i].state;
-
-                if (button == SDL_BUTTON_LEFT) {
-                    if (WIN_SwapButtons(hDevice)) {
-                        button = SDL_BUTTON_RIGHT;
-                    }
-                } else if (button == SDL_BUTTON_RIGHT) {
-                    if (WIN_SwapButtons(hDevice)) {
-                        button = SDL_BUTTON_LEFT;
-                    }
-                }
-
-                if (windowdata->focus_click_pending & SDL_BUTTON(button)) {
-                    /* Ignore the button click for activation */
-                    if (!state) {
-                        windowdata->focus_click_pending &= ~SDL_BUTTON(button);
-                        WIN_UpdateClipCursor(window);
-                    }
-                    if (WIN_ShouldIgnoreFocusClick(windowdata)) {
-                        continue;
-                    }
-                }
-
-                SDL_SendMouseButton(timestamp, window, mouseID, state, button);
-            }
-        }
-
-        if (rawmouse->usButtonFlags & RI_MOUSE_WHEEL) {
-            short amount = (short)rawmouse->usButtonData;
-            float fAmount = (float)amount / WHEEL_DELTA;
-            SDL_SendMouseWheel(WIN_GetEventTimestamp(), window, mouseID, 0.0f, fAmount, SDL_MOUSEWHEEL_NORMAL);
-        } else if (rawmouse->usButtonFlags & RI_MOUSE_HWHEEL) {
-            short amount = (short)rawmouse->usButtonData;
-            float fAmount = (float)amount / WHEEL_DELTA;
-            SDL_SendMouseWheel(WIN_GetEventTimestamp(), window, mouseID, fAmount, 0.0f, SDL_MOUSEWHEEL_NORMAL);
-        }
-    }
-}
-
-static void WIN_HandleRawKeyboardInput(Uint64 timestamp, SDL_VideoData *data, HANDLE hDevice, RAWKEYBOARD *rawkeyboard)
-{
-    SDL_KeyboardID keyboardID = (SDL_KeyboardID)(uintptr_t)hDevice;
-
-    if (!data->raw_keyboard_enabled) {
-        return;
-    }
-
-    if (rawkeyboard->Flags & RI_KEY_E1) {
-        // First key in a Ctrl+{key} sequence
-        data->pending_E1_key_sequence = SDL_TRUE;
-        return;
-    }
-
-    if ((rawkeyboard->Flags & RI_KEY_E0) && rawkeyboard->MakeCode == 0x2A) {
-        // 0xE02A make code prefix, ignored
-        return;
-    }
-
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-    if (!rawkeyboard->MakeCode) {
-        rawkeyboard->MakeCode = LOWORD(MapVirtualKey(rawkeyboard->VKey, WIN_IsWindowsXP() ? MAPVK_VK_TO_VSC : MAPVK_VK_TO_VSC_EX));
-    }
-#endif
-    if (!rawkeyboard->MakeCode) {
-        return;
-    }
-
-    Uint8 state = (rawkeyboard->Flags & RI_KEY_BREAK) ? SDL_RELEASED : SDL_PRESSED;
-    SDL_Scancode code;
-    USHORT rawcode = rawkeyboard->MakeCode;
-    if (data->pending_E1_key_sequence) {
-        rawcode |= 0xE100;
-        if (rawkeyboard->MakeCode == 0x45) {
-            // Ctrl+NumLock == Pause
-            code = SDL_SCANCODE_PAUSE;
-        } else {
-            // Ctrl+ScrollLock == Break (no SDL scancode?)
-            code = SDL_SCANCODE_UNKNOWN;
-        }
-        data->pending_E1_key_sequence = SDL_FALSE;
-    } else {
-        // The code is in the lower 7 bits, the high bit is set for the E0 prefix
-        Uint8 index = (Uint8)rawkeyboard->MakeCode;
-        if (rawkeyboard->Flags & RI_KEY_E0) {
-            rawcode |= 0xE000;
-            index |= 0x80;
-        }
-        code = windows_scancode_table[index];
-    }
-    if (state) {
-        SDL_Window *focus = SDL_GetKeyboardFocus();
-        if (!focus || focus->text_input_active) {
-            return;
-        }
-    }
-
-    SDL_SendKeyboardKey(timestamp, keyboardID, rawcode, code, state);
-}
-
-void WIN_PollRawInput(SDL_VideoDevice *_this)
-{
-    SDL_VideoData *data = _this->internal;
-    UINT size, i, count, total = 0;
-    RAWINPUT *input;
-    Uint64 now;
-
-    if (data->rawinput_offset == 0) {
-        BOOL isWow64;
-
-        data->rawinput_offset = sizeof(RAWINPUTHEADER);
-        if (IsWow64Process(GetCurrentProcess(), &isWow64) && isWow64) {
-            /* We're going to get 64-bit data, so use the 64-bit RAWINPUTHEADER size */
-            data->rawinput_offset += 8;
-        }
-    }
-
-    /* Get all available events */
-    input = (RAWINPUT *)data->rawinput;
-    for (;;) {
-        size = data->rawinput_size - (UINT)((BYTE *)input - data->rawinput);
-        count = GetRawInputBuffer(input, &size, sizeof(RAWINPUTHEADER));
-        if (count == 0 || count == (UINT)-1) {
-            if (!data->rawinput || (count == (UINT)-1 && GetLastError() == ERROR_INSUFFICIENT_BUFFER)) {
-                const UINT RAWINPUT_BUFFER_SIZE_INCREMENT = 96;   // 2 64-bit raw mouse packets
-                BYTE *rawinput = (BYTE *)SDL_realloc(data->rawinput, data->rawinput_size + RAWINPUT_BUFFER_SIZE_INCREMENT);
-                if (!rawinput) {
-                    break;
-                }
-                input = (RAWINPUT *)(rawinput + ((BYTE *)input - data->rawinput));
-                data->rawinput = rawinput;
-                data->rawinput_size += RAWINPUT_BUFFER_SIZE_INCREMENT;
-            } else {
-                break;
-            }
-        } else {
-            total += count;
-
-            // Advance input to the end of the buffer
-            while (count--) {
-                input = NEXTRAWINPUTBLOCK(input);
-            }
-        }
-    }
-
-    now = SDL_GetTicksNS();
-    if (total > 0) {
-        Uint64 mouse_timestamp, mouse_increment;
-        Uint64 delta = (now - data->last_rawinput_poll);
-        UINT total_mouse = 0;
-        for (i = 0, input = (RAWINPUT *)data->rawinput; i < total; ++i, input = NEXTRAWINPUTBLOCK(input)) {
-            if (input->header.dwType == RIM_TYPEMOUSE) {
-                ++total_mouse;
-            }
-        }
-        if (total_mouse > 1 && delta <= SDL_MS_TO_NS(100)) {
-            /* We'll spread these events over the time since the last poll */
-            mouse_timestamp = data->last_rawinput_poll;
-            mouse_increment = delta / total_mouse;
-        } else {
-            /* Do we want to track the update rate per device? */
-            mouse_timestamp = now;
-            mouse_increment = 0;
-        }
-        for (i = 0, input = (RAWINPUT *)data->rawinput; i < total; ++i, input = NEXTRAWINPUTBLOCK(input)) {
-            if (input->header.dwType == RIM_TYPEMOUSE) {
-                RAWMOUSE *rawmouse = (RAWMOUSE *)((BYTE *)input + data->rawinput_offset);
-                mouse_timestamp += mouse_increment;
-                WIN_HandleRawMouseInput(mouse_timestamp, data, input->header.hDevice, rawmouse);
-            } else if (input->header.dwType == RIM_TYPEKEYBOARD) {
-                RAWKEYBOARD *rawkeyboard = (RAWKEYBOARD *)((BYTE *)input + data->rawinput_offset);
-                WIN_HandleRawKeyboardInput(now, data, input->header.hDevice, rawkeyboard);
-            }
-        }
-    }
-    data->last_rawinput_poll = now;
-}
-
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
-
-static void AddDeviceID(Uint32 deviceID, Uint32 **list, int *count)
-{
-    int new_count = (*count + 1);
-    Uint32 *new_list = (Uint32 *)SDL_realloc(*list, new_count * sizeof(*new_list));
-    if (!new_list) {
-        /* Oh well, we'll drop this one */
-        return;
-    }
-    new_list[new_count - 1] = deviceID;
-
-    *count = new_count;
-    *list = new_list;
-}
-
-static SDL_bool HasDeviceID(Uint32 deviceID, const Uint32 *list, int count)
-{
-    for (int i = 0; i < count; ++i) {
-        if (deviceID == list[i]) {
-            return SDL_TRUE;
-        }
-    }
-    return SDL_FALSE;
-}
-
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-static void GetDeviceName(HDEVINFO devinfo, const char *instance, char *name, size_t len)
-{
-    name[0] = '\0';
-
-    SP_DEVINFO_DATA data;
-    SDL_zero(data);
-    data.cbSize = sizeof(data);
-    for (DWORD i = 0;; ++i) {
-        if (!SetupDiEnumDeviceInfo(devinfo, i, &data)) {
-            if (GetLastError() == ERROR_NO_MORE_ITEMS) {
-                break;
-            } else {
-                continue;
-            }
-        }
-
-        char DeviceInstanceId[64];
-        if (!SetupDiGetDeviceInstanceIdA(devinfo, &data, DeviceInstanceId, sizeof(DeviceInstanceId), NULL))
-            continue;
-
-        if (SDL_strcasecmp(instance, DeviceInstanceId) == 0) {
-            SetupDiGetDeviceRegistryPropertyA(devinfo, &data, SPDRP_DEVICEDESC, NULL, (PBYTE)name, (DWORD)len, NULL);
-            return;
-        }
-    }
-}
-
-void WIN_CheckKeyboardAndMouseHotplug(SDL_VideoDevice *_this, SDL_bool initial_check)
-{
-    PRAWINPUTDEVICELIST raw_devices = NULL;
-    UINT raw_device_count = 0;
-    int old_keyboard_count = 0;
-    SDL_KeyboardID *old_keyboards = NULL;
-    int new_keyboard_count = 0;
-    SDL_KeyboardID *new_keyboards = NULL;
-    int old_mouse_count = 0;
-    SDL_MouseID *old_mice = NULL;
-    int new_mouse_count = 0;
-    SDL_MouseID *new_mice = NULL;
-    SDL_bool send_event = !initial_check;
-
-    /* Check to see if anything has changed */
-    static Uint64 s_last_device_change;
-    Uint64 last_device_change = WIN_GetLastDeviceNotification();
-    if (!initial_check && last_device_change == s_last_device_change) {
-        return;
-    }
-    s_last_device_change = last_device_change;
-
-    if ((GetRawInputDeviceList(NULL, &raw_device_count, sizeof(RAWINPUTDEVICELIST)) == -1) || (!raw_device_count)) {
-        return; /* oh well. */
-    }
-
-    raw_devices = (PRAWINPUTDEVICELIST)SDL_malloc(sizeof(RAWINPUTDEVICELIST) * raw_device_count);
-    if (!raw_devices) {
-        return; /* oh well. */
-    }
-
-    raw_device_count = GetRawInputDeviceList(raw_devices, &raw_device_count, sizeof(RAWINPUTDEVICELIST));
-    if (raw_device_count == (UINT)-1) {
-        SDL_free(raw_devices);
-        raw_devices = NULL;
-        return; /* oh well. */
-    }
-
-    HDEVINFO devinfo = SetupDiGetClassDevsA(NULL, NULL, NULL, (DIGCF_ALLCLASSES | DIGCF_PRESENT));
-
-    old_keyboards = SDL_GetKeyboards(&old_keyboard_count);
-    old_mice = SDL_GetMice(&old_mouse_count);
-
-    for (UINT i = 0; i < raw_device_count; i++) {
-        RID_DEVICE_INFO rdi;
-        char devName[MAX_PATH] = { 0 };
-        UINT rdiSize = sizeof(rdi);
-        UINT nameSize = SDL_arraysize(devName);
-        int vendor = 0, product = 0;
-        DWORD dwType = raw_devices[i].dwType;
-        char *instance, *ptr, name[64];
-
-        if (dwType != RIM_TYPEKEYBOARD && dwType != RIM_TYPEMOUSE) {
-            continue;
-        }
-
-        rdi.cbSize = sizeof(rdi);
-        if (GetRawInputDeviceInfoA(raw_devices[i].hDevice, RIDI_DEVICEINFO, &rdi, &rdiSize) == ((UINT)-1) ||
-            GetRawInputDeviceInfoA(raw_devices[i].hDevice, RIDI_DEVICENAME, devName, &nameSize) == ((UINT)-1)) {
-            continue;
-        }
-
-        /* Extract the device instance */
-        instance = devName;
-        while (*instance == '\\' || *instance == '?') {
-            ++instance;
-        }
-        for (ptr = instance; *ptr; ++ptr) {
-            if (*ptr == '#') {
-                *ptr = '\\';
-            }
-            if (*ptr == '{') {
-                if (ptr > instance && ptr[-1] == '\\') {
-                    --ptr;
-                }
-                break;
-            }
-        }
-        *ptr = '\0';
-
-        SDL_sscanf(instance, "HID\\VID_%X&PID_%X&", &vendor, &product);
-
-        switch (dwType) {
-        case RIM_TYPEKEYBOARD:
-            if (SDL_IsKeyboard((Uint16)vendor, (Uint16)product, rdi.keyboard.dwNumberOfKeysTotal)) {
-                SDL_KeyboardID keyboardID = (Uint32)(uintptr_t)raw_devices[i].hDevice;
-                AddDeviceID(keyboardID, &new_keyboards, &new_keyboard_count);
-                if (!HasDeviceID(keyboardID, old_keyboards, old_keyboard_count)) {
-                    GetDeviceName(devinfo, instance, name, sizeof(name));
-                    SDL_AddKeyboard(keyboardID, name, send_event);
-                }
-            }
-            break;
-        case RIM_TYPEMOUSE:
-            if (SDL_IsMouse((Uint16)vendor, (Uint16)product)) {
-                SDL_MouseID mouseID = (Uint32)(uintptr_t)raw_devices[i].hDevice;
-                AddDeviceID(mouseID, &new_mice, &new_mouse_count);
-                if (!HasDeviceID(mouseID, old_mice, old_mouse_count)) {
-                    GetDeviceName(devinfo, instance, name, sizeof(name));
-                    SDL_AddMouse(mouseID, name, send_event);
-                }
-            }
-            break;
-        default:
-            break;
-        }
-    }
-
-    for (int i = old_keyboard_count; i--;) {
-        if (!HasDeviceID(old_keyboards[i], new_keyboards, new_keyboard_count)) {
-            SDL_RemoveKeyboard(old_keyboards[i], send_event);
-        }
-    }
-
-    for (int i = old_mouse_count; i--;) {
-        if (!HasDeviceID(old_mice[i], new_mice, new_mouse_count)) {
-            SDL_RemoveMouse(old_mice[i], send_event);
-        }
-    }
-
-    SDL_free(old_keyboards);
-    SDL_free(new_keyboards);
-    SDL_free(old_mice);
-    SDL_free(new_mice);
-
-    SetupDiDestroyDeviceInfoList(devinfo);
-
-    SDL_free(raw_devices);
-}
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
-
-// Return SDL_TRUE if spurious LCtrl is pressed
+// Return 1 if spruious LCtrl is pressed
 // LCtrl is sent when RAltGR is pressed
-static SDL_bool SkipAltGrLeftControl(WPARAM wParam, LPARAM lParam)
+int skip_bad_lcrtl(WPARAM wParam, LPARAM lParam)
 {
+    MSG next_msg;
+    DWORD msg_time;
     if (wParam != VK_CONTROL) {
-        return SDL_FALSE;
+        return 0;
     }
-
     // Is this an extended key (i.e. right key)?
-    if (lParam & 0x01000000) {
-        return SDL_FALSE;
-    }
+    if (lParam & 0x01000000)
+                return 0;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     // Here is a trick: "Alt Gr" sends LCTRL, then RALT. We only
     // want the RALT message, so we try to see if the next message
     // is a RALT message. In that case, this is a false LCTRL!
-    MSG next_msg;
-    DWORD msg_time = GetMessageTime();
+    msg_time = GetMessageTime();
     if (PeekMessage(&next_msg, NULL, 0, 0, PM_NOREMOVE)) {
         if (next_msg.message == WM_KEYDOWN ||
             next_msg.message == WM_SYSKEYDOWN) {
-            if (next_msg.wParam == VK_MENU && (next_msg.lParam & 0x01000000) && next_msg.time == msg_time) {
-                // Next message is a RALT down message, which means that this is NOT a proper LCTRL message!
-                return SDL_TRUE;
+            if (next_msg.wParam == VK_MENU &&
+                (next_msg.lParam & 0x01000000) &&
+                next_msg.time == msg_time) {
+                // Next message is a RALT down message, which
+                // means that this is NOT a proper LCTRL message!
+                return 1;
             }
         }
     }
-#endif /* !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES) */
-
-    return SDL_FALSE;
+    return 0;
 }
 
-LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK
+WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    static SDL_bool s_ModalMoveResizeLoop;
     SDL_WindowData *data;
     LRESULT returnCode = -1;
 
+    /* Send a SDL_SYSWMEVENT if the application wants them */
+    if (SDL_GetEventState(SDL_SYSWMEVENT) == SDL_ENABLE) {
+        SDL_SysWMmsg wmmsg;
+
+        SDL_VERSION(&wmmsg.version);
+        wmmsg.subsystem = SDL_SYSWM_WINDOWS;
+        wmmsg.msg.win.hwnd = hwnd;
+        wmmsg.msg.win.msg = msg;
+        wmmsg.msg.win.wParam = wParam;
+        wmmsg.msg.win.lParam = lParam;
+        SDL_SendSysWMEvent(&wmmsg);
+    }
+
     /* Get the window data for the window */
     data = WIN_GetWindowDataFromHWND(hwnd);
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     if (!data) {
         /* Fallback */
         data = (SDL_WindowData *)GetProp(hwnd, TEXT("SDL_WindowData"));
@@ -1055,16 +765,16 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     {
         char message[1024];
         if (msg > MAX_WMMSG) {
-            SDL_snprintf(message, sizeof(message), "Received windows message: %p UNKNOWN (%d) -- 0x%x, 0x%x\r\n", hwnd, msg, wParam, lParam);
+            SDL_snprintf(message, sizeof(message), "Received windows message: %p UNKNOWN (%d) -- 0x%p, 0x%p\n", hwnd, msg, wParam, lParam);
         } else {
-            SDL_snprintf(message, sizeof(message), "Received windows message: %p %s -- 0x%x, 0x%x\r\n", hwnd, wmtab[msg], wParam, lParam);
+            SDL_snprintf(message, sizeof(message), "Received windows message: %p %s -- 0x%p, 0x%p\n", hwnd, wmtab[msg], wParam, lParam);
         }
         OutputDebugStringA(message);
     }
 #endif /* WMMSG_DEBUG */
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-    if (WIN_HandleIMEMessage(hwnd, msg, wParam, &lParam, data->videodata)) {
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+    if (IME_HandleMessage(hwnd, msg, wParam, &lParam, data->videodata)) {
         return 0;
     }
 #endif
@@ -1074,13 +784,13 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_SHOWWINDOW:
     {
         if (wParam) {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_SHOWN, 0, 0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
         } else {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_HIDDEN, 0, 0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
         }
     } break;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     case WM_NCACTIVATE:
     {
         /* Don't immediately clip the cursor in case we're clicking minimize/maximize buttons */
@@ -1096,13 +806,6 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     {
         /* Update the focus in case we changed focus to a child window and then away from the application */
         WIN_UpdateFocus(data->window, !!LOWORD(wParam));
-    } break;
-
-    case WM_MOUSEACTIVATE:
-    {
-        if (SDL_WINDOW_IS_POPUP(data->window)) {
-            return MA_NOACTIVATE;
-        }
     } break;
 
     case WM_SETFOCUS:
@@ -1126,7 +829,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
     case WM_MOUSEMOVE:
     {
-        /* SDL_Mouse *mouse = SDL_GetMouse(); */
+        SDL_Mouse *mouse = SDL_GetMouse();
 
         if (!data->mouse_tracked) {
             TRACKMOUSEEVENT trackMouseEvent;
@@ -1140,11 +843,16 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             }
         }
 
-        if (!data->videodata->raw_mouse_enabled) {
+        if (!mouse->relative_mode || mouse->relative_mode_warp) {
             /* Only generate mouse events for real mouse */
-            if (GetMouseMessageSource((ULONG)GetMessageExtraInfo()) != SDL_MOUSE_EVENT_SOURCE_TOUCH &&
+            if (GetMouseMessageSource() != SDL_MOUSE_EVENT_SOURCE_TOUCH &&
                 lParam != data->last_pointer_update) {
-                SDL_SendMouseMotion(WIN_GetEventTimestamp(), data->window, SDL_GLOBAL_MOUSE_ID, SDL_FALSE, (float)GET_X_LPARAM(lParam), (float)GET_Y_LPARAM(lParam));
+                int x = GET_X_LPARAM(lParam);
+                int y = GET_Y_LPARAM(lParam);
+
+                WIN_ClientPointToSDL(data->window, &x, &y);
+
+                SDL_SendMouseMotion(data->window, 0, 0, x, y);
             }
         }
     } break;
@@ -1162,21 +870,26 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_XBUTTONDOWN:
     case WM_XBUTTONDBLCLK:
     {
-        /* SDL_Mouse *mouse = SDL_GetMouse(); */
-        if (!data->videodata->raw_mouse_enabled) {
-            if (GetMouseMessageSource((ULONG)GetMessageExtraInfo()) != SDL_MOUSE_EVENT_SOURCE_TOUCH &&
+        SDL_Mouse *mouse = SDL_GetMouse();
+        if (!mouse->relative_mode || mouse->relative_mode_warp) {
+            if (GetMouseMessageSource() != SDL_MOUSE_EVENT_SOURCE_TOUCH &&
                 lParam != data->last_pointer_update) {
-                WIN_CheckWParamMouseButtons(WIN_GetEventTimestamp(), wParam, data, SDL_GLOBAL_MOUSE_ID);
+                WIN_CheckWParamMouseButtons(wParam, data, 0);
             }
         }
     } break;
 
-#if 0   /* We handle raw input all at once instead of using a syscall for each mouse event */
     case WM_INPUT:
     {
+        SDL_Mouse *mouse = SDL_GetMouse();
         HRAWINPUT hRawInput = (HRAWINPUT)lParam;
         RAWINPUT inp;
         UINT size = sizeof(inp);
+
+        /* We only use raw mouse input in relative mode */
+        if (!mouse->relative_mode || mouse->relative_mode_warp) {
+            break;
+        }
 
         /* Relative mouse motion is delivered to the window with keyboard focus */
         if (data->window != SDL_GetKeyboardFocus()) {
@@ -1184,25 +897,109 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         }
 
         GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
+
+        /* Mouse data (ignoring synthetic mouse events generated for touchscreens) */
         if (inp.header.dwType == RIM_TYPEMOUSE) {
-            WIN_HandleRawMouseInput(WIN_GetEventTimestamp(), data, inp.header.hDevice, &inp.data.mouse);
-        } else if (inp.header.dwType == RIM_TYPEKEYBOARD) {
-            WIN_HandleRawKeyboardInput(WIN_GetEventTimestamp(), data, inp.header.hDevice, &inp.data.keyboard);
+            SDL_MouseID mouseID;
+            RAWMOUSE *rawmouse;
+            if (SDL_GetNumTouchDevices() > 0 &&
+                (GetMouseMessageSource() == SDL_MOUSE_EVENT_SOURCE_TOUCH || (GetMessageExtraInfo() & 0x80) == 0x80)) {
+                break;
+            }
+            /* We do all of our mouse state checking against mouse ID 0
+             * We would only use the actual hDevice if we were tracking
+             * all mouse motion independently, and never using mouse ID 0.
+             */
+            mouseID = 0; /* (SDL_MouseID)(uintptr_t)inp.header.hDevice; */
+            rawmouse = &inp.data.mouse;
+
+            if ((rawmouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE) {
+                SDL_SendMouseMotion(data->window, mouseID, 1, (int)rawmouse->lLastX, (int)rawmouse->lLastY);
+            } else if (rawmouse->lLastX || rawmouse->lLastY) {
+                /* This is absolute motion, either using a tablet or mouse over RDP
+
+                   Notes on how RDP appears to work, as of Windows 10 2004:
+                    - SetCursorPos() calls are cached, with multiple calls coalesced into a single call that's sent to the RDP client. If the last call to SetCursorPos() has the same value as the last one that was sent to the client, it appears to be ignored and not sent. This means that we need to jitter the SetCursorPos() position slightly in order for the recentering to work correctly.
+                    - User mouse motion is coalesced with SetCursorPos(), so the WM_INPUT positions we see will not necessarily match the positon we requested with SetCursorPos().
+                    - SetCursorPos() outside of the bounds of the focus window appears not to do anything.
+                    - SetCursorPos() while the cursor is NULL doesn't do anything
+
+                   We handle this by creating a safe area within the application window, and when the mouse leaves that safe area, we warp back to the opposite side. Any single motion > 50% of the safe area is assumed to be a warp and ignored.
+                */
+                SDL_bool remote_desktop = GetSystemMetrics(SM_REMOTESESSION) ? SDL_TRUE : SDL_FALSE;
+                SDL_bool virtual_desktop = (rawmouse->usFlags & MOUSE_VIRTUAL_DESKTOP) ? SDL_TRUE : SDL_FALSE;
+                SDL_bool normalized_coordinates = !(rawmouse->usFlags & 0x40) ? SDL_TRUE : SDL_FALSE;
+                int w = GetSystemMetrics(virtual_desktop ? SM_CXVIRTUALSCREEN : SM_CXSCREEN);
+                int h = GetSystemMetrics(virtual_desktop ? SM_CYVIRTUALSCREEN : SM_CYSCREEN);
+                int x = normalized_coordinates ? (int)(((float)rawmouse->lLastX / 65535.0f) * w) : (int)rawmouse->lLastX;
+                int y = normalized_coordinates ? (int)(((float)rawmouse->lLastY / 65535.0f) * h) : (int)rawmouse->lLastY;
+                int relX, relY;
+
+                /* Calculate relative motion */
+                if (data->last_raw_mouse_position.x == 0 && data->last_raw_mouse_position.y == 0) {
+                    data->last_raw_mouse_position.x = x;
+                    data->last_raw_mouse_position.y = y;
+                }
+                relX = x - data->last_raw_mouse_position.x;
+                relY = y - data->last_raw_mouse_position.y;
+
+                if (remote_desktop) {
+                    if (!data->in_title_click && !data->focus_click_pending) {
+                        static int wobble;
+                        float floatX = (float)x / w;
+                        float floatY = (float)y / h;
+
+                        /* See if the mouse is at the edge of the screen, or in the RDP title bar area */
+                        if (floatX <= 0.01f || floatX >= 0.99f || floatY <= 0.01f || floatY >= 0.99f || y < 32) {
+                            /* Wobble the cursor position so it's not ignored if the last warp didn't have any effect */
+                            RECT rect = data->cursor_clipped_rect;
+                            int warpX = rect.left + ((rect.right - rect.left) / 2) + wobble;
+                            int warpY = rect.top + ((rect.bottom - rect.top) / 2);
+
+                            WIN_SetCursorPos(warpX, warpY);
+
+                            ++wobble;
+                            if (wobble > 1) {
+                                wobble = -1;
+                            }
+                        } else {
+                            /* Send relative motion if we didn't warp last frame (had good position data)
+                               We also sometimes get large deltas due to coalesced mouse motion and warping,
+                               so ignore those.
+                             */
+                            const int MAX_RELATIVE_MOTION = (h / 6);
+                            if (SDL_abs(relX) < MAX_RELATIVE_MOTION &&
+                                SDL_abs(relY) < MAX_RELATIVE_MOTION) {
+                                SDL_SendMouseMotion(data->window, mouseID, 1, relX, relY);
+                            }
+                        }
+                    }
+                } else {
+                    const int MAXIMUM_TABLET_RELATIVE_MOTION = 32;
+                    if (SDL_abs(relX) > MAXIMUM_TABLET_RELATIVE_MOTION ||
+                        SDL_abs(relY) > MAXIMUM_TABLET_RELATIVE_MOTION) {
+                        /* Ignore this motion, probably a pen lift and drop */
+                    } else {
+                        SDL_SendMouseMotion(data->window, mouseID, 1, relX, relY);
+                    }
+                }
+
+                data->last_raw_mouse_position.x = x;
+                data->last_raw_mouse_position.y = y;
+            }
+            WIN_CheckRawMouseButtons(inp.header.hDevice, rawmouse->usButtonFlags, data, mouseID);
         }
     } break;
-#endif
 
     case WM_MOUSEWHEEL:
     case WM_MOUSEHWHEEL:
     {
-        if (!data->videodata->raw_mouse_enabled) {
-            short amount = GET_WHEEL_DELTA_WPARAM(wParam);
-            float fAmount = (float)amount / WHEEL_DELTA;
-            if (msg == WM_MOUSEWHEEL) {
-                SDL_SendMouseWheel(WIN_GetEventTimestamp(), data->window, SDL_GLOBAL_MOUSE_ID, 0.0f, fAmount, SDL_MOUSEWHEEL_NORMAL);
-            } else {
-                SDL_SendMouseWheel(WIN_GetEventTimestamp(), data->window, SDL_GLOBAL_MOUSE_ID, fAmount, 0.0f, SDL_MOUSEWHEEL_NORMAL);
-            }
+        short amount = GET_WHEEL_DELTA_WPARAM(wParam);
+        float fAmount = (float)amount / WHEEL_DELTA;
+        if (msg == WM_MOUSEWHEEL) {
+            SDL_SendMouseWheel(data->window, 0, 0.0f, fAmount, SDL_MOUSEWHEEL_NORMAL);
+        } else {
+            SDL_SendMouseWheel(data->window, 0, fAmount, 0.0f, SDL_MOUSEWHEEL_NORMAL);
         }
     } break;
 
@@ -1211,17 +1008,21 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             if (SDL_GetMouseFocus() == data->window && !SDL_GetMouse()->relative_mode && !IsIconic(hwnd)) {
                 SDL_Mouse *mouse;
                 POINT cursorPos;
+                SDL_Point point;
                 GetCursorPos(&cursorPos);
                 ScreenToClient(hwnd, &cursorPos);
+                point.x = cursorPos.x;
+                point.y = cursorPos.y;
+                WIN_ClientPointToSDL(data->window, &point.x, &point.y);
                 mouse = SDL_GetMouse();
                 if (!mouse->was_touch_mouse_events) { /* we're not a touch handler causing a mouse leave? */
-                    SDL_SendMouseMotion(WIN_GetEventTimestamp(), data->window, SDL_GLOBAL_MOUSE_ID, SDL_FALSE, (float)cursorPos.x, (float)cursorPos.y);
+                    SDL_SendMouseMotion(data->window, 0, 0, point.x, point.y);
                 } else {                                       /* touch handling? */
                     mouse->was_touch_mouse_events = SDL_FALSE; /* not anymore */
                     if (mouse->touch_mouse_events) {           /* convert touch to mouse events */
-                        SDL_SendMouseMotion(WIN_GetEventTimestamp(), data->window, SDL_TOUCH_MOUSEID, SDL_FALSE, (float)cursorPos.x, (float)cursorPos.y);
+                        SDL_SendMouseMotion(data->window, SDL_TOUCH_MOUSEID, 0, point.x, point.y);
                     } else { /* normal handling */
-                        SDL_SendMouseMotion(WIN_GetEventTimestamp(), data->window, SDL_GLOBAL_MOUSE_ID, SDL_FALSE, (float)cursorPos.x, (float)cursorPos.y);
+                        SDL_SendMouseMotion(data->window, 0, 0, point.x, point.y);
                     }
                 }
             }
@@ -1237,30 +1038,29 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
         returnCode = 0;
         break;
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     {
-        if (SkipAltGrLeftControl(wParam, lParam)) {
+        SDL_Scancode code = WindowsScanCodeToSDLScanCode(lParam, wParam);
+        const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+
+        if (skip_bad_lcrtl(wParam, lParam)) {
             returnCode = 0;
             break;
         }
 
-        SDL_bool virtual_key = SDL_FALSE;
-        Uint16 rawcode = 0;
-        SDL_Scancode code = WindowsScanCodeToSDLScanCode(lParam, wParam, &rawcode, &virtual_key);
-
         /* Detect relevant keyboard shortcuts */
-        if (code == SDL_SCANCODE_F4 && (SDL_GetModState() & SDL_KMOD_ALT)) {
+        if (keyboardState[SDL_SCANCODE_LALT] == SDL_PRESSED || keyboardState[SDL_SCANCODE_RALT] == SDL_PRESSED) {
             /* ALT+F4: Close window */
-            if (ShouldGenerateWindowCloseOnAltF4()) {
-                SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_CLOSE_REQUESTED, 0, 0);
+            if (code == SDL_SCANCODE_F4 && ShouldGenerateWindowCloseOnAltF4()) {
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
             }
         }
 
-        if (virtual_key || !data->videodata->raw_keyboard_enabled || data->window->text_input_active) {
-            SDL_SendKeyboardKey(WIN_GetEventTimestamp(), SDL_GLOBAL_KEYBOARD_ID, rawcode, code, SDL_PRESSED);
+        if (code != SDL_SCANCODE_UNKNOWN) {
+            SDL_SendKeyboardKey(SDL_PRESSED, code);
         }
     }
 
@@ -1270,22 +1070,20 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_SYSKEYUP:
     case WM_KEYUP:
     {
-        if (SkipAltGrLeftControl(wParam, lParam)) {
+        SDL_Scancode code = WindowsScanCodeToSDLScanCode(lParam, wParam);
+        const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+
+        if (skip_bad_lcrtl(wParam, lParam)) {
             returnCode = 0;
             break;
         }
 
-        SDL_bool virtual_key = SDL_FALSE;
-        Uint16 rawcode = 0;
-        SDL_Scancode code = WindowsScanCodeToSDLScanCode(lParam, wParam, &rawcode, &virtual_key);
-        const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-
-        if (virtual_key || !data->videodata->raw_keyboard_enabled || data->window->text_input_active) {
+        if (code != SDL_SCANCODE_UNKNOWN) {
             if (code == SDL_SCANCODE_PRINTSCREEN &&
                 keyboardState[code] == SDL_RELEASED) {
-                SDL_SendKeyboardKey(WIN_GetEventTimestamp(), SDL_GLOBAL_KEYBOARD_ID, rawcode, code, SDL_PRESSED);
+                SDL_SendKeyboardKey(SDL_PRESSED, code);
             }
-            SDL_SendKeyboardKey(WIN_GetEventTimestamp(), SDL_GLOBAL_KEYBOARD_ID, rawcode, code, SDL_RELEASED);
+            SDL_SendKeyboardKey(SDL_RELEASED, code);
         }
     }
         returnCode = 0;
@@ -1295,10 +1093,8 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         if (wParam == UNICODE_NOCHAR) {
             returnCode = 1;
         } else {
-            if (SDL_TextInputActive(data->window)) {
-                char text[5];
-                char *end = SDL_UCS4ToUTF8((Uint32)wParam, text);
-                *end = '\0';
+            char text[5];
+            if (WIN_ConvertUTF32toUTF8((UINT32)wParam, text)) {
                 SDL_SendKeyboardText(text);
             }
             returnCode = 0;
@@ -1306,34 +1102,35 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         break;
 
     case WM_CHAR:
-        if (SDL_TextInputActive(data->window)) {
-            /* Characters outside Unicode Basic Multilingual Plane (BMP)
-             * are coded as so called "surrogate pair" in two separate UTF-16 character events.
-             * Cache high surrogate until next character event. */
-            if (IS_HIGH_SURROGATE(wParam)) {
-                data->high_surrogate = (WCHAR)wParam;
-            } else {
-                WCHAR utf16[3];
-
-                utf16[0] = data->high_surrogate ? data->high_surrogate : (WCHAR)wParam;
-                utf16[1] = data->high_surrogate ? (WCHAR)wParam : L'\0';
-                utf16[2] = L'\0';
-
-                char utf8[5];
-                int result = WIN_WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, utf16, -1, utf8, sizeof(utf8), NULL, NULL);
-                if (result > 0) {
-                    SDL_SendKeyboardText(utf8);
-                }
-                data->high_surrogate = L'\0';
+        /* When a user enters a Unicode code point defined in the Basic Multilingual Plane, Windows sends a WM_CHAR
+           message with the code point encoded as UTF-16. When a user enters a Unicode code point from a Supplementary
+           Plane, Windows sends the code point in two separate WM_CHAR messages: The first message includes the UTF-16
+           High Surrogate and the second the UTF-16 Low Surrogate. The High and Low Surrogates cannot be individually
+           converted to valid UTF-8, therefore, we must save the High Surrogate from the first WM_CHAR message and
+           concatenate it with the Low Surrogate from the second WM_CHAR message. At that point, we have a valid
+           UTF-16 surrogate pair ready to re-encode as UTF-8. */
+        if (IS_HIGH_SURROGATE(wParam)) {
+            data->high_surrogate = (WCHAR)wParam;
+        } else if (IS_SURROGATE_PAIR(data->high_surrogate, wParam)) {
+            /* The code point is in a Supplementary Plane.
+               Here wParam is the Low Surrogate. */
+            char text[5];
+            if (WIN_ConvertUTF16toUTF8((UINT32)data->high_surrogate, (UINT32)wParam, text)) {
+                SDL_SendKeyboardText(text);
             }
+            data->high_surrogate = 0;
         } else {
-            data->high_surrogate = L'\0';
+            /* The code point is in the Basic Multilingual Plane.
+               It's numerically equal to UTF-32. */
+            char text[5];
+            if (WIN_ConvertUTF32toUTF8((UINT32)wParam, text)) {
+                SDL_SendKeyboardText(text);
+            }
         }
-
         returnCode = 0;
         break;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 #ifdef WM_INPUTLANGCHANGE
     case WM_INPUTLANGCHANGE:
     {
@@ -1353,7 +1150,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         data->in_title_click = SDL_FALSE;
 
         /* The mouse may have been released during a modal loop */
-        WIN_CheckAsyncMouseRelease(WIN_GetEventTimestamp(), data);
+        WIN_CheckAsyncMouseRelease(data);
     } break;
 
 #ifdef WM_GETMINMAXINFO
@@ -1366,6 +1163,10 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         int min_w, min_h;
         int max_w, max_h;
         BOOL constrain_max_size;
+
+        if (SDL_IsShapedWindow(data->window)) {
+            Win32_ResizeWindowShape(data->window);
+        }
 
         /* If this is an expected size change, allow it */
         if (data->expected_resize) {
@@ -1382,6 +1183,12 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         SDL_GetWindowMinimumSize(data->window, &min_w, &min_h);
         SDL_GetWindowMaximumSize(data->window, &max_w, &max_h);
 
+        /* Convert w, h, min_w, min_h, max_w, max_h from dpi-scaled points to pixels,
+           treating them as coordinates within the client area. */
+        WIN_ClientPointFromSDL(data->window, &w, &h);
+        WIN_ClientPointFromSDL(data->window, &min_w, &min_h);
+        WIN_ClientPointFromSDL(data->window, &max_w, &max_h);
+
         /* Store in min_w and min_h difference between current size and minimal
            size so we don't need to call AdjustWindowRectEx twice */
         min_w -= w;
@@ -1395,11 +1202,27 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         }
 
         if (!(SDL_GetWindowFlags(data->window) & SDL_WINDOW_BORDERLESS)) {
+            LONG style = GetWindowLong(hwnd, GWL_STYLE);
+            /* DJM - according to the docs for GetMenu(), the
+               return value is undefined if hwnd is a child window.
+               Apparently it's too difficult for MS to check
+               inside their function, so I have to do it here.
+             */
+            BOOL menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+            UINT dpi;
+
+            dpi = 96;
             size.top = 0;
             size.left = 0;
             size.bottom = h;
             size.right = w;
-            WIN_AdjustWindowRectForHWND(hwnd, &size, 0);
+
+            if (WIN_IsPerMonitorV2DPIAware(SDL_GetVideoDevice())) {
+                dpi = data->videodata->GetDpiForWindow(hwnd);
+                data->videodata->AdjustWindowRectExForDpi(&size, style, menu, 0, dpi);
+            } else {
+                AdjustWindowRectEx(&size, style, menu, 0);
+            }
             w = size.right - size.left;
             h = size.bottom - size.top;
 #ifdef HIGHDPI_DEBUG
@@ -1440,128 +1263,75 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 #endif /* WM_GETMINMAXINFO */
 
     case WM_WINDOWPOSCHANGING:
-    {
+
         if (data->expected_resize) {
             returnCode = 0;
         }
-
-        if (data->floating_rect_pending &&
-            !IsIconic(hwnd) &&
-            !IsZoomed(hwnd) &&
-            (data->window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED)) &&
-            !(data->window->flags & SDL_WINDOW_FULLSCREEN)) {
-            /* If a new floating size is pending, apply it if moving from a fixed-size to floating state. */
-            WINDOWPOS *windowpos = (WINDOWPOS*)lParam;
-            int fx, fy, fw, fh;
-
-            WIN_AdjustWindowRect(data->window, &fx, &fy, &fw, &fh, SDL_WINDOWRECT_FLOATING);
-            windowpos->x = fx;
-            windowpos->y = fy;
-            windowpos->cx = fw;
-            windowpos->cy = fh;
-            windowpos->flags &= ~(SWP_NOSIZE | SWP_NOMOVE);
-
-            data->floating_rect_pending = SDL_FALSE;
-        }
-    } break;
+        break;
 
     case WM_WINDOWPOSCHANGED:
     {
-        SDL_Window *win;
-        const SDL_DisplayID original_displayID = data->last_displayID;
-        const WINDOWPOS *windowpos = (WINDOWPOS *)lParam;
-        const SDL_bool iconic = IsIconic(hwnd);
-        const SDL_bool zoomed = IsZoomed(hwnd);
         RECT rect;
         int x, y;
         int w, h;
+        int display_index = data->window->display_index;
 
-        if (windowpos->flags & SWP_SHOWWINDOW) {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_SHOWN, 0, 0);
-        }
-
-        if (iconic) {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_MINIMIZED, 0, 0);
-        } else if (zoomed) {
-            if (data->window->flags & SDL_WINDOW_MINIMIZED) {
-                /* If going from minimized to maximized, send the restored event first. */
-                SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_RESTORED, 0, 0);
-            }
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_MAXIMIZED, 0, 0);
-        } else if (data->window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED)) {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_RESTORED, 0, 0);
-        }
-
-        if (windowpos->flags & SWP_HIDEWINDOW) {
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_HIDDEN, 0, 0);
+        if (data->initializing || data->in_border_change) {
+            break;
         }
 
         /* When the window is minimized it's resized to the dock icon size, ignore this */
-        if (iconic) {
+        if (IsIconic(hwnd)) {
             break;
         }
 
-        if (data->initializing) {
+        if (!GetClientRect(hwnd, &rect) || WIN_IsRectEmpty(&rect)) {
             break;
         }
-
-        if (GetClientRect(hwnd, &rect) && !WIN_IsRectEmpty(&rect)) {
-            ClientToScreen(hwnd, (LPPOINT) &rect);
-            ClientToScreen(hwnd, (LPPOINT) &rect + 1);
-
-            x = rect.left;
-            y = rect.top;
-
-            SDL_GlobalToRelativeForWindow(data->window, x, y, &x, &y);
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_MOVED, x, y);
-        }
-
-        /* Moving the window from one display to another can change the size of the window (in the handling of SDL_EVENT_WINDOW_MOVED), so we need to re-query the bounds */
-        if (GetClientRect(hwnd, &rect) && !WIN_IsRectEmpty(&rect)) {
-            w = rect.right;
-            h = rect.bottom;
-
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_RESIZED, w, h);
-        }
+        ClientToScreen(hwnd, (LPPOINT)&rect);
+        ClientToScreen(hwnd, (LPPOINT)&rect + 1);
 
         WIN_UpdateClipCursor(data->window);
 
-        /* Update the window display position */
-        data->last_displayID = SDL_GetDisplayForWindow(data->window);
+        x = rect.left;
+        y = rect.top;
+        WIN_ScreenPointToSDL(&x, &y);
 
-        if (data->last_displayID != original_displayID) {
-            /* Display changed, check ICC profile */
-            WIN_UpdateWindowICCProfile(data->window, SDL_TRUE);
-        }
+        SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED, x, y);
 
-        /* Update the position of any child windows */
-        for (win = data->window->first_child; win; win = win->next_sibling) {
-            /* Don't update hidden child windows, their relative position doesn't change */
-            if (!(win->flags & SDL_WINDOW_HIDDEN)) {
-                WIN_SetWindowPositionInternal(win, SWP_NOCOPYBITS | SWP_NOACTIVATE, SDL_WINDOWRECT_CURRENT);
-            }
-        }
+        /* Convert client area width/height from pixels to dpi-scaled points */
+        w = rect.right - rect.left;
+        h = rect.bottom - rect.top;
+        WIN_ClientPointToSDL(data->window, &w, &h);
+
+        SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED, w, h);
+
+#ifdef HIGHDPI_DEBUG
+        SDL_Log("WM_WINDOWPOSCHANGED: Windows client rect (pixels): (%d, %d) (%d x %d)\tSDL client rect (points): (%d, %d) (%d x %d) cached dpi %d, windows reported dpi %d",
+                rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+                x, y, w, h, data->scaling_dpi, data->videodata->GetDpiForWindow ? data->videodata->GetDpiForWindow(data->hwnd) : 0);
+#endif
 
         /* Forces a WM_PAINT event */
         InvalidateRect(hwnd, NULL, FALSE);
 
+        if (data->window->display_index != display_index) {
+            /* Display changed, check ICC profile */
+            WIN_UpdateWindowICCProfile(data->window, SDL_TRUE);
+        }
     } break;
 
     case WM_ENTERSIZEMOVE:
     case WM_ENTERMENULOOP:
     {
-        SetTimer(hwnd, (UINT_PTR)SDL_IterateMainCallbacks, USER_TIMER_MINIMUM, NULL);
+        SetTimer(hwnd, (UINT_PTR)&s_ModalMoveResizeLoop, USER_TIMER_MINIMUM, NULL);
     } break;
 
     case WM_TIMER:
     {
-        if (wParam == (UINT_PTR)SDL_IterateMainCallbacks) {
-            if (SDL_HasMainCallbacks()) {
-                SDL_IterateMainCallbacks(SDL_FALSE);
-            } else {
-                // Send an expose event so the application can redraw
-                SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_EXPOSED, 0, 0);
-            }
+        if (wParam == (UINT_PTR)&s_ModalMoveResizeLoop) {
+            // Send an expose event so the application can redraw
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
             return 0;
         }
     } break;
@@ -1569,136 +1339,30 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_EXITSIZEMOVE:
     case WM_EXITMENULOOP:
     {
-        KillTimer(hwnd, (UINT_PTR)SDL_IterateMainCallbacks);
+        KillTimer(hwnd, (UINT_PTR)&s_ModalMoveResizeLoop);
     } break;
 
-    case WM_SIZING:
-        {
-            WPARAM edge = wParam;
-            RECT* dragRect = (RECT*)lParam;
-            RECT clientDragRect = *dragRect;
-            SDL_bool lock_aspect_ratio = (data->window->max_aspect == data->window->min_aspect) ? SDL_TRUE : SDL_FALSE;
-            RECT rc;
-            LONG w, h;
-            float new_aspect;
-
-            /* if aspect ratio constraints are not enabled then skip this message */
-            if (data->window->min_aspect <= 0 && data->window->max_aspect <= 0) {
-                break;
-            }
-
-            /* unadjust the dragRect from the window rect to the client rect */
-            SetRectEmpty(&rc);
-            if (!AdjustWindowRectEx(&rc, GetWindowStyle(hwnd), GetMenu(hwnd) != NULL, GetWindowExStyle(hwnd))) {
-                break;
-            }
-
-            clientDragRect.left -= rc.left;
-            clientDragRect.top -= rc.top;
-            clientDragRect.right -= rc.right;
-            clientDragRect.bottom -= rc.bottom;
-
-            w = clientDragRect.right - clientDragRect.left;
-            h = clientDragRect.bottom - clientDragRect.top;
-            new_aspect = w / (float)h;
-
-            /* handle the special case in which the min ar and max ar are the same so the window can size symmetrically */
-            if (lock_aspect_ratio) {
-                switch (edge) {
-                case WMSZ_LEFT:
-                case WMSZ_RIGHT:
-                    h = (int)(w / data->window->max_aspect);
-                    break;
-                default:
-                    /* resizing via corners or top or bottom */
-                    w = (int)(h*data->window->max_aspect);
-                    break;
-                }
-            } else {
-                switch (edge) {
-                case WMSZ_LEFT:
-                case WMSZ_RIGHT:
-                    if (data->window->max_aspect > 0.0f && new_aspect > data->window->max_aspect) {
-                        w = (int)SDL_roundf(h * data->window->max_aspect);
-                    } else if (data->window->min_aspect > 0.0f && new_aspect < data->window->min_aspect) {
-                        w = (int)SDL_roundf(h * data->window->min_aspect);
-                    }
-                    break;
-                case WMSZ_TOP:
-                case WMSZ_BOTTOM:
-                    if (data->window->min_aspect > 0.0f && new_aspect < data->window->min_aspect) {
-                        h = (int)SDL_roundf(w / data->window->min_aspect);
-                    } else if (data->window->max_aspect > 0.0f && new_aspect > data->window->max_aspect) {
-                        h = (int)SDL_roundf(w / data->window->max_aspect);
-                    }
-                    break;
-
-                default:
-                    /* resizing via corners */
-                    if (data->window->max_aspect > 0.0f && new_aspect > data->window->max_aspect) {
-                        w = (int)SDL_roundf(h * data->window->max_aspect);
-                    } else if (data->window->min_aspect > 0.0f && new_aspect < data->window->min_aspect) {
-                        h = (int)SDL_roundf(w / data->window->min_aspect);
-                    }
-                    break;
-                }
-            }
-
-            switch (edge) {
-            case WMSZ_LEFT:
-                clientDragRect.left = clientDragRect.right - w;
-                if (lock_aspect_ratio) {
-                    clientDragRect.top = (clientDragRect.bottom + clientDragRect.top - h) / 2;
-                }
-                clientDragRect.bottom = h + clientDragRect.top;
-                break;
-            case WMSZ_BOTTOMLEFT:
-                clientDragRect.left = clientDragRect.right - w;
-                clientDragRect.bottom = h + clientDragRect.top;
-                break;
-            case WMSZ_RIGHT:
-                clientDragRect.right = w + clientDragRect.left;
-                if (lock_aspect_ratio) {
-                    clientDragRect.top = (clientDragRect.bottom + clientDragRect.top - h) / 2;
-                }
-                clientDragRect.bottom = h + clientDragRect.top;
-                break;
-            case WMSZ_TOPRIGHT:
-                clientDragRect.right = w + clientDragRect.left;
-                clientDragRect.top = clientDragRect.bottom - h;
-                break;
-            case WMSZ_TOP:
-                if (lock_aspect_ratio) {
-                    clientDragRect.left = (clientDragRect.right + clientDragRect.left - w) / 2;
-                }
-                clientDragRect.right = w + clientDragRect.left;
-                clientDragRect.top = clientDragRect.bottom - h;
-                break;
-            case WMSZ_TOPLEFT:
-                clientDragRect.left = clientDragRect.right - w;
-                clientDragRect.top = clientDragRect.bottom - h;
-                break;
-            case WMSZ_BOTTOM:
-                if (lock_aspect_ratio) {
-                    clientDragRect.left = (clientDragRect.right + clientDragRect.left - w) / 2;
-                }
-                clientDragRect.right = w + clientDragRect.left;
-                clientDragRect.bottom = h + clientDragRect.top;
-                break;
-            case WMSZ_BOTTOMRIGHT:
-                clientDragRect.right = w + clientDragRect.left;
-                clientDragRect.bottom = h + clientDragRect.top;
-                break;
-            }
-
-            /* convert the client rect to a window rect */
-            if (!AdjustWindowRectEx(&clientDragRect, GetWindowStyle(hwnd), GetMenu(hwnd) != NULL, GetWindowExStyle(hwnd))) {
-                break;
-            }
-
-            *dragRect = clientDragRect;
+    case WM_SIZE:
+    {
+        switch (wParam) {
+        case SIZE_MAXIMIZED:
+            SDL_SendWindowEvent(data->window,
+                                SDL_WINDOWEVENT_RESTORED, 0, 0);
+            SDL_SendWindowEvent(data->window,
+                                SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
+            break;
+        case SIZE_MINIMIZED:
+            SDL_SendWindowEvent(data->window,
+                                SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+            break;
+        case SIZE_RESTORED:
+            SDL_SendWindowEvent(data->window,
+                                SDL_WINDOWEVENT_RESTORED, 0, 0);
+            break;
+        default:
+            break;
         }
-        break;
+    } break;
 
     case WM_SETCURSOR:
     {
@@ -1719,18 +1383,8 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     {
         RECT rect;
         if (GetUpdateRect(hwnd, &rect, FALSE)) {
-            const LONG style = GetWindowLong(hwnd, GWL_EXSTYLE);
-
-            /* Composited windows will continue to receive WM_PAINT messages for update
-               regions until the window is actually painted through Begin/EndPaint */
-            if (style & WS_EX_COMPOSITED) {
-                PAINTSTRUCT ps;
-                BeginPaint(hwnd, &ps);
-                EndPaint(hwnd, &ps);
-            }
-
             ValidateRect(hwnd, NULL);
-            SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_EXPOSED, 0, 0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
         }
     }
         returnCode = 0;
@@ -1738,7 +1392,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
         /* We'll do our own drawing, prevent flicker */
     case WM_ERASEBKGND:
-        if (ShouldClearWindowOnEraseBackground(data)) {
+        if (!data->videodata->cleared) {
             RECT client_rect;
             HBRUSH brush;
             data->videodata->cleared = SDL_TRUE;
@@ -1770,7 +1424,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
     case WM_CLOSE:
     {
-        SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_CLOSE_REQUESTED, 0, 0);
+        SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
     }
         returnCode = 0;
         break;
@@ -1799,11 +1453,8 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
                 for (i = 0; i < num_inputs; ++i) {
                     PTOUCHINPUT input = &inputs[i];
-                    const int w = (rect.right - rect.left);
-                    const int h = (rect.bottom - rect.top);
 
-                    const SDL_TouchID touchId = (SDL_TouchID)((uintptr_t)input->hSource);
-                    const SDL_FingerID fingerId = (input->dwID + 1);
+                    const SDL_TouchID touchId = (SDL_TouchID)((size_t)input->hSource);
 
                     /* TODO: Can we use GetRawInputDeviceInfo and HID info to
                        determine if this is a direct or indirect touch device?
@@ -1813,26 +1464,17 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                     }
 
                     /* Get the normalized coordinates for the window */
-                    if (w <= 1) {
-                        x = 0.5f;
-                    } else {
-                        x = (float)(input->x - rect.left) / (w - 1);
-                    }
-                    if (h <= 1) {
-                        y = 0.5f;
-                    } else {
-                        y = (float)(input->y - rect.top) / (h - 1);
-                    }
+                    x = (float)(input->x - rect.left) / (rect.right - rect.left);
+                    y = (float)(input->y - rect.top) / (rect.bottom - rect.top);
 
-                    /* FIXME: Should we use the input->dwTime field for the tick source of the timestamp? */
                     if (input->dwFlags & TOUCHEVENTF_DOWN) {
-                        SDL_SendTouch(WIN_GetEventTimestamp(), touchId, fingerId, data->window, SDL_TRUE, x, y, 1.0f);
+                        SDL_SendTouch(touchId, input->dwID, data->window, SDL_TRUE, x, y, 1.0f);
                     }
                     if (input->dwFlags & TOUCHEVENTF_MOVE) {
-                        SDL_SendTouchMotion(WIN_GetEventTimestamp(), touchId, fingerId, data->window, x, y, 1.0f);
+                        SDL_SendTouchMotion(touchId, input->dwID, data->window, x, y, 1.0f);
                     }
                     if (input->dwFlags & TOUCHEVENTF_UP) {
-                        SDL_SendTouch(WIN_GetEventTimestamp(), touchId, fingerId, data->window, SDL_FALSE, x, y, 1.0f);
+                        SDL_SendTouch(touchId, input->dwID, data->window, SDL_FALSE, x, y, 1.0f);
                     }
                 }
             }
@@ -1863,15 +1505,16 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         HDROP drop = (HDROP)wParam;
         UINT count = DragQueryFile(drop, 0xFFFFFFFF, NULL, 0);
         for (i = 0; i < count; ++i) {
+            SDL_bool isstack;
             UINT size = DragQueryFile(drop, i, NULL, 0) + 1;
-            LPTSTR buffer = (LPTSTR)SDL_malloc(sizeof(TCHAR) * size);
+            LPTSTR buffer = SDL_small_alloc(TCHAR, size, &isstack);
             if (buffer) {
                 if (DragQueryFile(drop, i, buffer, size)) {
                     char *file = WIN_StringToUTF8(buffer);
-                    SDL_SendDropFile(data->window, NULL, file);
+                    SDL_SendDropFile(data->window, file);
                     SDL_free(file);
                 }
-                SDL_free(buffer);
+                SDL_small_free(buffer, isstack);
             }
         }
         SDL_SendDropComplete(data->window);
@@ -1887,14 +1530,15 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
     case WM_NCCALCSIZE:
     {
-        SDL_WindowFlags window_flags = SDL_GetWindowFlags(data->window);
+        Uint32 window_flags = SDL_GetWindowFlags(data->window);
         if (wParam == TRUE && (window_flags & SDL_WINDOW_BORDERLESS) && !(window_flags & SDL_WINDOW_FULLSCREEN)) {
             /* When borderless, need to tell windows that the size of the non-client area is 0 */
             if (!(window_flags & SDL_WINDOW_RESIZABLE)) {
                 int w, h;
                 NCCALCSIZE_PARAMS *params = (NCCALCSIZE_PARAMS *)lParam;
-                w = data->window->floating.w;
-                h = data->window->floating.h;
+                w = data->window->windowed.w;
+                h = data->window->windowed.h;
+                WIN_ClientPointFromSDL(data->window, &w, &h);
                 params->rgrc[0].right = params->rgrc[0].left + w;
                 params->rgrc[0].bottom = params->rgrc[0].top + h;
             }
@@ -1905,11 +1549,6 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_NCHITTEST:
     {
         SDL_Window *window = data->window;
-
-        if (window->flags & SDL_WINDOW_TOOLTIP) {
-            return HTTRANSPARENT;
-        }
-
         if (window->hit_test) {
             POINT winpoint;
             winpoint.x = GET_X_LPARAM(lParam);
@@ -1919,11 +1558,12 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 SDL_HitTestResult rc;
                 point.x = winpoint.x;
                 point.y = winpoint.y;
+                WIN_ClientPointToSDL(data->window, &point.x, &point.y);
                 rc = window->hit_test(window, &point, window->hit_test_data);
                 switch (rc) {
 #define POST_HIT_TEST(ret)                                                 \
     {                                                                      \
-        SDL_SendWindowEvent(data->window, SDL_EVENT_WINDOW_HIT_TEST, 0, 0); \
+        SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIT_TEST, 0, 0); \
         return ret;                                                        \
     }
                 case SDL_HITTEST_DRAGGABLE:
@@ -1978,6 +1618,9 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             int frame_w, frame_h;
             int query_client_w_win, query_client_h_win;
 
+            const DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+            const BOOL menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+
 #ifdef HIGHDPI_DEBUG
             SDL_Log("WM_GETDPISCALEDSIZE: current DPI: %d potential DPI: %d input size: (%dx%d)",
                     prevDPI, nextDPI, sizeInOut->cx, sizeInOut->cy);
@@ -1988,7 +1631,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 RECT rect = { 0 };
 
                 if (!(data->window->flags & SDL_WINDOW_BORDERLESS)) {
-                    WIN_AdjustWindowRectForHWND(hwnd, &rect, prevDPI);
+                    data->videodata->AdjustWindowRectExForDpi(&rect, style, menu, 0, prevDPI);
                 }
 
                 frame_w = -rect.left + rect.right;
@@ -1998,6 +1641,14 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 query_client_h_win = sizeInOut->cy - frame_h;
             }
 
+            /* Convert to new dpi if we are using scaling.
+             * Otherwise leave as pixels.
+             */
+            if (data->videodata->dpi_scaling_enabled) {
+                query_client_w_win = MulDiv(query_client_w_win, nextDPI, prevDPI);
+                query_client_h_win = MulDiv(query_client_h_win, nextDPI, prevDPI);
+            }
+
             /* Add the window frame size that would be used at nextDPI */
             {
                 RECT rect = { 0 };
@@ -2005,7 +1656,7 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 rect.bottom = query_client_h_win;
 
                 if (!(data->window->flags & SDL_WINDOW_BORDERLESS)) {
-                    WIN_AdjustWindowRectForHWND(hwnd, &rect, nextDPI);
+                    data->videodata->AdjustWindowRectExForDpi(&rect, style, menu, 0, nextDPI);
                 }
 
                 /* This is supposed to control the suggested rect param of WM_DPICHANGED */
@@ -2036,6 +1687,23 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 /* This DPI change is coming from an explicit SetWindowPos call within SDL.
                    Assume all call sites are calculating the DPI-aware frame correctly, so
                    we don't need to do any further adjustment. */
+
+                if (data->videodata->dpi_scaling_enabled) {
+                    /* Update the cached DPI value for this window */
+                    data->scaling_dpi = newDPI;
+
+                    /* Send a SDL_WINDOWEVENT_SIZE_CHANGED saying that the client size (in dpi-scaled points) is unchanged.
+                       Renderers need to get this to know that the framebuffer size changed.
+
+                       We clear the window size to force the event to be delivered, but what we really
+                       want for SDL3 is a new event to notify that the DPI changed and then watch for
+                       that in the renderer directly.
+                     */
+                    data->window->w = 0;
+                    data->window->h = 0;
+                    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SIZE_CHANGED, data->window->w, data->window->h);
+                }
+
 #ifdef HIGHDPI_DEBUG
                 SDL_Log("WM_DPICHANGED: Doing nothing, assuming window is already sized correctly");
 #endif
@@ -2043,15 +1711,34 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             }
 
             /* Interactive user-initiated resizing/movement */
-            {
-                /* Calculate the new frame w/h such that
+
+            if (WIN_IsPerMonitorV2DPIAware(SDL_GetVideoDevice())) {
+                /* WM_GETDPISCALEDSIZE should have been called prior, so we can trust the given
+                   suggestedRect. */
+                w = suggestedRect->right - suggestedRect->left;
+                h = suggestedRect->bottom - suggestedRect->top;
+
+#ifdef HIGHDPI_DEBUG
+                SDL_Log("WM_DPICHANGED: using suggestedRect");
+#endif
+            } else {
+                /* permonitor and earlier DPI awareness: calculate the new frame w/h such that
                    the client area size is maintained. */
+                const DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+                const BOOL menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+
                 RECT rect = { 0 };
                 rect.right = data->window->w;
                 rect.bottom = data->window->h;
 
+                if (data->videodata->dpi_scaling_enabled) {
+                    /* scale client size to from points to the new DPI */
+                    rect.right = MulDiv(rect.right, newDPI, 96);
+                    rect.bottom = MulDiv(rect.bottom, newDPI, 96);
+                }
+
                 if (!(data->window->flags & SDL_WINDOW_BORDERLESS)) {
-                    WIN_AdjustWindowRectForHWND(hwnd, &rect, newDPI);
+                    AdjustWindowRectEx(&rect, style, menu, 0);
                 }
 
                 w = rect.right - rect.left;
@@ -2073,21 +1760,27 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                          h,
                          SWP_NOZORDER | SWP_NOACTIVATE);
             data->expected_resize = SDL_FALSE;
+
+            if (data->videodata->dpi_scaling_enabled) {
+                /* Update the cached DPI value for this window */
+                data->scaling_dpi = newDPI;
+
+                /* Send a SDL_WINDOWEVENT_SIZE_CHANGED saying that the client size (in dpi-scaled points) is unchanged.
+                   Renderers need to get this to know that the framebuffer size changed. */
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SIZE_CHANGED, data->window->w, data->window->h);
+            }
+
             return 0;
         }
         break;
 
     case WM_SETTINGCHANGE:
-        if (wParam == 0 && lParam != 0 && SDL_wcscmp((wchar_t *)lParam, L"ImmersiveColorSet") == 0) {
-            SDL_SetSystemTheme(WIN_GetSystemTheme());
-            WIN_UpdateDarkModeForHWND(hwnd);
-        }
         if (wParam == SPI_SETMOUSE || wParam == SPI_SETMOUSESPEED) {
             WIN_UpdateMouseSystemScale();
         }
         break;
 
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
     }
 
     /* If there's a window proc, assume it's going to handle messages */
@@ -2100,22 +1793,22 @@ LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     }
 }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 static void WIN_UpdateClipCursorForWindows(void)
 {
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
     SDL_Window *window;
-    Uint64 now = SDL_GetTicks();
-    const int CLIPCURSOR_UPDATE_INTERVAL_MS = SDL_GetMouse()->relative_mode_clip_interval;
+    Uint32 now = SDL_GetTicks();
+    const Uint32 CLIPCURSOR_UPDATE_INTERVAL_MS = 3000;
 
     if (_this) {
         for (window = _this->windows; window; window = window->next) {
-            SDL_WindowData *data = window->internal;
+            SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
             if (data) {
                 if (data->skip_update_clipcursor) {
                     data->skip_update_clipcursor = SDL_FALSE;
                     WIN_UpdateClipCursor(window);
-                } else if (CLIPCURSOR_UPDATE_INTERVAL_MS > 0 && now >= (data->last_updated_clipcursor + CLIPCURSOR_UPDATE_INTERVAL_MS)) {
+                } else if ((now - data->last_updated_clipcursor) >= CLIPCURSOR_UPDATE_INTERVAL_MS) {
                     WIN_UpdateClipCursor(window);
                 }
             }
@@ -2128,28 +1821,30 @@ static void WIN_UpdateMouseCapture(void)
     SDL_Window *focusWindow = SDL_GetKeyboardFocus();
 
     if (focusWindow && (focusWindow->flags & SDL_WINDOW_MOUSE_CAPTURE)) {
-        SDL_WindowData *data = focusWindow->internal;
+        SDL_WindowData *data = (SDL_WindowData *)focusWindow->driverdata;
 
         if (!data->mouse_tracked) {
             POINT cursorPos;
 
             if (GetCursorPos(&cursorPos) && ScreenToClient(data->hwnd, &cursorPos)) {
                 SDL_bool swapButtons = GetSystemMetrics(SM_SWAPBUTTON) != 0;
-                SDL_MouseID mouseID = SDL_GLOBAL_MOUSE_ID;
+                SDL_MouseID mouseID = SDL_GetMouse()->mouseID;
+                SDL_Point point;
+                point.x = cursorPos.x;
+                point.y = cursorPos.y;
+                WIN_ClientPointToSDL(data->window, &point.x, &point.y);
 
-                SDL_SendMouseMotion(WIN_GetEventTimestamp(), data->window, mouseID, SDL_FALSE, (float)cursorPos.x, (float)cursorPos.y);
-                SDL_SendMouseButton(WIN_GetEventTimestamp(), data->window, mouseID, GetAsyncKeyState(VK_LBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED,
-                                    !swapButtons ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT);
-                SDL_SendMouseButton(WIN_GetEventTimestamp(), data->window, mouseID, GetAsyncKeyState(VK_RBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED,
-                                    !swapButtons ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT);
-                SDL_SendMouseButton(WIN_GetEventTimestamp(), data->window, mouseID, GetAsyncKeyState(VK_MBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE);
-                SDL_SendMouseButton(WIN_GetEventTimestamp(), data->window, mouseID, GetAsyncKeyState(VK_XBUTTON1) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_X1);
-                SDL_SendMouseButton(WIN_GetEventTimestamp(), data->window, mouseID, GetAsyncKeyState(VK_XBUTTON2) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_X2);
+                SDL_SendMouseMotion(data->window, mouseID, 0, point.x, point.y);
+                SDL_SendMouseButton(data->window, mouseID, GetAsyncKeyState(VK_LBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, !swapButtons ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT);
+                SDL_SendMouseButton(data->window, mouseID, GetAsyncKeyState(VK_RBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, !swapButtons ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT);
+                SDL_SendMouseButton(data->window, mouseID, GetAsyncKeyState(VK_MBUTTON) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE);
+                SDL_SendMouseButton(data->window, mouseID, GetAsyncKeyState(VK_XBUTTON1) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_X1);
+                SDL_SendMouseButton(data->window, mouseID, GetAsyncKeyState(VK_XBUTTON2) & 0x8000 ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_X2);
             }
         }
     }
 }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
 /* A message hook called before TranslateMessage() */
 static SDL_WindowsMessageHook g_WindowsMessageHook = NULL;
@@ -2161,13 +1856,13 @@ void SDL_SetWindowsMessageHook(SDL_WindowsMessageHook callback, void *userdata)
     g_WindowsMessageHookData = userdata;
 }
 
-int WIN_WaitEventTimeout(SDL_VideoDevice *_this, Sint64 timeoutNS)
+int WIN_WaitEventTimeout(_THIS, int timeout)
 {
     if (g_WindowsEnableMessageLoop) {
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
-        DWORD timeout, ret;
-        timeout = timeoutNS < 0 ? INFINITE : (DWORD)SDL_NS_TO_MS(timeoutNS);
-        ret = MsgWaitForMultipleObjects(0, NULL, FALSE, timeout, QS_ALLINPUT);
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+        DWORD dwMilliseconds, ret;
+        dwMilliseconds = timeout < 0 ? INFINITE : (DWORD)timeout;
+        ret = MsgWaitForMultipleObjects(0, NULL, FALSE, dwMilliseconds, QS_ALLINPUT);
         if (ret == WAIT_OBJECT_0) {
             return 1;
         } else {
@@ -2178,11 +1873,11 @@ int WIN_WaitEventTimeout(SDL_VideoDevice *_this, Sint64 timeoutNS)
         MSG msg;
         BOOL message_result;
         UINT_PTR timer_id = 0;
-        if (timeoutNS > 0) {
-            timer_id = SetTimer(NULL, 0, (UINT)SDL_NS_TO_MS(timeoutNS), NULL);
+        if (timeout > 0) {
+            timer_id = SetTimer(NULL, 0, timeout, NULL);
             message_result = GetMessage(&msg, 0, 0, 0);
             KillTimer(NULL, timer_id);
-        } else if (timeoutNS == 0) {
+        } else if (timeout == 0) {
             message_result = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
         } else {
             message_result = GetMessage(&msg, 0, 0, 0);
@@ -2192,9 +1887,7 @@ int WIN_WaitEventTimeout(SDL_VideoDevice *_this, Sint64 timeoutNS)
                 return 0;
             }
             if (g_WindowsMessageHook) {
-                if (!g_WindowsMessageHook(g_WindowsMessageHookData, &msg)) {
-                    return 1;
-                }
+                g_WindowsMessageHook(g_WindowsMessageHookData, msg.hwnd, msg.message, msg.wParam, msg.lParam);
             }
             /* Always translate the message in case it's a non-SDL window (e.g. with Qt integration) */
             TranslateMessage(&msg);
@@ -2203,51 +1896,36 @@ int WIN_WaitEventTimeout(SDL_VideoDevice *_this, Sint64 timeoutNS)
         } else {
             return 0;
         }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
     } else {
         /* Fail the wait so the caller falls back to polling */
         return -1;
     }
 }
 
-void WIN_SendWakeupEvent(SDL_VideoDevice *_this, SDL_Window *window)
+void WIN_SendWakeupEvent(_THIS, SDL_Window *window)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     PostMessage(data->hwnd, data->videodata->_SDL_WAKEUP, 0, 0);
 }
 
-void WIN_PumpEvents(SDL_VideoDevice *_this)
+void WIN_PumpEvents(_THIS)
 {
     MSG msg;
-#ifdef _MSC_VER /* We explicitly want to use GetTickCount(), not GetTickCount64() */
-#pragma warning(push)
-#pragma warning(disable : 28159)
-#endif
     DWORD end_ticks = GetTickCount() + 1;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
     int new_messages = 0;
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     const Uint8 *keystate;
     SDL_Window *focusWindow;
 #endif
 
-    if (_this->internal->gameinput_context) {
-        WIN_UpdateGameInput(_this);
-    }
-
     if (g_WindowsEnableMessageLoop) {
-        SDL_processing_messages = SDL_TRUE;
-
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (g_WindowsMessageHook) {
-                if (!g_WindowsMessageHook(g_WindowsMessageHookData, &msg)) {
-                    continue;
-                }
+                g_WindowsMessageHook(g_WindowsMessageHookData, msg.hwnd, msg.message, msg.wParam, msg.lParam);
             }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
             /* Don't dispatch any mouse motion queued prior to or including the last mouse warp */
             if (msg.message == WM_MOUSEMOVE && SDL_last_warp_time) {
                 if (!SDL_TICKS_PASSED(msg.time, (SDL_last_warp_time + 1))) {
@@ -2257,9 +1935,7 @@ void WIN_PumpEvents(SDL_VideoDevice *_this)
                 /* This mouse message happened after the warp */
                 SDL_last_warp_time = 0;
             }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
-
-            WIN_SetMessageTick(msg.time);
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
             /* Always translate the message in case it's a non-SDL window (e.g. with Qt integration) */
             TranslateMessage(&msg);
@@ -2278,21 +1954,19 @@ void WIN_PumpEvents(SDL_VideoDevice *_this)
                 }
             }
         }
-
-        SDL_processing_messages = SDL_FALSE;
     }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     /* Windows loses a shift KEYUP event when you have both pressed at once and let go of one.
        You won't get a KEYUP until both are released, and that keyup will only be for the second
        key you released. Take heroic measures and check the keystate as of the last handled event,
        and if we think a key is pressed when Windows doesn't, unstick it in SDL's state. */
     keystate = SDL_GetKeyboardState(NULL);
     if ((keystate[SDL_SCANCODE_LSHIFT] == SDL_PRESSED) && !(GetKeyState(VK_LSHIFT) & 0x8000)) {
-        SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_LSHIFT, SDL_RELEASED);
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
     }
     if ((keystate[SDL_SCANCODE_RSHIFT] == SDL_PRESSED) && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
-        SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_RSHIFT, SDL_RELEASED);
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RSHIFT);
     }
 
     /* The Windows key state gets lost when using Windows+Space or Windows+G shortcuts and
@@ -2301,10 +1975,10 @@ void WIN_PumpEvents(SDL_VideoDevice *_this)
     focusWindow = SDL_GetKeyboardFocus();
     if (!focusWindow || !(focusWindow->flags & SDL_WINDOW_KEYBOARD_GRABBED)) {
         if ((keystate[SDL_SCANCODE_LGUI] == SDL_PRESSED) && !(GetKeyState(VK_LWIN) & 0x8000)) {
-            SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_LGUI, SDL_RELEASED);
+            SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LGUI);
         }
         if ((keystate[SDL_SCANCODE_RGUI] == SDL_PRESSED) && !(GetKeyState(VK_RWIN) & 0x8000)) {
-            SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_RGUI, SDL_RELEASED);
+            SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RGUI);
         }
     }
 
@@ -2313,16 +1987,9 @@ void WIN_PumpEvents(SDL_VideoDevice *_this)
 
     /* Update mouse capture */
     WIN_UpdateMouseCapture();
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
-    if (!_this->internal->gameinput_context) {
-        WIN_CheckKeyboardAndMouseHotplug(_this, SDL_FALSE);
-    }
-
-    WIN_UpdateIMECandidates(_this);
-
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
-
-#ifdef SDL_PLATFORM_GDK
+#ifdef __GDK__
     GDK_DispatchTaskQueue();
 #endif
 }
@@ -2334,7 +2001,7 @@ HINSTANCE SDL_Instance = NULL;
 
 static void WIN_CleanRegisterApp(WNDCLASSEX wcex)
 {
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     if (wcex.hIcon) {
         DestroyIcon(wcex.hIcon);
     }
@@ -2346,7 +2013,6 @@ static void WIN_CleanRegisterApp(WNDCLASSEX wcex)
     SDL_Appname = NULL;
 }
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
 static BOOL CALLBACK WIN_ResourceNameCallback(HMODULE hModule, LPCTSTR lpType, LPTSTR lpName, LONG_PTR lParam)
 {
     WNDCLASSEX *wcex = (WNDCLASSEX *)lParam;
@@ -2360,13 +2026,12 @@ static BOOL CALLBACK WIN_ResourceNameCallback(HMODULE hModule, LPCTSTR lpType, L
     /* Do not bother enumerating any more. */
     return FALSE;
 }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
 
 /* Register the class for this application */
 int SDL_RegisterApp(const char *name, Uint32 style, void *hInst)
 {
     WNDCLASSEX wcex;
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     const char *hint;
 #endif
 
@@ -2384,7 +2049,7 @@ int SDL_RegisterApp(const char *name, Uint32 style, void *hInst)
     }
     SDL_Appname = WIN_UTF8ToString(name);
     SDL_Appstyle = style;
-    SDL_Instance = hInst ? (HINSTANCE)hInst : GetModuleHandle(NULL);
+    SDL_Instance = hInst ? hInst : GetModuleHandle(NULL);
 
     /* Register the application class */
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -2400,7 +2065,7 @@ int SDL_RegisterApp(const char *name, Uint32 style, void *hInst)
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
 
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
     hint = SDL_GetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON);
     if (hint && *hint) {
         wcex.hIcon = LoadIcon(SDL_Instance, MAKEINTRESOURCE(SDL_atoi(hint)));
@@ -2413,7 +2078,7 @@ int SDL_RegisterApp(const char *name, Uint32 style, void *hInst)
         /* Use the first icon as a default icon, like in the Explorer. */
         EnumResourceNames(SDL_Instance, RT_GROUP_ICON, WIN_ResourceNameCallback, (LONG_PTR)&wcex);
     }
-#endif /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
+#endif /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
 
     if (!RegisterClassEx(&wcex)) {
         WIN_CleanRegisterApp(wcex);
@@ -2439,7 +2104,7 @@ void SDL_UnregisterApp(void)
         wcex.hIcon = NULL;
         wcex.hIconSm = NULL;
         /* Check for any registered window classes. */
-#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
         if (GetClassInfoEx(SDL_Instance, SDL_Appname, &wcex)) {
             UnregisterClass(SDL_Appname, SDL_Instance);
         }
@@ -2449,3 +2114,5 @@ void SDL_UnregisterApp(void)
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINDOWS */
+
+/* vi: set ts=4 sw=4 expandtab: */

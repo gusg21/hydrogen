@@ -18,14 +18,16 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
-#if defined(SDL_PLATFORM_WIN32) || defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_GDK)
+#if defined(__WIN32__) || defined(__WINRT__) || defined(__GDK__)
 
 #include "SDL_windows.h"
+#include "SDL_error.h"
+#include "SDL_system.h"
 
 #include <objbase.h> /* for CoInitialize/CoUninitialize (Win32 only) */
-#ifdef HAVE_ROAPI_H
+#if defined(HAVE_ROAPI_H)
 #include <roapi.h> /* For RoInitialize/RoUninitialize (Win32 only) */
 #else
 typedef enum RO_INIT_TYPE
@@ -47,10 +49,6 @@ typedef enum RO_INIT_TYPE
 
 #ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
-#endif
-
-#ifndef WC_ERR_INVALID_CHARS
-#define WC_ERR_INVALID_CHARS 0x00000080
 #endif
 
 /* Sets an error message based on an HRESULT */
@@ -90,14 +88,14 @@ WIN_CoInitialize(void)
 
        If you need multi-threaded mode, call CoInitializeEx() before SDL_Init()
     */
-#ifdef SDL_PLATFORM_WINRT
+#ifdef __WINRT__
     /* DLudwig: On WinRT, it is assumed that COM was initialized in main().
        CoInitializeEx is available (not CoInitialize though), however
        on WinRT, main() is typically declared with the [MTAThread]
        attribute, which, AFAIK, should initialize COM.
     */
     return S_OK;
-#elif defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#elif defined(__XBOXONE__) || defined(__XBOXSERIES__)
     /* On Xbox, there's no need to call CoInitializeEx (and it's not implemented) */
     return S_OK;
 #else
@@ -118,13 +116,13 @@ WIN_CoInitialize(void)
 
 void WIN_CoUninitialize(void)
 {
-#ifndef SDL_PLATFORM_WINRT
+#ifndef __WINRT__
     CoUninitialize();
 #endif
 }
 
-#ifndef SDL_PLATFORM_WINRT
-FARPROC WIN_LoadComBaseFunction(const char *name)
+#ifndef __WINRT__
+void *WIN_LoadComBaseFunction(const char *name)
 {
     static SDL_bool s_bLoaded;
     static HMODULE s_hComBase;
@@ -144,7 +142,7 @@ FARPROC WIN_LoadComBaseFunction(const char *name)
 HRESULT
 WIN_RoInitialize(void)
 {
-#ifdef SDL_PLATFORM_WINRT
+#ifdef __WINRT__
     return S_OK;
 #else
     typedef HRESULT(WINAPI * RoInitialize_t)(RO_INIT_TYPE initType);
@@ -171,7 +169,7 @@ WIN_RoInitialize(void)
 
 void WIN_RoUninitialize(void)
 {
-#ifndef SDL_PLATFORM_WINRT
+#ifndef __WINRT__
     typedef void(WINAPI * RoUninitialize_t)(void);
     RoUninitialize_t RoUninitializeFunc = (RoUninitialize_t)WIN_LoadComBaseFunction("RoUninitialize");
     if (RoUninitializeFunc) {
@@ -180,7 +178,7 @@ void WIN_RoUninitialize(void)
 #endif
 }
 
-#if !defined(SDL_PLATFORM_WINRT) && !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+#if !defined(__WINRT__) && !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
 static BOOL IsWindowsVersionOrGreater(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor)
 {
     OSVERSIONINFOEXW osvi;
@@ -201,46 +199,32 @@ static BOOL IsWindowsVersionOrGreater(WORD wMajorVersion, WORD wMinorVersion, WO
 }
 #endif
 
-// apply some static variables so we only call into the Win32 API once per process for each check.
-#if defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
-    #define CHECKWINVER(notdesktop_platform_result, test) return (notdesktop_platform_result);
-#else
-    #define CHECKWINVER(notdesktop_platform_result, test) \
-        static SDL_bool checked = SDL_FALSE; \
-        static BOOL retval = FALSE; \
-        if (!checked) { \
-            retval = (test); \
-            checked = SDL_TRUE; \
-        } \
-        return retval;
-#endif
-
-// this is the oldest thing we run on (and we may lose support for this in SDL3 at any time!),
-//  so there's no "OrGreater" as that would always be TRUE. The other functions are here to
-//  ask "can we support a specific feature?" but this function is here to ask "do we need to do
-//  something different for an OS version we probably should abandon?"  :)
-BOOL WIN_IsWindowsXP(void)
-{
-    CHECKWINVER(FALSE, !WIN_IsWindowsVistaOrGreater() && IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WINXP), LOBYTE(_WIN32_WINNT_WINXP), 0));
-}
-
 BOOL WIN_IsWindowsVistaOrGreater(void)
 {
-    CHECKWINVER(TRUE, IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_VISTA), LOBYTE(_WIN32_WINNT_VISTA), 0));
+#if defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)
+    return TRUE;
+#else
+    return IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_VISTA), LOBYTE(_WIN32_WINNT_VISTA), 0);
+#endif
 }
 
 BOOL WIN_IsWindows7OrGreater(void)
 {
-    CHECKWINVER(TRUE, IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN7), LOBYTE(_WIN32_WINNT_WIN7), 0));
+#if defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)
+    return TRUE;
+#else
+    return IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN7), LOBYTE(_WIN32_WINNT_WIN7), 0);
+#endif
 }
 
 BOOL WIN_IsWindows8OrGreater(void)
 {
-    CHECKWINVER(TRUE, IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN8), LOBYTE(_WIN32_WINNT_WIN8), 0));
+#if defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)
+    return TRUE;
+#else
+    return IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN8), LOBYTE(_WIN32_WINNT_WIN8), 0);
+#endif
 }
-
-#undef CHECKWINVER
-
 
 /*
 WAVExxxCAPS gives you 31 bytes for the device name, and just truncates if it's
@@ -265,8 +249,8 @@ WASAPI doesn't need this. This is just for DirectSound/WinMM.
 */
 char *WIN_LookupAudioDeviceName(const WCHAR *name, const GUID *guid)
 {
-#if defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
-    return WIN_StringToUTF8W(name); /* No registry access on WinRT/UWP and Xbox, go with what we've got. */
+#if defined(__WINRT__) || defined(__XBOXONE__) || defined(__XBOXSERIES__)
+    return WIN_StringToUTF8(name); /* No registry access on WinRT/UWP and Xbox, go with what we've got. */
 #else
     static const GUID nullguid = { 0 };
     const unsigned char *ptr;
@@ -318,7 +302,7 @@ char *WIN_LookupAudioDeviceName(const WCHAR *name, const GUID *guid)
     retval = WIN_StringToUTF8(strw);
     SDL_free(strw);
     return retval ? retval : WIN_StringToUTF8(name);
-#endif /* if SDL_PLATFORM_WINRT / else */
+#endif /* if __WINRT__ / else */
 }
 
 BOOL WIN_IsEqualGUID(const GUID *a, const GUID *b)
@@ -352,41 +336,51 @@ BOOL WIN_IsRectEmpty(const RECT *rect)
     /* Calculating this manually because UWP and Xbox do not support Win32 IsRectEmpty. */
     return (rect->right <= rect->left) || (rect->bottom <= rect->top);
 }
+#endif /* defined(__WIN32__) || defined(__WINRT__) || defined(__GDK__) */
 
-/* Some GUIDs we need to know without linking to libraries that aren't available before Vista. */
-/* *INDENT-OFF* */ /* clang-format off */
-static const GUID SDL_KSDATAFORMAT_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,{ 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
-static const GUID SDL_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = { 0x00000003, 0x0000, 0x0010,{ 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
-/* *INDENT-ON* */ /* clang-format on */
+/*
+ * Public APIs
+ */
+#if !defined(SDL_VIDEO_DRIVER_WINDOWS)
 
-SDL_AudioFormat SDL_WaveFormatExToSDLFormat(WAVEFORMATEX *waveformat)
+#if defined(__WIN32__) || defined(__GDK__)
+int SDL_RegisterApp(const char *name, Uint32 style, void *hInst)
 {
-    if ((waveformat->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) && (waveformat->wBitsPerSample == 32)) {
-        return SDL_AUDIO_F32;
-    } else if ((waveformat->wFormatTag == WAVE_FORMAT_PCM) && (waveformat->wBitsPerSample == 16)) {
-        return SDL_AUDIO_S16;
-    } else if ((waveformat->wFormatTag == WAVE_FORMAT_PCM) && (waveformat->wBitsPerSample == 32)) {
-        return SDL_AUDIO_S32;
-    } else if (waveformat->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-        const WAVEFORMATEXTENSIBLE *ext = (const WAVEFORMATEXTENSIBLE *)waveformat;
-        if ((SDL_memcmp(&ext->SubFormat, &SDL_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, sizeof(GUID)) == 0) && (waveformat->wBitsPerSample == 32)) {
-            return SDL_AUDIO_F32;
-        } else if ((SDL_memcmp(&ext->SubFormat, &SDL_KSDATAFORMAT_SUBTYPE_PCM, sizeof(GUID)) == 0) && (waveformat->wBitsPerSample == 16)) {
-            return SDL_AUDIO_S16;
-        } else if ((SDL_memcmp(&ext->SubFormat, &SDL_KSDATAFORMAT_SUBTYPE_PCM, sizeof(GUID)) == 0) && (waveformat->wBitsPerSample == 32)) {
-            return SDL_AUDIO_S32;
-        }
-    }
+    (void)name;
+    (void)style;
+    (void)hInst;
     return 0;
 }
 
-
-int WIN_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWCH lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCCH lpDefaultChar, LPBOOL lpUsedDefaultChar)
+void SDL_UnregisterApp(void)
 {
-    if (WIN_IsWindowsXP()) {
-        dwFlags &= ~WC_ERR_INVALID_CHARS;  // not supported before Vista. Without this flag, it will just replace bogus chars with U+FFFD. You're on your own, WinXP.
-    }
-    return WideCharToMultiByte(CodePage, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar);
 }
 
-#endif /* defined(SDL_PLATFORM_WIN32) || defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_GDK) */
+void SDL_SetWindowsMessageHook(SDL_WindowsMessageHook callback, void *userdata)
+{
+}
+#endif /* __WIN32__ || __GDK__ */
+
+#if defined(__WIN32__) || defined(__WINGDK__)
+int SDL_Direct3D9GetAdapterIndex(int displayIndex)
+{
+    (void)displayIndex;
+    return 0; /* D3DADAPTER_DEFAULT */
+}
+
+SDL_bool SDL_DXGIGetOutputInfo(int displayIndex, int *adapterIndex, int *outputIndex)
+{
+    (void)displayIndex;
+    if (adapterIndex) {
+        *adapterIndex = -1;
+    }
+    if (outputIndex) {
+        *outputIndex = -1;
+    }
+    return SDL_FALSE;
+}
+#endif /* __WIN32__ || __WINGDK__ */
+
+#endif /* !SDL_VIDEO_DRIVER_WINDOWS */
+
+/* vi: set ts=4 sw=4 expandtab: */

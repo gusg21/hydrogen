@@ -18,10 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if defined(SDL_HAPTIC_DUMMY) || defined(SDL_HAPTIC_DISABLED)
 
+#include "SDL_haptic.h"
 #include "../SDL_syshaptic.h"
 
 static int SDL_SYS_LogicError(void)
@@ -36,12 +37,6 @@ int SDL_SYS_HapticInit(void)
 
 int SDL_SYS_NumHaptics(void)
 {
-    return 0;
-}
-
-SDL_HapticID SDL_SYS_HapticInstanceID(int index)
-{
-    SDL_SYS_LogicError();
     return 0;
 }
 
@@ -61,9 +56,9 @@ int SDL_SYS_HapticMouse(void)
     return -1;
 }
 
-SDL_bool SDL_SYS_JoystickIsHaptic(SDL_Joystick *joystick)
+int SDL_SYS_JoystickIsHaptic(SDL_Joystick *joystick)
 {
-    return SDL_FALSE;
+    return 0;
 }
 
 int SDL_SYS_HapticOpenFromJoystick(SDL_Haptic *haptic, SDL_Joystick *joystick)
@@ -71,9 +66,9 @@ int SDL_SYS_HapticOpenFromJoystick(SDL_Haptic *haptic, SDL_Joystick *joystick)
     return SDL_SYS_LogicError();
 }
 
-SDL_bool SDL_SYS_JoystickSameHaptic(SDL_Haptic *haptic, SDL_Joystick *joystick)
+int SDL_SYS_JoystickSameHaptic(SDL_Haptic *haptic, SDL_Joystick *joystick)
 {
-    return SDL_FALSE;
+    return 0;
 }
 
 void SDL_SYS_HapticClose(SDL_Haptic *haptic)
@@ -87,14 +82,14 @@ void SDL_SYS_HapticQuit(void)
 }
 
 int SDL_SYS_HapticNewEffect(SDL_Haptic *haptic,
-                            struct haptic_effect *effect, const SDL_HapticEffect *base)
+                            struct haptic_effect *effect, SDL_HapticEffect *base)
 {
     return SDL_SYS_LogicError();
 }
 
 int SDL_SYS_HapticUpdateEffect(SDL_Haptic *haptic,
                                struct haptic_effect *effect,
-                               const SDL_HapticEffect *data)
+                               SDL_HapticEffect *data)
 {
     return SDL_SYS_LogicError();
 }
@@ -148,3 +143,5 @@ int SDL_SYS_HapticStopAll(SDL_Haptic *haptic)
 }
 
 #endif /* SDL_HAPTIC_DUMMY || SDL_HAPTIC_DISABLED */
+
+/* vi: set ts=4 sw=4 expandtab: */

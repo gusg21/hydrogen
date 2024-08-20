@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_xinput_h_
 #define SDL_xinput_h_
@@ -26,7 +26,7 @@
 #include "SDL_windows.h"
 
 #ifdef HAVE_XINPUT_H
-#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
 /* Xbox supports an XInput wrapper which is a C++-only header... */
 #include <math.h> /* Required to compile with recent MSVC... */
 #include <XInputOnGameInput.h>
@@ -274,3 +274,5 @@ extern DWORD SDL_XInputVersion; /* ((major << 16) & 0xFF00) | (minor & 0xFF) */
 #define XINPUTGETBATTERYINFORMATION SDL_XInputGetBatteryInformation
 
 #endif /* SDL_xinput_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

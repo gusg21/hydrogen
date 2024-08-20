@@ -18,29 +18,30 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
-
-#ifdef SDL_FILESYSTEM_PS2
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/* System dependent filesystem routines                                */
-
-#include "../SDL_sysfilesystem.h"
+#include "../../SDL_internal.h"
 
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *SDL_SYS_GetBasePath(void)
+#if defined(SDL_FILESYSTEM_PS2)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* System dependent filesystem routines                                */
+
+#include "SDL_error.h"
+#include "SDL_filesystem.h"
+
+char *SDL_GetBasePath(void)
 {
-    char *retval = NULL;
+    char *retval;
     size_t len;
     char cwd[FILENAME_MAX];
 
     getcwd(cwd, sizeof(cwd));
-    len = SDL_strlen(cwd) + 2;
+    len = SDL_strlen(cwd) + 1;
     retval = (char *)SDL_malloc(len);
     if (retval) {
-        SDL_snprintf(retval, len, "%s/", cwd);
+        SDL_memcpy(retval, cwd, len);
     }
 
     return retval;
@@ -50,12 +51,12 @@ char *SDL_SYS_GetBasePath(void)
 static void recursive_mkdir(const char *dir)
 {
     char tmp[FILENAME_MAX];
-    const char *base = SDL_GetBasePath();
+    char *base = SDL_GetBasePath();
     char *p = NULL;
     size_t len;
 
-    SDL_snprintf(tmp, sizeof(tmp), "%s", dir);
-    len = SDL_strlen(tmp);
+    snprintf(tmp, sizeof(tmp), "%s", dir);
+    len = strlen(tmp);
     if (tmp[len - 1] == '/') {
         tmp[len - 1] = 0;
     }
@@ -64,7 +65,7 @@ static void recursive_mkdir(const char *dir)
         if (*p == '/') {
             *p = 0;
             // Just creating subfolders from current path
-            if (base && SDL_strstr(tmp, base) != NULL) {
+            if (strstr(tmp, base) != NULL) {
                 mkdir(tmp, S_IRWXU);
             }
 
@@ -72,48 +73,38 @@ static void recursive_mkdir(const char *dir)
         }
     }
 
+    free(base);
     mkdir(tmp, S_IRWXU);
 }
 
-char *SDL_SYS_GetPrefPath(const char *org, const char *app)
+char *SDL_GetPrefPath(const char *org, const char *app)
 {
     char *retval = NULL;
     size_t len;
-
+    char *base = SDL_GetBasePath();
     if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
-
     if (!org) {
         org = "";
     }
 
-    const char *base = SDL_GetBasePath();
-    if (!base) {
-        return NULL;
-    }
-
     len = SDL_strlen(base) + SDL_strlen(org) + SDL_strlen(app) + 4;
     retval = (char *)SDL_malloc(len);
-    if (retval) {
-        if (*org) {
-            SDL_snprintf(retval, len, "%s%s/%s/", base, org, app);
-        } else {
-            SDL_snprintf(retval, len, "%s%s/", base, app);
-        }
 
-        recursive_mkdir(retval);
+    if (*org) {
+        SDL_snprintf(retval, len, "%s%s/%s/", base, org, app);
+    } else {
+        SDL_snprintf(retval, len, "%s%s/", base, app);
     }
+    free(base);
+
+    recursive_mkdir(retval);
 
     return retval;
 }
 
-/* TODO */
-char *SDL_SYS_GetUserFolder(SDL_Folder folder)
-{
-    SDL_Unsupported();
-    return NULL;
-}
-
 #endif /* SDL_FILESYSTEM_PS2 */
+
+/* vi: set ts=4 sw=4 expandtab: */

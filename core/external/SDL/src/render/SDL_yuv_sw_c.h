@@ -22,19 +22,21 @@
 #ifndef SDL_yuv_sw_c_h_
 #define SDL_yuv_sw_c_h_
 
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
+
+#include "SDL_video.h"
 
 /* This is the software implementation of the YUV texture support */
 
 struct SDL_SW_YUVTexture
 {
-    SDL_PixelFormat format;
-    SDL_PixelFormat target_format;
+    Uint32 format;
+    Uint32 target_format;
     int w, h;
     Uint8 *pixels;
 
     /* These are just so we don't have to allocate them separately */
-    int pitches[3];
+    Uint16 pitches[3];
     Uint8 *planes[3];
 
     /* This is a temporary surface in case we have to stretch copy */
@@ -44,7 +46,7 @@ struct SDL_SW_YUVTexture
 
 typedef struct SDL_SW_YUVTexture SDL_SW_YUVTexture;
 
-SDL_SW_YUVTexture *SDL_SW_CreateYUVTexture(SDL_PixelFormat format, int w, int h);
+SDL_SW_YUVTexture *SDL_SW_CreateYUVTexture(Uint32 format, int w, int h);
 int SDL_SW_QueryYUVTexturePixels(SDL_SW_YUVTexture *swdata, void **pixels,
                                  int *pitch);
 int SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture *swdata, const SDL_Rect *rect,
@@ -60,8 +62,10 @@ int SDL_SW_LockYUVTexture(SDL_SW_YUVTexture *swdata, const SDL_Rect *rect,
                           void **pixels, int *pitch);
 void SDL_SW_UnlockYUVTexture(SDL_SW_YUVTexture *swdata);
 int SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture *swdata, const SDL_Rect *srcrect,
-                        SDL_PixelFormat target_format, int w, int h, void *pixels,
+                        Uint32 target_format, int w, int h, void *pixels,
                         int pitch);
 void SDL_SW_DestroyYUVTexture(SDL_SW_YUVTexture *swdata);
 
 #endif /* SDL_yuv_sw_c_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -26,6 +26,8 @@
 #endif
 
 /* SDL includes: */
+#include "SDL_video.h"
+#include "SDL_events.h"
 
 #if NTDDI_VERSION >= NTDDI_WINBLUE /* ApplicationView's functionality only becomes \
                                       useful for SDL in Win[Phone] 8.1 and up.     \
@@ -39,7 +41,7 @@ extern "C" {
 }
 
 /* Private display data */
-struct SDL_VideoData
+typedef struct SDL_VideoData
 {
     /* An object created by ANGLE/WinRT (OpenGL ES 2 for WinRT) that gets
      * passed to eglGetDisplay and eglCreateWindowSurface:
@@ -56,7 +58,7 @@ struct SDL_VideoData
      * It's casted to 'IUnknown *', to help with building SDL.
      */
     IUnknown *displayRequest;
-};
+} SDL_VideoData;
 
 /* The global, WinRT, SDL Window.
    For now, SDL/WinRT only supports one window (due to platform limitations of
@@ -67,8 +69,8 @@ extern SDL_Window *WINRT_GlobalSDLWindow;
 /* Updates one or more SDL_Window flags, by querying the OS' native windowing APIs.
    SDL_Window flags that can be updated should be specified in 'mask'.
 */
-extern void WINRT_UpdateWindowFlags(SDL_Window *window, SDL_WindowFlags mask);
-extern "C" SDL_WindowFlags WINRT_DetectWindowFlags(SDL_Window *window); /* detects flags w/o applying them */
+extern void WINRT_UpdateWindowFlags(SDL_Window *window, Uint32 mask);
+extern "C" Uint32 WINRT_DetectWindowFlags(SDL_Window *window); /* detects flags w/o applying them */
 
 /* Display mode internals */
 // typedef struct
@@ -97,10 +99,9 @@ struct SDL_WindowData
 #ifdef SDL_VIDEO_OPENGL_EGL
     EGLSurface egl_surface;
 #endif
-#if SDL_WINRT_USE_APPLICATIONVIEW
+#ifdef SDL_WINRT_USE_APPLICATIONVIEW
     Windows::UI::ViewManagement::ApplicationView ^ appView;
 #endif
-    WCHAR high_surrogate;
 };
 
 #endif // ifdef __cplusplus_winrt

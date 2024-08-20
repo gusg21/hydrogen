@@ -18,12 +18,13 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if defined(SDL_JOYSTICK_DUMMY) || defined(SDL_JOYSTICK_DISABLED)
 
 /* This is the dummy implementation of the SDL joystick API */
 
+#include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
@@ -39,11 +40,6 @@ static int DUMMY_JoystickGetCount(void)
 
 static void DUMMY_JoystickDetect(void)
 {
-}
-
-static SDL_bool DUMMY_JoystickIsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
-{
-    return SDL_FALSE;
 }
 
 static const char *DUMMY_JoystickGetDeviceName(int device_index)
@@ -70,9 +66,9 @@ static void DUMMY_JoystickSetDevicePlayerIndex(int device_index, int player_inde
 {
 }
 
-static SDL_GUID DUMMY_JoystickGetDeviceGUID(int device_index)
+static SDL_JoystickGUID DUMMY_JoystickGetDeviceGUID(int device_index)
 {
-    SDL_GUID guid;
+    SDL_JoystickGUID guid;
     SDL_zero(guid);
     return guid;
 }
@@ -95,6 +91,11 @@ static int DUMMY_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rum
 static int DUMMY_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble)
 {
     return SDL_Unsupported();
+}
+
+static Uint32 DUMMY_JoystickGetCapabilities(SDL_Joystick *joystick)
+{
+    return 0;
 }
 
 static int DUMMY_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
@@ -133,7 +134,6 @@ SDL_JoystickDriver SDL_DUMMY_JoystickDriver = {
     DUMMY_JoystickInit,
     DUMMY_JoystickGetCount,
     DUMMY_JoystickDetect,
-    DUMMY_JoystickIsDevicePresent,
     DUMMY_JoystickGetDeviceName,
     DUMMY_JoystickGetDevicePath,
     DUMMY_JoystickGetDeviceSteamVirtualGamepadSlot,
@@ -144,6 +144,7 @@ SDL_JoystickDriver SDL_DUMMY_JoystickDriver = {
     DUMMY_JoystickOpen,
     DUMMY_JoystickRumble,
     DUMMY_JoystickRumbleTriggers,
+    DUMMY_JoystickGetCapabilities,
     DUMMY_JoystickSetLED,
     DUMMY_JoystickSendEffect,
     DUMMY_JoystickSetSensorsEnabled,
@@ -154,3 +155,5 @@ SDL_JoystickDriver SDL_DUMMY_JoystickDriver = {
 };
 
 #endif /* SDL_JOYSTICK_DUMMY || SDL_JOYSTICK_DISABLED */
+
+/* vi: set ts=4 sw=4 expandtab: */

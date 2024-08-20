@@ -2,8 +2,7 @@
 
 #include <stdint.h>
 
-#include <SDL3/SDL.h>
-#include <bgfx/bgfx.h>
+#include <SDL2/SDL.h>
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
@@ -33,11 +32,13 @@ class Window {
     /// @param queue a pointer to the queue to populate
     void postEventsToQueue(h_core::EventQueue* queue);
 
+    void swap();
+
     h_core::systems::Rendering* getRenderingSystem();
+    SDL_Window* getSDLWindow();
 
   private:
     SDL_Window* m_sdlWindow = nullptr;
-    bgfx::ViewId m_clearViewId = 0;
     h_core::systems::Rendering* m_renderer = nullptr;
 };
 }  // namespace h_core

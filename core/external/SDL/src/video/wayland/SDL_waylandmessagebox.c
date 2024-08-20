@@ -19,13 +19,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_WAYLAND
 
-#include <stdlib.h>   /* fgets */
-#include <stdio.h>    /* FILE, STDOUT_FILENO, fdopen, fclose */
-#include <unistd.h>   /* pid_t, pipe, fork, close, dup2, execvp, _exit */
+#include "SDL.h"
+#include <stdlib.h> /* fgets */
+#include <stdio.h> /* FILE, STDOUT_FILENO, fdopen, fclose */
+#include <unistd.h> /* pid_t, pipe, fork, close, dup2, execvp, _exit */
 #include <sys/wait.h> /* waitpid, WIFEXITED, WEXITSTATUS */
 #include <string.h>   /* strerr */
 #include <errno.h>
@@ -36,8 +37,7 @@
 
 #define MAX_BUTTONS 8 /* Maximum number of buttons supported */
 
-static int run_zenity(const char **args, int fd_pipe[2])
-{
+static int run_zenity(const char **args, int fd_pipe[2]) {
     int status;
     pid_t pid1;
 
@@ -48,7 +48,6 @@ static int run_zenity(const char **args, int fd_pipe[2])
         if (dup2(fd_pipe[1], STDOUT_FILENO) == -1) {
             _exit(128);
         }
-        close(fd_pipe[1]);
 
         /* const casting argv is fine:
          * https://pubs.opengroup.org/onlinepubs/9699919799/functions/fexecve.html -> rational
@@ -58,6 +57,7 @@ static int run_zenity(const char **args, int fd_pipe[2])
     } else if (pid1 < 0) { /* fork() failed */
         return SDL_SetError("fork() failed: %s", strerror(errno));
     } else { /* parent process */
+        close(fd_pipe[1]); /* no writing to the pipe */
         if (waitpid(pid1, &status, 0) != pid1) {
             return SDL_SetError("Waiting on zenity failed: %s", strerror(errno));
         }
@@ -74,8 +74,7 @@ static int run_zenity(const char **args, int fd_pipe[2])
     }
 }
 
-static int get_zenity_version(int *major, int *minor)
-{
+static int get_zenity_version(int *major, int *minor) {
     int fd_pipe[2]; /* fd_pipe[0]: read end of pipe, fd_pipe[1]: write end of pipe */
     const char *argv[] = { "zenity", "--version", NULL };
 
@@ -89,7 +88,6 @@ static int get_zenity_version(int *major, int *minor)
         char *version_ptr = NULL, *end_ptr = NULL;
         int tmp;
 
-        close(fd_pipe[1]);
         outputfp = fdopen(fd_pipe[0], "r");
         if (!outputfp) {
             close(fd_pipe[0]);
@@ -98,10 +96,6 @@ static int get_zenity_version(int *major, int *minor)
 
         version_ptr = fgets(version_str, ZENITY_VERSION_LEN, outputfp);
         (void)fclose(outputfp); /* will close underlying fd */
-
-        if (!version_ptr) {
-            return SDL_SetError("failed to read zenity version string");
-        }
 
         /* we expect the version string is in the form of MAJOR.MINOR.MICRO
          * as described in meson.build. We'll ignore everything after that.
@@ -112,16 +106,12 @@ static int get_zenity_version(int *major, int *minor)
         }
         *major = tmp;
 
-        if (*end_ptr == '.') {
-            version_ptr = end_ptr + 1; /* skip the dot */
-            tmp = (int) SDL_strtol(version_ptr, &end_ptr, 10);
-            if (tmp == 0 && end_ptr == version_ptr) {
-                return SDL_SetError("failed to get zenity minor version number");
-            }
-            *minor = tmp;
-        } else {
-            *minor = 0;
+        version_ptr = end_ptr + 1; /* skip the dot */
+        tmp = (int) SDL_strtol(version_ptr, &end_ptr, 10);
+        if (tmp == 0 && end_ptr == version_ptr) {
+            return SDL_SetError("failed to get zenity minor version number");
         }
+        *minor = tmp;
 
         return 0; /* success */
     }
@@ -131,22 +121,13 @@ static int get_zenity_version(int *major, int *minor)
     return -1; /* run_zenity should've called SDL_SetError() */
 }
 
-int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID)
-{
+int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid) {
     int fd_pipe[2]; /* fd_pipe[0]: read end of pipe, fd_pipe[1]: write end of pipe */
     int zenity_major = 0, zenity_minor = 0, output_len = 0;
     int argc = 5, i;
     const char *argv[5 + 2 /* icon name */ + 2 /* title */ + 2 /* message */ + 2 * MAX_BUTTONS + 1 /* NULL */] = {
         "zenity", "--question", "--switch", "--no-wrap", "--no-markup"
     };
-
-    /* Are we trying to connect to or are currently in a Wayland session? */
-    if (!SDL_getenv("WAYLAND_DISPLAY")) {
-        const char *session = SDL_getenv("XDG_SESSION_TYPE");
-        if (session && SDL_strcasecmp(session, "wayland") != 0) {
-            return SDL_SetError("Not on a wayland display");
-        }
-    }
 
     if (messageboxdata->numbuttons > MAX_BUTTONS) {
         return SDL_SetError("Too many buttons (%d max allowed)", MAX_BUTTONS);
@@ -166,7 +147,7 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
      * We need to handle it gracefully, otherwise no message box will be shown.
      */
     argv[argc++] = zenity_major > 3 || (zenity_major == 3 && zenity_minor >= 90) ? "--icon" : "--icon-name";
-    switch (messageboxdata->flags & (SDL_MESSAGEBOX_ERROR | SDL_MESSAGEBOX_WARNING | SDL_MESSAGEBOX_INFORMATION)) {
+    switch (messageboxdata->flags) {
     case SDL_MESSAGEBOX_ERROR:
         argv[argc++] = "dialog-error";
         break;
@@ -212,19 +193,18 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
         FILE *outputfp = NULL;
         char *output = NULL;
         char *tmp = NULL;
-        close(fd_pipe[1]);
 
-        if (!buttonID) {
-            /* if we don't need buttonID, we can return immediately */
+        if (!buttonid) {
+            /* if we don't need buttonid, we can return immediately */
             close(fd_pipe[0]);
             return 0; /* success */
         }
-        *buttonID = -1;
+        *buttonid = -1;
 
         output = SDL_malloc(output_len + 1);
         if (!output) {
             close(fd_pipe[0]);
-            return -1;
+            return SDL_OutOfMemory();
         }
         output[0] = '\0';
 
@@ -252,7 +232,7 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
         for (i = 0; i < messageboxdata->numbuttons; i += 1) {
             if (messageboxdata->buttons[i].text) {
                 if (SDL_strcmp(output, messageboxdata->buttons[i].text) == 0) {
-                    *buttonID = messageboxdata->buttons[i].buttonID;
+                    *buttonid = messageboxdata->buttons[i].buttonid;
                     break;
                 }
             }
@@ -268,3 +248,5 @@ int Wayland_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *button
 }
 
 #endif /* SDL_VIDEO_DRIVER_WAYLAND */
+
+/* vi: set ts=4 sw=4 expandtab: */

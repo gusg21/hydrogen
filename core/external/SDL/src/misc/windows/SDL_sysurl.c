@@ -18,14 +18,13 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
 
 #include "../SDL_sysurl.h"
 #include "../../core/windows/SDL_windows.h"
 
 #include <shellapi.h>
 
-#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
 int SDL_SYS_OpenURL(const char *url)
 {
     /* Not supported */
@@ -47,7 +46,7 @@ int SDL_SYS_OpenURL(const char *url)
     wurl = WIN_UTF8ToStringW(url);
     if (!wurl) {
         WIN_CoUninitialize();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Success returns value greater than 32. Less is an error. */
@@ -57,3 +56,5 @@ int SDL_SYS_OpenURL(const char *url)
     return (rc > ((HINSTANCE)32)) ? 0 : WIN_SetError("Couldn't open given URL.");
 }
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

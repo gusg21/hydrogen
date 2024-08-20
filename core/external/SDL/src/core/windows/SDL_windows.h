@@ -24,7 +24,7 @@
 #ifndef _INCLUDED_WINDOWS_H
 #define _INCLUDED_WINDOWS_H
 
-#ifdef SDL_PLATFORM_WIN32
+#if defined(__WIN32__)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -36,7 +36,7 @@
 #endif
 #undef WINVER
 #undef _WIN32_WINNT
-#if SDL_VIDEO_RENDER_D3D12 || defined(HAVE_DXGI1_6_H)
+#if SDL_VIDEO_RENDER_D3D12
 #define _WIN32_WINNT 0xA00 /* For D3D12, 0xA00 is required */
 #elif defined(HAVE_SHELLSCALINGAPI_H)
 #define _WIN32_WINNT 0x603 /* For DPI support */
@@ -45,7 +45,7 @@
 #endif
 #define WINVER _WIN32_WINNT
 
-#elif defined(SDL_PLATFORM_WINGDK)
+#elif defined(__WINGDK__)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -60,7 +60,7 @@
 #define _WIN32_WINNT 0xA00
 #define WINVER       _WIN32_WINNT
 
-#elif defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
+#elif defined(__XBOXONE__) || defined(__XBOXSERIES__)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -91,7 +91,8 @@
 
 #include <windows.h>
 #include <basetyps.h> /* for REFIID with broken mingw.org headers */
-#include <mmreg.h>
+
+#include "SDL_rect.h"
 
 /* Routines to convert from UTF8 to native Windows text */
 #define WIN_StringToUTF8W(S) SDL_iconv_string("UTF-8", "UTF-16LE", (const char *)(S), (SDL_wcslen(S) + 1) * sizeof(WCHAR))
@@ -122,9 +123,9 @@ extern int WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr);
 /* Sets an error message based on GetLastError(). Always return -1. */
 extern int WIN_SetError(const char *prefix);
 
-#ifndef SDL_PLATFORM_WINRT
+#if !defined(__WINRT__)
 /* Load a function from combase.dll */
-FARPROC WIN_LoadComBaseFunction(const char *name);
+void *WIN_LoadComBaseFunction(const char *name);
 #endif
 
 /* Wrap up the oddities of CoInitialize() into a common function. */
@@ -134,9 +135,6 @@ extern void WIN_CoUninitialize(void);
 /* Wrap up the oddities of RoInitialize() into a common function. */
 extern HRESULT WIN_RoInitialize(void);
 extern void WIN_RoUninitialize(void);
-
-/* Returns SDL_TRUE if we're running on Windows XP (any service pack). DOES NOT CHECK XP "OR GREATER"! */
-extern BOOL WIN_IsWindowsXP(void);
 
 /* Returns SDL_TRUE if we're running on Windows Vista and newer */
 extern BOOL WIN_IsWindowsVistaOrGreater(void);
@@ -161,14 +159,11 @@ extern void WIN_RectToRECT(const SDL_Rect *sdlrect, RECT *winrect);
 /* Returns SDL_TRUE if the rect is empty */
 extern BOOL WIN_IsRectEmpty(const RECT *rect);
 
-extern SDL_AudioFormat SDL_WaveFormatExToSDLFormat(WAVEFORMATEX *waveformat);
-
-/* WideCharToMultiByte, but with some WinXP manangement. */
-extern int WIN_WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWCH lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCCH lpDefaultChar, LPBOOL lpUsedDefaultChar);
-
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _INCLUDED_WINDOWS_H */
+
+/* vi: set ts=4 sw=4 expandtab: */

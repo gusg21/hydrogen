@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_VITA
 
@@ -30,7 +30,7 @@
 #include "../../render/vitagxm/SDL_render_vita_gxm_tools.h"
 #endif /* SDL_VIDEO_RENDER_VITA_GXM */
 
-int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID)
+int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
 #if SDL_VIDEO_RENDER_VITA_GXM
     SceMsgDialogParam param;
@@ -91,17 +91,17 @@ int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID)
         sceMsgDialogGetResult(&dialog_result);
 
         if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_BUTTON1) {
-            *buttonID = messageboxdata->buttons[0].buttonID;
+            *buttonid = messageboxdata->buttons[0].buttonid;
         } else if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_BUTTON2) {
-            *buttonID = messageboxdata->buttons[1].buttonID;
+            *buttonid = messageboxdata->buttons[1].buttonid;
         } else if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_BUTTON3) {
-            *buttonID = messageboxdata->buttons[2].buttonID;
+            *buttonid = messageboxdata->buttons[2].buttonid;
         } else if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_YES) {
-            *buttonID = messageboxdata->buttons[0].buttonID;
+            *buttonid = messageboxdata->buttons[0].buttonid;
         } else if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_NO) {
-            *buttonID = messageboxdata->buttons[1].buttonID;
+            *buttonid = messageboxdata->buttons[1].buttonid;
         } else if (dialog_result.buttonId == SCE_MSG_DIALOG_BUTTON_ID_OK) {
-            *buttonID = messageboxdata->buttons[0].buttonID;
+            *buttonid = messageboxdata->buttons[0].buttonid;
         }
         sceMsgDialogTerm();
     } else {
@@ -117,9 +117,11 @@ int VITA_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonID)
     return 0;
 #else
     (void)messageboxdata;
-    (void)buttonID;
+    (void)buttonid;
     return -1;
 #endif
 }
 
 #endif /* SDL_VIDEO_DRIVER_VITA */
+
+/* vi: set ts=4 sw=4 expandtab: */

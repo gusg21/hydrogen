@@ -18,9 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #if SDL_VIDEO_RENDER_D3D11
+
+#include "SDL_render.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,3 +36,5 @@ DXGI_MODE_ROTATION D3D11_GetCurrentRotation();
 #endif
 
 #endif /* SDL_VIDEO_RENDER_D3D11 */
+
+/* vi: set ts=4 sw=4 expandtab: */

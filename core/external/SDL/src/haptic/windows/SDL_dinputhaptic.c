@@ -18,12 +18,18 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
+#include "SDL.h"
+#include "SDL_error.h"
+#include "SDL_haptic.h"
 #include "../SDL_syshaptic.h"
 
 #ifdef SDL_HAPTIC_DINPUT
 
+#include "SDL_hints.h"
+#include "SDL_stdinc.h"
+#include "SDL_timer.h"
 #include "SDL_windowshaptic_c.h"
 #include "SDL_dinputhaptic_c.h"
 #include "../../joystick/windows/SDL_windowsjoystick_c.h"
@@ -71,7 +77,7 @@ int SDL_DINPUT_HapticInit(void)
         return SDL_SetError("Haptic: SubSystem already open.");
     }
 
-    if (!SDL_GetHintBoolean(SDL_HINT_JOYSTICK_DIRECTINPUT, SDL_TRUE)) {
+    if (!SDL_GetHintBoolean(SDL_HINT_DIRECTINPUT_ENABLED, SDL_TRUE)) {
         /* In some environments, IDirectInput8_Initialize / _EnumDevices can take a minute even with no controllers. */
         return 0;
     }
@@ -139,7 +145,7 @@ int SDL_DINPUT_HapticMaybeAddDevice(const DIDEVICEINSTANCE *pdidInstance)
 
     /* Make sure we don't already have it */
     for (item = SDL_hapticlist; item; item = item->next) {
-        if (SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0) {
+        if ((!item->bXInputHaptic) && (SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0)) {
             return -1; /* Already added */
         }
     }
@@ -167,10 +173,9 @@ int SDL_DINPUT_HapticMaybeAddDevice(const DIDEVICEINSTANCE *pdidInstance)
 
     item = (SDL_hapticlist_item *)SDL_calloc(1, sizeof(SDL_hapticlist_item));
     if (!item) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
-    item->instance_id = SDL_GetNextObjectID();
     item->name = WIN_StringToUTF8(pdidInstance->tszProductName);
     if (!item->name) {
         SDL_free(item);
@@ -194,7 +199,7 @@ int SDL_DINPUT_HapticMaybeRemoveDevice(const DIDEVICEINSTANCE *pdidInstance)
     }
 
     for (item = SDL_hapticlist; item; item = item->next) {
-        if (SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0) {
+        if (!item->bXInputHaptic && SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0) {
             /* found it, remove it. */
             return SDL_SYS_RemoveHapticDevice(prev, item);
         }
@@ -260,7 +265,8 @@ static BOOL CALLBACK DI_EffectCallback(LPCDIEFFECTINFO pei, LPVOID pv)
     EFFECT_TEST(GUID_ConstantForce, SDL_HAPTIC_CONSTANT);
     EFFECT_TEST(GUID_CustomForce, SDL_HAPTIC_CUSTOM);
     EFFECT_TEST(GUID_Sine, SDL_HAPTIC_SINE);
-    EFFECT_TEST(GUID_Square, SDL_HAPTIC_SQUARE);
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /* EFFECT_TEST(GUID_Square, SDL_HAPTIC_SQUARE); */
     EFFECT_TEST(GUID_Triangle, SDL_HAPTIC_TRIANGLE);
     EFFECT_TEST(GUID_SawtoothUp, SDL_HAPTIC_SAWTOOTHUP);
     EFFECT_TEST(GUID_SawtoothDown, SDL_HAPTIC_SAWTOOTHDOWN);
@@ -286,19 +292,20 @@ static int SDL_DINPUT_HapticOpenFromDevice(SDL_Haptic *haptic, LPDIRECTINPUTDEVI
     DIPROPDWORD dipdw;
 
     /* Allocate the hwdata */
-    haptic->hwdata = (struct haptic_hwdata *)SDL_calloc(1, sizeof(*haptic->hwdata));
+    haptic->hwdata = (struct haptic_hwdata *)SDL_malloc(sizeof(*haptic->hwdata));
     if (!haptic->hwdata) {
-        return -1;
+        return SDL_OutOfMemory();
     }
+    SDL_memset(haptic->hwdata, 0, sizeof(*haptic->hwdata));
 
     /* We'll use the device8 from now on. */
     haptic->hwdata->device = device8;
     haptic->hwdata->is_joystick = is_joystick;
 
     /* !!! FIXME: opening a haptic device here first will make an attempt to
-       !!! FIXME:  SDL_OpenJoystick() that same device fail later, since we
+       !!! FIXME:  SDL_JoystickOpen() that same device fail later, since we
        !!! FIXME:  have it open in exclusive mode. But this will allow
-       !!! FIXME:  SDL_OpenJoystick() followed by SDL_OpenHapticFromJoystick()
+       !!! FIXME:  SDL_JoystickOpen() followed by SDL_HapticOpenFromJoystick()
        !!! FIXME:  to work, and that's probably the common case. Still,
        !!! FIXME:  ideally, We need to unify the opening code. */
 
@@ -401,6 +408,7 @@ static int SDL_DINPUT_HapticOpenFromDevice(SDL_Haptic *haptic, LPDIRECTINPUTDEVI
     haptic->effects = (struct haptic_effect *)
         SDL_malloc(sizeof(struct haptic_effect) * haptic->neffects);
     if (!haptic->effects) {
+        SDL_OutOfMemory();
         goto acquire_err;
     }
     /* Clear the memory */
@@ -461,6 +469,7 @@ int SDL_DINPUT_JoystickSameHaptic(SDL_Haptic *haptic, SDL_Joystick *joystick)
 int SDL_DINPUT_HapticOpenFromJoystick(SDL_Haptic *haptic, SDL_Joystick *joystick)
 {
     SDL_hapticlist_item *item;
+    int index = 0;
     HRESULT ret;
     DIDEVICEINSTANCE joy_instance;
 
@@ -472,11 +481,11 @@ int SDL_DINPUT_HapticOpenFromJoystick(SDL_Haptic *haptic, SDL_Joystick *joystick
 
     /* Since it comes from a joystick we have to try to match it with a haptic device on our haptic list. */
     for (item = SDL_hapticlist; item; item = item->next) {
-        if (WIN_IsEqualGUID(&item->instance.guidInstance, &joy_instance.guidInstance)) {
-            haptic->instance_id = item->instance_id;
-            haptic->name = SDL_strdup(item->name);
+        if (!item->bXInputHaptic && WIN_IsEqualGUID(&item->instance.guidInstance, &joy_instance.guidInstance)) {
+            haptic->index = index;
             return SDL_DINPUT_HapticOpenFromDevice(haptic, joystick->hwdata->InputDevice, SDL_TRUE);
         }
+        ++index;
     }
 
     return SDL_SetError("Couldn't find joystick in haptic device list");
@@ -524,7 +533,7 @@ static DWORD DIGetTriggerButton(Uint16 button)
 /*
  * Sets the direction.
  */
-static int SDL_SYS_SetDirection(DIEFFECT *effect, const SDL_HapticDirection *dir, int naxes)
+static int SDL_SYS_SetDirection(DIEFFECT *effect, SDL_HapticDirection *dir, int naxes)
 {
     LONG *rglDir;
 
@@ -536,9 +545,9 @@ static int SDL_SYS_SetDirection(DIEFFECT *effect, const SDL_HapticDirection *dir
     }
 
     /* Has axes. */
-    rglDir = (LONG *)SDL_malloc(sizeof(LONG) * naxes);
+    rglDir = SDL_malloc(sizeof(LONG) * naxes);
     if (!rglDir) {
-        return -1;
+        return SDL_OutOfMemory();
     }
     SDL_memset(rglDir, 0, sizeof(LONG) * naxes);
     effect->rglDirection = rglDir;
@@ -586,7 +595,7 @@ static int SDL_SYS_SetDirection(DIEFFECT *effect, const SDL_HapticDirection *dir
  * Creates the DIEFFECT from a SDL_HapticEffect.
  */
 static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
-                              const SDL_HapticEffect *src)
+                              SDL_HapticEffect *src)
 {
     int i;
     DICONSTANTFORCE *constant;
@@ -595,11 +604,11 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
     DIRAMPFORCE *ramp;
     DICUSTOMFORCE *custom;
     DIENVELOPE *envelope;
-    const SDL_HapticConstant *hap_constant;
-    const SDL_HapticPeriodic *hap_periodic;
-    const SDL_HapticCondition *hap_condition;
-    const SDL_HapticRamp *hap_ramp;
-    const SDL_HapticCustom *hap_custom;
+    SDL_HapticConstant *hap_constant;
+    SDL_HapticPeriodic *hap_periodic;
+    SDL_HapticCondition *hap_condition;
+    SDL_HapticRamp *hap_ramp;
+    SDL_HapticCustom *hap_custom;
     DWORD *axes;
 
     /* Set global stuff. */
@@ -610,10 +619,11 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
     dest->dwFlags = DIEFF_OBJECTOFFSETS; /* Seems obligatory. */
 
     /* Envelope. */
-    envelope = (DIENVELOPE *)SDL_calloc(1, sizeof(DIENVELOPE));
+    envelope = SDL_malloc(sizeof(DIENVELOPE));
     if (!envelope) {
-        return -1;
+        return SDL_OutOfMemory();
     }
+    SDL_memset(envelope, 0, sizeof(DIENVELOPE));
     dest->lpEnvelope = envelope;
     envelope->dwSize = sizeof(DIENVELOPE); /* Always should be this. */
 
@@ -624,9 +634,9 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
         dest->cAxes = haptic->naxes;
     }
     if (dest->cAxes > 0) {
-        axes = (DWORD *)SDL_malloc(sizeof(DWORD) * dest->cAxes);
+        axes = SDL_malloc(sizeof(DWORD) * dest->cAxes);
         if (!axes) {
-            return -1;
+            return SDL_OutOfMemory();
         }
         axes[0] = haptic->hwdata->axes[0]; /* Always at least one axis. */
         if (dest->cAxes > 1) {
@@ -642,10 +652,11 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
     switch (src->type) {
     case SDL_HAPTIC_CONSTANT:
         hap_constant = &src->constant;
-        constant = (DICONSTANTFORCE *)SDL_calloc(1, sizeof(DICONSTANTFORCE));
+        constant = SDL_malloc(sizeof(DICONSTANTFORCE));
         if (!constant) {
-            return -1;
+            return SDL_OutOfMemory();
         }
+        SDL_memset(constant, 0, sizeof(DICONSTANTFORCE));
 
         /* Specifics */
         constant->lMagnitude = CONVERT(hap_constant->level);
@@ -677,15 +688,17 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
         break;
 
     case SDL_HAPTIC_SINE:
-    case SDL_HAPTIC_SQUARE:
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /* case SDL_HAPTIC_SQUARE: */
     case SDL_HAPTIC_TRIANGLE:
     case SDL_HAPTIC_SAWTOOTHUP:
     case SDL_HAPTIC_SAWTOOTHDOWN:
         hap_periodic = &src->periodic;
-        periodic = (DIPERIODIC *)SDL_calloc(1, sizeof(DIPERIODIC));
+        periodic = SDL_malloc(sizeof(DIPERIODIC));
         if (!periodic) {
-            return -1;
+            return SDL_OutOfMemory();
         }
+        SDL_memset(periodic, 0, sizeof(DIPERIODIC));
 
         /* Specifics */
         periodic->dwMagnitude = CONVERT(SDL_abs(hap_periodic->magnitude));
@@ -725,10 +738,11 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
     case SDL_HAPTIC_INERTIA:
     case SDL_HAPTIC_FRICTION:
         hap_condition = &src->condition;
-        condition = (DICONDITION *)SDL_calloc(dest->cAxes, sizeof(DICONDITION));
+        condition = SDL_malloc(sizeof(DICONDITION) * dest->cAxes);
         if (!condition) {
-            return -1;
+            return SDL_OutOfMemory();
         }
+        SDL_memset(condition, 0, sizeof(DICONDITION));
 
         /* Specifics */
         for (i = 0; i < (int)dest->cAxes; i++) {
@@ -765,10 +779,11 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
 
     case SDL_HAPTIC_RAMP:
         hap_ramp = &src->ramp;
-        ramp = (DIRAMPFORCE *)SDL_calloc(1, sizeof(DIRAMPFORCE));
+        ramp = SDL_malloc(sizeof(DIRAMPFORCE));
         if (!ramp) {
-            return -1;
+            return SDL_OutOfMemory();
         }
+        SDL_memset(ramp, 0, sizeof(DIRAMPFORCE));
 
         /* Specifics */
         ramp->lStart = CONVERT(hap_ramp->start);
@@ -802,16 +817,18 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic *haptic, DIEFFECT *dest,
 
     case SDL_HAPTIC_CUSTOM:
         hap_custom = &src->custom;
-        custom = (DICUSTOMFORCE *)SDL_calloc(1, sizeof(DICUSTOMFORCE));
+        custom = SDL_malloc(sizeof(DICUSTOMFORCE));
         if (!custom) {
-            return -1;
+            return SDL_OutOfMemory();
         }
+        SDL_memset(custom, 0, sizeof(DICUSTOMFORCE));
 
         /* Specifics */
         custom->cChannels = hap_custom->channels;
         custom->dwSamplePeriod = hap_custom->period * 1000UL;
         custom->cSamples = hap_custom->samples;
-        custom->rglForceData = (LPLONG)SDL_malloc(sizeof(LONG) * custom->cSamples * custom->cChannels);
+        custom->rglForceData =
+            SDL_malloc(sizeof(LONG) * custom->cSamples * custom->cChannels);
         for (i = 0; i < hap_custom->samples * hap_custom->channels; i++) { /* Copy data. */
             custom->rglForceData[i] = CCONVERT(hap_custom->data[i]);
         }
@@ -877,7 +894,7 @@ static void SDL_SYS_HapticFreeDIEFFECT(DIEFFECT *effect, int type)
  * Gets the effect type from the generic SDL haptic effect wrapper.
  */
 /* NOLINTNEXTLINE(readability-const-return-type): Can't fix Windows' headers */
-static REFGUID SDL_SYS_HapticEffectType(const SDL_HapticEffect *effect)
+static REFGUID SDL_SYS_HapticEffectType(SDL_HapticEffect *effect)
 {
     switch (effect->type) {
     case SDL_HAPTIC_CONSTANT:
@@ -886,8 +903,9 @@ static REFGUID SDL_SYS_HapticEffectType(const SDL_HapticEffect *effect)
     case SDL_HAPTIC_RAMP:
         return &GUID_RampForce;
 
-    case SDL_HAPTIC_SQUARE:
-        return &GUID_Square;
+        /* !!! FIXME: put this back when we have more bits in 2.1 */
+        /* case SDL_HAPTIC_SQUARE:
+            return &GUID_Square; */
 
     case SDL_HAPTIC_SINE:
         return &GUID_Sine;
@@ -920,7 +938,7 @@ static REFGUID SDL_SYS_HapticEffectType(const SDL_HapticEffect *effect)
         return NULL;
     }
 }
-int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *base)
+int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *base)
 {
     HRESULT ret;
     REFGUID type = SDL_SYS_HapticEffectType(base);
@@ -950,7 +968,7 @@ err_effectdone:
     return -1;
 }
 
-int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *data)
+int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *data)
 {
     HRESULT ret;
     DWORD flags;
@@ -1185,12 +1203,12 @@ void SDL_DINPUT_HapticQuit(void)
 {
 }
 
-int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *base)
+int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *base)
 {
     return SDL_Unsupported();
 }
 
-int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *data)
+int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *data)
 {
     return SDL_Unsupported();
 }
@@ -1240,3 +1258,5 @@ int SDL_DINPUT_HapticStopAll(SDL_Haptic *haptic)
 }
 
 #endif /* SDL_HAPTIC_DINPUT */
+
+/* vi: set ts=4 sw=4 expandtab: */

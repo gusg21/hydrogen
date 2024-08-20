@@ -18,10 +18,12 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
 
 #ifndef SDL_thread_c_h_
 #define SDL_thread_c_h_
+
+#include "SDL_thread.h"
 
 /* Need the definitions of SYS_ThreadHandle */
 #ifdef SDL_THREADS_DISABLED
@@ -40,6 +42,8 @@
 #include "n3ds/SDL_systhread_c.h"
 #elif defined(SDL_THREAD_STDCPP)
 #include "stdcpp/SDL_systhread_c.h"
+#elif defined(SDL_THREAD_OS2)
+#include "os2/SDL_systhread_c.h"
 #elif defined(SDL_THREAD_NGAGE)
 #include "ngage/SDL_systhread_c.h"
 #else
@@ -59,17 +63,17 @@ typedef enum SDL_ThreadState
 /* This is the system-independent thread info structure */
 struct SDL_Thread
 {
-    SDL_ThreadID threadid;
+    SDL_threadID threadid;
     SYS_ThreadHandle handle;
     int status;
-    SDL_AtomicInt state; /* SDL_THREAD_STATE_* */
+    SDL_atomic_t state; /* SDL_THREAD_STATE_* */
     SDL_error errbuf;
     char *name;
     size_t stacksize; /* 0 for default, >0 for user-specified stack size. */
     int(SDLCALL *userfunc)(void *);
     void *userdata;
     void *data;
-    SDL_FunctionPointer endfunc; /* only used on some platforms. */
+    void *endfunc; /* only used on some platforms. */
 };
 
 /* This is the function called to run a thread */
@@ -78,7 +82,7 @@ extern void SDL_RunThread(SDL_Thread *thread);
 /* This is the system-independent thread local storage structure */
 typedef struct
 {
-    int limit;
+    unsigned int limit;
     struct
     {
         void *data;
@@ -102,3 +106,5 @@ extern int SDL_Generic_SetTLSData(SDL_TLSData *data);
 extern void SDL_Generic_QuitTLSData(void);
 
 #endif /* SDL_thread_c_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

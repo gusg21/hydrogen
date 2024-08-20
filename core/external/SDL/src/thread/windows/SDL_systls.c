@@ -19,12 +19,13 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_THREAD_WINDOWS
 
 #include "../../core/windows/SDL_windows.h"
 
+#include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 
 #if WINAPI_FAMILY_WINRT
@@ -91,3 +92,5 @@ void SDL_SYS_QuitTLSData(void)
 }
 
 #endif /* SDL_THREAD_WINDOWS */
+
+/* vi: set ts=4 sw=4 expandtab: */

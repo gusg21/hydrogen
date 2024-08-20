@@ -1,7 +1,5 @@
 #pragma once
 
-#include "bgfx/bgfx.h"
-
 #include "core/asset.h"
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
@@ -17,18 +15,18 @@ class Model : public Asset {
 
     uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
 
-    bgfx::VertexBufferHandle getVertexBuffer() {
-        return m_vertexBuffer;
-    }
-    
-    bgfx::IndexBufferHandle getIndexBuffer() {
-        return m_indexBuffer;
-    }
+    //   bgfx::VertexBufferHandle getVertexBuffer() {
+    //       return m_vertexBuffer;
+    //   }
+
+    //   bgfx::IndexBufferHandle getIndexBuffer() {
+    //       return m_indexBuffer;
+    //   }
 
 
-  private:
-    bgfx::VertexBufferHandle m_vertexBuffer;
-    bgfx::IndexBufferHandle m_indexBuffer;
+    // private:
+    //   bgfx::VertexBufferHandle m_vertexBuffer;
+    //   bgfx::IndexBufferHandle m_indexBuffer;
 };
 
 struct Vertex {
@@ -40,7 +38,7 @@ struct Vertex {
 
     static void init();
 
-    static bgfx::VertexLayout layout;
+    // static bgfx::VertexLayout layout;
 };
 
 }  // namespace h_core

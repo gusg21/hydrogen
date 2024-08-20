@@ -18,7 +18,6 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
 
 #include "../SDL_sysurl.h"
 
@@ -28,10 +27,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
-#ifdef USE_POSIX_SPAWN
-#include <spawn.h>
-extern char **environ;
-#endif
 
 int SDL_SYS_OpenURL(const char *url)
 {
@@ -83,3 +78,5 @@ int SDL_SYS_OpenURL(const char *url)
         }
     }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

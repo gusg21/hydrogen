@@ -29,10 +29,15 @@
 
   So, combine them as best we can!
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_JOYSTICK_RAWINPUT
 
+#include "SDL_atomic.h"
+#include "SDL_endian.h"
+#include "SDL_events.h"
+#include "SDL_hints.h"
+#include "SDL_timer.h"
 #include "../usb_ids.h"
 #include "../SDL_sysjoystick.h"
 #include "../../core/windows/SDL_windows.h"
@@ -103,15 +108,15 @@ static int SDL_RAWINPUT_numjoysticks = 0;
 
 static void RAWINPUT_JoystickClose(SDL_Joystick *joystick);
 
-typedef struct SDL_RAWINPUT_Device
+typedef struct _SDL_RAWINPUT_Device
 {
-    SDL_AtomicInt refcount;
+    SDL_atomic_t refcount;
     char *name;
     char *path;
     Uint16 vendor_id;
     Uint16 product_id;
     Uint16 version;
-    SDL_GUID guid;
+    SDL_JoystickGUID guid;
     SDL_bool is_xinput;
     SDL_bool is_xboxone;
     int steam_virtual_gamepad_slot;
@@ -121,7 +126,7 @@ typedef struct SDL_RAWINPUT_Device
     SDL_Joystick *joystick;
     SDL_JoystickID joystick_id;
 
-    struct SDL_RAWINPUT_Device *next;
+    struct _SDL_RAWINPUT_Device *next;
 } SDL_RAWINPUT_Device;
 
 struct joystick_hwdata
@@ -140,7 +145,7 @@ struct joystick_hwdata
 
 #ifdef SDL_JOYSTICK_RAWINPUT_MATCHING
     Uint64 match_state; /* Lowest 16 bits for button states, higher 24 for 6 4bit axes */
-    Uint64 last_state_packet;
+    Uint32 last_state_packet;
 #endif
 
 #ifdef SDL_JOYSTICK_RAWINPUT_XINPUT
@@ -178,7 +183,7 @@ static const Uint16 subscribed_devices[] = {
 
 static struct
 {
-    Uint64 last_state_packet;
+    Uint32 last_state_packet;
     SDL_Joystick *joystick;
     SDL_Joystick *last_joystick;
 } guide_button_candidate;
@@ -250,20 +255,20 @@ static void RAWINPUT_FillMatchState(WindowsMatchState *state, Uint64 match_state
         /* Bitwise map .RLDUWVQTS.KYXBA -> YXBA..WVQTKSRLDU */
         (WORD)(match_state << 12 | (match_state & 0x0780) >> 1 | (match_state & 0x0010) << 1 | (match_state & 0x0040) >> 2 | (match_state & 0x7800) >> 11);
     /*  Explicit
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_SOUTH)) ? XINPUT_GAMEPAD_A : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_EAST)) ? XINPUT_GAMEPAD_B : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_WEST)) ? XINPUT_GAMEPAD_X : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_NORTH)) ? XINPUT_GAMEPAD_Y : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_BACK)) ? XINPUT_GAMEPAD_BACK : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_START)) ? XINPUT_GAMEPAD_START : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_LEFT_STICK)) ? XINPUT_GAMEPAD_LEFT_THUMB : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_RIGHT_STICK)) ? XINPUT_GAMEPAD_RIGHT_THUMB: 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)) ? XINPUT_GAMEPAD_LEFT_SHOULDER : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) ? XINPUT_GAMEPAD_RIGHT_SHOULDER : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_UP)) ? XINPUT_GAMEPAD_DPAD_UP : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_DOWN)) ? XINPUT_GAMEPAD_DPAD_DOWN : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_LEFT)) ? XINPUT_GAMEPAD_DPAD_LEFT : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_RIGHT)) ? XINPUT_GAMEPAD_DPAD_RIGHT : 0);
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_A)) ? XINPUT_GAMEPAD_A : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_B)) ? XINPUT_GAMEPAD_B : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_X)) ? XINPUT_GAMEPAD_X : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_Y)) ? XINPUT_GAMEPAD_Y : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_BACK)) ? XINPUT_GAMEPAD_BACK : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_START)) ? XINPUT_GAMEPAD_START : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_LEFTSTICK)) ? XINPUT_GAMEPAD_LEFT_THUMB : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_RIGHTSTICK)) ? XINPUT_GAMEPAD_RIGHT_THUMB: 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) ? XINPUT_GAMEPAD_LEFT_SHOULDER : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) ? XINPUT_GAMEPAD_RIGHT_SHOULDER : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_UP)) ? XINPUT_GAMEPAD_DPAD_UP : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_DOWN)) ? XINPUT_GAMEPAD_DPAD_DOWN : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_LEFT)) ? XINPUT_GAMEPAD_DPAD_LEFT : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) ? XINPUT_GAMEPAD_DPAD_RIGHT : 0);
     */
 
     if (state->xinput_buttons) {
@@ -290,20 +295,20 @@ static void RAWINPUT_FillMatchState(WindowsMatchState *state, Uint64 match_state
         /*  RStick/LStick (QT)         RShould/LShould  (WV)                 DPad R/L/D/U                          YXBA                         bac(K)                      (S)tart */
         (match_state & 0x0180) << 5 | (match_state & 0x0600) << 1 | (match_state & 0x7800) >> 5 | (match_state & 0x000F) << 2 | (match_state & 0x0010) >> 3 | (match_state & 0x0040) >> 6;
     /*  Explicit
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_SOUTH)) ? GamepadButtons_A : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_EAST)) ? GamepadButtons_B : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_WEST)) ? GamepadButtons_X : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_NORTH)) ? GamepadButtons_Y : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_BACK)) ? GamepadButtons_View : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_START)) ? GamepadButtons_Menu : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_LEFT_STICK)) ? GamepadButtons_LeftThumbstick : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_RIGHT_STICK)) ? GamepadButtons_RightThumbstick: 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)) ? GamepadButtons_LeftShoulder: 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) ? GamepadButtons_RightShoulder: 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_UP)) ? GamepadButtons_DPadUp : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_DOWN)) ? GamepadButtons_DPadDown : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_LEFT)) ? GamepadButtons_DPadLeft : 0) |
-        ((match_state & (1<<SDL_GAMEPAD_BUTTON_DPAD_RIGHT)) ? GamepadButtons_DPadRight : 0); */
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_A)) ? GamepadButtons_A : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_B)) ? GamepadButtons_B : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_X)) ? GamepadButtons_X : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_Y)) ? GamepadButtons_Y : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_BACK)) ? GamepadButtons_View : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_START)) ? GamepadButtons_Menu : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_LEFTSTICK)) ? GamepadButtons_LeftThumbstick : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_RIGHTSTICK)) ? GamepadButtons_RightThumbstick: 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) ? GamepadButtons_LeftShoulder: 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) ? GamepadButtons_RightShoulder: 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_UP)) ? GamepadButtons_DPadUp : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_DOWN)) ? GamepadButtons_DPadDown : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_LEFT)) ? GamepadButtons_DPadLeft : 0) |
+        ((match_state & (1<<SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) ? GamepadButtons_DPadRight : 0); */
 
     if (state->wgi_buttons) {
         state->any_data = SDL_TRUE;
@@ -332,7 +337,7 @@ static void RAWINPUT_UpdateXInput(void)
     if (xinput_device_change) {
         for (user_index = 0; user_index < XUSER_MAX_COUNT; user_index++) {
             XINPUT_CAPABILITIES capabilities;
-            xinput_state[user_index].connected = (XINPUTGETCAPABILITIES(user_index, XINPUT_FLAG_GAMEPAD, &capabilities) == ERROR_SUCCESS);
+            xinput_state[user_index].connected = (XINPUTGETCAPABILITIES(user_index, XINPUT_FLAG_GAMEPAD, &capabilities) == ERROR_SUCCESS) ? SDL_TRUE : SDL_FALSE;
         }
         xinput_device_change = SDL_FALSE;
         xinput_state_dirty = SDL_TRUE;
@@ -397,7 +402,7 @@ static SDL_bool RAWINPUT_XInputSlotMatches(const WindowsMatchState *state, Uint8
 
 static SDL_bool RAWINPUT_GuessXInputSlot(const WindowsMatchState *state, Uint8 *correlation_id, Uint8 *slot_idx)
 {
-    Uint8 user_index;
+    int user_index;
     int match_count;
 
     /* If there is only one available slot, let's use that
@@ -421,7 +426,7 @@ static SDL_bool RAWINPUT_GuessXInputSlot(const WindowsMatchState *state, Uint8 *
     for (user_index = 0; user_index < XUSER_MAX_COUNT; ++user_index) {
         if (!xinput_state[user_index].used && RAWINPUT_XInputSlotMatches(state, user_index)) {
             ++match_count;
-            *slot_idx = user_index;
+            *slot_idx = (Uint8)user_index;
             /* Incrementing correlation_id for any match, as negative evidence for others being correlated */
             *correlation_id = ++xinput_state[user_index].correlation_id;
         }
@@ -466,7 +471,7 @@ static struct
 typedef struct GamepadDelegate
 {
     __FIEventHandler_1_Windows__CGaming__CInput__CGamepad iface;
-    SDL_AtomicInt refcount;
+    SDL_atomic_t refcount;
 } GamepadDelegate;
 
 static const IID IID_IEventHandler_Gamepad = { 0x8a7639ee, 0x624a, 0x501a, { 0xbb, 0x53, 0x56, 0x2d, 0x1e, 0xc1, 0x1b, 0x52 } };
@@ -517,12 +522,6 @@ static HRESULT STDMETHODCALLTYPE IEventHandler_CGamepadVtbl_InvokeRemoved(__FIEv
     return S_OK;
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4028) /* formal parameter 3 different from declaration, when using older buggy WGI headers */
-#pragma warning(disable : 4113) /* X differs in parameter lists from Y, when using older buggy WGI headers */
-#endif
-
 static __FIEventHandler_1_Windows__CGaming__CInput__CGamepadVtbl gamepad_added_vtbl = {
     IEventHandler_CGamepadVtbl_QueryInterface,
     IEventHandler_CGamepadVtbl_AddRef,
@@ -544,10 +543,6 @@ static GamepadDelegate gamepad_removed = {
     { &gamepad_removed_vtbl },
     { 1 }
 };
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 static void RAWINPUT_MarkWindowsGamingInputSlotUsed(WindowsGamingInputGamepadState *wgi_slot, RAWINPUT_DeviceContext *ctx)
 {
@@ -572,15 +567,15 @@ static SDL_bool RAWINPUT_MissingWindowsGamingInputSlot(void)
     return SDL_FALSE;
 }
 
-static int RAWINPUT_UpdateWindowsGamingInput(void)
+static void RAWINPUT_UpdateWindowsGamingInput(void)
 {
     int ii;
     if (!wgi_state.gamepad_statics) {
-        return 0;
+        return;
     }
 
     if (!wgi_state.dirty) {
-        return 0;
+        return;
     }
 
     wgi_state.dirty = SDL_FALSE;
@@ -617,18 +612,18 @@ static int RAWINPUT_UpdateWindowsGamingInput(void)
                         if (!found) {
                             /* New device, add it */
                             WindowsGamingInputGamepadState *gamepad_state;
-                            WindowsGamingInputGamepadState **new_per_gamepad;
+
+                            wgi_state.per_gamepad_count++;
+                            wgi_state.per_gamepad = SDL_realloc(wgi_state.per_gamepad, sizeof(wgi_state.per_gamepad[0]) * wgi_state.per_gamepad_count);
+                            if (!wgi_state.per_gamepad) {
+                                SDL_OutOfMemory();
+                                return;
+                            }
                             gamepad_state = SDL_calloc(1, sizeof(*gamepad_state));
                             if (!gamepad_state) {
-                                return -1;
+                                SDL_OutOfMemory();
+                                return;
                             }
-                            new_per_gamepad = SDL_realloc(wgi_state.per_gamepad, sizeof(wgi_state.per_gamepad[0]) * (wgi_state.per_gamepad_count + 1));
-                            if (!new_per_gamepad) {
-                                SDL_free(gamepad_state);
-                                return -1;
-                            }
-                            wgi_state.per_gamepad = new_per_gamepad;
-                            wgi_state.per_gamepad_count++;
                             wgi_state.per_gamepad[wgi_state.per_gamepad_count - 1] = gamepad_state;
                             gamepad_state->gamepad = gamepad;
                             gamepad_state->connected = SDL_TRUE;
@@ -663,7 +658,6 @@ static int RAWINPUT_UpdateWindowsGamingInput(void)
             wgi_state.per_gamepad[ii]->connected = SDL_FALSE; /* Not used by anything, currently */
         }
     }
-    return 0;
 }
 static void RAWINPUT_InitWindowsGamingInput(RAWINPUT_DeviceContext *ctx)
 {
@@ -686,7 +680,7 @@ static void RAWINPUT_InitWindowsGamingInput(RAWINPUT_DeviceContext *ctx)
             typedef HRESULT(WINAPI * WindowsCreateStringReference_t)(PCWSTR sourceString, UINT32 length, HSTRING_HEADER * hstringHeader, HSTRING * string);
             typedef HRESULT(WINAPI * RoGetActivationFactory_t)(HSTRING activatableClassId, REFIID iid, void **factory);
 
-#ifdef SDL_PLATFORM_WINRT
+#ifdef __WINRT__
             WindowsCreateStringReference_t WindowsCreateStringReferenceFunc = WindowsCreateStringReference;
             RoGetActivationFactory_t RoGetActivationFactoryFunc = RoGetActivationFactory;
 #else
@@ -867,7 +861,7 @@ static void RAWINPUT_AddDevice(HANDLE hDevice)
     SDL_RAWINPUT_Device *curr, *last;
     RID_DEVICE_INFO rdi;
     UINT size;
-    char dev_name[MAX_PATH] = { 0 };
+    char dev_name[MAX_PATH];
     HANDLE hFile = INVALID_HANDLE_VALUE;
 
     /* Make sure we're not trying to add the same device twice */
@@ -877,7 +871,6 @@ static void RAWINPUT_AddDevice(HANDLE hDevice)
 
     /* Figure out what kind of device it is */
     size = sizeof(rdi);
-    SDL_zero(rdi);
     CHECK(GetRawInputDeviceInfoA(hDevice, RIDI_DEVICEINFO, &rdi, &size) != (UINT)-1);
     CHECK(rdi.dwType == RIM_TYPEHID);
 
@@ -886,7 +879,10 @@ static void RAWINPUT_AddDevice(HANDLE hDevice)
     CHECK(GetRawInputDeviceInfoA(hDevice, RIDI_DEVICENAME, dev_name, &size) != (UINT)-1);
     /* Only take XInput-capable devices */
     CHECK(SDL_strstr(dev_name, "IG_") != NULL);
-    CHECK(!SDL_JoystickHandledByAnotherDriver(&SDL_RAWINPUT_JoystickDriver, (Uint16)rdi.hid.dwVendorId, (Uint16)rdi.hid.dwProductId, (Uint16)rdi.hid.dwVersionNumber, ""));
+#ifdef SDL_JOYSTICK_HIDAPI
+    /* Don't take devices handled by HIDAPI */
+    CHECK(!HIDAPI_IsDevicePresent((Uint16)rdi.hid.dwVendorId, (Uint16)rdi.hid.dwProductId, (Uint16)rdi.hid.dwVersionNumber, ""));
+#endif
     device = (SDL_RAWINPUT_Device *)SDL_calloc(1, sizeof(SDL_RAWINPUT_Device));
     CHECK(device);
     device->hDevice = hDevice;
@@ -935,7 +931,7 @@ static void RAWINPUT_AddDevice(HANDLE hDevice)
     CloseHandle(hFile);
     hFile = INVALID_HANDLE_VALUE;
 
-    device->joystick_id = SDL_GetNextObjectID();
+    device->joystick_id = SDL_GetNextJoystickInstanceID();
 
 #ifdef DEBUG_RAWINPUT
     SDL_Log("Adding RAWINPUT device '%s' VID 0x%.4x, PID 0x%.4x, version %d, handle 0x%.8x\n", device->name, device->vendor_id, device->product_id, device->version, device->hDevice);
@@ -1059,6 +1055,42 @@ SDL_bool RAWINPUT_IsEnabled(void)
     return SDL_RAWINPUT_inited && !SDL_RAWINPUT_remote_desktop;
 }
 
+SDL_bool RAWINPUT_IsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
+{
+    SDL_RAWINPUT_Device *device;
+
+    /* If we're being asked about a device, that means another API just detected one, so rescan */
+#ifdef SDL_JOYSTICK_RAWINPUT_XINPUT
+    xinput_device_change = SDL_TRUE;
+#endif
+
+    device = SDL_RAWINPUT_devices;
+    while (device) {
+        if (vendor_id == device->vendor_id && product_id == device->product_id) {
+            return SDL_TRUE;
+        }
+
+        /* The Xbox 360 wireless controller shows up as product 0 in WGI.
+           Try to match it to a Raw Input device via name or known product ID. */
+        if (vendor_id == device->vendor_id && product_id == 0 &&
+            ((name && SDL_strstr(device->name, name) != NULL) ||
+             (device->vendor_id == USB_VENDOR_MICROSOFT &&
+              device->product_id == USB_PRODUCT_XBOX360_XUSB_CONTROLLER))) {
+            return SDL_TRUE;
+        }
+
+        /* The Xbox One controller shows up as a hardcoded raw input VID/PID */
+        if (name && SDL_strcmp(name, "Xbox One Game Controller") == 0 &&
+            device->vendor_id == USB_VENDOR_MICROSOFT &&
+            device->product_id == USB_PRODUCT_XBOX_ONE_XBOXGIP_CONTROLLER) {
+            return SDL_TRUE;
+        }
+
+        device = device->next;
+    }
+    return SDL_FALSE;
+}
+
 static void RAWINPUT_PostUpdate(void)
 {
 #ifdef SDL_JOYSTICK_RAWINPUT_MATCHING
@@ -1098,7 +1130,7 @@ static void RAWINPUT_PostUpdate(void)
             if (ctx->guide_hack) {
                 int guide_button = joystick->nbuttons - 1;
 
-                SDL_SendJoystickButton(SDL_GetTicksNS(), guide_button_candidate.joystick, (Uint8)guide_button, SDL_PRESSED);
+                SDL_PrivateJoystickButton(guide_button_candidate.joystick, guide_button, SDL_PRESSED);
             }
             guide_button_candidate.last_joystick = guide_button_candidate.joystick;
         }
@@ -1108,7 +1140,7 @@ static void RAWINPUT_PostUpdate(void)
         if (ctx->guide_hack) {
             int guide_button = joystick->nbuttons - 1;
 
-            SDL_SendJoystickButton(SDL_GetTicksNS(), joystick, (Uint8)guide_button, SDL_RELEASED);
+            SDL_PrivateJoystickButton(joystick, guide_button, SDL_RELEASED);
         }
         guide_button_candidate.last_joystick = NULL;
     }
@@ -1140,42 +1172,6 @@ static void RAWINPUT_JoystickDetect(void)
         }
     }
     RAWINPUT_PostUpdate();
-}
-
-static SDL_bool RAWINPUT_JoystickIsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
-{
-    SDL_RAWINPUT_Device *device;
-
-    /* If we're being asked about a device, that means another API just detected one, so rescan */
-#ifdef SDL_JOYSTICK_RAWINPUT_XINPUT
-    xinput_device_change = SDL_TRUE;
-#endif
-
-    device = SDL_RAWINPUT_devices;
-    while (device) {
-        if (vendor_id == device->vendor_id && product_id == device->product_id) {
-            return SDL_TRUE;
-        }
-
-        /* The Xbox 360 wireless controller shows up as product 0 in WGI.
-           Try to match it to a Raw Input device via name or known product ID. */
-        if (vendor_id == device->vendor_id && product_id == 0 &&
-            ((name && SDL_strstr(device->name, name) != NULL) ||
-             (device->vendor_id == USB_VENDOR_MICROSOFT &&
-              device->product_id == USB_PRODUCT_XBOX360_XUSB_CONTROLLER))) {
-            return SDL_TRUE;
-        }
-
-        /* The Xbox One controller shows up as a hardcoded raw input VID/PID */
-        if (name && SDL_strcmp(name, "Xbox One Game Controller") == 0 &&
-            device->vendor_id == USB_VENDOR_MICROSOFT &&
-            device->product_id == USB_PRODUCT_XBOX_ONE_XBOXGIP_CONTROLLER) {
-            return SDL_TRUE;
-        }
-
-        device = device->next;
-    }
-    return SDL_FALSE;
 }
 
 static SDL_RAWINPUT_Device *RAWINPUT_GetDeviceByIndex(int device_index)
@@ -1215,7 +1211,7 @@ static void RAWINPUT_JoystickSetDevicePlayerIndex(int device_index, int player_i
 {
 }
 
-static SDL_GUID RAWINPUT_JoystickGetDeviceGUID(int device_index)
+static SDL_JoystickGUID RAWINPUT_JoystickGetDeviceGUID(int device_index)
 {
     return RAWINPUT_GetDeviceByIndex(device_index)->guid;
 }
@@ -1245,7 +1241,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
 
     ctx = (RAWINPUT_DeviceContext *)SDL_calloc(1, sizeof(RAWINPUT_DeviceContext));
     if (!ctx) {
-        return -1;
+        return SDL_OutOfMemory();
     }
     joystick->hwdata = ctx;
 
@@ -1277,7 +1273,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
     ctx->data = (HIDP_DATA *)SDL_malloc(ctx->max_data_length * sizeof(*ctx->data));
     if (!ctx->data) {
         RAWINPUT_JoystickClose(joystick);
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     if (SDL_HidP_GetCaps(ctx->preparsed_data, &caps) != HIDP_STATUS_SUCCESS) {
@@ -1322,7 +1318,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
         ctx->button_indices = (USHORT *)SDL_malloc(joystick->nbuttons * sizeof(*ctx->button_indices));
         if (!ctx->button_indices) {
             RAWINPUT_JoystickClose(joystick);
-            return -1;
+            return SDL_OutOfMemory();
         }
 
         for (i = 0; i < caps.NumberInputButtonCaps; ++i) {
@@ -1333,7 +1329,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
                     int j, count = 1 + (cap->Range.DataIndexMax - cap->Range.DataIndexMin);
 
                     for (j = 0; j < count; ++j) {
-                        ctx->button_indices[button_index++] = (USHORT)(cap->Range.DataIndexMin + j);
+                        ctx->button_indices[button_index++] = cap->Range.DataIndexMin + j;
                     }
                 } else {
                     ctx->button_indices[button_index++] = cap->NotRange.DataIndex;
@@ -1375,7 +1371,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
         ctx->axis_indices = (USHORT *)SDL_malloc(joystick->naxes * sizeof(*ctx->axis_indices));
         if (!ctx->axis_indices) {
             RAWINPUT_JoystickClose(joystick);
-            return -1;
+            return SDL_OutOfMemory();
         }
 
         for (i = 0; i < caps.NumberInputValueCaps; ++i) {
@@ -1408,7 +1404,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
         ctx->hat_indices = (USHORT *)SDL_malloc(joystick->nhats * sizeof(*ctx->hat_indices));
         if (!ctx->hat_indices) {
             RAWINPUT_JoystickClose(joystick);
-            return -1;
+            return SDL_OutOfMemory();
         }
 
         for (i = 0; i < caps.NumberInputValueCaps; ++i) {
@@ -1426,20 +1422,7 @@ static int RAWINPUT_JoystickOpen(SDL_Joystick *joystick, int device_index)
         }
     }
 
-#ifdef SDL_JOYSTICK_RAWINPUT_XINPUT
-    if (ctx->is_xinput) {
-        SDL_SetBooleanProperty(SDL_GetJoystickProperties(joystick), SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN, SDL_TRUE);
-    }
-#endif
-#ifdef SDL_JOYSTICK_RAWINPUT_WGI
-    if (ctx->is_xinput) {
-        SDL_SetBooleanProperty(SDL_GetJoystickProperties(joystick), SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN, SDL_TRUE);
-
-        if (ctx->is_xboxone) {
-            SDL_SetBooleanProperty(SDL_GetJoystickProperties(joystick), SDL_PROP_JOYSTICK_CAP_TRIGGER_RUMBLE_BOOLEAN, SDL_TRUE);
-        }
-    }
-#endif
+    joystick->epowerlevel = SDL_JOYSTICK_POWER_UNKNOWN;
 
     return 0;
 }
@@ -1495,7 +1478,7 @@ static int RAWINPUT_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_
 
 static int RAWINPUT_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble)
 {
-#ifdef SDL_JOYSTICK_RAWINPUT_WGI
+#if defined(SDL_JOYSTICK_RAWINPUT_WGI)
     RAWINPUT_DeviceContext *ctx = joystick->hwdata;
 
     if (ctx->wgi_correlated) {
@@ -1514,6 +1497,31 @@ static int RAWINPUT_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_r
 #else
     return SDL_Unsupported();
 #endif
+}
+
+static Uint32 RAWINPUT_JoystickGetCapabilities(SDL_Joystick *joystick)
+{
+    Uint32 result = 0;
+#if defined(SDL_JOYSTICK_RAWINPUT_XINPUT) || defined(SDL_JOYSTICK_RAWINPUT_WGI)
+    RAWINPUT_DeviceContext *ctx = joystick->hwdata;
+
+#ifdef SDL_JOYSTICK_RAWINPUT_XINPUT
+    if (ctx->is_xinput) {
+        result |= SDL_JOYCAP_RUMBLE;
+    }
+#endif
+#ifdef SDL_JOYSTICK_RAWINPUT_WGI
+    if (ctx->is_xinput) {
+        result |= SDL_JOYCAP_RUMBLE;
+
+        if (ctx->is_xboxone) {
+            result |= SDL_JOYCAP_RUMBLE_TRIGGERS;
+        }
+    }
+#endif
+#endif /**/
+
+    return result;
 }
 
 static int RAWINPUT_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
@@ -1561,48 +1569,48 @@ static void RAWINPUT_HandleStatePacket(SDL_Joystick *joystick, Uint8 *data, int 
 #ifdef SDL_JOYSTICK_RAWINPUT_MATCHING
     /* Map new buttons and axes into game controller controls */
     static const int button_map[] = {
-        SDL_GAMEPAD_BUTTON_SOUTH,
-        SDL_GAMEPAD_BUTTON_EAST,
-        SDL_GAMEPAD_BUTTON_WEST,
-        SDL_GAMEPAD_BUTTON_NORTH,
-        SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
-        SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
-        SDL_GAMEPAD_BUTTON_BACK,
-        SDL_GAMEPAD_BUTTON_START,
-        SDL_GAMEPAD_BUTTON_LEFT_STICK,
-        SDL_GAMEPAD_BUTTON_RIGHT_STICK
+        SDL_CONTROLLER_BUTTON_A,
+        SDL_CONTROLLER_BUTTON_B,
+        SDL_CONTROLLER_BUTTON_X,
+        SDL_CONTROLLER_BUTTON_Y,
+        SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+        SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+        SDL_CONTROLLER_BUTTON_BACK,
+        SDL_CONTROLLER_BUTTON_START,
+        SDL_CONTROLLER_BUTTON_LEFTSTICK,
+        SDL_CONTROLLER_BUTTON_RIGHTSTICK
     };
-#define HAT_MASK ((1 << SDL_GAMEPAD_BUTTON_DPAD_UP) | (1 << SDL_GAMEPAD_BUTTON_DPAD_DOWN) | (1 << SDL_GAMEPAD_BUTTON_DPAD_LEFT) | (1 << SDL_GAMEPAD_BUTTON_DPAD_RIGHT))
+#define HAT_MASK ((1 << SDL_CONTROLLER_BUTTON_DPAD_UP) | (1 << SDL_CONTROLLER_BUTTON_DPAD_DOWN) | (1 << SDL_CONTROLLER_BUTTON_DPAD_LEFT) | (1 << SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
     static const int hat_map[] = {
         0,
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_UP),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_UP) | (1 << SDL_GAMEPAD_BUTTON_DPAD_RIGHT),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_RIGHT),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_DOWN) | (1 << SDL_GAMEPAD_BUTTON_DPAD_RIGHT),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_DOWN),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_DOWN) | (1 << SDL_GAMEPAD_BUTTON_DPAD_LEFT),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_LEFT),
-        (1 << SDL_GAMEPAD_BUTTON_DPAD_UP) | (1 << SDL_GAMEPAD_BUTTON_DPAD_LEFT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_UP),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_UP) | (1 << SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_DOWN) | (1 << SDL_CONTROLLER_BUTTON_DPAD_RIGHT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_DOWN),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_DOWN) | (1 << SDL_CONTROLLER_BUTTON_DPAD_LEFT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_LEFT),
+        (1 << SDL_CONTROLLER_BUTTON_DPAD_UP) | (1 << SDL_CONTROLLER_BUTTON_DPAD_LEFT),
         0,
     };
     Uint64 match_state = ctx->match_state;
     /* Update match_state with button bit, then fall through */
-#define SDL_SendJoystickButton(timestamp, joystick, button, state)                  \
+#define SDL_PrivateJoystickButton(joystick, button, state)                  \
     if (button < SDL_arraysize(button_map)) {                               \
         Uint64 button_bit = 1ull << button_map[button];                     \
         match_state = (match_state & ~button_bit) | (button_bit * (state)); \
     }                                                                       \
-    SDL_SendJoystickButton(timestamp, joystick, button, state)
+    SDL_PrivateJoystickButton(joystick, button, state)
 #ifdef SDL_JOYSTICK_RAWINPUT_MATCH_AXES
     /* Grab high 4 bits of value, then fall through */
 #define AddAxisToMatchState(axis, value)                                                                    \
     {                                                                                                       \
         match_state = (match_state & ~(0xFull << (4 * axis + 16))) | ((value)&0xF000ull) << (4 * axis + 4); \
     }
-#define SDL_SendJoystickAxis(timestamp, joystick, axis, value) \
+#define SDL_PrivateJoystickAxis(joystick, axis, value) \
     if (axis < 4)                                      \
         AddAxisToMatchState(axis, value);              \
-    SDL_SendJoystickAxis(timestamp, joystick, axis, value)
+    SDL_PrivateJoystickAxis(joystick, axis, value)
 #endif
 #endif /* SDL_JOYSTICK_RAWINPUT_MATCHING */
 
@@ -1612,7 +1620,6 @@ static void RAWINPUT_HandleStatePacket(SDL_Joystick *joystick, Uint8 *data, int 
     int naxes = joystick->naxes - (ctx->trigger_hack * 2);
     int nhats = joystick->nhats;
     Uint32 button_mask = 0;
-    Uint64 timestamp = SDL_GetTicksNS();
 
     if (SDL_HidP_GetData(HidP_Input, ctx->data, &data_length, ctx->preparsed_data, (PCHAR)data, size) != HIDP_STATUS_SUCCESS) {
         return;
@@ -1625,14 +1632,14 @@ static void RAWINPUT_HandleStatePacket(SDL_Joystick *joystick, Uint8 *data, int 
         }
     }
     for (i = 0; i < nbuttons; ++i) {
-        SDL_SendJoystickButton(timestamp, joystick, (Uint8)i, (button_mask & (1 << i)) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_PrivateJoystickButton(joystick, i, (button_mask & (1 << i)) ? SDL_PRESSED : SDL_RELEASED);
     }
 
     for (i = 0; i < naxes; ++i) {
         HIDP_DATA *item = GetData(ctx->axis_indices[i], ctx->data, data_length);
         if (item) {
             Sint16 axis = (int)(Uint16)item->RawValue - 0x8000;
-            SDL_SendJoystickAxis(timestamp, joystick, (Uint8)i, axis);
+            SDL_PrivateJoystickAxis(joystick, i, axis);
         }
     }
 
@@ -1660,15 +1667,15 @@ static void RAWINPUT_HandleStatePacket(SDL_Joystick *joystick, Uint8 *data, int 
 #endif
                 hat = hat_states[state];
             }
-            SDL_SendJoystickHat(timestamp, joystick, (Uint8)i, hat);
+            SDL_PrivateJoystickHat(joystick, i, hat);
         }
     }
 
-#ifdef SDL_SendJoystickButton
-#undef SDL_SendJoystickButton
+#ifdef SDL_PrivateJoystickButton
+#undef SDL_PrivateJoystickButton
 #endif
-#ifdef SDL_SendJoystickAxis
-#undef SDL_SendJoystickAxis
+#ifdef SDL_PrivateJoystickAxis
+#undef SDL_PrivateJoystickAxis
 #endif
 
 #ifdef SDL_JOYSTICK_RAWINPUT_MATCH_TRIGGERS
@@ -1713,8 +1720,8 @@ static void RAWINPUT_HandleStatePacket(SDL_Joystick *joystick, Uint8 *data, int 
                 if (!has_trigger_data)
 #endif /* SDL_JOYSTICK_RAWINPUT_MATCH_TRIGGERS */
                 {
-                    SDL_SendJoystickAxis(timestamp, joystick, (Uint8)left_trigger, left_value);
-                    SDL_SendJoystickAxis(timestamp, joystick, (Uint8)right_trigger, right_value);
+                    SDL_PrivateJoystickAxis(joystick, left_trigger, left_value);
+                    SDL_PrivateJoystickAxis(joystick, right_trigger, right_value);
                 }
             }
         }
@@ -1782,13 +1789,13 @@ static void RAWINPUT_UpdateOtherAPIs(SDL_Joystick *joystick)
                 /* It gets left down if we were actually correlated incorrectly and it was released on the WindowsGamingInput
                   device but we didn't get a state packet. */
                 if (ctx->guide_hack) {
-                    SDL_SendJoystickButton(0, joystick, (Uint8)guide_button, SDL_RELEASED);
+                    SDL_PrivateJoystickButton(joystick, guide_button, SDL_RELEASED);
                 }
             }
         }
     }
     if (!ctx->wgi_correlated) {
-        Uint8 new_correlation_count = 0;
+        SDL_bool new_correlation_count = 0;
         if (RAWINPUT_MissingWindowsGamingInputSlot()) {
             Uint8 correlation_id = 0;
             WindowsGamingInputGamepadState *slot_idx = NULL;
@@ -1878,7 +1885,7 @@ static void RAWINPUT_UpdateOtherAPIs(SDL_Joystick *joystick)
                     /* It gets left down if we were actually correlated incorrectly and it was released on the XInput
                       device but we didn't get a state packet. */
                     if (ctx->guide_hack) {
-                        SDL_SendJoystickButton(0, joystick, (Uint8)guide_button, SDL_RELEASED);
+                        SDL_PrivateJoystickButton(joystick, guide_button, SDL_RELEASED);
                     }
                 }
             }
@@ -1941,54 +1948,40 @@ static void RAWINPUT_UpdateOtherAPIs(SDL_Joystick *joystick)
         RAWINPUT_UpdateXInput();
         if (xinput_state[ctx->xinput_slot].connected) {
             XINPUT_BATTERY_INFORMATION_EX *battery_info = &xinput_state[ctx->xinput_slot].battery;
-            Uint64 timestamp;
-
-            if (ctx->guide_hack || ctx->trigger_hack) {
-                timestamp = SDL_GetTicksNS();
-            } else {
-                /* timestamp won't be used */
-                timestamp = 0;
-            }
 
             if (ctx->guide_hack) {
-                SDL_SendJoystickButton(timestamp, joystick, (Uint8)guide_button, (xinput_state[ctx->xinput_slot].state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE) ? SDL_PRESSED : SDL_RELEASED);
+                SDL_PrivateJoystickButton(joystick, guide_button, (xinput_state[ctx->xinput_slot].state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE) ? SDL_PRESSED : SDL_RELEASED);
             }
             if (ctx->trigger_hack) {
-                SDL_SendJoystickAxis(timestamp, joystick, (Uint8)left_trigger, ((int)xinput_state[ctx->xinput_slot].state.Gamepad.bLeftTrigger * 257) - 32768);
-                SDL_SendJoystickAxis(timestamp, joystick, (Uint8)right_trigger, ((int)xinput_state[ctx->xinput_slot].state.Gamepad.bRightTrigger * 257) - 32768);
+                SDL_PrivateJoystickAxis(joystick, left_trigger, ((int)xinput_state[ctx->xinput_slot].state.Gamepad.bLeftTrigger * 257) - 32768);
+                SDL_PrivateJoystickAxis(joystick, right_trigger, ((int)xinput_state[ctx->xinput_slot].state.Gamepad.bRightTrigger * 257) - 32768);
             }
             has_trigger_data = SDL_TRUE;
 
-            SDL_PowerState state;
-            int percent;
-            switch (battery_info->BatteryType) {
-            case BATTERY_TYPE_WIRED:
-                state = SDL_POWERSTATE_CHARGING;
-                break;
-            case BATTERY_TYPE_UNKNOWN:
-            case BATTERY_TYPE_DISCONNECTED:
-                state = SDL_POWERSTATE_UNKNOWN;
-                break;
-            default:
-                state = SDL_POWERSTATE_ON_BATTERY;
-                break;
+            if (battery_info->BatteryType != BATTERY_TYPE_UNKNOWN &&
+                battery_info->BatteryType != BATTERY_TYPE_DISCONNECTED) {
+                SDL_JoystickPowerLevel ePowerLevel = SDL_JOYSTICK_POWER_UNKNOWN;
+                if (battery_info->BatteryType == BATTERY_TYPE_WIRED) {
+                    ePowerLevel = SDL_JOYSTICK_POWER_WIRED;
+                } else {
+                    switch (battery_info->BatteryLevel) {
+                    case BATTERY_LEVEL_EMPTY:
+                        ePowerLevel = SDL_JOYSTICK_POWER_EMPTY;
+                        break;
+                    case BATTERY_LEVEL_LOW:
+                        ePowerLevel = SDL_JOYSTICK_POWER_LOW;
+                        break;
+                    case BATTERY_LEVEL_MEDIUM:
+                        ePowerLevel = SDL_JOYSTICK_POWER_MEDIUM;
+                        break;
+                    default:
+                    case BATTERY_LEVEL_FULL:
+                        ePowerLevel = SDL_JOYSTICK_POWER_FULL;
+                        break;
+                    }
+                }
+                SDL_PrivateJoystickBatteryLevel(joystick, ePowerLevel);
             }
-            switch (battery_info->BatteryLevel) {
-            case BATTERY_LEVEL_EMPTY:
-                percent = 10;
-                break;
-            case BATTERY_LEVEL_LOW:
-                percent = 40;
-                break;
-            case BATTERY_LEVEL_MEDIUM:
-                percent = 70;
-                break;
-            default:
-            case BATTERY_LEVEL_FULL:
-                percent = 100;
-                break;
-            }
-            SDL_SendJoystickPowerInfo(joystick, state, percent);
         }
     }
 #endif /* SDL_JOYSTICK_RAWINPUT_XINPUT */
@@ -1998,21 +1991,13 @@ static void RAWINPUT_UpdateOtherAPIs(SDL_Joystick *joystick)
         RAWINPUT_UpdateWindowsGamingInput(); /* May detect disconnect / cause uncorrelation */
         if (ctx->wgi_correlated) {           /* Still connected */
             struct __x_ABI_CWindows_CGaming_CInput_CGamepadReading *state = &ctx->wgi_slot->state;
-            Uint64 timestamp;
-
-            if (ctx->guide_hack || ctx->trigger_hack) {
-                timestamp = SDL_GetTicksNS();
-            } else {
-                /* timestamp won't be used */
-                timestamp = 0;
-            }
 
             if (ctx->guide_hack) {
-                SDL_SendJoystickButton(timestamp, joystick, (Uint8)guide_button, (state->Buttons & GamepadButtons_GUIDE) ? SDL_PRESSED : SDL_RELEASED);
+                SDL_PrivateJoystickButton(joystick, guide_button, (state->Buttons & GamepadButtons_GUIDE) ? SDL_PRESSED : SDL_RELEASED);
             }
             if (ctx->trigger_hack) {
-                SDL_SendJoystickAxis(timestamp, joystick, (Uint8)left_trigger, (Sint16)(((int)(state->LeftTrigger * SDL_MAX_UINT16)) - 32768));
-                SDL_SendJoystickAxis(timestamp, joystick, (Uint8)right_trigger, (Sint16)(((int)(state->RightTrigger * SDL_MAX_UINT16)) - 32768));
+                SDL_PrivateJoystickAxis(joystick, left_trigger, ((int)(state->LeftTrigger * SDL_MAX_UINT16)) - 32768);
+                SDL_PrivateJoystickAxis(joystick, right_trigger, ((int)(state->RightTrigger * SDL_MAX_UINT16)) - 32768);
             }
             has_trigger_data = SDL_TRUE;
         }
@@ -2022,7 +2007,7 @@ static void RAWINPUT_UpdateOtherAPIs(SDL_Joystick *joystick)
     if (!correlated) {
         if (!guide_button_candidate.joystick ||
             (ctx->last_state_packet && (!guide_button_candidate.last_state_packet ||
-                                        ctx->last_state_packet >= guide_button_candidate.last_state_packet))) {
+                                        SDL_TICKS_PASSED(ctx->last_state_packet, guide_button_candidate.last_state_packet)))) {
             guide_button_candidate.joystick = joystick;
             guide_button_candidate.last_state_packet = ctx->last_state_packet;
         }
@@ -2207,7 +2192,6 @@ SDL_JoystickDriver SDL_RAWINPUT_JoystickDriver = {
     RAWINPUT_JoystickInit,
     RAWINPUT_JoystickGetCount,
     RAWINPUT_JoystickDetect,
-    RAWINPUT_JoystickIsDevicePresent,
     RAWINPUT_JoystickGetDeviceName,
     RAWINPUT_JoystickGetDevicePath,
     RAWINPUT_JoystickGetDeviceSteamVirtualGamepadSlot,
@@ -2218,6 +2202,7 @@ SDL_JoystickDriver SDL_RAWINPUT_JoystickDriver = {
     RAWINPUT_JoystickOpen,
     RAWINPUT_JoystickRumble,
     RAWINPUT_JoystickRumbleTriggers,
+    RAWINPUT_JoystickGetCapabilities,
     RAWINPUT_JoystickSetLED,
     RAWINPUT_JoystickSendEffect,
     RAWINPUT_JoystickSetSensorsEnabled,
@@ -2228,3 +2213,5 @@ SDL_JoystickDriver SDL_RAWINPUT_JoystickDriver = {
 };
 
 #endif /* SDL_JOYSTICK_RAWINPUT */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <bgfx/bgfx.h>
-
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
+#include "core/math/color.h"
 #include "core/project.h"
 #include "core/scene.h"
 #include "core/system.h"
@@ -29,6 +28,11 @@ class Engine {
     /// @brief run the game loop (blocking)
     void run();
 
+    uint32_t getWidth();
+    uint32_t getHeight();
+
+    h_core::math::Color getClearColor();
+
   private:
     h_core::Project* m_project {};
     h_core::Window* m_window = nullptr;
@@ -36,7 +40,7 @@ class Engine {
     h_core::Scene m_scene {};
     h_core::System* m_systems[ENGINE_SYSTEM_COUNT];
 
-    // TODO: Temp rendering variables
-    bgfx::ViewId m_clearView = 0;
+    uint32_t m_windowWidth, m_windowHeight;
+    h_core::math::Color m_clearColor;
 };
 }  // namespace h_core

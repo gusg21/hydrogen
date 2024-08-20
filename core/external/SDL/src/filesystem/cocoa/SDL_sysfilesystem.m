@@ -18,20 +18,22 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_FILESYSTEM_COCOA
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
-#include "../SDL_sysfilesystem.h"
-
 #include <Foundation/Foundation.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-char *SDL_SYS_GetBasePath(void)
+#include "SDL_error.h"
+#include "SDL_stdinc.h"
+#include "SDL_filesystem.h"
+
+char *SDL_GetBasePath(void)
 {
     @autoreleasepool {
         NSBundle *bundle = [NSBundle mainBundle];
@@ -54,7 +56,9 @@ char *SDL_SYS_GetBasePath(void)
         if (base) {
             const size_t len = SDL_strlen(base) + 2;
             retval = (char *)SDL_malloc(len);
-            if (retval != NULL) {
+            if (retval == NULL) {
+                SDL_OutOfMemory();
+            } else {
                 SDL_snprintf(retval, len, "%s/", base);
             }
         }
@@ -63,7 +67,7 @@ char *SDL_SYS_GetBasePath(void)
     }
 }
 
-char *SDL_SYS_GetPrefPath(const char *org, const char *app)
+char *SDL_GetPrefPath(const char *org, const char *app)
 {
     @autoreleasepool {
         char *retval = NULL;
@@ -77,7 +81,7 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
             org = "";
         }
 
-#ifndef SDL_PLATFORM_TVOS
+#if !TARGET_OS_TV
         array = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 #else
         /* tvOS does not have persistent local storage!
@@ -97,7 +101,7 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
         }
 
         array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-#endif /* !SDL_PLATFORM_TVOS */
+#endif /* !TARGET_OS_TV */
 
         if ([array count] > 0) { /* we only want the first item in the list. */
             NSString *str = [array objectAtIndex:0];
@@ -105,7 +109,9 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
             if (base) {
                 const size_t len = SDL_strlen(base) + SDL_strlen(org) + SDL_strlen(app) + 4;
                 retval = (char *)SDL_malloc(len);
-                if (retval != NULL) {
+                if (retval == NULL) {
+                    SDL_OutOfMemory();
+                } else {
                     char *ptr;
                     if (*org) {
                         SDL_snprintf(retval, len, "%s/%s/%s/", base, org, app);
@@ -128,113 +134,6 @@ char *SDL_SYS_GetPrefPath(const char *org, const char *app)
     }
 }
 
-char *SDL_SYS_GetUserFolder(SDL_Folder folder)
-{
-    @autoreleasepool {
-#ifdef SDL_PLATFORM_TVOS
-        SDL_SetError("tvOS does not have persistent storage");
-        return NULL;
-#else
-        char *retval = NULL;
-        const char* base;
-        NSArray *array;
-        NSSearchPathDirectory dir;
-        NSString *str;
-        char *ptr;
-
-        switch (folder) {
-        case SDL_FOLDER_HOME:
-            base = SDL_getenv("HOME");
-
-            if (!base) {
-                SDL_SetError("No $HOME environment variable available");
-                return NULL;
-            }
-
-            goto append_slash;
-
-        case SDL_FOLDER_DESKTOP:
-            dir = NSDesktopDirectory;
-            break;
-
-        case SDL_FOLDER_DOCUMENTS:
-            dir = NSDocumentDirectory;
-            break;
-
-        case SDL_FOLDER_DOWNLOADS:
-            dir = NSDownloadsDirectory;
-            break;
-
-        case SDL_FOLDER_MUSIC:
-            dir = NSMusicDirectory;
-            break;
-
-        case SDL_FOLDER_PICTURES:
-            dir = NSPicturesDirectory;
-            break;
-
-        case SDL_FOLDER_PUBLICSHARE:
-            dir = NSSharedPublicDirectory;
-            break;
-
-        case SDL_FOLDER_SAVEDGAMES:
-            SDL_SetError("Saved games folder not supported on Cocoa");
-            return NULL;
-
-        case SDL_FOLDER_SCREENSHOTS:
-            SDL_SetError("Screenshots folder not supported on Cocoa");
-            return NULL;
-
-        case SDL_FOLDER_TEMPLATES:
-            SDL_SetError("Templates folder not supported on Cocoa");
-            return NULL;
-
-        case SDL_FOLDER_VIDEOS:
-            dir = NSMoviesDirectory;
-            break;
-
-        default:
-            SDL_SetError("Invalid SDL_Folder: %d", (int) folder);
-            return NULL;
-        };
-
-        array = NSSearchPathForDirectoriesInDomains(dir, NSUserDomainMask, YES);
-
-        if ([array count] <= 0) {
-            SDL_SetError("Directory not found");
-            return NULL;
-        }
-
-        str = [array objectAtIndex:0];
-        base = [str fileSystemRepresentation];
-        if (!base) {
-            SDL_SetError("Couldn't get folder path");
-            return NULL;
-        }
-
-append_slash:
-        retval = SDL_malloc(SDL_strlen(base) + 2);
-        if (retval == NULL) {
-            return NULL;
-        }
-
-        if (SDL_snprintf(retval, SDL_strlen(base) + 2, "%s/", base) < 0) {
-            SDL_SetError("Couldn't snprintf folder path for Cocoa: %s", base);
-            SDL_free(retval);
-            return NULL;
-        }
-
-        for (ptr = retval + 1; *ptr; ptr++) {
-            if (*ptr == '/') {
-                *ptr = '\0';
-                mkdir(retval, 0700);
-                *ptr = '/';
-            }
-        }
-
-        return retval;
-#endif /* SDL_PLATFORM_TVOS */
-    }
-}
-
 #endif /* SDL_FILESYSTEM_COCOA */
+
+/* vi: set ts=4 sw=4 expandtab: */

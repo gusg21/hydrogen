@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 /* D3D12 shader implementation */
 
@@ -31,7 +31,17 @@ typedef enum
 {
     SHADER_SOLID,
     SHADER_RGB,
-    SHADER_ADVANCED,
+#if SDL_HAVE_YUV
+    SHADER_YUV_JPEG,
+    SHADER_YUV_BT601,
+    SHADER_YUV_BT709,
+    SHADER_NV12_JPEG,
+    SHADER_NV12_BT601,
+    SHADER_NV12_BT709,
+    SHADER_NV21_JPEG,
+    SHADER_NV21_BT601,
+    SHADER_NV21_BT709,
+#endif
     NUM_SHADERS
 } D3D12_Shader;
 
@@ -39,7 +49,10 @@ typedef enum
 {
     ROOTSIG_COLOR,
     ROOTSIG_TEXTURE,
-    ROOTSIG_ADVANCED,
+#if SDL_HAVE_YUV
+    ROOTSIG_YUV,
+    ROOTSIG_NV,
+#endif
     NUM_ROOTSIGS
 } D3D12_RootSignature;
 
@@ -52,3 +65,5 @@ extern void D3D12_GetRootSignatureData(D3D12_RootSignature rootSig, D3D12_SHADER
 #ifdef __cplusplus
 }
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

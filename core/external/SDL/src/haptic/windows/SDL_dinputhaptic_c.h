@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
+#include "SDL_haptic.h"
 #include "SDL_windowshaptic_c.h"
 
 /* Set up for C function definitions, even when using C++ */
@@ -35,8 +36,8 @@ extern int SDL_DINPUT_JoystickSameHaptic(SDL_Haptic *haptic, SDL_Joystick *joyst
 extern int SDL_DINPUT_HapticOpenFromJoystick(SDL_Haptic *haptic, SDL_Joystick *joystick);
 extern void SDL_DINPUT_HapticClose(SDL_Haptic *haptic);
 extern void SDL_DINPUT_HapticQuit(void);
-extern int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *base);
-extern int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, const SDL_HapticEffect *data);
+extern int SDL_DINPUT_HapticNewEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *base);
+extern int SDL_DINPUT_HapticUpdateEffect(SDL_Haptic *haptic, struct haptic_effect *effect, SDL_HapticEffect *data);
 extern int SDL_DINPUT_HapticRunEffect(SDL_Haptic *haptic, struct haptic_effect *effect, Uint32 iterations);
 extern int SDL_DINPUT_HapticStopEffect(SDL_Haptic *haptic, struct haptic_effect *effect);
 extern void SDL_DINPUT_HapticDestroyEffect(SDL_Haptic *haptic, struct haptic_effect *effect);
@@ -51,3 +52,5 @@ extern int SDL_DINPUT_HapticStopAll(SDL_Haptic *haptic);
 #ifdef __cplusplus
 }
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

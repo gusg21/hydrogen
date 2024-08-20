@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 
@@ -47,10 +47,10 @@ static SDL_bool have_mitshm(Display *dpy)
 
 #endif /* !NO_SHARED_MEMORY */
 
-int X11_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, SDL_PixelFormat *format,
+int X11_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *format,
                                 void **pixels, int *pitch)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     Display *display = data->videodata->display;
     XGCValues gcv;
     XVisualInfo vinfo;
@@ -128,7 +128,7 @@ int X11_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, SDL_
 
     *pixels = SDL_malloc((size_t)h * (*pitch));
     if (!*pixels) {
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     data->ximage = X11_XCreateImage(display, data->visual,
@@ -142,10 +142,10 @@ int X11_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, SDL_
     return 0;
 }
 
-int X11_UpdateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, const SDL_Rect *rects,
+int X11_UpdateWindowFramebuffer(_THIS, SDL_Window *window, const SDL_Rect *rects,
                                 int numrects)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     Display *display = data->videodata->display;
     int i;
     int x, y, w, h;
@@ -221,9 +221,9 @@ int X11_UpdateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, cons
     return 0;
 }
 
-void X11_DestroyWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window)
+void X11_DestroyWindowFramebuffer(_THIS, SDL_Window *window)
 {
-    SDL_WindowData *data = window->internal;
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     Display *display;
 
     if (!data) {
@@ -254,3 +254,5 @@ void X11_DestroyWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window)
 }
 
 #endif /* SDL_VIDEO_DRIVER_X11 */
+
+/* vi: set ts=4 sw=4 expandtab: */

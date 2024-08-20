@@ -19,14 +19,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_evdev_h_
 #define SDL_evdev_h_
 
 #ifdef SDL_INPUT_LINUXEV
 
-struct input_event;
+#include "SDL_events.h"
 
 extern int SDL_EVDEV_Init(void);
 extern void SDL_EVDEV_Quit(void);
@@ -34,8 +34,9 @@ extern void SDL_EVDEV_SetVTSwitchCallbacks(void (*release_callback)(void*), void
                                            void (*acquire_callback)(void*), void *acquire_callback_data);
 extern int SDL_EVDEV_GetDeviceCount(int device_class);
 extern void SDL_EVDEV_Poll(void);
-extern Uint64 SDL_EVDEV_GetEventTimestamp(struct input_event *event);
 
 #endif /* SDL_INPUT_LINUXEV */
 
 #endif /* SDL_evdev_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

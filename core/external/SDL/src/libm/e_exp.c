@@ -1,4 +1,3 @@
-#include "SDL_internal.h"
 /*
  * ====================================================
  * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
@@ -98,13 +97,6 @@ P3   =  6.61375632143793436117e-05, /* 0x3F11566A, 0xAF25DE2C */
 P4   = -1.65339022054652515390e-06, /* 0xBEBBBD41, 0xC5D26BF1 */
 P5   =  4.13813679705723846039e-08; /* 0x3E663769, 0x72BEA4D0 */
 
-union {
-	Uint64 u64;
-	double d;
-} inf_union = {
-	0x7ff0000000000000  /* Binary representation of a 64-bit infinite double (sign=0, exponent=2047, mantissa=0) */
-};
-
 double __ieee754_exp(double x)	/* default IEEE double exp */
 {
 	double y;
@@ -130,8 +122,6 @@ double __ieee754_exp(double x)	/* default IEEE double exp */
 		else return (xsb==0)? x:0.0;	/* exp(+-inf)={inf,0} */
 	    }
 		#if 1
-		if(x > o_threshold) return inf_union.d; /* overflow */
-		#elif 1
 		if(x > o_threshold) return huge*huge; /* overflow */
 		#else  /* !!! FIXME: check this: "huge * huge" is a compiler warning, maybe they wanted +Inf? */
 		if(x > o_threshold) return INFINITY; /* overflow */

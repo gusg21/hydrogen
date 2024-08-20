@@ -1,44 +1,71 @@
 #include "core/engine.h"
 
-#include <bgfx/bgfx.h>
-#include <imgui.h>
-#include <imgui_impl_bgfx.h>
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NOEXCEPTION
-#include <tiny_gltf.h>
-#include <tinystl/string.h>
+#include "tiny_gltf.h"
 
 #include "core/systems/sys_gravity.h"
 #include "core/systems/sys_rendering.h"
+#include "core/theming/theming.h"
+
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl2.h"
 
 void h_core::Engine::init(h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
 
     m_project = project;
 
-    ImGui::CreateContext();
-
     std::string windowTitle = "hydrogen runtime - " + project->projectName;
 
     m_window = new h_core::Window();
-    m_window->init(windowTitle, 1600, 900, false);
+    m_window->init(
+        windowTitle, project->windowWidth, project->windowHeight, false);
     m_systems[1] = m_window->getRenderingSystem();
 
-    m_clearView = 0;
-    bgfx::setViewClear(m_clearView, BGFX_CLEAR_COLOR);
-    bgfx::setViewRect(m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
+    // ImGui setup
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |=
+        ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
 
-    ImGui_Implbgfx_Init(255);
+    h_core::theming::cherry();
+    //ImGui::StyleColorsLight();
+
+    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplSDL2_InitForOpenGL(
+        m_window->getSDLWindow(),
+        m_window->getRenderingSystem()->getGLContext());
+
+    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+         systemIndex++) {
+        m_systems[systemIndex]->engine = this;
+        m_systems[systemIndex]->init();
+    }
 }
 
 void h_core::Engine::destroy() {
-    ImGui_Implbgfx_Shutdown();
+    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+         systemIndex++) {
+        // Call it to tell it it's going to die
+        m_systems[systemIndex]->destroy();
+
+        // Shoot it
+        delete m_systems[systemIndex];
+
+        // Bury it and erase its memory
+        m_systems[systemIndex] = nullptr;
+
+        // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
+    }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 
     m_window->destroy();
     delete m_window;
-
-    ImGui::DestroyContext();
-    bgfx::shutdown();
 }
 
 void h_core::Engine::run() {
@@ -60,47 +87,68 @@ void h_core::Engine::run() {
                     engineRunning = false;
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    bgfx::reset(
-                        event.newWidth, event.newHeight, BGFX_RESET_VSYNC);
-                    bgfx::setViewRect(
-                        m_clearView, 0, 0, bgfx::BackbufferRatio::Equal);
+                    printf("INFO: ENGINE: Wow!\n");
+                    m_windowWidth = event.newWindowWidth;
+                    m_windowHeight = event.newWindowHeight;
                     break;
                 default:
                     break;
             }
         }
 
+        // Begin ImGui Frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
+        // Demo window
+        ImGui::ShowDemoWindow();
+
+        // Begin drawing for every system
+        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+             systemIndex++) {
+            m_systems[systemIndex]->beginFrame();
+        }
+        
+        // Update all actors
         for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
              systemIndex++) {
             m_scene.processSystem(m_systems[systemIndex]);
         }
 
-        ImGui_Implbgfx_NewFrame();
-
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-        ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-
-        // BEGIN PLACEHOLDER RENDERING PLAYGROUND //
-
-        bgfx::touch(m_clearView);
-        bgfx::setDebug(BGFX_DEBUG_STATS);
-
+        // Draw the actors
         for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
              systemIndex++) {
             m_scene.drawSystem(m_systems[systemIndex]);
         }
 
-        // END PLACEHOLDER RENDERING PLAYGROUND //
-
+        // End the frame for every system
         for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
              systemIndex++) {
             m_systems[systemIndex]->endFrame();
         }
 
+        // Send ImGui draw data
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Update the window
+        m_window->swap();
+
+        // Clear the queue
         m_events.clear();
     }
+}
 
-    bgfx::shutdown();
+
+uint32_t h_core::Engine::getWidth() {
+    return m_windowWidth;
+}
+
+uint32_t h_core::Engine::getHeight() {
+    return m_windowHeight;
+}
+
+h_core::math::Color h_core::Engine::getClearColor() {
+    return m_clearColor;
 }

@@ -2,8 +2,8 @@
 
 #include <core/engine.h>
 
-int main() {
-    printf("Runtime compiled successfully!\n");
+int main(int argc, char* args[]) {
+    // printf("Runtime compiled successfully!\n");
 
     h_core::Engine* engine = new h_core::Engine();
 
@@ -17,4 +17,6 @@ int main() {
 
     engine->run();
     engine->destroy();
+
+    return 0;
 }

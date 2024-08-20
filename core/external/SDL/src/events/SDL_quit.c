@@ -18,7 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../SDL_internal.h"
+
+#include "SDL_hints.h"
 
 /* General quit handling code for SDL */
 
@@ -26,6 +28,7 @@
 #include <signal.h>
 #endif
 
+#include "SDL_events.h"
 #include "SDL_events_c.h"
 
 #if defined(HAVE_SIGNAL_H) || defined(HAVE_SIGACTION)
@@ -142,7 +145,7 @@ static void SDL_QuitQuit_Internal(void)
 }
 #endif
 
-int SDL_InitQuit(void)
+int SDL_QuitInit(void)
 {
 #ifdef HAVE_SIGNAL_SUPPORT
     if (!SDL_GetHintBoolean(SDL_HINT_NO_SIGNAL_HANDLERS, SDL_FALSE)) {
@@ -172,14 +175,14 @@ void SDL_SendPendingSignalEvents(void)
 #ifdef SDL_BACKGROUNDING_SIGNAL
     if (send_backgrounding_pending) {
         send_backgrounding_pending = SDL_FALSE;
-        SDL_OnApplicationWillEnterBackground();
+        SDL_OnApplicationWillResignActive();
     }
 #endif
 
 #ifdef SDL_FOREGROUNDING_SIGNAL
     if (send_foregrounding_pending) {
         send_foregrounding_pending = SDL_FALSE;
-        SDL_OnApplicationDidEnterForeground();
+        SDL_OnApplicationDidBecomeActive();
     }
 #endif
 #endif
@@ -191,5 +194,7 @@ int SDL_SendQuit(void)
 #ifdef HAVE_SIGNAL_SUPPORT
     send_quit_pending = SDL_FALSE;
 #endif
-    return SDL_SendAppEvent(SDL_EVENT_QUIT);
+    return SDL_SendAppEvent(SDL_QUIT);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

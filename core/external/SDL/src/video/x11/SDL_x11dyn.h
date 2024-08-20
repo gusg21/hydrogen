@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
+#include "../../SDL_internal.h"
 
 #ifndef SDL_x11dyn_h_
 #define SDL_x11dyn_h_
@@ -26,9 +26,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <X11/Xresource.h>
 
-#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBLOOKUPKEYSYM
+#ifdef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
 #include <X11/XKBlib.h>
 #endif
 
@@ -104,3 +103,4 @@ extern SDL_DYNX11FN_XGetICValues X11_XGetICValues;
 #endif
 
 #endif /* !defined SDL_x11dyn_h_ */
+/* vi: set ts=4 sw=4 expandtab: */

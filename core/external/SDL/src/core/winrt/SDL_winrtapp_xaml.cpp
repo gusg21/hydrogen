@@ -18,7 +18,6 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_internal.h"
 
 /* Windows includes */
 #include <agile.h>
@@ -29,6 +28,8 @@
 #endif
 
 /* SDL includes */
+#include "../../SDL_internal.h"
+#include "SDL.h"
 #include "../../video/winrt/SDL_winrtevents_c.h"
 #include "../../video/winrt/SDL_winrtvideo_cpp.h"
 #include "SDL_winrtapp_common.h"
@@ -134,7 +135,7 @@ int SDL_WinRTInitXAMLApp(int (*mainFunction)(int, char **), void *backgroundPane
     // CoreWindow.  WinRT will not allow the app's CoreWindow to be accessed via the
     // SDL/WinRT thread.
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
-        // SDL_InitSubSystem will, on error, set the SDL error.  Let that propagate to
+        // SDL_InitSubSystem will, on error, set the SDL error.  Let that propogate to
         // the caller to here:
         WINRT_XAMLWasEnabled = oldXAMLWasEnabledValue;
         return -1;
@@ -142,5 +143,5 @@ int SDL_WinRTInitXAMLApp(int (*mainFunction)(int, char **), void *backgroundPane
 
     // All done, for now.
     return 0;
-#endif // SDL_WINAPI_FAMILY_PHONE
+#endif // SDL_WINAPI_FAMILY_PHONE  /  else
 }
