@@ -38,10 +38,7 @@ static const uint16_t cubeTriList[] = {
 
 
 uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
-    printf("INFO: MODEL: loading model from YAML spec...\n");
-
-    // Set up vertex layout info
-    h_core::Vertex::init();
+    printf("INFO: MESH: loading model from YAML spec...\n");
 
     // Parse YAML
     std::string gltfFilePath = yaml["gltf"].as<std::string>("");
@@ -107,10 +104,11 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
         model.buffers[texCoordBufferView.buffer].data.data();
 
     // load vertex data
-    size_t vertexCount = posAccessor.count;
-    h_core::Vertex* vertexBuffer = new h_core::Vertex[vertexCount] {};
+    size_t vertexBufferCount = posAccessor.count;
+    h_core::Vertex* vertexBuffer = new h_core::Vertex[vertexBufferCount] {};
 
-    for (uint32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
+    for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount;
+         vertexIndex++) {
         h_core::Vertex* vertex = &vertexBuffer[vertexIndex];
         vertex->position =
             *(const h_core::math::
@@ -135,17 +133,25 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
         model.accessors[indexBufferAccessorIndex];
     tinygltf::BufferView indexBufferView =
         model.bufferViews[indexBufferAccessor.bufferView];
-    std::vector<uint8_t> indexBuffer =
-        model.buffers[indexBufferView.buffer].data;
+    size_t indexBufferCount = indexBufferAccessor.count;
+    uint16_t* indexBuffer16 = reinterpret_cast<uint16_t*>(
+        model.buffers[indexBufferView.buffer].data.data());
 
+    uint32_t* indexBuffer32 = new uint32_t[indexBufferCount];
+    for (uint32_t indexBufferIndex = 0; indexBufferIndex < indexBufferCount;
+         indexBufferIndex++) {
+        indexBuffer32[indexBufferIndex] = indexBuffer16[indexBufferIndex];
+    }
+
+    loadModel(vertexBufferCount, vertexBuffer, indexBufferCount, indexBuffer32);
 
     return 0;
 }
 
 
 void h_core::Mesh::loadModel(
-    const uint32_t* vertexCount, const h_core::Vertex* vertexBuffer,
-    const uint32_t* inidicesCount, const uint32_t* indexBuffer) {
+    uint32_t vertexBufferCount, const h_core::Vertex* vertexBuffer,
+    uint32_t inidicesCount, const uint32_t* indexBuffer) {
     if (!m_initialized) {
         glGenVertexArrays(1, &m_vao);
         glBindVertexArray(m_vao);
@@ -178,20 +184,20 @@ void h_core::Mesh::loadModel(
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 
-    if (vertexCount > 0) {
+    if (vertexBufferCount > 0) {
         glBufferData(
-            GL_ARRAY_BUFFER, sizeof(h_core::Vertex) * (*vertexCount),
+            GL_ARRAY_BUFFER, sizeof(h_core::Vertex) * vertexBufferCount,
             vertexBuffer, GL_STATIC_DRAW);
     }
 
     if (inidicesCount > 0) {
         glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * (*inidicesCount),
+            GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * inidicesCount,
             indexBuffer, GL_STATIC_DRAW);
     }
 
-    m_numVerticies = *vertexCount;
-    m_numIndices = *inidicesCount;
+    m_numVerticies = vertexBufferCount;
+    m_numIndices = inidicesCount;
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

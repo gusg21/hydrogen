@@ -4,7 +4,7 @@
 #include "core/assets.h"
 #include "core/componentbitmask.h"
 #include "core/transform.h"
-#include "core/model.h"
+#include "core/mesh.h"
 
 namespace h_core {
 class ActorSpec : public Asset {
@@ -13,6 +13,6 @@ class ActorSpec : public Asset {
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;
-    h_core::Mesh model;
+    h_core::Mesh mesh;
 };
 }  // namespace h_core

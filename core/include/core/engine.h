@@ -10,6 +10,9 @@
 
 #define ENGINE_SYSTEM_COUNT 2
 
+#define ENGINE_INIT_FAIL_BAD_WINDOW_INIT 1
+#define ENGINE_INIT_FAIL_BAD_SYSTEM_INIT 2
+
 namespace h_core {
 class Engine {
   public:
@@ -20,7 +23,7 @@ class Engine {
 
     /// @brief set up the engine with a given project
     /// @param project the project
-    void init(h_core::Project* project);
+    uint32_t init(h_core::Project* project);
 
     /// @brief clean up the engine
     void destroy();

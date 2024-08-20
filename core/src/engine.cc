@@ -12,7 +12,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-void h_core::Engine::init(h_core::Project* project) {
+uint32_t h_core::Engine::init(h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
 
     m_project = project;
@@ -20,8 +20,9 @@ void h_core::Engine::init(h_core::Project* project) {
     std::string windowTitle = "hydrogen runtime - " + project->projectName;
 
     m_window = new h_core::Window();
-    m_window->init(
+    uint32_t windowInitResult = m_window->init(
         windowTitle, project->windowWidth, project->windowHeight, false);
+    if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_systems[1] = m_window->getRenderingSystem();
 
     // ImGui setup
@@ -31,7 +32,7 @@ void h_core::Engine::init(h_core::Project* project) {
         ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
 
     h_core::theming::cherry();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplSDL2_InitForOpenGL(
@@ -41,8 +42,12 @@ void h_core::Engine::init(h_core::Project* project) {
     for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
          systemIndex++) {
         m_systems[systemIndex]->engine = this;
-        m_systems[systemIndex]->init();
+        if (m_systems[systemIndex]->init() != 0) {
+            return ENGINE_INIT_FAIL_BAD_SYSTEM_INIT;
+        }
     }
+
+    return 0;
 }
 
 void h_core::Engine::destroy() {
@@ -109,7 +114,7 @@ void h_core::Engine::run() {
              systemIndex++) {
             m_systems[systemIndex]->beginFrame();
         }
-        
+
         // Update all actors
         for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
              systemIndex++) {

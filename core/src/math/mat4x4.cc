@@ -73,7 +73,7 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::getProjMatrix(
 h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
     h_core::math::Vector3 position, h_core::math::Quaternion rotation,
     h_core::math::Vector3 scale) {
-        float data[16];
+    float data[16];
     h_core::math::Mat4x4 matrix(data);
 
     matrix.Translate(position);

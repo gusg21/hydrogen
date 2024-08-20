@@ -10,21 +10,19 @@
 #define MODEL_INIT_FAIL_BAD_GLTF           2
 
 namespace h_core {
-struct MeshData {
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indicies;
-};
-
 struct Vertex {
     Vertex() = default;
 
     h_core::math::Vector3 position;
     h_core::math::Vector3 normal;
     h_core::math::Vector2 texCoord;
-
-    static void init();
-
+    
     // static bgfx::VertexLayout layout;
+};
+
+struct MeshData {
+    std::vector<h_core::Vertex> vertices;
+    std::vector<uint32_t> indicies;
 };
 
 class Mesh : public Asset {
@@ -33,8 +31,8 @@ class Mesh : public Asset {
 
     uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
     void loadModel(
-        const uint32_t* vertexCount, const Vertex* vertexBuffer,
-        const uint32_t* inidicesCount, const uint32_t* indexBuffer);
+        uint32_t vertexCount, const Vertex* vertexBuffer,
+        uint32_t inidicesCount, const uint32_t* indexBuffer);
     //   bgfx::VertexBufferHandle getVertexBuffer() {
     //       return m_vertexBuffer;
     //   }

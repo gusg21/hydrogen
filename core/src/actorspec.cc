@@ -6,7 +6,7 @@ uint32_t h_core::ActorSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml
 
     mask = yaml["mask"].as<h_core::ComponentBitmask>();
     transform.initFromYaml(yaml["transform"]);
-    model.initFromYaml(assets, yaml["model"]);
+    mesh.initFromYaml(assets, yaml["model"]);
 
     return 0;
 }

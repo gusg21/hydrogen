@@ -4,13 +4,16 @@
 
 #include "core/scene.h"
 
+// NOTE: This system is a dummy! Useful for reference and testing but probably
+// not in any other cases.
+
 uint32_t h_core::systems::Gravity::init() {
     return 0;
 }
 
 void h_core::systems::Gravity::process() {
     transform->position.y += 0.5f;
-    //printf("y pos %f\n", transform->position.y);
+    // printf("y pos %f\n", transform->position.y);
 }
 
 h_core::ComponentBitmask h_core::systems::Gravity::getMask() {

@@ -8,13 +8,14 @@
 
 #include "core/engine.h"
 #include "core/math/mat4x4.h"
-#include "core/model.h"
+#include "core/mesh.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
 #define RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE 1
 #define RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK           2
+#define RENDERING_INIT_FAIL_BAD_PROGRAM                1
 #define RENDERING_OPENGL_LOG_MAX_SIZE                  1024
 
 // uint32_t loadShader(
@@ -120,6 +121,12 @@ uint32_t loadProgram(
 }
 
 uint32_t h_core::systems::Rendering::init() {
+    m_shader = h_core::systems::Shader {};
+    uint32_t shaderLoadResult = loadProgram(
+        &m_shader, "hcore_assets/vs_default.glsl",
+        "hcore_assets/fs_default.glsl");
+    if (shaderLoadResult != 0) { return RENDERING_INIT_FAIL_BAD_PROGRAM; }
+
     return 0;
 }
 
@@ -158,10 +165,6 @@ void h_core::systems::Rendering::draw() {
     // bgfx::setState(state);
 
     // bgfx::submit(0, m_shader.programHandle);
-
-    
-
-    
 }
 
 uint32_t h_core::systems::Rendering::initFromWindow(
@@ -201,11 +204,6 @@ uint32_t h_core::systems::Rendering::initFromWindow(
     SDL_GL_SetShwapInterval(1);
 
     gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-    m_shader = h_core::systems::Shader {};
-    loadProgram(
-        &m_shader, "hcore_assets/vs_default.glsl",
-        "hcore_assets/fs_default.glsl");
 
     return 0;
 }

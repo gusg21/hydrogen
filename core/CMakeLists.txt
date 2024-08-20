@@ -12,7 +12,7 @@ add_library(HydrogenCore STATIC
                                     include/core/engineevents.h
     src/event.cc                    include/core/event.h
     src/eventqueue.cc               include/core/eventqueue.h
-    src/model.cc                    include/core/model.h
+    src/mesh.cc                     include/core/mesh.h
     src/project.cc                  include/core/project.h
     src/scene.cc                    include/core/scene.h
     src/system.cc                   include/core/system.h
