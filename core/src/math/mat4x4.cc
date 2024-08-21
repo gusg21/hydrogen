@@ -4,19 +4,16 @@
 #include <cmath>
 
 h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
-    h_core::math::Vector3 position, h_core::math::Vector3 target,
-    bool isRightHanded) {
+    h_core::math::Vector3 position, h_core::math::Vector3 target) {
     h_core::math::Vector3 view =
-        (isRightHanded ? h_core::math::Vector3::subtract(position, target)
-                       : h_core::math::Vector3::subtract(target, position));
-
+        h_core::math::Vector3::subtract(position, target);
     h_core::math::Vector3 up = h_core::math::Vector3(0);
     h_core::math::Vector3 right = h_core::math::Vector3(0);
 
     h_core::math::Vector3 uxv = h_core::math::Vector3::cross(up, view);
 
     if (0.0f == h_core::math::Vector3::dot(uxv, uxv)) {
-        right = h_core::math::Vector3(isRightHanded ? 1.0f : -1.0f, 0.0f, 0.0f);
+        right = h_core::math::Vector3(1.0f, 0.0f, 0.0f);
     }
     else { right = h_core::math::Vector3::normalize(up); }
 
@@ -48,26 +45,22 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
 }
 
 h_core::math::Mat4x4 h_core::math::Mat4x4::getProjMatrix(
-    float fov, float aspectRatio, float nearClipPlane, float farClipPlane,
-    bool hasHomogenous, bool isRightHanded) {
+    float fov, float aspectRatio, float nearClipPlane, float farClipPlane) {
     const float height = 1.0f / std::tan(fov * (MATH_PI / 180.0f));
     const float width = height * 1.0f / aspectRatio;
     const float clipDiffernce = farClipPlane - nearClipPlane;
 
-    const float aa = hasHomogenous
-                         ? (farClipPlane + nearClipPlane) / clipDiffernce
-                         : farClipPlane / clipDiffernce;
-    const float bb = hasHomogenous
-                         ? (2.0f * farClipPlane * nearClipPlane) / clipDiffernce
-                         : nearClipPlane * aa;
+    const float aa = (farClipPlane + nearClipPlane) / clipDiffernce;
+    const float bb = (2.0f * farClipPlane * nearClipPlane) / clipDiffernce;
+
 
     float result[16];
 
     result[0] = width;
     result[5] = height;
-    result[10] = isRightHanded ? -aa : aa;
-    result[11] = isRightHanded ? -1.0f : 1.0f;
-    result[14] = -bb;
+    result[10] = -aa;
+    result[14] = -1.0f;
+    result[11] = -bb;
 
     return h_core::math::Mat4x4(result);
 }
@@ -139,7 +132,7 @@ void h_core::math::Mat4x4::scale(h_core::math::Vector3 scale) {
     matrix[10] = 1 / scale.z;
 }
 
-#define INDEX(x,y) (y + (x * 4))
+#define INDEX(x, y) (y + (x * 4))
 h_core::math::Mat4x4 h_core::math::Mat4x4::multiply(
     h_core::math::Mat4x4 a, h_core::math::Mat4x4 b) {
     h_core::math::Mat4x4 dest {};

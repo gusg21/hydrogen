@@ -43,12 +43,10 @@ struct Mat4x4 {
         Vector3 position, Quaternion rotation, Vector3 scale);
 
     static Mat4x4 lookAtMat(
-        h_core::math::Vector3 position, h_core::math::Vector3 target,
-        bool isRightHanded);
+        h_core::math::Vector3 position, h_core::math::Vector3 target);
 
     static Mat4x4 getProjMatrix(
-        float fov, float aspectRatio, float nearClipPlane, float farClipPlane,
-        bool hasHomogenous, bool isRightHanded);
+        float fov, float aspectRatio, float nearClipPlane, float farClipPlane);
 };
 }  // namespace math
 }  // namespace h_core
