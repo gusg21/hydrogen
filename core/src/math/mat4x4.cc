@@ -91,30 +91,30 @@ void h_core::math::Mat4x4::translate(h_core::math::Vector3 position) {
     matrix[11] = position.z;
 }
 
-void h_core::math::Mat4x4::rotation(float angle, h_core::math::Axis axis) {
-    switch (axis) {
-        case X:
-            matrix[5] = std::cos(angle);
-            matrix[6] = -std::sin(angle);
-            matrix[9] = std::sin(angle);
-            matrix[10] = std::cos(angle);
-            break;
-        case Y:
-            matrix[0] = std::cos(angle);
-            matrix[2] = std::sin(angle);
-            matrix[8] = -std::sin(angle);
-            matrix[10] = std::cos(angle);
-            break;
-        case Z:
-            matrix[0] = std::cos(angle);
-            matrix[1] = -std::sin(angle);
-            matrix[4] = std::sin(angle);
-            matrix[5] = std::cos(angle);
-            break;
-        default:
-            break;
-    }
-}
+// void h_core::math::Mat4x4::rotation(float angle, h_core::math::Axis axis) {
+//     switch (axis) {
+//         case X:
+//             matrix[5] = std::cos(angle);
+//             matrix[6] = -std::sin(angle);
+//             matrix[9] = std::sin(angle);
+//             matrix[10] = std::cos(angle);
+//             break;
+//         case Y:
+//             matrix[0] = std::cos(angle);
+//             matrix[2] = std::sin(angle);
+//             matrix[8] = -std::sin(angle);
+//             matrix[10] = std::cos(angle);
+//             break;
+//         case Z:
+//             matrix[0] = std::cos(angle);
+//             matrix[1] = -std::sin(angle);
+//             matrix[4] = std::sin(angle);
+//             matrix[5] = std::cos(angle);
+//             break;
+//         default:
+//             break;
+//     }
+// }
 
 void h_core::math::Mat4x4::rotation(h_core::math::Quaternion rotation) {
     matrix[0] =
@@ -124,13 +124,13 @@ void h_core::math::Mat4x4::rotation(h_core::math::Quaternion rotation) {
     matrix[10] =
         1.0f - 2.0f * (rotation.x * rotation.x + rotation.y * rotation.y);
 
-    matrix[1] = 2.0f * (rotation.x * rotation.y - rotation.z * rotation.w);
-    matrix[2] = 2.0f * (rotation.x * rotation.z + rotation.y * rotation.w);
-    matrix[4] = 2.0f * (rotation.x * rotation.y + rotation.z * rotation.w);
+    matrix[4] = 2.0f * (rotation.x * rotation.y - rotation.z * rotation.w);
+    matrix[8] = 2.0f * (rotation.x * rotation.z + rotation.y * rotation.w);
+    matrix[1] = 2.0f * (rotation.x * rotation.y + rotation.z * rotation.w);
 
-    matrix[6] = 2.0f * (rotation.y * rotation.z - rotation.x * rotation.w);
-    matrix[8] = 2.0f * (rotation.x * rotation.z - rotation.y * rotation.w);
-    matrix[9] = 2.0f * (rotation.y * rotation.z + rotation.x * rotation.w);
+    matrix[9] = 2.0f * (rotation.y * rotation.z - rotation.x * rotation.w);
+    matrix[2] = 2.0f * (rotation.x * rotation.z - rotation.y * rotation.w);
+    matrix[6] = 2.0f * (rotation.y * rotation.z + rotation.x * rotation.w);
 }
 
 void h_core::math::Mat4x4::scale(h_core::math::Vector3 scale) {

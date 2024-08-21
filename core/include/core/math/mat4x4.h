@@ -32,7 +32,7 @@ struct Mat4x4 {
     float matrix[16];
 
     void translate(Vector3 position);
-    void rotation(float angle, Axis axis);
+    // void rotation(float angle, Axis axis);
     void rotation(Quaternion rotation);
     void scale(Vector3 scale);
 
