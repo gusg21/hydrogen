@@ -19,29 +19,29 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
 
     up = h_core::math::Vector3::cross(view, right);
 
-    float mat[16];
+    h_core::math::Mat4x4 result {};
 
-    mat[0] = right.x;
-    mat[1] = up.x;
-    mat[2] = view.x;
-    mat[3] = 0.0f;
+    result.matrix[0] = right.x;
+    result.matrix[1] = up.x;
+    result.matrix[2] = view.x;
+    result.matrix[3] = 0.0f;
 
-    mat[4] = right.y;
-    mat[5] = up.y;
-    mat[6] = view.y;
-    mat[7] = 0.0f;
+    result.matrix[4] = right.y;
+    result.matrix[5] = up.y;
+    result.matrix[6] = view.y;
+    result.matrix[7] = 0.0f;
 
-    mat[8] = right.z;
-    mat[9] = up.z;
-    mat[10] = view.z;
-    mat[11] = 0.0f;
+    result.matrix[8] = right.z;
+    result.matrix[9] = up.z;
+    result.matrix[10] = view.z;
+    result.matrix[11] = 0.0f;
 
-    mat[12] = -h_core::math::Vector3::dot(right, position);
-    mat[13] = -h_core::math::Vector3::dot(up, position);
-    mat[14] = -h_core::math::Vector3::dot(view, position);
-    mat[15] = 1.0f;
+    result.matrix[12] = -h_core::math::Vector3::dot(right, position);
+    result.matrix[13] = -h_core::math::Vector3::dot(up, position);
+    result.matrix[14] = -h_core::math::Vector3::dot(view, position);
+    result.matrix[15] = 1.0f;
 
-    return h_core::math::Mat4x4(mat);
+    return result;
 }
 
 h_core::math::Mat4x4 h_core::math::Mat4x4::getProjMatrix(
@@ -54,15 +54,15 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::getProjMatrix(
     const float bb = (2.0f * farClipPlane * nearClipPlane) / clipDiffernce;
 
 
-    float result[16];
+    h_core::math::Mat4x4 result {};
 
-    result[0] = width;
-    result[5] = height;
-    result[10] = -aa;
-    result[14] = -1.0f;
-    result[11] = -bb;
+    result.matrix[0] = width;
+    result.matrix[5] = height;
+    result.matrix[10] = -aa;
+    result.matrix[14] = -1.0f;
+    result.matrix[11] = -bb;
 
-    return h_core::math::Mat4x4(result);
+    return result;
 }
 
 h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
