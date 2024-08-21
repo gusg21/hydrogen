@@ -158,12 +158,12 @@ void h_core::systems::Renderer::beginFrame() {
     // h_core::math::Vector3 up { 0.f, 1.f, 0.f };
     h_core::math::Vector3 toTarget = h_core::math::Vector3::normalize(
         h_core::math::Vector3::subtract(target, position));
-    h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(position, target, true);
+    h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(position, target);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(viewMatrix,
             h_core::math::Mat4x4::getProjMatrix(
-                60.0f, m_width / m_height, 1000.f, 0.1f, true, true)));
+                60.0f, m_width / m_height, 1000.f, 0.1f)));
 }
 
 void h_core::systems::Renderer::draw() {
