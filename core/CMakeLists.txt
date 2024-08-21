@@ -28,7 +28,6 @@ add_library(HydrogenCore STATIC
 
     src/systems/sys_gravity.cc      include/core/systems/sys_gravity.h
     src/systems/sys_rendering.cc    include/core/systems/sys_rendering.h
-
     )
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -105,4 +104,6 @@ function(HydrogenCore_SetupMain target)
     if(TARGET SDL2::SDL2main)
         target_link_libraries(${target} PRIVATE SDL2::SDL2main)
     endif()
+
+    target_sources(${target} PRIVATE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/icon/app.o)
 endfunction()
