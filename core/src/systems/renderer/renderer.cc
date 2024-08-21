@@ -1,4 +1,4 @@
-#include "core/systems/sys_rendering.h"
+#include "core/systems/renderer/renderer.h"
 
 #include <fstream>
 
@@ -13,6 +13,7 @@
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
+#define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
 #define RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE 1
 #define RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK           2
 #define RENDERING_INIT_FAIL_BAD_PROGRAM                1
@@ -54,9 +55,19 @@
 uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     // Read code from file
     std::ifstream shaderCodeFile { filePath };
+    if (!shaderCodeFile.good()) {
+        printf(
+            "ERROR: RENDERER: Failed to load shader from path %s\n",
+            filePath.c_str());
+        return RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM;
+    }
     std::stringstream shaderCodeStream;
     shaderCodeStream << shaderCodeFile.rdbuf();
     std::string shaderCode = shaderCodeStream.str();
+
+#if HCORE_DEBUG
+    printf("DEBUG: RENDERER: %s\n", shaderCode.c_str());
+#endif
 
     // Load in the code
     const GLint shaderCodeLength = shaderCode.size();
@@ -72,7 +83,7 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
         glGetShaderInfoLog(
             *out_shaderId, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        printf("ERROR: RENDERING: %s\n", log);
+        printf("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE;
     }
 
@@ -107,7 +118,7 @@ uint32_t loadProgram(
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
         glGetProgramInfoLog(
             out_shader->program, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        printf("ERROR: RENDERING: %s\n", log);
+        printf("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK;
     }
 
@@ -120,7 +131,7 @@ uint32_t loadProgram(
     return 0;
 }
 
-uint32_t h_core::systems::Rendering::init() {
+uint32_t h_core::systems::Renderer::init() {
     m_shader = h_core::systems::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",
@@ -130,44 +141,40 @@ uint32_t h_core::systems::Rendering::init() {
     return 0;
 }
 
-void h_core::systems::Rendering::destroy() {
+void h_core::systems::Renderer::destroy() {
     SDL_GL_DeleteContext(m_glContext);
 }
 
-void h_core::systems::Rendering::beginFrame() {
+void h_core::systems::Renderer::beginFrame() {
     glViewport(0, 0, engine->getWidth(), engine->getHeight());
     h_core::math::Color clearColor = engine->getClearColor();
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    m_shader.use();
+    h_core::math::Vector3 target { 0.f, 0.f, 0.f };
+    h_core::math::Vector3 position { -10.f, 0.f, 0.f };
+    // h_core::math::Vector3 up { 0.f, 1.f, 0.f };
+    h_core::math::Vector3 toTarget = h_core::math::Vector3::normalize(
+        h_core::math::Vector3::subtract(target, position));
+    h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(position, target, true);
+    m_shader.setMat4(
+        "uni_viewProjectionMatrix",
+        h_core::math::Mat4x4::multiply(viewMatrix,
+            h_core::math::Mat4x4::getProjMatrix(
+                60.0f, m_width / m_height, 1000.f, 0.1f, true, true)));
 }
 
-void h_core::systems::Rendering::draw() {
-    // h_core::math::Mat4x4 view = h_core::math::Mat4x4::lookAtMat(
-    //     cameraPosition,
-    //     h_core::math::Vector3::add(cameraPosition, cameraDirection), true);
+void h_core::systems::Renderer::draw() {
+    m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
-    // h_core::math::Mat4x4 proj = h_core::math::Mat4x4::getProjMatrix(
-    //     60.0f, m_width / m_height, 0.1f, 100.0f,
-    //     bgfx::getCaps()->homogeneousDepth, true);
-
-    // bgfx::setViewTransform(0, view.m_matrix, proj.m_matrix);
-
-    // bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height));
-
-
-    // bgfx::setTransform(transform->getMatrix().m_matrix);
-
-    // bgfx::setVertexBuffer(0, model->getVertexBuffer());
-    // bgfx::setIndexBuffer(model->getIndexBuffer());
-
-    // uint64_t state = 0 | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_WRITE_Z |
-    //                  BGFX_STATE_WRITE_RGB;
-    // bgfx::setState(state);
-
-    // bgfx::submit(0, m_shader.programHandle);
+    glBindVertexArray(mesh->getVertexAttributesHandle());
+    glDrawElements(
+        GL_TRIANGLES, mesh->getNumIndices(), GL_UNSIGNED_INT, nullptr);
 }
 
-uint32_t h_core::systems::Rendering::initFromWindow(
+uint32_t h_core::systems::Renderer::initFromWindow(
     uint32_t width, uint32_t height, SDL_Window* window) {
     // bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
     //                       // single-threaded rendering.
@@ -208,12 +215,12 @@ uint32_t h_core::systems::Rendering::initFromWindow(
     return 0;
 }
 
-void h_core::systems::Rendering::endFrame() {}
+void h_core::systems::Renderer::endFrame() {}
 
-h_core::ComponentBitmask h_core::systems::Rendering::getMask() {
-    return TRANSFORM_COMPONENT_BITMASK & MODEL_COMPONENT_BITMASK;
+h_core::ComponentBitmask h_core::systems::Renderer::getMask() {
+    return TRANSFORM_COMPONENT_BITMASK | MODEL_COMPONENT_BITMASK;
 }
 
-SDL_GLContext h_core::systems::Rendering::getGLContext() {
+SDL_GLContext h_core::systems::Renderer::getGLContext() {
     return m_glContext;
 }

@@ -1,4 +1,6 @@
 #include "core/math/mat4x4.h"
+
+#include <stdint.h>
 #include <cmath>
 
 h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
@@ -76,75 +78,79 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
     float data[16];
     h_core::math::Mat4x4 matrix(data);
 
-    matrix.Translate(position);
-    matrix.Rotation(rotation);
-    matrix.Scale(scale);
+    matrix.translate(position);
+    matrix.rotation(rotation);
+    matrix.scale(scale);
 
     return matrix;
 }
 
-void h_core::math::Mat4x4::Translate(h_core::math::Vector3 position) {
-    m_matrix[3] = position.x;
-    m_matrix[7] = position.y;
-    m_matrix[11] = position.z;
+void h_core::math::Mat4x4::translate(h_core::math::Vector3 position) {
+    matrix[3] = position.x;
+    matrix[7] = position.y;
+    matrix[11] = position.z;
 }
 
-void h_core::math::Mat4x4::Rotation(
-    float angle, h_core::math::MATH_ROTATION_AXIS axis) {
+void h_core::math::Mat4x4::rotation(float angle, h_core::math::Axis axis) {
     switch (axis) {
         case X:
-            m_matrix[5] = std::cos(angle);
-            m_matrix[6] = -std::sin(angle);
-            m_matrix[9] = std::sin(angle);
-            m_matrix[10] = std::cos(angle);
+            matrix[5] = std::cos(angle);
+            matrix[6] = -std::sin(angle);
+            matrix[9] = std::sin(angle);
+            matrix[10] = std::cos(angle);
             break;
         case Y:
-            m_matrix[0] = std::cos(angle);
-            m_matrix[2] = std::sin(angle);
-            m_matrix[8] = -std::sin(angle);
-            m_matrix[10] = std::cos(angle);
+            matrix[0] = std::cos(angle);
+            matrix[2] = std::sin(angle);
+            matrix[8] = -std::sin(angle);
+            matrix[10] = std::cos(angle);
             break;
         case Z:
-            m_matrix[0] = std::cos(angle);
-            m_matrix[1] = -std::sin(angle);
-            m_matrix[4] = std::sin(angle);
-            m_matrix[5] = std::cos(angle);
+            matrix[0] = std::cos(angle);
+            matrix[1] = -std::sin(angle);
+            matrix[4] = std::sin(angle);
+            matrix[5] = std::cos(angle);
             break;
         default:
             break;
     }
 }
 
-void h_core::math::Mat4x4::Rotation(h_core::math::Quaternion rotation) {
-    m_matrix[0] =
+void h_core::math::Mat4x4::rotation(h_core::math::Quaternion rotation) {
+    matrix[0] =
         1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z);
-    m_matrix[5] =
+    matrix[5] =
         1.0f - 2.0f * (rotation.x * rotation.x + rotation.z * rotation.z);
-    m_matrix[10] =
+    matrix[10] =
         1.0f - 2.0f * (rotation.x * rotation.x + rotation.y * rotation.y);
 
-    m_matrix[1] = 2.0f * (rotation.x * rotation.y - rotation.z * rotation.w);
-    m_matrix[2] = 2.0f * (rotation.x * rotation.z + rotation.y * rotation.w);
-    m_matrix[4] = 2.0f * (rotation.x * rotation.y + rotation.z * rotation.w);
+    matrix[1] = 2.0f * (rotation.x * rotation.y - rotation.z * rotation.w);
+    matrix[2] = 2.0f * (rotation.x * rotation.z + rotation.y * rotation.w);
+    matrix[4] = 2.0f * (rotation.x * rotation.y + rotation.z * rotation.w);
 
-    m_matrix[6] = 2.0f * (rotation.y * rotation.z - rotation.x * rotation.w);
-    m_matrix[8] = 2.0f * (rotation.x * rotation.z - rotation.y * rotation.w);
-    m_matrix[9] = 2.0f * (rotation.y * rotation.z + rotation.x * rotation.w);
+    matrix[6] = 2.0f * (rotation.y * rotation.z - rotation.x * rotation.w);
+    matrix[8] = 2.0f * (rotation.x * rotation.z - rotation.y * rotation.w);
+    matrix[9] = 2.0f * (rotation.y * rotation.z + rotation.x * rotation.w);
 }
 
-void h_core::math::Mat4x4::Scale(h_core::math::Vector3 scale) {
-    m_matrix[0] = 1 / scale.x;
-    m_matrix[5] = 1 / scale.y;
-    m_matrix[10] = 1 / scale.z;
+void h_core::math::Mat4x4::scale(h_core::math::Vector3 scale) {
+    matrix[0] = 1 / scale.x;
+    matrix[5] = 1 / scale.y;
+    matrix[10] = 1 / scale.z;
 }
 
-h_core::math::Mat4x4 h_core::math::Mat4x4::createDefaultTransformMatrix() {
-    float matrix[16] = { 0 };
-
-    matrix[0] = 1;
-    matrix[5] = 1;
-    matrix[10] = 1;
-    matrix[15] = 1;
-
-    return h_core::math::Mat4x4(matrix);
+h_core::math::Mat4x4 h_core::math::Mat4x4::multiply(
+    h_core::math::Mat4x4 src1, h_core::math::Mat4x4 src2) {
+    h_core::math::Mat4x4 dest {};
+    for (uint32_t i = 0; i < 4; i++) {
+        for (uint32_t j = 0; j < 4; j++) {
+            float sum = 0.f;
+            for (uint32_t k = 0; k < 4; k++) {
+                uint32_t aRow = i;
+                uint32_t aCol = k;
+                sum += src1[]; // Trying to implement matrix multiplication at 3:30 AM hurts :(
+            }
+        }
+    }
+    return dest;
 }

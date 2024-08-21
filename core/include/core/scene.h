@@ -5,8 +5,8 @@
 #include "core/actor.h"
 #include "core/actorspec.h"
 #include "core/scenespec.h"
-#include "core/transform.h"
 #include "core/system.h"
+#include "core/transform.h"
 
 #define SCENE_MAX_ACTORS 1024
 
@@ -30,9 +30,12 @@ class Scene {
     void drawSystem(h_core::System* system);
 
   private:
+    void updateSystemReferences(h_core::System* system, h_core::ActorId id);
+
     ActorId m_nextId = 0;
 
     h_core::ComponentBitmask m_masks[SCENE_MAX_ACTORS] = {};
     h_core::Transform m_transforms[SCENE_MAX_ACTORS] = {};
+    h_core::Mesh m_meshes[SCENE_MAX_ACTORS] = {};
 };
 }  // namespace h_core

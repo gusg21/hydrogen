@@ -1,26 +1,16 @@
 #pragma once
 
-#include "core/system.h"
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
+#include "core/systems/renderer/shader.h"
+#include "core/system.h"
+
 namespace h_core {
 namespace systems {
-
-struct Shader {
-    GLuint vertexShader, fragmentShader;
-    GLuint program;
-};
-
-struct Vertex {
-    h_core::math::Vector3 position;
-    h_core::math::Vector3 normal;
-    h_core::math::Vector2 texCoord;
-};
-
-class Rendering : public System {
+class Renderer : public System {
   public:
-    Rendering() = default;
+    Renderer() = default;
 
     uint32_t init();
     void destroy();
@@ -34,15 +24,13 @@ class Rendering : public System {
     SDL_GLContext getGLContext();
     h_core::ComponentBitmask getMask();
 
-    
-
   private:
     h_core::math::Vector3 cameraPosition = h_core::math::Vector3(0);
     h_core::math::Vector3 cameraDirection = h_core::math::Vector3(0);
 
     float m_width = 0;
     float m_height = 0;
-    Shader m_shader;
+    h_core::systems::Shader m_shader;
     SDL_GLContext m_glContext;
 };
 }  // namespace systems

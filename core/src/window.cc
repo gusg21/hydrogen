@@ -3,7 +3,7 @@
 #include "SDL2/SDL.h"
 #include "imgui_impl_sdl2.h"
 
-#define WINDOW_FAIL_INIT_BGFX 1
+#define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
 uint32_t h_core::Window::init(
     std::string title, uint32_t width, uint32_t height, bool fullscreen) {
@@ -14,8 +14,10 @@ uint32_t h_core::Window::init(
         title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width,
         height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    m_renderer = new h_core::systems::Rendering();
-    m_renderer->initFromWindow(width, height, m_sdlWindow);
+    m_renderer = new h_core::systems::Renderer();
+    if (m_renderer->initFromWindow(width, height, m_sdlWindow)) {
+        return WINDOW_INIT_FAIL_INIT_RENDERER;
+    }
 
     printf("INFO: RENDERING: OpenGL version: %s\n", glGetString(GL_VERSION));
 
@@ -86,7 +88,7 @@ void h_core::Window::swap() {
     SDL_GL_SwapWindow(m_sdlWindow);
 }
 
-h_core::systems::Rendering* h_core::Window::getRenderingSystem() {
+h_core::systems::Renderer* h_core::Window::getRendererSystem() {
     return m_renderer;
 }
 

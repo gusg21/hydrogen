@@ -152,38 +152,37 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 void h_core::Mesh::loadModel(
     uint32_t vertexBufferCount, const h_core::Vertex* vertexBuffer,
     uint32_t inidicesCount, const uint32_t* indexBuffer) {
-    if (!m_initialized) {
-        glGenVertexArrays(1, &m_vao);
-        glBindVertexArray(m_vao);
+    // Generate buffers and load attributes
+    glGenVertexArrays(1, &m_vertexAttributesHandle);
+    glBindVertexArray(m_vertexAttributesHandle);
 
-        glGenBuffers(1, &m_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glGenBuffers(1, &m_vertexBufferHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
 
-        glGenBuffers(1, &m_ebo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+    glGenBuffers(1, &m_indexBufferHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 
-        glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-            (const void*)offsetof(h_core::Vertex, position));
-        glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+        (const void*)offsetof(h_core::Vertex, position));
+    glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(
-            1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-            (const void*)offsetof(h_core::Vertex, normal));
-        glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+        (const void*)offsetof(h_core::Vertex, normal));
+    glEnableVertexAttribArray(1);
 
-        glVertexAttribPointer(
-            2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-            (const void*)offsetof(h_core::Vertex, texCoord));
-        glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
+        (const void*)offsetof(h_core::Vertex, texCoord));
+    glEnableVertexAttribArray(2);
 
-        m_initialized = true;
-    }
+    // Bind the vertex and index buffers to this VAO
+    glBindVertexArray(m_vertexAttributesHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 
-    glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-
+    // Mark buffers for static drawing (not updated)
     if (vertexBufferCount > 0) {
         glBufferData(
             GL_ARRAY_BUFFER, sizeof(h_core::Vertex) * vertexBufferCount,
@@ -196,10 +195,32 @@ void h_core::Mesh::loadModel(
             indexBuffer, GL_STATIC_DRAW);
     }
 
-    m_numVerticies = vertexBufferCount;
+    // Store buffer sizes
+    m_numVertices = vertexBufferCount;
     m_numIndices = inidicesCount;
 
+    // Clean up
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GLuint h_core::Mesh::getIndexBufferHandle() {
+    return m_indexBufferHandle;
+}
+
+GLuint h_core::Mesh::getVertexAttributesHandle() {
+    return m_vertexAttributesHandle;
+}
+
+GLuint h_core::Mesh::getVertexBufferHandle() {
+    return m_vertexBufferHandle;
+}
+
+size_t h_core::Mesh::getNumVertices() {
+    return m_numVertices;
+}
+
+size_t h_core::Mesh::getNumIndices() {
+    return m_numIndices;
 }

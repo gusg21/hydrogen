@@ -5,7 +5,7 @@
 #include "tiny_gltf.h"
 
 #include "core/systems/sys_gravity.h"
-#include "core/systems/sys_rendering.h"
+#include "core/systems/renderer/renderer.h"
 #include "core/theming/theming.h"
 
 #include "imgui.h"
@@ -23,7 +23,7 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
     uint32_t windowInitResult = m_window->init(
         windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
-    m_systems[1] = m_window->getRenderingSystem();
+    m_systems[1] = m_window->getRendererSystem();
 
     // ImGui setup
     ImGui::CreateContext();
@@ -37,7 +37,7 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
     ImGui_ImplOpenGL3_Init();
     ImGui_ImplSDL2_InitForOpenGL(
         m_window->getSDLWindow(),
-        m_window->getRenderingSystem()->getGLContext());
+        m_window->getRendererSystem()->getGLContext());
 
     for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
          systemIndex++) {

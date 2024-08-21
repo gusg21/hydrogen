@@ -16,7 +16,7 @@ struct Vertex {
     h_core::math::Vector3 position;
     h_core::math::Vector3 normal;
     h_core::math::Vector2 texCoord;
-    
+
     // static bgfx::VertexLayout layout;
 };
 
@@ -33,19 +33,19 @@ class Mesh : public Asset {
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
         uint32_t inidicesCount, const uint32_t* indexBuffer);
-    //   bgfx::VertexBufferHandle getVertexBuffer() {
-    //       return m_vertexBuffer;
-    //   }
 
-    //   bgfx::IndexBufferHandle getIndexBuffer() {
-    //       return m_indexBuffer;
-    //   }
+    GLuint getVertexBufferHandle();
+    GLuint getIndexBufferHandle();
+    GLuint getVertexAttributesHandle();
+    size_t getNumVertices();
+    size_t getNumIndices();
 
 
   private:
-    bool m_initialized = false;
-    GLuint m_vbo, m_vao, m_ebo;
-    uint32_t m_numVerticies = 0;
+    // Shouldn't need an initialized flag - should only be initted once!
+    // bool m_initialized = false;
+    GLuint m_vertexBufferHandle, m_vertexAttributesHandle, m_indexBufferHandle;
+    uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
 };
 }  // namespace h_core

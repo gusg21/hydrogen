@@ -5,29 +5,31 @@ cmake_minimum_required(VERSION 3.21)
 # Core sources
 add_library(HydrogenCore STATIC 
 
-    src/actorspec.cc                include/core/actorspec.h
-    src/asset.cc                    include/core/asset.h
-    src/assets.cc                   include/core/assets.h
-    src/engine.cc                   include/core/engine.h
-                                    include/core/engineevents.h
-    src/event.cc                    include/core/event.h
-    src/eventqueue.cc               include/core/eventqueue.h
-    src/mesh.cc                     include/core/mesh.h
-    src/project.cc                  include/core/project.h
-    src/scene.cc                    include/core/scene.h
-    src/system.cc                   include/core/system.h
-    src/scenespec.cc                include/core/scenespec.h
-    src/transform.cc                include/core/transform.h
-    src/window.cc                   include/core/window.h
+    src/actorspec.cc                    include/core/actorspec.h
+    src/asset.cc                        include/core/asset.h
+    src/assets.cc                       include/core/assets.h
+    src/engine.cc                       include/core/engine.h
+                                        include/core/engineevents.h
+    src/event.cc                        include/core/event.h
+    src/eventqueue.cc                   include/core/eventqueue.h
+    src/mesh.cc                         include/core/mesh.h
+    src/project.cc                      include/core/project.h
+    src/scene.cc                        include/core/scene.h
+    src/system.cc                       include/core/system.h
+    src/scenespec.cc                    include/core/scenespec.h
+    src/transform.cc                    include/core/transform.h
+    src/window.cc                       include/core/window.h
                                     
-    src/math/mat4x4.cc              include/core/math/mat4x4.h
-                                    include/core/math/quaternion.h
-    src/math/vector2.cc             include/core/math/vector2.h
-    src/math/vector3.cc             include/core/math/vector3.h
-                                    include/core/math/vectors.h
+    src/math/mat4x4.cc                  include/core/math/mat4x4.h
+                                        include/core/math/math.h
+                                        include/core/math/quaternion.h
+    src/math/vector2.cc                 include/core/math/vector2.h
+    src/math/vector3.cc                 include/core/math/vector3.h
 
-    src/systems/sys_gravity.cc      include/core/systems/sys_gravity.h
-    src/systems/sys_rendering.cc    include/core/systems/sys_rendering.h
+    src/systems/sys_gravity.cc          include/core/systems/sys_gravity.h
+    src/systems/renderer/renderer.cc    include/core/systems/renderer/renderer.h
+    src/systems/renderer/shader.cc      include/core/systems/renderer/shader.h
+                                        include/core/systems/renderer/vertex.h
     )
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

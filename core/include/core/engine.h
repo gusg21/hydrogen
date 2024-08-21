@@ -2,7 +2,7 @@
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
-#include "core/math/color.h"
+#include "core/math/math.h"
 #include "core/project.h"
 #include "core/scene.h"
 #include "core/system.h"

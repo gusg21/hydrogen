@@ -2,7 +2,7 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include "core/math/vectors.h"
+#include "core/math/math.h"
 
 #define TRANSFORM_COMPONENT_BITMASK (1 << 0)
 
