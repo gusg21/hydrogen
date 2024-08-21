@@ -139,17 +139,17 @@ void h_core::math::Mat4x4::scale(h_core::math::Vector3 scale) {
     matrix[10] = 1 / scale.z;
 }
 
+#define INDEX(x,y) (y + (x * 4))
 h_core::math::Mat4x4 h_core::math::Mat4x4::multiply(
-    h_core::math::Mat4x4 src1, h_core::math::Mat4x4 src2) {
+    h_core::math::Mat4x4 a, h_core::math::Mat4x4 b) {
     h_core::math::Mat4x4 dest {};
-    for (uint32_t i = 0; i < 4; i++) {
-        for (uint32_t j = 0; j < 4; j++) {
-            float sum = 0.f;
-            for (uint32_t k = 0; k < 4; k++) {
-                uint32_t aRow = i;
-                uint32_t aCol = k;
-                sum += src1[]; // Trying to implement matrix multiplication at 3:30 AM hurts :(
-            }
+    for (uint32_t destX = 0; destX < 4; destX++) {
+        for (uint32_t destY = 0; destY < 4; destY++) {
+            dest.matrix[INDEX(destX, destY)] =
+                a.matrix[INDEX(0, destY)] * b.matrix[INDEX(destX, 0)] +
+                a.matrix[INDEX(1, destY)] * b.matrix[INDEX(destX, 1)] +
+                a.matrix[INDEX(2, destY)] * b.matrix[INDEX(destX, 2)] +
+                a.matrix[INDEX(3, destY)] * b.matrix[INDEX(destX, 3)];
         }
     }
     return dest;

@@ -10,15 +10,13 @@
 namespace h_core {
 namespace math {
 
-enum Axis {
-    X,
-    Y,
-    Z
-};
+enum Axis { X, Y, Z };
 
 struct Mat4x4 {
     Mat4x4() {
-        ::memset(matrix, 0, 16);
+        for (int i = 0; i < 16; i++) {
+            matrix[i] = 0.f;
+        }
         matrix[0] = 1.0f;
         matrix[5] = 1.0f;
         matrix[10] = 1.0f;
@@ -37,10 +35,12 @@ struct Mat4x4 {
     void rotation(float angle, Axis axis);
     void rotation(Quaternion rotation);
     void scale(Vector3 scale);
-    h_core::math::Mat4x4 multiply(h_core::math::Mat4x4 a, h_core::math::Mat4x4 b);
 
-        static Mat4x4 createTransformMatrix(
-            Vector3 position, Quaternion rotation, Vector3 scale);
+    static h_core::math::Mat4x4 multiply(
+        h_core::math::Mat4x4 a, h_core::math::Mat4x4 b);
+
+    static Mat4x4 createTransformMatrix(
+        Vector3 position, Quaternion rotation, Vector3 scale);
 
     static Mat4x4 lookAtMat(
         h_core::math::Vector3 position, h_core::math::Vector3 target,
