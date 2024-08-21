@@ -84,7 +84,8 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::Accessor posAccessor = model.accessors[posAccessorIndex];
     tinygltf::BufferView posBufferView =
         model.bufferViews[posAccessor.bufferView];
-    const uint8_t* posBuffer = model.buffers[posBufferView.buffer].data.data();
+    const uint8_t* posBuffer = model.buffers[posBufferView.buffer].data.data() +
+                               posBufferView.byteOffset;
 
     // normal attribute
     uint32_t normalAccessorIndex = primitiveInfo.attributes["NORMAL"];
@@ -92,7 +93,8 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::BufferView normalBufferView =
         model.bufferViews[normalAccessor.bufferView];
     const uint8_t* normalBuffer =
-        model.buffers[normalBufferView.buffer].data.data();
+        model.buffers[normalBufferView.buffer].data.data() +
+        normalBufferView.byteOffset;
 
     // uv attribute
     uint32_t texCoordAccessorIndex = primitiveInfo.attributes["TEXCOORD_0"];
@@ -101,7 +103,8 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::BufferView texCoordBufferView =
         model.bufferViews[texCoordAccessor.bufferView];
     const uint8_t* texCoordBuffer =
-        model.buffers[texCoordBufferView.buffer].data.data();
+        model.buffers[texCoordBufferView.buffer].data.data() +
+        texCoordBufferView.byteOffset;
 
     // load vertex data
     size_t vertexBufferCount = posAccessor.count;
@@ -110,21 +113,12 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount;
          vertexIndex++) {
         h_core::Vertex* vertex = &vertexBuffer[vertexIndex];
-        vertex->position =
-            *(const h_core::math::
-                  Vector3*)(&posBuffer
-                                [posBufferView.byteOffset +
-                                 vertexIndex * sizeof(h_core::math::Vector3)]);
-        vertex->normal =
-            *(const h_core::math::
-                  Vector3*)(&normalBuffer
-                                [normalBufferView.byteOffset +
-                                 vertexIndex * sizeof(h_core::math::Vector3)]);
-        vertex->texCoord =
-            *(const h_core::math::
-                  Vector2*)(&texCoordBuffer
-                                [texCoordBufferView.byteOffset +
-                                 vertexIndex * sizeof(h_core::math::Vector2)]);
+        vertex->position = reinterpret_cast<const h_core::math::Vector3*>(
+            posBuffer)[vertexIndex];
+        vertex->normal = reinterpret_cast<const h_core::math::Vector3*>(
+            normalBuffer)[vertexIndex];
+        vertex->texCoord = reinterpret_cast<const h_core::math::Vector2*>(
+            texCoordBuffer)[vertexIndex];
     }
 
     // load index buffer
@@ -156,6 +150,8 @@ void h_core::Mesh::loadModel(
     glGenVertexArrays(1, &m_vertexAttributesHandle);
     glBindVertexArray(m_vertexAttributesHandle);
 
+    printf("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
+
     glGenBuffers(1, &m_vertexBufferHandle);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
 
@@ -178,7 +174,6 @@ void h_core::Mesh::loadModel(
     glEnableVertexAttribArray(2);
 
     // Bind the vertex and index buffers to this VAO
-    glBindVertexArray(m_vertexAttributesHandle);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 

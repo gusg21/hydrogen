@@ -12,7 +12,8 @@ void h_core::Scene::initFromSceneSpecAssetIndex(
         assets->getAssetByIndex<h_core::SceneSpec>(sceneSpecIndex);
 
     for (uint32_t actorSpecIndex = 0;
-         actorSpecIndex < sceneSpec->actorSpecIndices.size(); actorSpecIndex++) {
+         actorSpecIndex < sceneSpec->actorSpecIndices.size();
+         actorSpecIndex++) {
         addActor(assets->getAssetByIndex<h_core::ActorSpec>(
             sceneSpec->actorSpecIndices[actorSpecIndex]));
     }
@@ -22,6 +23,7 @@ h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
     ActorId newId = m_nextId;
     m_masks[newId] = spec->mask;
     m_transforms[newId] = spec->transform;
+    m_meshes[newId] = spec->mesh;
     printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, m_masks[newId]);
     m_nextId++;
     return newId;
@@ -29,6 +31,7 @@ h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
 
 void h_core::Scene::updateSystemReferences(
     h_core::System* system, h_core::ActorId id) {
+    system->actorId = id;
     system->transform = &m_transforms[id];
     system->mesh = &m_meshes[id];
 }

@@ -1,6 +1,6 @@
-// #pragma once
+#pragma once
 
-// #include <stdint.h>
+#include <stdint.h>
 
 // #include "tinystl/string.h"
 
@@ -18,3 +18,8 @@
 //     h_core::ComponentBitfield componentBitfield;
 // };
 // }  // namespace h_core
+
+namespace h_core
+{
+typedef uint32_t ActorId;
+} // namespace h_core

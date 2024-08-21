@@ -151,6 +151,8 @@ void h_core::systems::Renderer::beginFrame() {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     m_shader.use();
     h_core::math::Vector3 target { 0.f, 0.f, 0.f };
@@ -161,13 +163,16 @@ void h_core::systems::Renderer::beginFrame() {
     h_core::math::Mat4x4 viewMatrix =
         h_core::math::Mat4x4::lookAtMat(position, target);
     h_core::math::Mat4x4 projMatrix = h_core::math::Mat4x4::getProjMatrix(
-        60.0f, m_width / m_height, 1000.f, 0.1f);
+        60.0f, (float)engine->getWidth() / (float)engine->getHeight(), 1000.f,
+        0.1f);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(viewMatrix, projMatrix));
 }
 
 void h_core::systems::Renderer::draw() {
+    // printf("DEBUG: RENDERER: actor id %d\n", actorId);
+
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     glBindVertexArray(mesh->getVertexAttributesHandle());
@@ -212,9 +217,6 @@ uint32_t h_core::systems::Renderer::initFromWindow(
     SDL_GL_SetShwapInterval(1);
 
     gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-    m_width = width;
-    m_height = height;
 
     return 0;
 }

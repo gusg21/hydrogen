@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "core/actor.h"
+#include "core/componentbitmask.h"
 #include "core/actorspec.h"
 #include "core/scenespec.h"
 #include "core/system.h"
@@ -11,9 +12,6 @@
 #define SCENE_MAX_ACTORS 1024
 
 namespace h_core {
-typedef uint32_t ComponentBitmask;
-typedef uint32_t ActorId;
-
 class Scene {
   public:
     Scene() = default;

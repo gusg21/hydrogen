@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/actor.h"
 #include "core/componentbitmask.h"
 #include "core/transform.h"
 #include "core/mesh.h"
@@ -19,6 +20,7 @@ class System {
 
     virtual h_core::ComponentBitmask getMask() = 0;
 
+    h_core::ActorId actorId;
     h_core::Engine* engine;
     h_core::Transform* transform;
     h_core::Mesh* mesh;

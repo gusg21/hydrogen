@@ -28,8 +28,6 @@ class Renderer : public System {
     h_core::math::Vector3 cameraPosition = h_core::math::Vector3(0);
     h_core::math::Vector3 cameraDirection = h_core::math::Vector3(0);
 
-    float m_width = 0;
-    float m_height = 0;
     h_core::systems::Shader m_shader;
     SDL_GLContext m_glContext;
 };

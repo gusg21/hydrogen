@@ -25,6 +25,9 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_systems[1] = m_window->getRendererSystem();
 
+    m_windowWidth = project->windowWidth;
+    m_windowHeight = project->windowHeight;
+
     // ImGui setup
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -135,7 +138,7 @@ void h_core::Engine::run() {
 
         // Send ImGui draw data
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update the window
         m_window->swap();
