@@ -156,15 +156,12 @@ void h_core::systems::Renderer::beginFrame() {
 
     m_shader.use();
     h_core::math::Vector3 target { 0.f, 0.f, 0.f };
-    h_core::math::Vector3 position { -10.f, 0.f, 0.f };
+    h_core::math::Vector3 position { 10.f, 0.f, 0.f };
     // h_core::math::Vector3 up { 0.f, 1.f, 0.f };
-    h_core::math::Vector3 toTarget = h_core::math::Vector3::normalize(
-        h_core::math::Vector3::subtract(target, position));
     h_core::math::Mat4x4 viewMatrix =
         h_core::math::Mat4x4::lookAtMat(position, target);
-    h_core::math::Mat4x4 projMatrix = h_core::math::Mat4x4::getProjMatrix(
-        60.0f, (float)engine->getWidth() / (float)engine->getHeight(), 1000.f,
-        0.1f);
+    h_core::math::Mat4x4 projMatrix =
+        h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 1000.f, 0.1f);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(viewMatrix, projMatrix));
@@ -175,9 +172,23 @@ void h_core::systems::Renderer::draw() {
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
+    GLenum glElementType;
+    switch (mesh->getMeshIndexType()) {
+        case h_core::MeshIndexType::BYTE:
+            glElementType = GL_UNSIGNED_BYTE;
+            break;
+        case h_core::MeshIndexType::SHORT:
+            glElementType = GL_UNSIGNED_SHORT;
+            break;
+        case h_core::MeshIndexType::INT:
+            glElementType = GL_UNSIGNED_INT;
+            break;
+    }
+
     glBindVertexArray(mesh->getVertexAttributesHandle());
     glDrawElements(
-        GL_TRIANGLES, mesh->getNumIndices(), GL_UNSIGNED_INT, nullptr);
+        mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType,
+        nullptr);
 }
 
 uint32_t h_core::systems::Renderer::initFromWindow(

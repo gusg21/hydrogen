@@ -31,22 +31,23 @@ struct Mat4x4 {
 
     float matrix[16];
 
-    void translate(Vector3 position);
+    static Mat4x4 translation(Vector3 position);
     // void rotation(float angle, Axis axis);
-    void rotation(Quaternion rotation);
-    void scale(Vector3 scale);
+    static Mat4x4 rotation(Quaternion rotation);
+    static Mat4x4 scale(Vector3 scale);
 
     static h_core::math::Mat4x4 multiply(
         h_core::math::Mat4x4 a, h_core::math::Mat4x4 b);
 
     static Mat4x4 createTransformMatrix(
-        Vector3 position, Quaternion rotation, Vector3 scale);
+        h_core::math::Vector3 position, h_core::math::Quaternion rotation,
+        h_core::math::Vector3 scale);
 
     static Mat4x4 lookAtMat(
         h_core::math::Vector3 position, h_core::math::Vector3 target);
 
     static Mat4x4 getProjMatrix(
-        float fov, float aspectRatio, float nearClipPlane, float farClipPlane);
+        float fovY, float aspect, float nearClipPlane, float farClipPlane);
 };
 }  // namespace math
 }  // namespace h_core

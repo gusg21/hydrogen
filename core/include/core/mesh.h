@@ -20,9 +20,16 @@ struct Vertex {
     // static bgfx::VertexLayout layout;
 };
 
-struct MeshData {
-    std::vector<h_core::Vertex> vertices;
-    std::vector<uint32_t> indicies;
+// What for?
+// struct MeshData {
+//     std::vector<h_core::Vertex> vertices;
+//     std::vector<uint32_t> indicies;
+// };
+
+enum class MeshIndexType {
+    BYTE,
+    SHORT,
+    INT
 };
 
 class Mesh : public Asset {
@@ -32,14 +39,15 @@ class Mesh : public Asset {
     uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
-        uint32_t inidicesCount, const uint32_t* indexBuffer);
+        uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);
 
     GLuint getVertexBufferHandle();
     GLuint getIndexBufferHandle();
     GLuint getVertexAttributesHandle();
     size_t getNumVertices();
     size_t getNumIndices();
-
+    MeshIndexType getMeshIndexType();
+    uint32_t getPrimitiveMode();
 
   private:
     // Shouldn't need an initialized flag - should only be initted once!
@@ -47,5 +55,7 @@ class Mesh : public Asset {
     GLuint m_vertexBufferHandle, m_vertexAttributesHandle, m_indexBufferHandle;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
+    MeshIndexType m_meshIndexType = MeshIndexType::BYTE;
+    uint32_t m_primitiveMode = 4;
 };
 }  // namespace h_core

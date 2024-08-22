@@ -78,6 +78,7 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::Node node = model.nodes.front();
     tinygltf::Mesh mesh = model.meshes[node.mesh];
     tinygltf::Primitive primitiveInfo = mesh.primitives.front();
+    m_primitiveMode = primitiveInfo.mode;
 
     // pos attribute
     uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
@@ -129,23 +130,19 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
         model.bufferViews[indexBufferAccessor.bufferView];
     size_t indexBufferCount = indexBufferAccessor.count;
     uint16_t* indexBuffer16 = reinterpret_cast<uint16_t*>(
-        model.buffers[indexBufferView.buffer].data.data());
+        model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset);
+    m_meshIndexType = h_core::MeshIndexType::SHORT;
 
-    uint32_t* indexBuffer32 = new uint32_t[indexBufferCount];
-    for (uint32_t indexBufferIndex = 0; indexBufferIndex < indexBufferCount;
-         indexBufferIndex++) {
-        indexBuffer32[indexBufferIndex] = indexBuffer16[indexBufferIndex];
-    }
-
-    loadModel(vertexBufferCount, vertexBuffer, indexBufferCount, indexBuffer32);
+    loadModel(
+        vertexBufferCount, vertexBuffer, indexBufferCount, indexBuffer16,
+        m_meshIndexType);
 
     return 0;
 }
 
-
 void h_core::Mesh::loadModel(
     uint32_t vertexBufferCount, const h_core::Vertex* vertexBuffer,
-    uint32_t inidicesCount, const uint32_t* indexBuffer) {
+    uint32_t inidicesCount, const void* indexBuffer, MeshIndexType indexType) {
     // Generate buffers and load attributes
     glGenVertexArrays(1, &m_vertexAttributesHandle);
     glBindVertexArray(m_vertexAttributesHandle);
@@ -185,9 +182,26 @@ void h_core::Mesh::loadModel(
     }
 
     if (inidicesCount > 0) {
+        // Determine index type size
+        size_t indexTypeSize = 0;
+        switch (indexType) {
+            case MeshIndexType::BYTE:
+                indexTypeSize = sizeof(unsigned char);
+                break;
+            case MeshIndexType::SHORT:
+                indexTypeSize = sizeof(unsigned short);
+                break;
+            case MeshIndexType::INT:
+                indexTypeSize = sizeof(unsigned int);
+                break;
+            default:
+                printf("Undefined mesh index type value!! What!!!\n");
+                break;
+        }
+
         glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * inidicesCount,
-            indexBuffer, GL_STATIC_DRAW);
+            GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * inidicesCount, indexBuffer,
+            GL_STATIC_DRAW);
     }
 
     // Store buffer sizes
@@ -199,6 +213,7 @@ void h_core::Mesh::loadModel(
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
 
 GLuint h_core::Mesh::getIndexBufferHandle() {
     return m_indexBufferHandle;
@@ -218,4 +233,12 @@ size_t h_core::Mesh::getNumVertices() {
 
 size_t h_core::Mesh::getNumIndices() {
     return m_numIndices;
+}
+
+h_core::MeshIndexType h_core::Mesh::getMeshIndexType() {
+    return m_meshIndexType;
+}
+
+uint32_t h_core::Mesh::getPrimitiveMode() {
+    return m_primitiveMode;
 }
