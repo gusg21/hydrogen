@@ -156,7 +156,7 @@ void h_core::systems::Renderer::beginFrame() {
 
     m_shader.use();
     h_core::math::Vector3 target { 0.f, 0.f, 0.f };
-    h_core::math::Vector3 position { 10.f, 0.f, 0.f };
+    h_core::math::Vector3 position { 100.f, 0.f, 0.f };
     // h_core::math::Vector3 up { 0.f, 1.f, 0.f };
     h_core::math::Mat4x4 viewMatrix =
         h_core::math::Mat4x4::lookAtMat(position, target);
@@ -164,7 +164,7 @@ void h_core::systems::Renderer::beginFrame() {
         h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 1000.f, 0.1f);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
-        h_core::math::Mat4x4::multiply(viewMatrix, projMatrix));
+        h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
 }
 
 void h_core::systems::Renderer::draw() {

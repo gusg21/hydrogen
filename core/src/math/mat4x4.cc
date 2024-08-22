@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <cmath>
 
+// NOTE : We are using column-major matrix storage here!!
+
 h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
     h_core::math::Vector3 position, h_core::math::Vector3 target) {
     h_core::math::Vector3 forward =
@@ -31,23 +33,23 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
     h_core::math::Mat4x4 result {};
 
     result.matrix[0] = right.x;
-    result.matrix[4] = up.x;
-    result.matrix[8] = view.x;
-    result.matrix[12] = 0.0f;
+    result.matrix[1] = up.x;
+    result.matrix[2] = forward.x;
+    result.matrix[3] = 0.0f;
 
-    result.matrix[1] = right.y;
+    result.matrix[4] = right.y;
     result.matrix[5] = up.y;
-    result.matrix[9] = view.y;
-    result.matrix[13] = 0.0f;
+    result.matrix[6] = forward.y;
+    result.matrix[7] = 0.0f;
 
-    result.matrix[2] = right.z;
-    result.matrix[6] = up.z;
-    result.matrix[10] = view.z;
-    result.matrix[14] = 0.0f;
+    result.matrix[8] = right.z;
+    result.matrix[9] = up.z;
+    result.matrix[10] = forward.z;
+    result.matrix[11] = 0.0f;
 
-    result.matrix[3] = -position.dot(right);
-    result.matrix[7] = position.dot(right);
-    result.matrix[11] = ;
+    result.matrix[12] = -position.dot(right);
+    result.matrix[13] = -position.dot(up);
+    result.matrix[14] = -position.dot(forward);
     result.matrix[15] = 1.0f;
 
     return result;
