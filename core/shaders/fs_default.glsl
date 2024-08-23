@@ -1,4 +1,4 @@
-#version 460
+#version 410
 
 in vec3 frag_worldPosition;
 in vec3 frag_worldNormal;

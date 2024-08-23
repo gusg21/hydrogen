@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Hydrogen LANGUAGES CXX)
+project(Hydrogen LANGUAGES CXX C)
 set (CMAKE_CXX_STANDARD 17)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
