@@ -40,6 +40,14 @@ static const uint16_t cubeTriList[] = {
 uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     printf("INFO: MESH: loading model from YAML spec...\n");
 
+    if (yaml["primitive"].as<bool>(false)) {
+        // Just load cube
+        loadModel(
+            8, cubeVertices, 36, cubeTriList, h_core::MeshIndexType::SHORT);
+
+        return 0;
+    }
+
     // Parse YAML
     std::string gltfFilePath = yaml["gltf"].as<std::string>("");
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
@@ -129,12 +137,11 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::BufferView indexBufferView =
         model.bufferViews[indexBufferAccessor.bufferView];
     size_t indexBufferCount = indexBufferAccessor.count;
-    uint16_t* indexBuffer16 = reinterpret_cast<uint16_t*>(
-        model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset);
-    m_meshIndexType = h_core::MeshIndexType::SHORT;
 
     loadModel(
-        vertexBufferCount, vertexBuffer, indexBufferCount, indexBuffer16,
+        vertexBufferCount, vertexBuffer, indexBufferCount,
+        model.buffers[indexBufferView.buffer].data.data() +
+            indexBufferView.byteOffset,
         m_meshIndexType);
 
     return 0;
@@ -207,6 +214,7 @@ void h_core::Mesh::loadModel(
     // Store buffer sizes
     m_numVertices = vertexBufferCount;
     m_numIndices = inidicesCount;
+    m_meshIndexType = indexType;
 
     // Clean up
     glBindVertexArray(0);

@@ -122,18 +122,15 @@ void h_core::systems::Renderer::beginFrame() {
     h_core::math::Color clearColor = engine->getClearColor();
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
     m_shader.use();
-    h_core::math::Vector3 target2 { 0.f, 10.f, 0.f };
-    h_core::math::Vector3 position2 { 25.f, 10.f, 0.f };
+    h_core::math::Vector3 target2 { 0.f, 00.f, 0.f };
+    h_core::math::Vector3 position2 { 5.f, 3.f, 0.f };
     h_core::math::Vector3 up { 0.f, 1.f, 0.f };
     h_core::math::Mat4x4 viewMatrix =
         h_core::math::Mat4x4::lookAtMat(position2, target2);
     h_core::math::Mat4x4 projMatrix =
-        h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 1000.f, 0.1f);
+        h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 10.f, 1.f);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
@@ -159,7 +156,7 @@ void h_core::systems::Renderer::draw() {
 
     glBindVertexArray(mesh->getVertexAttributesHandle());
     glDrawElements(
-        mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType,
+        GL_LINES, mesh->getNumIndices(), glElementType,
         nullptr);
 }
 
@@ -180,6 +177,10 @@ uint32_t h_core::systems::Renderer::initFromWindow(
     SDL_GL_SetShwapInterval(1);
 
     gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     return 0;
 }
