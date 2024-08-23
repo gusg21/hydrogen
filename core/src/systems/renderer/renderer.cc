@@ -38,7 +38,7 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     std::string shaderCode = shaderCodeStream.str();
 
 #if HCORE_DEBUG
-    printf("DEBUG: RENDERER: %s\n", shaderCode.c_str());
+    // printf("DEBUG: RENDERER: %s\n", shaderCode.c_str());
 #endif
 
     // Load in the code
@@ -124,16 +124,30 @@ void h_core::systems::Renderer::beginFrame() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_shader.use();
-    h_core::math::Vector3 target2 { 0.f, 00.f, 0.f };
-    h_core::math::Vector3 position2 { 5.f, 3.f, 0.f };
     h_core::math::Vector3 up { 0.f, 1.f, 0.f };
-    h_core::math::Mat4x4 viewMatrix =
-        h_core::math::Mat4x4::lookAtMat(position2, target2);
-    h_core::math::Mat4x4 projMatrix =
-        h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 10.f, 1.f);
+    h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(
+        m_cameraPosition,
+        h_core::math::Vector3::add(m_cameraPosition, m_cameraDirection));
+
+    float aspect =
+        (float)engine->getWidth() / (float)engine->getHeight();
+    h_core::math::Mat4x4 projMatrix = h_core::math::Mat4x4::getProjMatrix(
+        (m_fovDegrees / 180.f) * M_PI, aspect, m_nearZ, m_farZ);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
+
+    if (ImGui::Begin("Camera Settings")) {
+        ImGui::SliderFloat3(
+            "Camera Position", &m_cameraPosition.x, -10.f, 10.f);
+        ImGui::SliderFloat("FOV", &m_fovDegrees, 0.f, 180.f);
+        ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
+        ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
+        ImGui::Checkbox("CCW", &m_ccw);
+        glFrontFace(m_ccw ? GL_CCW : GL_CW);
+
+        ImGui::End();
+    }
 }
 
 void h_core::systems::Renderer::draw() {
@@ -156,7 +170,7 @@ void h_core::systems::Renderer::draw() {
 
     glBindVertexArray(mesh->getVertexAttributesHandle());
     glDrawElements(
-        GL_LINES, mesh->getNumIndices(), glElementType,
+        mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType,
         nullptr);
 }
 
@@ -178,7 +192,9 @@ uint32_t h_core::systems::Renderer::initFromWindow(
 
     gladLoadGLLoader(SDL_GL_GetProcAddress);
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 

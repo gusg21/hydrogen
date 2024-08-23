@@ -139,7 +139,7 @@ void h_core::Engine::run() {
 
         // Send ImGui draw data
         ImGui::Render();
-        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update the window
         m_window->swap();

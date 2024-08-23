@@ -14,4 +14,5 @@ transform:
     y: 1
     z: 1
 model:
-  gltf: "assets/camera/AntiqueCamera.gltf"
+  gltf: "assets/butter/Butter.glb"
+  gltf_binary: true

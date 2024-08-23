@@ -25,8 +25,12 @@ class Renderer : public System {
     h_core::ComponentBitmask getMask();
 
   private:
-    h_core::math::Vector3 cameraPosition = h_core::math::Vector3(0);
-    h_core::math::Vector3 cameraDirection = h_core::math::Vector3(0);
+    h_core::math::Vector3 m_cameraPosition { 10.f, 10.f, 0.f };
+    h_core::math::Vector3 m_cameraDirection { -1.f, 0.f, 0.f };
+    float m_fovDegrees = 70.f;
+    float m_nearZ = 1.f;
+    float m_farZ = 100.f;
+    bool m_ccw = true;
 
     h_core::systems::Shader m_shader;
     SDL_GLContext m_glContext;

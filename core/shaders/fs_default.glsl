@@ -14,7 +14,7 @@ void main()
 	vec4 sunColor = vec4(1, 0.8, 0.7, 1);
 	
 	vec4 ambient = ambientAmount * ambientColor;
-	vec4 diffuse = diffuseAmount * sunColor * clamp(dot(frag_worldNormal, vec3(0, 1, 0)), 0, 1);
+	vec4 diffuse = diffuseAmount * sunColor * clamp(dot(frag_worldNormal, normalize(vec3(1, 1, 0))), 0, 1);
 	
 	out_fragColor = ambient + diffuse;
 }

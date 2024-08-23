@@ -5,9 +5,10 @@
 #include "core/math/vector3.h"
 #include "glad/glad.h"
 
-#define MODEL_COMPONENT_BITMASK            (1 << 1)
-#define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH 1
-#define MODEL_INIT_FAIL_BAD_GLTF           2
+#define MODEL_COMPONENT_BITMASK                 (1 << 1)
+#define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH      1
+#define MODEL_INIT_FAIL_BAD_GLTF                2
+#define MODEL_INIT_FAIL_INVALID_INDEX_DATA_TYPE 3
 
 namespace h_core {
 struct Vertex {
@@ -26,11 +27,7 @@ struct Vertex {
 //     std::vector<uint32_t> indicies;
 // };
 
-enum class MeshIndexType {
-    BYTE,
-    SHORT,
-    INT
-};
+enum class MeshIndexType { BYTE, SHORT, INT };
 
 class Mesh : public Asset {
   public:

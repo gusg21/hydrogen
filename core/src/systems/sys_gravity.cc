@@ -16,7 +16,7 @@ uint32_t h_core::systems::Gravity::init() {
 
 void h_core::systems::Gravity::process() {
     transform->rotation =
-        h_core::math::Quaternion::rotate(transform->rotation, 0.001f, h_core::math::Vector3 {0.f, 1.f, 0.f});
+        h_core::math::Quaternion::rotate(transform->rotation, 0.005f, h_core::math::Vector3 {0.f, 1.f, 0.f});
 }
 
 h_core::ComponentBitmask h_core::systems::Gravity::getMask() {

@@ -42,6 +42,7 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 
     if (yaml["primitive"].as<bool>(false)) {
         // Just load cube
+        printf("DEBUG: MESH: Loading cube primitive mesh\n");
         loadModel(
             8, cubeVertices, 36, cubeTriList, h_core::MeshIndexType::SHORT);
 
@@ -137,6 +138,22 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     tinygltf::BufferView indexBufferView =
         model.bufferViews[indexBufferAccessor.bufferView];
     size_t indexBufferCount = indexBufferAccessor.count;
+
+    // determine index type
+    switch (indexBufferAccessor.componentType) {
+        case 5121:
+            m_meshIndexType = h_core::MeshIndexType::BYTE;
+            break;
+        case 5123:
+            m_meshIndexType = h_core::MeshIndexType::SHORT;
+            break;
+        case 5125:
+            m_meshIndexType = h_core::MeshIndexType::INT;
+            break;
+        
+        default:
+            return MODEL_INIT_FAIL_INVALID_INDEX_DATA_TYPE;
+    }
 
     loadModel(
         vertexBufferCount, vertexBuffer, indexBufferCount,

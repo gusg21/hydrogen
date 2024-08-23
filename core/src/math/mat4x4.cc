@@ -76,11 +76,12 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
     h_core::math::Mat4x4 matrix {};
 
     h_core::math::Mat4x4 posMat = h_core::math::Mat4x4::translation(position);
-    h_core::math::Mat4x4 rotMat = h_core::math::Mat4x4::rotation(rotation);
+    h_core::math::Mat4x4 rotMat = h_core::math::Mat4x4::rotation(
+        h_core::math::Quaternion::normalize(rotation));
     h_core::math::Mat4x4 scaleMat = h_core::math::Mat4x4::scaler(scale);
 
     matrix = Mat4x4::multiply(
-        Mat4x4::multiply(Mat4x4::multiply(matrix, posMat), rotMat), scaleMat);
+        Mat4x4::multiply(Mat4x4::multiply(matrix, scaleMat), rotMat), posMat);
 
     return matrix;
 }
@@ -138,10 +139,11 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::rotation(
         (2.0f * (rotation.y * rotation.z + rotation.w * rotation.x));
 
     result.matrix[8] =
-        (2.0f * (rotation.x * rotation.z +  rotation.w * rotation.y));
+        (2.0f * (rotation.x * rotation.z + rotation.w * rotation.y));
     result.matrix[9] =
         (2.0f * (rotation.y * rotation.z - rotation.w * rotation.x));
-    result.matrix[10] = 1.0f - (2.0f * (rotation.x * rotation.x + rotation.y * rotation.y));
+    result.matrix[10] =
+        1.0f - (2.0f * (rotation.x * rotation.x + rotation.y * rotation.y));
 
     // matrix[0] =
     //     1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z);
