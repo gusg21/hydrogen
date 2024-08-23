@@ -22,7 +22,7 @@ add_library(HydrogenCore STATIC
                                     
     src/math/mat4x4.cc                  include/core/math/mat4x4.h
                                         include/core/math/math.h
-                                        include/core/math/quaternion.h
+    src/math/quaternion.cc              include/core/math/quaternion.h
     src/math/vector2.cc                 include/core/math/vector2.h
     src/math/vector3.cc                 include/core/math/vector3.h
 
@@ -57,6 +57,12 @@ set_target_properties(SDL2-static PROPERTIES FOLDER "SDL")
 # OpenGL
 find_package(OpenGL REQUIRED)
 target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
+
+# GLM
+set(GLM_BUILD_TESTS OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(external/glm)
+target_link_libraries(HydrogenCore PUBLIC glm::glm)
 
 # GLAD
 add_subdirectory(external/glad)

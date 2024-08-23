@@ -8,48 +8,36 @@
 h_core::math::Mat4x4 h_core::math::Mat4x4::lookAtMat(
     h_core::math::Vector3 position, h_core::math::Vector3 target) {
     h_core::math::Vector3 forward =
-        h_core::math::Vector3::subtract(position, target);
+        h_core::math::Vector3::subtract(target, position);
     forward = h_core::math::Vector3::normalize(forward);
 
-    h_core::math::Vector3 yPosAxis {0.f, 1.f, 0.f};
-    h_core::math::Vector3 right = yPosAxis.cross(forward);
+    h_core::math::Vector3 yPosAxis { 0.f, 1.f, 0.f };
+    h_core::math::Vector3 right = forward.cross(yPosAxis);
     right = h_core::math::Vector3::normalize(right);
 
-    h_core::math::Vector3 up = forward.cross(right);
+    h_core::math::Vector3 up = right.cross(forward);
     up = h_core::math::Vector3::normalize(up);
-
-    // h_core::math::Vector3 up = h_core::math::Vector3(0);
-    // h_core::math::Vector3 right = h_core::math::Vector3(0);
-
-    // h_core::math::Vector3 uxv = h_core::math::Vector3::cross(up, view);
-
-    // if (0.0f == h_core::math::Vector3::dot(uxv, uxv)) {
-    //     right = h_core::math::Vector3(1.0f, 0.0f, 0.0f);
-    // }
-    // else { right = h_core::math::Vector3::normalize(up); }
-
-    // up = h_core::math::Vector3::cross(view, right);
 
     h_core::math::Mat4x4 result {};
 
     result.matrix[0] = right.x;
     result.matrix[1] = up.x;
-    result.matrix[2] = forward.x;
+    result.matrix[2] = -forward.x;
     result.matrix[3] = 0.0f;
 
     result.matrix[4] = right.y;
     result.matrix[5] = up.y;
-    result.matrix[6] = forward.y;
+    result.matrix[6] = -forward.y;
     result.matrix[7] = 0.0f;
 
     result.matrix[8] = right.z;
     result.matrix[9] = up.z;
-    result.matrix[10] = forward.z;
+    result.matrix[10] = -forward.z;
     result.matrix[11] = 0.0f;
 
     result.matrix[12] = -position.dot(right);
     result.matrix[13] = -position.dot(up);
-    result.matrix[14] = -position.dot(forward);
+    result.matrix[14] = position.dot(forward);
     result.matrix[15] = 1.0f;
 
     return result;
@@ -60,20 +48,20 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::getProjMatrix(
     // https://www.songho.ca/opengl/gl_projectionmatrix.html
     // const float height = 1.0f / std::tan(fov * (MATH_PI / 180.0f));
     // const float width = height * 1.0f / aspectRatio;
-    const float DEG2RAD = acos(-1.0f) / 180;
-    float tangent = tan((fovY / 2.0f) * DEG2RAD);
-    float top = nearClipPlane * tangent;
-    float right = top * aspect;
+    // const float DEG2RAD = acos(-1.0f) / 180;
+    float tanHalfFovy = tan((fovY / 2.0f));
+    // float top = nearClipPlane * tangent;
+    // float right = top * aspect;
 
     const float clipDiffernce = farClipPlane - nearClipPlane;
     const float aa = -(farClipPlane + nearClipPlane) / clipDiffernce;
-    const float bb = -(2.0f * farClipPlane * nearClipPlane) / clipDiffernce;
+    const float bb = (-2.0f * farClipPlane * nearClipPlane) / clipDiffernce;
 
 
     h_core::math::Mat4x4 result {};
 
-    result.matrix[0] = nearClipPlane / right;
-    result.matrix[5] = nearClipPlane / top;
+    result.matrix[0] = 1.f / (aspect * tanHalfFovy);
+    result.matrix[5] = 1.f / tanHalfFovy;
     result.matrix[10] = aa;
     result.matrix[11] = -1.0f;
     result.matrix[14] = bb;
@@ -89,7 +77,7 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
 
     h_core::math::Mat4x4 posMat = h_core::math::Mat4x4::translation(position);
     h_core::math::Mat4x4 rotMat = h_core::math::Mat4x4::rotation(rotation);
-    h_core::math::Mat4x4 scaleMat = h_core::math::Mat4x4::scale(scale);
+    h_core::math::Mat4x4 scaleMat = h_core::math::Mat4x4::scaler(scale);
 
     matrix = Mat4x4::multiply(
         Mat4x4::multiply(Mat4x4::multiply(matrix, posMat), rotMat), scaleMat);
@@ -135,34 +123,25 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::rotation(
     h_core::math::Quaternion rotation) {
     // https://www.songho.ca/opengl/gl_quaternion.html
     h_core::math::Mat4x4 result {};
-    result.matrix[0] = 1.0f - (2.0f * rotation.y * rotation.y) -
-                       (2.0f * rotation.z * rotation.z);
+    result.matrix[0] =
+        1.0f - (2.0f * (rotation.y * rotation.y + rotation.z * rotation.z));
     result.matrix[1] =
-        (2.0f * rotation.x * rotation.y) + (2.0f * rotation.w * rotation.z);
+        (2.0f * (rotation.x * rotation.y + rotation.w * rotation.z));
     result.matrix[2] =
-        (2.0f * rotation.x * rotation.z) - (2.0f * rotation.w * rotation.y);
-    result.matrix[3] = 0.f;
+        (2.0f * (rotation.x * rotation.z - rotation.w * rotation.y));
 
     result.matrix[4] =
-        (2.0f * rotation.x * rotation.y) - (2.0f * rotation.w * rotation.z);
-    result.matrix[5] = 1.0f - (2.0f * rotation.x * rotation.x) -
-                       (2.0f * rotation.z * rotation.z);
+        (2.0f * (rotation.x * rotation.y - rotation.w * rotation.z));
+    result.matrix[5] =
+        1.0f - (2.0f * (rotation.x * rotation.x + rotation.z * rotation.z));
     result.matrix[6] =
-        (2.0f * rotation.y * rotation.z) + (2.0f * rotation.w * rotation.x);
-    result.matrix[7] = 0.f;
+        (2.0f * (rotation.y * rotation.z + rotation.w * rotation.x));
 
     result.matrix[8] =
-        (2.0f * rotation.x * rotation.z) + (2.0f * rotation.w * rotation.y);
+        (2.0f * (rotation.x * rotation.z +  rotation.w * rotation.y));
     result.matrix[9] =
-        (2.0f * rotation.y * rotation.z) + (2.0f * rotation.w * rotation.x);
-    result.matrix[10] = 1.0f - (2.0f * rotation.x * rotation.x) -
-                        (2.0f * rotation.y * rotation.y);
-    result.matrix[11] = 0.f;
-
-    result.matrix[12] = 0.f;
-    result.matrix[13] = 0.f;
-    result.matrix[14] = 0.f;
-    result.matrix[15] = 1.f;
+        (2.0f * (rotation.y * rotation.z - rotation.w * rotation.x));
+    result.matrix[10] = 1.0f - (2.0f * (rotation.x * rotation.x + rotation.y * rotation.y));
 
     // matrix[0] =
     //     1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z);
@@ -182,11 +161,11 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::rotation(
     return result;
 }
 
-h_core::math::Mat4x4 h_core::math::Mat4x4::scale(h_core::math::Vector3 scale) {
+h_core::math::Mat4x4 h_core::math::Mat4x4::scaler(h_core::math::Vector3 scale) {
     h_core::math::Mat4x4 matrix {};
-    matrix.matrix[0] = 1 / scale.x;
-    matrix.matrix[5] = 1 / scale.y;
-    matrix.matrix[10] = 1 / scale.z;
+    matrix.matrix[0] = scale.x;
+    matrix.matrix[5] = scale.y;
+    matrix.matrix[10] = scale.z;
     return matrix;
 }
 

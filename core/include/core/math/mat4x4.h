@@ -5,8 +5,6 @@
 #include "core/math/quaternion.h"
 #include "core/math/vector3.h"
 
-#define MATH_PI 3.14159265358979323846f
-
 namespace h_core {
 namespace math {
 
@@ -32,9 +30,9 @@ struct Mat4x4 {
     float matrix[16];
 
     static Mat4x4 translation(Vector3 position);
-    // void rotation(float angle, Axis axis);
+    // static Mat4x4 rotation(float angle, Axis axis);
     static Mat4x4 rotation(Quaternion rotation);
-    static Mat4x4 scale(Vector3 scale);
+    static Mat4x4 scaler(Vector3 scale);
 
     static h_core::math::Mat4x4 multiply(
         h_core::math::Mat4x4 a, h_core::math::Mat4x4 b);

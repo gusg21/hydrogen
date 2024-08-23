@@ -41,7 +41,7 @@ void h_core::Scene::processSystem(h_core::System* system) {
 
     for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
         ComponentBitmask actorMask = m_masks[id];
-        if (requiredMask & actorMask == requiredMask) {
+        if ((requiredMask & actorMask) == requiredMask) {
             updateSystemReferences(system, id);
             system->process();
         }
@@ -53,7 +53,7 @@ void h_core::Scene::drawSystem(h_core::System* system) {
 
     for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
         ComponentBitmask actorMask = m_masks[id];
-        if (requiredMask & actorMask == requiredMask) {
+        if ((requiredMask & actorMask) == requiredMask) {
             updateSystemReferences(system, id);
             system->draw();
         }

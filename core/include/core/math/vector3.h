@@ -15,8 +15,9 @@ struct Vector3 {
 
     static Vector3 subtract(Vector3 v1, Vector3 v2);
     static Vector3 add(Vector3 v1, Vector3 v2);
+    static Vector3 scale(Vector3 v, float scalar);
 
-
+    static float getLength(Vector3 v);
     static Vector3 normalize(Vector3 v);
 
     float x;

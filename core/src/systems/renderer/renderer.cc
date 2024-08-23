@@ -2,8 +2,13 @@
 
 #include <fstream>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/glm.hpp"
 #include "imgui_impl_sdl2.h"
 
 #include "core/engine.h"
@@ -18,39 +23,6 @@
 #define RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK           2
 #define RENDERING_INIT_FAIL_BAD_PROGRAM                1
 #define RENDERING_OPENGL_LOG_MAX_SIZE                  1024
-
-// uint32_t loadShader(
-//     bgfx::ShaderHandle* out_handle, std::string* out_codeString,
-//     std::string shaderName) {
-//     std::string shaderPath = "generated/";
-
-// #if defined(_WIN32)
-//     shaderPath += "windows/";
-// #elif defined(__APPLE__)
-//     shaderPath += "osx/";
-// #endif
-
-//     shaderPath += shaderName + ".bin";
-
-//     std::ifstream shaderCodeFile { shaderPath };
-
-//     if (!shaderCodeFile.good()) {
-//         printf(
-//             "ERROR: RENDERING: Failed to open shader file %s\n",
-//             shaderPath.c_str());
-//         return 1;
-//     }
-
-//     printf("INFO: RENDERING: Loaded shader file %s\n", shaderPath.c_str());
-
-
-//     *out_codeString = shaderCodeStream.str();
-
-//     *out_handle = bgfx::createShader(
-//         bgfx::makeRef(out_codeString->c_str(), out_codeString->size()));
-
-//     return 0;
-// }
 
 uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     // Read code from file
@@ -155,11 +127,11 @@ void h_core::systems::Renderer::beginFrame() {
     glCullFace(GL_BACK);
 
     m_shader.use();
-    h_core::math::Vector3 target { 0.f, 0.f, 0.f };
-    h_core::math::Vector3 position { 100.f, 0.f, 0.f };
-    // h_core::math::Vector3 up { 0.f, 1.f, 0.f };
+    h_core::math::Vector3 target2 { 0.f, 10.f, 0.f };
+    h_core::math::Vector3 position2 { 25.f, 10.f, 0.f };
+    h_core::math::Vector3 up { 0.f, 1.f, 0.f };
     h_core::math::Mat4x4 viewMatrix =
-        h_core::math::Mat4x4::lookAtMat(position, target);
+        h_core::math::Mat4x4::lookAtMat(position2, target2);
     h_core::math::Mat4x4 projMatrix =
         h_core::math::Mat4x4::getProjMatrix(70.f, 16.f / 9.f, 1000.f, 0.1f);
     m_shader.setMat4(
@@ -193,26 +165,6 @@ void h_core::systems::Renderer::draw() {
 
 uint32_t h_core::systems::Renderer::initFromWindow(
     uint32_t width, uint32_t height, SDL_Window* window) {
-    // bgfx::renderFrame();  // TODO: required? Docs say needed to indicate
-    //                       // single-threaded rendering.
-
-    // bgfx::Init init;
-
-    // // Acquire native handle
-    // init.platformData.nwh = nwh;
-    // init.debug = true;
-
-    // // Set up resolution + backbuffer settings
-    // init.resolution.width = width;
-    // init.resolution.height = height;
-    // init.resolution.reset = BGFX_RESET_VSYNC;
-
-    // if (!bgfx::init(init)) { return RENDERING_INIT_FAIL_UNABLE_TO_BGFX; }
-
-    // m_width = width;
-    // m_height = height;
-
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(
         SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

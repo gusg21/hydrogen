@@ -2,7 +2,7 @@ mask: 3
 transform:
   position:
     x: 0
-    y: 100
+    y: 0
     z: 0 
   rotation:
     x: 0

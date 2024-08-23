@@ -46,6 +46,7 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
          systemIndex++) {
         m_systems[systemIndex]->engine = this;
         if (m_systems[systemIndex]->init() != 0) {
+            printf("ERROR: ENGINE: Failed to init system index %d\n", systemIndex);
             return ENGINE_INIT_FAIL_BAD_SYSTEM_INIT;
         }
     }
