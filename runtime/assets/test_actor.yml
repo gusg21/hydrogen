@@ -14,5 +14,5 @@ transform:
     y: 1
     z: 1
 model:
-  gltf: "assets/butter/Butter.glb"
+  gltf: "assets/door/door.glb"
   gltf_binary: true

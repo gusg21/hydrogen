@@ -6,13 +6,13 @@
 
 #include <core/engine.h>
 
-void pmat(h_core::math::Mat4x4 m) {
-    for (uint32_t i = 0; i < 4; i++) {
-        printf(
-            "%f %f %f %f\n", m.matrix[0 + i], m.matrix[4 + i], m.matrix[8 + i],
-            m.matrix[12 + i]);
-    }
-}
+// void pmat(h_core::math::Mat4x4 m) {
+//     for (uint32_t i = 0; i < 4; i++) {
+//         printf(
+//             "%f %f %f %f\n", m.matrix[0 + i], m.matrix[4 + i], m.matrix[8 + i],
+//             m.matrix[12 + i]);
+//     }
+// }
 
 int main(int argc, char* args[]) {
     // printf("Runtime compiled successfully!\n");
@@ -45,17 +45,17 @@ int main(int argc, char* args[]) {
     // h_core::math::Mat4x4 out = h_core::math::Mat4x4::multiply(a, b);
     // pmat(out);
 
-    h_core::Transform trans {};
-    trans.position = h_core::math::Vector3 { 1.f, 1.f, 1.f };
-    trans.rotation = h_core::math::Quaternion { 0.f, 0.5f, 0.f, 1.f };
-    trans.scale = h_core::math::Vector3 { 2.f, 2.f, 2.f };
-    pmat(trans.getMatrix());
+    // h_core::Transform trans {};
+    // trans.position = h_core::math::Vector3 { 1.f, 1.f, 1.f };
+    // trans.rotation = h_core::math::Quaternion { 0.f, 0.5f, 0.f, 1.f };
+    // trans.scale = h_core::math::Vector3 { 2.f, 2.f, 2.f };
+    // pmat(trans.getMatrix());
 
-    glm::mat4 glmTrans = glm::mat4(1.0f);
-    glmTrans = glm::translate(glmTrans, { 1.f, 1.f, 1.f });
-    glmTrans *= glm::mat4_cast(glm::quat { 1.0f, 0.f, 0.5f, 0.f });
-    glmTrans = glm::scale(glmTrans, { 2.f, 2.f, 2.f });
-    printf("%s\n", glm::to_string(glmTrans).c_str());
+    // glm::mat4 glmTrans = glm::mat4(1.0f);
+    // glmTrans = glm::translate(glmTrans, { 1.f, 1.f, 1.f });
+    // glmTrans *= glm::mat4_cast(glm::quat { 1.0f, 0.f, 0.5f, 0.f });
+    // glmTrans = glm::scale(glmTrans, { 2.f, 2.f, 2.f });
+    // printf("%s\n", glm::to_string(glmTrans).c_str());
 
 
     h_core::Engine* engine = new h_core::Engine();

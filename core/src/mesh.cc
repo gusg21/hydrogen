@@ -150,7 +150,7 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
         case 5125:
             m_meshIndexType = h_core::MeshIndexType::INT;
             break;
-        
+
         default:
             return MODEL_INIT_FAIL_INVALID_INDEX_DATA_TYPE;
     }
