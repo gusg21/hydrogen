@@ -26,7 +26,7 @@ add_library(HydrogenCore STATIC
     src/math/vector2.cc                 include/core/math/vector2.h
     src/math/vector3.cc                 include/core/math/vector3.h
 
-    src/systems/sys_gravity.cc          include/core/systems/sys_gravity.h
+    src/systems/gravity.cc              include/core/systems/gravity.h
     src/systems/renderer/renderer.cc    include/core/systems/renderer/renderer.h
     src/systems/renderer/shader.cc      include/core/systems/renderer/shader.h
                                         include/core/systems/renderer/vertex.h
@@ -39,6 +39,10 @@ target_compile_definitions(HydrogenCore PRIVATE "HCORE_DEBUG=$<IF:$<CONFIG:Debug
 
 # Core include dir
 target_include_directories(HydrogenCore PUBLIC include)
+
+# AngelScript
+add_subdirectory(external/angelscriptsdk/angelscript/projects/cmake)
+target_link_libraries(HydrogenCore PUBLIC angelscript)
 
 # SDL
 set(SDL_STATIC ON)
