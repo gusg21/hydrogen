@@ -1,4 +1,4 @@
-mask: 3
+mask: 7
 transform:
   position:
     x: 0
@@ -14,5 +14,6 @@ transform:
     y: 1
     z: 1
 model:
-  gltf: "assets/butter/Butter.glb"
-  gltf_binary: true
+  gltf: "assets/camera/AntiqueCamera.gltf"
+script:
+  script_file: "assets/scripts/test1.as"

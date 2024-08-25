@@ -1,4 +1,4 @@
-#include "core/systems/renderer/renderer.h"
+#include "core/systems/render/renderer.h"
 
 #include <fstream>
 
@@ -13,7 +13,7 @@
 
 #include "core/engine.h"
 #include "core/math/mat4x4.h"
-#include "core/mesh.h"
+#include "core/systems/render/mesh.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
@@ -63,7 +63,7 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
 }
 
 uint32_t loadProgram(
-    h_core::systems::Shader* out_shader, std::string vertexPath,
+    h_core::render::Shader* out_shader, std::string vertexPath,
     std::string fragmentPath) {
     uint32_t result;
 
@@ -103,8 +103,8 @@ uint32_t loadProgram(
     return 0;
 }
 
-uint32_t h_core::systems::Renderer::init() {
-    m_shader = h_core::systems::Shader {};
+uint32_t h_core::render::Renderer::init() {
+    m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",
         "hcore_assets/fs_default.glsl");
@@ -113,11 +113,11 @@ uint32_t h_core::systems::Renderer::init() {
     return 0;
 }
 
-void h_core::systems::Renderer::destroy() {
+void h_core::render::Renderer::destroy() {
     SDL_GL_DeleteContext(m_glContext);
 }
 
-void h_core::systems::Renderer::beginFrame() {
+void h_core::render::Renderer::beginFrame() {
     glViewport(0, 0, engine->getWidth(), engine->getHeight());
     h_core::math::Color clearColor = engine->getClearColor();
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -150,20 +150,20 @@ void h_core::systems::Renderer::beginFrame() {
     }
 }
 
-void h_core::systems::Renderer::draw() {
+void h_core::render::Renderer::draw() {
     // printf("DEBUG: RENDERER: actor id %d\n", actorId);
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
     switch (mesh->getMeshIndexType()) {
-        case h_core::MeshIndexType::BYTE:
+        case h_core::render::MeshIndexType::BYTE:
             glElementType = GL_UNSIGNED_BYTE;
             break;
-        case h_core::MeshIndexType::SHORT:
+        case h_core::render::MeshIndexType::SHORT:
             glElementType = GL_UNSIGNED_SHORT;
             break;
-        case h_core::MeshIndexType::INT:
+        case h_core::render::MeshIndexType::INT:
             glElementType = GL_UNSIGNED_INT;
             break;
     }
@@ -174,7 +174,7 @@ void h_core::systems::Renderer::draw() {
         nullptr);
 }
 
-uint32_t h_core::systems::Renderer::initFromWindow(
+uint32_t h_core::render::Renderer::initFromWindow(
     uint32_t width, uint32_t height, SDL_Window* window) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(
@@ -201,12 +201,12 @@ uint32_t h_core::systems::Renderer::initFromWindow(
     return 0;
 }
 
-void h_core::systems::Renderer::endFrame() {}
+void h_core::render::Renderer::endFrame() {}
 
-h_core::ComponentBitmask h_core::systems::Renderer::getMask() {
+h_core::ComponentBitmask h_core::render::Renderer::getMask() {
     return TRANSFORM_COMPONENT_BITMASK | MODEL_COMPONENT_BITMASK;
 }
 
-SDL_GLContext h_core::systems::Renderer::getGLContext() {
+SDL_GLContext h_core::render::Renderer::getGLContext() {
     return m_glContext;
 }

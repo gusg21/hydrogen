@@ -4,8 +4,9 @@
 #define TINYGLTF_NOEXCEPTION
 #include "tiny_gltf.h"
 
-#include "core/systems/sys_gravity.h"
-#include "core/systems/renderer/renderer.h"
+#include "core/systems/gravity.h"
+#include "core/systems/render/renderer.h"
+#include "core/systems/script/scripting.h"
 #include "core/theming/theming.h"
 
 #include "imgui.h"
@@ -14,6 +15,8 @@
 
 uint32_t h_core::Engine::init(h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
+    m_systems[1] = nullptr;  // Renderer
+    m_systems[2] = new h_core::script::Scripting();
 
     m_project = project;
 
@@ -46,7 +49,8 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
          systemIndex++) {
         m_systems[systemIndex]->engine = this;
         if (m_systems[systemIndex]->init() != 0) {
-            printf("ERROR: ENGINE: Failed to init system index %d\n", systemIndex);
+            printf(
+                "ERROR: ENGINE: Failed to init system index %d\n", systemIndex);
             return ENGINE_INIT_FAIL_BAD_SYSTEM_INIT;
         }
     }
@@ -82,6 +86,11 @@ void h_core::Engine::run() {
     if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
         m_scene.initFromSceneSpecAssetIndex(
             &m_project->assets, m_project->initialSceneSpec);
+    }
+
+    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
+         systemIndex++) {
+        m_scene.initSystem(m_systems[systemIndex]);
     }
 
     bool engineRunning = true;

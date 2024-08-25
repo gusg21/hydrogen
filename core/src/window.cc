@@ -14,7 +14,7 @@ uint32_t h_core::Window::init(
         title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width,
         height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    m_renderer = new h_core::systems::Renderer();
+    m_renderer = new h_core::render::Renderer();
     if (m_renderer->initFromWindow(width, height, m_sdlWindow)) {
         return WINDOW_INIT_FAIL_INIT_RENDERER;
     }
@@ -88,7 +88,7 @@ void h_core::Window::swap() {
     SDL_GL_SwapWindow(m_sdlWindow);
 }
 
-h_core::systems::Renderer* h_core::Window::getRendererSystem() {
+h_core::render::Renderer* h_core::Window::getRendererSystem() {
     return m_renderer;
 }
 

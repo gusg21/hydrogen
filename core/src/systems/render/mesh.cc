@@ -1,4 +1,4 @@
-#include "core/mesh.h"
+#include "core/systems/render/mesh.h"
 
 #include <string>
 
@@ -8,7 +8,7 @@
 
 // TODO: move these godless monstrosities to a subf
 
-static h_core::Vertex cubeVertices[] = {
+static h_core::render::Vertex cubeVertices[] = {
     { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
       h_core::math::Vector2(0) },
     { h_core::math::Vector3(1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
@@ -37,14 +37,14 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     printf("INFO: MESH: loading model from YAML spec...\n");
 
     if (yaml["primitive"].as<bool>(false)) {
         // Just load cube
         printf("DEBUG: MESH: Loading cube primitive mesh\n");
         loadModel(
-            8, cubeVertices, 36, cubeTriList, h_core::MeshIndexType::SHORT);
+            8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT);
 
         return 0;
     }
@@ -118,11 +118,12 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
 
     // load vertex data
     size_t vertexBufferCount = posAccessor.count;
-    h_core::Vertex* vertexBuffer = new h_core::Vertex[vertexBufferCount] {};
+    h_core::render::Vertex* vertexBuffer =
+        new h_core::render::Vertex[vertexBufferCount] {};
 
     for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount;
          vertexIndex++) {
-        h_core::Vertex* vertex = &vertexBuffer[vertexIndex];
+        h_core::render::Vertex* vertex = &vertexBuffer[vertexIndex];
         vertex->position = reinterpret_cast<const h_core::math::Vector3*>(
             posBuffer)[vertexIndex];
         vertex->normal = reinterpret_cast<const h_core::math::Vector3*>(
@@ -142,13 +143,13 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     // determine index type
     switch (indexBufferAccessor.componentType) {
         case 5121:
-            m_meshIndexType = h_core::MeshIndexType::BYTE;
+            m_meshIndexType = h_core::render::MeshIndexType::BYTE;
             break;
         case 5123:
-            m_meshIndexType = h_core::MeshIndexType::SHORT;
+            m_meshIndexType = h_core::render::MeshIndexType::SHORT;
             break;
         case 5125:
-            m_meshIndexType = h_core::MeshIndexType::INT;
+            m_meshIndexType = h_core::render::MeshIndexType::INT;
             break;
 
         default:
@@ -164,8 +165,8 @@ uint32_t h_core::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
     return 0;
 }
 
-void h_core::Mesh::loadModel(
-    uint32_t vertexBufferCount, const h_core::Vertex* vertexBuffer,
+void h_core::render::Mesh::loadModel(
+    uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer,
     uint32_t inidicesCount, const void* indexBuffer, MeshIndexType indexType) {
     // Generate buffers and load attributes
     glGenVertexArrays(1, &m_vertexAttributesHandle);
@@ -180,18 +181,18 @@ void h_core::Mesh::loadModel(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 
     glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-        (const void*)offsetof(h_core::Vertex, position));
+        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, position));
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(
-        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-        (const void*)offsetof(h_core::Vertex, normal));
+        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, normal));
     glEnableVertexAttribArray(1);
 
     glVertexAttribPointer(
-        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::Vertex),
-        (const void*)offsetof(h_core::Vertex, texCoord));
+        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, texCoord));
     glEnableVertexAttribArray(2);
 
     // Bind the vertex and index buffers to this VAO
@@ -201,7 +202,7 @@ void h_core::Mesh::loadModel(
     // Mark buffers for static drawing (not updated)
     if (vertexBufferCount > 0) {
         glBufferData(
-            GL_ARRAY_BUFFER, sizeof(h_core::Vertex) * vertexBufferCount,
+            GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * vertexBufferCount,
             vertexBuffer, GL_STATIC_DRAW);
     }
 
@@ -240,30 +241,30 @@ void h_core::Mesh::loadModel(
 }
 
 
-GLuint h_core::Mesh::getIndexBufferHandle() {
+GLuint h_core::render::Mesh::getIndexBufferHandle() {
     return m_indexBufferHandle;
 }
 
-GLuint h_core::Mesh::getVertexAttributesHandle() {
+GLuint h_core::render::Mesh::getVertexAttributesHandle() {
     return m_vertexAttributesHandle;
 }
 
-GLuint h_core::Mesh::getVertexBufferHandle() {
+GLuint h_core::render::Mesh::getVertexBufferHandle() {
     return m_vertexBufferHandle;
 }
 
-size_t h_core::Mesh::getNumVertices() {
+size_t h_core::render::Mesh::getNumVertices() {
     return m_numVertices;
 }
 
-size_t h_core::Mesh::getNumIndices() {
+size_t h_core::render::Mesh::getNumIndices() {
     return m_numIndices;
 }
 
-h_core::MeshIndexType h_core::Mesh::getMeshIndexType() {
+h_core::render::MeshIndexType h_core::render::Mesh::getMeshIndexType() {
     return m_meshIndexType;
 }
 
-uint32_t h_core::Mesh::getPrimitiveMode() {
+uint32_t h_core::render::Mesh::getPrimitiveMode() {
     return m_primitiveMode;
 }

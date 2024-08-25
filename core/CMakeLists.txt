@@ -12,7 +12,6 @@ add_library(HydrogenCore STATIC
                                         include/core/engineevents.h
     src/event.cc                        include/core/event.h
     src/eventqueue.cc                   include/core/eventqueue.h
-    src/mesh.cc                         include/core/mesh.h
     src/project.cc                      include/core/project.h
     src/scene.cc                        include/core/scene.h
     src/system.cc                       include/core/system.h
@@ -27,9 +26,12 @@ add_library(HydrogenCore STATIC
     src/math/vector3.cc                 include/core/math/vector3.h
 
     src/systems/gravity.cc              include/core/systems/gravity.h
-    src/systems/renderer/renderer.cc    include/core/systems/renderer/renderer.h
-    src/systems/renderer/shader.cc      include/core/systems/renderer/shader.h
-                                        include/core/systems/renderer/vertex.h
+    src/systems/render/mesh.cc          include/core/systems/render/mesh.h
+    src/systems/render/renderer.cc      include/core/systems/render/renderer.h
+    src/systems/render/shader.cc        include/core/systems/render/shader.h
+                                        include/core/systems/render/vertex.h
+    src/systems/script/script.cc        include/core/systems/script/script.h
+    src/systems/script/scripting.cc     include/core/systems/script/scripting.h
     )
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -42,7 +44,14 @@ target_include_directories(HydrogenCore PUBLIC include)
 
 # AngelScript
 add_subdirectory(external/angelscriptsdk/angelscript/projects/cmake)
-target_link_libraries(HydrogenCore PUBLIC angelscript)
+add_library(HydrogenCore_AngelScriptExtensions STATIC 
+    external/angelscriptsdk/add_on/scriptstdstring/scriptstdstring.cpp
+)
+target_include_directories(HydrogenCore_AngelScriptExtensions PUBLIC 
+    external/angelscriptsdk/add_on/scriptstdstring/
+)
+target_link_libraries(HydrogenCore_AngelScriptExtensions PUBLIC angelscript)
+target_link_libraries(HydrogenCore PUBLIC HydrogenCore_AngelScriptExtensions)
 
 # SDL
 set(SDL_STATIC ON)

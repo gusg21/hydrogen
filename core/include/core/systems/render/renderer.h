@@ -3,11 +3,11 @@
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
-#include "core/systems/renderer/shader.h"
+#include "core/systems/render/shader.h"
 #include "core/system.h"
 
 namespace h_core {
-namespace systems {
+namespace render {
 class Renderer : public System {
   public:
     Renderer() = default;
@@ -32,7 +32,7 @@ class Renderer : public System {
     float m_farZ = 100.f;
     bool m_ccw = true;
 
-    h_core::systems::Shader m_shader;
+    h_core::render::Shader m_shader;
     SDL_GLContext m_glContext;
 };
 }  // namespace systems

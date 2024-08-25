@@ -11,6 +11,7 @@
 #define MODEL_INIT_FAIL_INVALID_INDEX_DATA_TYPE 3
 
 namespace h_core {
+namespace render {
 struct Vertex {
     Vertex() = default;
 
@@ -52,7 +53,9 @@ class Mesh : public Asset {
     GLuint m_vertexBufferHandle, m_vertexAttributesHandle, m_indexBufferHandle;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
-    MeshIndexType m_meshIndexType = MeshIndexType::BYTE;
+    h_core::render::MeshIndexType m_meshIndexType =
+        h_core::render::MeshIndexType::BYTE;
     uint32_t m_primitiveMode = 4;
 };
+}  // namespace render
 }  // namespace h_core

@@ -8,7 +8,7 @@
 #include "core/system.h"
 #include "core/window.h"
 
-#define ENGINE_SYSTEM_COUNT 2
+#define ENGINE_SYSTEM_COUNT 3
 
 #define ENGINE_INIT_FAIL_BAD_WINDOW_INIT 1
 #define ENGINE_INIT_FAIL_BAD_SYSTEM_INIT 2

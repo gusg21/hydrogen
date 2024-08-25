@@ -6,7 +6,7 @@
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
-#include "core/systems/renderer/renderer.h"
+#include "core/systems/render/renderer.h"
 
 namespace h_core {
 class Window {
@@ -34,11 +34,11 @@ class Window {
 
     void swap();
 
-    h_core::systems::Renderer* getRendererSystem();
+    h_core::render::Renderer* getRendererSystem();
     SDL_Window* getSDLWindow();
 
   private:
     SDL_Window* m_sdlWindow = nullptr;
-    h_core::systems::Renderer* m_renderer = nullptr;
+    h_core::render::Renderer* m_renderer = nullptr;
 };
 }  // namespace h_core

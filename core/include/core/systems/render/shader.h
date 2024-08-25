@@ -8,7 +8,7 @@
 #include "core/math/mat4x4.h"
 
 namespace h_core {
-namespace systems {
+namespace render {
 
 struct Shader {
     GLuint vertexShader, fragmentShader;
@@ -18,5 +18,5 @@ struct Shader {
     void setMat4(std::string name, h_core::math::Mat4x4 matrix);
     void setMat4Glm(std::string name, glm::mat4 matrix);
 };
-}  // namespace systems
+}  // namespace render
 }  // namespace h_core

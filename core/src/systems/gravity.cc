@@ -1,4 +1,4 @@
-#include "core/systems/sys_gravity.h"
+#include "core/systems/gravity.h"
 
 #include "stdio.h"
 
@@ -20,5 +20,5 @@ void h_core::systems::Gravity::process() {
 }
 
 h_core::ComponentBitmask h_core::systems::Gravity::getMask() {
-    return (1 << 0);
+    return TRANSFORM_COMPONENT_BITMASK;
 }
