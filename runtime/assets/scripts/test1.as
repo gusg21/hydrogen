@@ -1,5 +1,5 @@
-namespace Test {
-void doThaThang() {
-    print("HEY");
-}
+class Test1 {
+    void process() {
+        print("Howdy!");
+    }
 }

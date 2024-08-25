@@ -22,6 +22,7 @@ class Scripting : public System {
   private:
     asIScriptEngine* scriptEngine = nullptr;
     asIScriptModule* scriptModule = nullptr;
+    asIScriptContext* scriptContext = nullptr;
 
     bool scriptModuleBuilt = true;
       

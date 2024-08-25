@@ -38,3 +38,45 @@ uint32_t h_core::script::Script::initFromYaml(
 
     return 0;
 }
+
+// TODO: Chit-chat with Xav about whether these belong in script.cc or
+// scripting.cc
+uint32_t h_core::script::Script::runMethodIfExists(
+    asIScriptContext* context, std::string methodDecl) {
+    asIScriptFunction* func = type->GetMethodByDecl(methodDecl.c_str());
+
+    if (func != nullptr) {
+        // TODO(optimization): `func` is rederived in runMethod()
+        return runMethod(context, methodDecl);
+    }
+
+    return 0;
+}
+
+uint32_t h_core::script::Script::runMethod(
+    asIScriptContext* context, std::string methodDecl) {
+    asIScriptFunction* func = type->GetMethodByDecl(methodDecl.c_str());
+
+    int result;
+
+    result = context->Prepare(func);
+    if (result != 0) {
+        // TODO: AngelScript returns more specific error codes, probably
+        // worth it to specialize this error code if we ever use it
+        return SCRIPT_RUN_METHOD_FAIL_BAD_PREPARE;
+    }
+
+    result = context->SetObject(instance);
+    if (result != 0) {
+        // TODO: See above
+        return SCRIPT_RUN_METHOD_FAIL_BAD_INSTANCE;
+    }
+
+    result = context->Execute();
+    if (result != 0) {
+        // TODO: See above
+        return SCRIPT_RUN_METHOD_FAIL_BAD_EXECUTE;
+    }
+
+    return 0;
+}
