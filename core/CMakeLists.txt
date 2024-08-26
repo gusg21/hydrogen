@@ -57,6 +57,7 @@ set_target_properties(HydrogenCore_AngelScriptExtensions PROPERTIES FOLDER "Vend
 
 # SDL
 set(SDL_STATIC ON)
+set(SDL_SHARED ON) # not required but sometimes SDL will not build without it :(
 set(SDL_DISABLE_UNINSTALL ON)
 set(SDL_TEST_LIBRARY OFF)
 set(SDL_TESTS OFF)
@@ -71,6 +72,9 @@ set_target_properties(SDL2-static PROPERTIES FOLDER "Vendored/SDL")
 set_target_properties(SDL2_test PROPERTIES FOLDER "Vendored/SDL")
 set_target_properties(SDL2main PROPERTIES FOLDER "Vendored/SDL")
 set_target_properties(sdl_headers_copy PROPERTIES FOLDER "Vendored/SDL")
+if(TARGET SDL2)
+    set_target_properties(SDL2 PROPERTIES FOLDER "Vendored/SDL") # see above comment
+endif()
 
 # OpenGL
 find_package(OpenGL REQUIRED)
