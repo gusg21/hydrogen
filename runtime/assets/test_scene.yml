@@ -1,3 +1,5 @@
 actors:
   -
     file: assets/test_actor2.yml
+  -
+    file: assets/test_actor2.yml
