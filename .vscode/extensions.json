@@ -6,6 +6,7 @@
         "twxs.cmake",
         "ms-vscode.cmake-tools",
         "gruntfuggly.todo-tree",
-        "ms-vscode.hexeditor"
+        "ms-vscode.hexeditor",
+        "renesackers.angelscript"
     ]
 }
