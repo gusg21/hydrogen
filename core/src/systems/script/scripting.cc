@@ -40,14 +40,28 @@ uint32_t h_core::script::Scripting::init() {
         scriptEngine->GetModule("hyScripting", asGM_CREATE_IF_NOT_EXISTS);
     scriptContext = scriptEngine->CreateContext();
 
+    // Engine utils
     RegisterStdString(scriptEngine);
-
-    // Register functions
     scriptEngine->SetMessageCallback(
         asFUNCTION(angelScriptMessageCallback), nullptr, asCALL_CDECL);
     scriptEngine->RegisterGlobalFunction(
         "void print(const string &in)", asFUNCTION(angelScriptPrint),
         asCALL_CDECL);
+
+    // ENGINE INTERFACE BEGIN
+
+    scriptEngine->SetDefaultNamespace("engine");
+
+    // -> Types
+    scriptEngine->RegisterObjectType(
+        "Transform", sizeof(h_core::Transform), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
+
+    // -> Global Functions
+    scriptEngine->RegisterGlobalFunction(
+        "Transform getTransform()", asMETHOD(Scripting, getBoundTransform),
+        asCALL_THISCALL_ASGLOBAL, this);
+
+    // ENGINE INTERFACE END
 
     return 0;
 }
@@ -108,4 +122,8 @@ void h_core::script::Scripting::endFrame() {}
 
 uint32_t h_core::script::Scripting::getMask() {
     return SCRIPT_COMPONENT_BITMASK;
+}
+
+h_core::Transform h_core::script::Scripting::getBoundTransform() {
+    return *transform;
 }

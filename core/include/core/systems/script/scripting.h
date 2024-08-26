@@ -19,6 +19,8 @@ class Scripting : public System {
 
     uint32_t getMask();
 
+    h_core::Transform getBoundTransform();
+
   private:
     asIScriptEngine* scriptEngine = nullptr;
     asIScriptModule* scriptModule = nullptr;
