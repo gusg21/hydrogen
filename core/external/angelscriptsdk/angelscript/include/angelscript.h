@@ -622,7 +622,7 @@ asUINT asGetTypeTraits()
 	bool hasConstructor        = std::is_default_constructible<T>::value && !std::has_trivial_default_constructor<T>::value;
 	bool hasDestructor         = std::is_destructible<T>::value          && !std::has_trivial_destructor<T>::value;
 	bool hasAssignmentOperator = std::is_copy_assignable<T>::value       && !std::has_trivial_copy_assign<T>::value;
-	bool hasCopyConstructor    = std::is_copy_constructible<T>::value    && !std::has_trivial_copy_constructor<T>::value;
+	bool hasCopyConstructor    = std::is_copy_constructZible<T>::value    && !std::has_trivial_copy_constructor<T>::value;
 #endif
 	bool isFloat     = std::is_floating_point<T>::value;
 	bool isPrimitive = std::is_integral<T>::value || std::is_pointer<T>::value || std::is_enum<T>::value;

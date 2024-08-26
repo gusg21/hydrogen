@@ -33,6 +33,10 @@ void angelScriptPrint(std::string& message) {
     printf("INFO: SCRIPTING: %s\n", message.c_str());
 }
 
+std::string actorIdToString(h_core::ActorId id) {
+    return std::to_string(id);
+}
+
 uint32_t h_core::script::Scripting::init() {
     // Setup engine
     scriptEngine = asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
@@ -47,8 +51,7 @@ uint32_t h_core::script::Scripting::init() {
     scriptEngine->RegisterGlobalFunction(
         "void print(const string &in)", asFUNCTION(angelScriptPrint),
         asCALL_CDECL);
-    
-    
+
 
     // ENGINE INTERFACE BEGIN
 
@@ -56,12 +59,31 @@ uint32_t h_core::script::Scripting::init() {
 
     // -> Types
     scriptEngine->RegisterObjectType(
-        "Transform", sizeof(h_core::Transform), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
+        "Vector3", sizeof(h_core::math::Vector3),
+        asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector3>());
+    scriptEngine->RegisterObjectProperty(
+        "Vector3", "float x", asOFFSET(h_core::math::Vector3, x));
+
+    scriptEngine->RegisterObjectType(
+        "Transform", sizeof(h_core::Transform),
+        asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
+    scriptEngine->RegisterObjectProperty(
+        "Transform", "Vector3 pos", asOFFSET(h_core::Transform, position));
+
+    scriptEngine->RegisterObjectType(
+        "ActorId", sizeof(h_core::ActorId),
+        asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::ActorId>());
 
     // -> Global Functions
     scriptEngine->RegisterGlobalFunction(
-        "Transform getTransform()", asMETHOD(Scripting, getBoundTransform),
+        "Transform getBoundTransform()", asMETHOD(Scripting, getBoundTransform),
         asCALL_THISCALL_ASGLOBAL, this);
+    scriptEngine->RegisterGlobalFunction(
+        "void setBoundTransform(Transform)",
+        asMETHOD(Scripting, setBoundTransform), asCALL_THISCALL_ASGLOBAL, this);
+    scriptEngine->RegisterGlobalFunction(
+        "string toString(ActorId id)",
+        asFUNCTIONPR(actorIdToString, (ActorId), std::string), asCALL_CDECL);
 
     // ENGINE INTERFACE END
 
@@ -75,7 +97,9 @@ void h_core::script::Scripting::initPerActor() {
     scriptModuleBuilt = false;
 }
 
-void h_core::script::Scripting::beginFrame() {
+void h_core::script::Scripting::beginFrame() {}
+
+void h_core::script::Scripting::process() {
     // Build script if the script is not yet built
     // TODO: Is this good? Might be better to have a post-init hook for systems
     if (!scriptModuleBuilt) {
@@ -93,6 +117,7 @@ void h_core::script::Scripting::beginFrame() {
 
                 // Construct object
                 scriptContext->Prepare(typeConstructor);
+                scriptContext->SetArgObject(0, &actorId);
                 scriptContext->Execute();
 
                 // Retreive instance pointer
@@ -100,7 +125,7 @@ void h_core::script::Scripting::beginFrame() {
                     *(asIScriptObject**)
                          scriptContext->GetAddressOfReturnValue();
 
-                script->instance->AddRef(); // We're holding onto it
+                script->instance->AddRef();  // We're holding onto it
 
                 scriptModuleBuilt = true;
             }
@@ -112,9 +137,7 @@ void h_core::script::Scripting::beginFrame() {
         }
         else { printf("ERROR: SCRIPTING: Failed to build module.\n"); }
     }
-}
 
-void h_core::script::Scripting::process() {
     script->runMethodIfExists(scriptContext, "void process()");
 }
 
@@ -130,4 +153,8 @@ uint32_t h_core::script::Scripting::getMask() {
 
 h_core::Transform h_core::script::Scripting::getBoundTransform() {
     return *transform;
+}
+
+void h_core::script::Scripting::setBoundTransform(h_core::Transform newTrans) {
+    *transform = newTrans;
 }

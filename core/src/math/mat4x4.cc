@@ -81,7 +81,7 @@ h_core::math::Mat4x4 h_core::math::Mat4x4::createTransformMatrix(
     h_core::math::Mat4x4 scaleMat = h_core::math::Mat4x4::scaler(scale);
 
     matrix = Mat4x4::multiply(
-        Mat4x4::multiply(Mat4x4::multiply(matrix, scaleMat), rotMat), posMat);
+        Mat4x4::multiply(Mat4x4::multiply(matrix, posMat), rotMat), scaleMat);
 
     return matrix;
 }
