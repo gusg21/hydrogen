@@ -47,6 +47,8 @@ uint32_t h_core::script::Scripting::init() {
     scriptEngine->RegisterGlobalFunction(
         "void print(const string &in)", asFUNCTION(angelScriptPrint),
         asCALL_CDECL);
+    
+    
 
     // ENGINE INTERFACE BEGIN
 
@@ -85,7 +87,7 @@ void h_core::script::Scripting::beginFrame() {
                 // Determine constructor of form "MyClass @MyClass()"
                 std::string typeName = script->type->GetName();
                 std::string typeConstructorDecl =
-                    typeName + " @" + typeName + "()";
+                    typeName + " @" + typeName + "(ActorId id)";
                 asIScriptFunction* typeConstructor =
                     script->type->GetFactoryByDecl(typeConstructorDecl.c_str());
 
@@ -116,7 +118,9 @@ void h_core::script::Scripting::process() {
     script->runMethodIfExists(scriptContext, "void process()");
 }
 
-void h_core::script::Scripting::draw() {}
+void h_core::script::Scripting::draw() {
+    script->runMethodIfExists(scriptContext, "void draw()");
+}
 
 void h_core::script::Scripting::endFrame() {}
 

@@ -52,6 +52,8 @@ target_include_directories(HydrogenCore_AngelScriptExtensions PUBLIC
 )
 target_link_libraries(HydrogenCore_AngelScriptExtensions PUBLIC angelscript)
 target_link_libraries(HydrogenCore PUBLIC HydrogenCore_AngelScriptExtensions)
+set_target_properties(angelscript PROPERTIES FOLDER "Vendored/AngelScript")
+set_target_properties(HydrogenCore_AngelScriptExtensions PROPERTIES FOLDER "Vendored/AngelScript")
 
 # SDL
 set(SDL_STATIC ON)
@@ -65,7 +67,10 @@ if(TARGET SDL2::SDL2main)
     target_link_libraries(HydrogenCore PRIVATE SDL2::SDL2main)
 endif()
 
-set_target_properties(SDL2-static PROPERTIES FOLDER "SDL")
+set_target_properties(SDL2-static PROPERTIES FOLDER "Vendored/SDL")
+set_target_properties(SDL2_test PROPERTIES FOLDER "Vendored/SDL")
+set_target_properties(SDL2main PROPERTIES FOLDER "Vendored/SDL")
+set_target_properties(sdl_headers_copy PROPERTIES FOLDER "Vendored/SDL")
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -76,10 +81,12 @@ set(GLM_BUILD_TESTS OFF)
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(external/glm)
 target_link_libraries(HydrogenCore PUBLIC glm::glm)
+set_target_properties(glm PROPERTIES FOLDER "Vendored/GLM")
 
 # GLAD
 add_subdirectory(external/glad)
 target_link_libraries(HydrogenCore PUBLIC glad)
+set_target_properties(glad PROPERTIES FOLDER "Vendored/glad")
 
 # ImGui integrations
 add_subdirectory(external/imgui.cmake EXCLUDE_FROM_ALL)
@@ -92,7 +99,7 @@ target_sources(HydrogenCore PRIVATE
     external/opengl-imgui/imgui_impl_opengl3.cpp
     )
 
-set_target_properties(imgui.cmake PROPERTIES FOLDER "imgui")
+set_target_properties(imgui.cmake PROPERTIES FOLDER "Vendored/imgui")
 
 # tinygltf integration
 set(TINYGLTF_INSTALL OFF)
@@ -100,7 +107,7 @@ set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 add_subdirectory(external/tinygltf EXCLUDE_FROM_ALL)
 target_link_libraries(HydrogenCore PRIVATE tinygltf)
 
-set_target_properties(tinygltf PROPERTIES FOLDER "tinygltf")
+set_target_properties(tinygltf PROPERTIES FOLDER "Vendored/tinygltf")
 
 # yaml-cpp
 set(YAML_BUILD_SHARED_LIBS OFF)
@@ -108,8 +115,8 @@ set(YAML_CPP_FORMAT_SOURCE OFF)
 set(YAML_CPP_INSTALL OFF)
 set(YAML_CPP_BUILD_TOOLS OFF)
 add_subdirectory(external/yaml-cpp EXCLUDE_FROM_ALL)
-set_target_properties(yaml-cpp PROPERTIES FOLDER "yaml-cpp")
-set_target_properties(uninstall PROPERTIES FOLDER "yaml-cpp/misc")
+set_target_properties(yaml-cpp PROPERTIES FOLDER "Vendored/yaml-cpp")
+set_target_properties(uninstall PROPERTIES FOLDER "Vendored/yaml-cpp/misc")
 
 target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
 
@@ -119,6 +126,7 @@ function(HydrogenCore_CopyShaders folder)
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
     )
     add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
+    set_target_properties(HydrogenCore_CopyShaders PROPERTIES FOLDER "HyCoreSupport")
 endfunction()
 
 function(HydrogenCore_SetupMain target)
