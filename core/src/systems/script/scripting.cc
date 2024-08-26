@@ -63,12 +63,18 @@ uint32_t h_core::script::Scripting::init() {
         asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector3>());
     scriptEngine->RegisterObjectProperty(
         "Vector3", "float x", asOFFSET(h_core::math::Vector3, x));
+    scriptEngine->RegisterObjectProperty(
+        "Vector3", "float y", asOFFSET(h_core::math::Vector3, y));
+    scriptEngine->RegisterObjectProperty(
+        "Vector3", "float z", asOFFSET(h_core::math::Vector3, z));
 
     scriptEngine->RegisterObjectType(
         "Transform", sizeof(h_core::Transform),
         asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
     scriptEngine->RegisterObjectProperty(
-        "Transform", "Vector3 pos", asOFFSET(h_core::Transform, position));
+        "Transform", "Vector3 position", asOFFSET(h_core::Transform, position));
+    scriptEngine->RegisterObjectProperty(
+        "Transform", "Vector3 scale", asOFFSET(h_core::Transform, scale));
 
     scriptEngine->RegisterObjectType(
         "ActorId", sizeof(h_core::ActorId),

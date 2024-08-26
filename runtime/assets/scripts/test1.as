@@ -10,7 +10,7 @@ class Test1 {
         // print("Howdy!");
 
         engine::Transform trans = engine::getBoundTransform(); // Gets current transform
-        trans.pos.x += 0.01f;
+        trans.position.x += 0.01f;
         engine::setBoundTransform(trans);
     }
 }
