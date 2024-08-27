@@ -9,8 +9,8 @@
 // void pmat(h_core::math::Mat4x4 m) {
 //     for (uint32_t i = 0; i < 4; i++) {
 //         printf(
-//             "%f %f %f %f\n", m.matrix[0 + i], m.matrix[4 + i], m.matrix[8 + i],
-//             m.matrix[12 + i]);
+//             "%f %f %f %f\n", m.matrix[0 + i], m.matrix[4 + i], m.matrix[8 +
+//             i], m.matrix[12 + i]);
 //     }
 // }
 
@@ -61,13 +61,12 @@ int main(int argc, char* args[]) {
     h_core::Engine* engine = new h_core::Engine();
 
     h_core::Project project {};
-    project.projectName = "Hello World!";
+    project.initFromYaml("assets/project.yml");
 
-    uint32_t engineInitResult = engine->init(&project);
+    h_core::Assets assets {};
+
+    uint32_t engineInitResult = engine->init(&assets, &project);
     if (engineInitResult != 0) { return engineInitResult; }
-
-    project.initialSceneSpec = project.assets.getOrLoadAsset<h_core::SceneSpec>(
-        "assets/test_scene.yml");
 
     engine->run();
     engine->destroy();

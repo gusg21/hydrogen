@@ -23,7 +23,7 @@ class Engine {
 
     /// @brief set up the engine with a given project
     /// @param project the project
-    uint32_t init(h_core::Project* project);
+    uint32_t init(h_core::Assets* assets, h_core::Project* project);
 
     /// @brief clean up the engine
     void destroy();
@@ -37,7 +37,8 @@ class Engine {
     h_core::math::Color getClearColor();
 
   private:
-    h_core::Project* m_project {};
+    h_core::Assets* m_assets = nullptr;
+    h_core::Project* m_project = nullptr;
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
     h_core::Scene m_scene {};

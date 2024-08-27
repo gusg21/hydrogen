@@ -13,14 +13,15 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-uint32_t h_core::Engine::init(h_core::Project* project) {
+uint32_t h_core::Engine::init(
+    h_core::Assets* out_assets, h_core::Project* project) {
     m_systems[0] = new h_core::systems::Gravity();
     m_systems[1] = nullptr;  // Renderer
     m_systems[2] = new h_core::script::Scripting();
 
     m_project = project;
 
-    std::string windowTitle = "hydrogen runtime - " + project->projectName;
+    std::string windowTitle = "hydrogen runtime - " + project->name;
 
     m_window = new h_core::Window();
     uint32_t windowInitResult = m_window->init(
@@ -55,6 +56,9 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
         }
     }
 
+    m_assets = out_assets;
+    m_assets->loadFromProject(project);
+
     return 0;
 }
 
@@ -85,7 +89,7 @@ void h_core::Engine::run() {
     // Set up first scene
     if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
         m_scene.initFromSceneSpecAssetIndex(
-            &m_project->assets, m_project->initialSceneSpec);
+            m_assets, m_project->initialSceneSpec);
     }
 
     for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;

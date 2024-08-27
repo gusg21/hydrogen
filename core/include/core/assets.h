@@ -23,10 +23,14 @@ namespace h_core {
 typedef uint32_t AssetHash;
 typedef uint32_t AssetIndex;
 
+class Project;
+
 // Base class for all sources of assets (packed/unpacked)
 class Assets {
   public:
     Assets() = default;
+
+    void loadFromProject(h_core::Project* project);
 
     /// @brief convert the name of an asset to its hash
     /// @param string the string to convert (asset name)
