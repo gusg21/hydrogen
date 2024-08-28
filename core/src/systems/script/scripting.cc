@@ -37,7 +37,7 @@ std::string actorIdToString(h_core::ActorId id) {
     return std::to_string(id);
 }
 
-uint32_t h_core::script::Scripting::init() {
+uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
     // Setup engine
     scriptEngine = asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
     scriptModule =
@@ -108,41 +108,6 @@ void h_core::script::Scripting::beginFrame() {}
 void h_core::script::Scripting::process() {
     // Build script if the script is not yet built
     // TODO: Is this good? Might be better to have a post-init hook for systems
-    if (!scriptModuleBuilt) {
-        int result = scriptModule->Build();
-        if (!(result < 0)) {
-            if (scriptModule->GetObjectTypeCount() > 0) {
-                // Get the first type
-                script->type = scriptModule->GetObjectTypeByIndex(0);
-                // Determine constructor of form "MyClass @MyClass()"
-                std::string typeName = script->type->GetName();
-                std::string typeConstructorDecl =
-                    typeName + " @" + typeName + "(ActorId id)";
-                asIScriptFunction* typeConstructor =
-                    script->type->GetFactoryByDecl(typeConstructorDecl.c_str());
-
-                // Construct object
-                scriptContext->Prepare(typeConstructor);
-                scriptContext->SetArgObject(0, &actorId);
-                scriptContext->Execute();
-
-                // Retreive instance pointer
-                script->instance =
-                    *(asIScriptObject**)
-                         scriptContext->GetAddressOfReturnValue();
-
-                script->instance->AddRef();  // We're holding onto it
-
-                scriptModuleBuilt = true;
-            }
-            else {
-                printf(
-                    "ERROR: SCRIPTING: No defined types in module %s!\n",
-                    scriptModule->GetName());
-            }
-        }
-        else { printf("ERROR: SCRIPTING: Failed to build module.\n"); }
-    }
 
     script->runMethodIfExists(scriptContext, "void process()");
 }

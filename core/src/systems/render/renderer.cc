@@ -103,7 +103,7 @@ uint32_t loadProgram(
     return 0;
 }
 
-uint32_t h_core::render::Renderer::init() {
+uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",

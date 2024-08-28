@@ -12,7 +12,7 @@ class Renderer : public System {
   public:
     Renderer() = default;
 
-    uint32_t init();
+    uint32_t init(h_core::Engine* engine) override;
     void destroy();
     void beginFrame();
     void draw();

@@ -7,6 +7,6 @@ class Assets;
 
 class Asset {
   public:
-    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
+    virtual uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
 };
 }  // namespace h_core

@@ -9,7 +9,7 @@ namespace script {
 
 class Scripting : public System {
   public:
-    uint32_t init();
+    uint32_t init(h_core::Engine* engine);
     void destroy();
     void initPerActor();
     void beginFrame();

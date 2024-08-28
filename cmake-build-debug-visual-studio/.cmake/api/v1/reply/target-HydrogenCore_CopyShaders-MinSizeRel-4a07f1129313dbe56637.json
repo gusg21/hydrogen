@@ -1,0 +1,84 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"HydrogenCore_CopyShaders"
+		],
+		"files" : 
+		[
+			"core/CMakeLists.txt",
+			"runtime/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 15,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 129,
+				"parent" : 1
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "HyCoreSupport"
+	},
+	"id" : "HydrogenCore_CopyShaders::@dcf6d6b3a78d87189fa9",
+	"name" : "HydrogenCore_CopyShaders",
+	"paths" : 
+	{
+		"build" : "runtime",
+		"source" : "runtime"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"isGenerated" : true,
+			"path" : "cmake-build-debug-visual-studio/runtime/CMakeFiles/HydrogenCore_CopyShaders",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "cmake-build-debug-visual-studio/CMakeFiles/013c1c5eef9dd52e328af0b6b20cf460/HydrogenCore_CopyShaders.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

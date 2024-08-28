@@ -24,52 +24,8 @@ h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
     m_masks[newId] = spec->mask;
     m_transforms[newId] = spec->transform;
     m_meshes[newId] = spec->mesh;
-    m_scripts[newId] = spec->script;
+    m_scripts[newId].initFromScriptAsset(spec->script, engine);
     printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, m_masks[newId]);
     m_nextId++;
     return newId;
-}
-
-void h_core::Scene::updateSystemReferences(
-    h_core::System* system, h_core::ActorId id) {
-    system->actorId = id;
-    system->transform = &m_transforms[id];
-    system->mesh = &m_meshes[id];
-    system->script = &m_scripts[id];
-}
-
-void h_core::Scene::initSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->initPerActor();
-        }
-    }
-}
-
-void h_core::Scene::processSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->process();
-        }
-    }
-}
-
-void h_core::Scene::drawSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->draw();
-        }
-    }
 }

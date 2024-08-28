@@ -1,0 +1,10 @@
+^C:\USERS\ANGUS.GOUCHER\DESKTOP\HYDROGEN\CORE\EXTERNAL\YAML-CPP\CMAKELISTS.TXT
+setlocal
+"C:\Program Files (x86)\JetBrains\CLion 2021.3.4\bin\cmake\win\bin\cmake.exe" -SC:/Users/angus.goucher/Desktop/hydrogen -BC:/Users/angus.goucher/Desktop/hydrogen/cmake-build-debug-visual-studio --check-stamp-file C:/Users/angus.goucher/Desktop/hydrogen/cmake-build-debug-visual-studio/core/external/yaml-cpp/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

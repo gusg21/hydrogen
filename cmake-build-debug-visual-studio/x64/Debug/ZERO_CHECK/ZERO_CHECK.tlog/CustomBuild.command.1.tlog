@@ -1,0 +1,10 @@
+^C:\USERS\ANGUS.GOUCHER\DESKTOP\HYDROGEN\CMAKE-BUILD-DEBUG-VISUAL-STUDIO\CMAKEFILES\8B8E35F56E79A318CF6805655A55B1B5\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\JetBrains\CLion 2021.3.4\bin\cmake\win\bin\cmake.exe" -SC:/Users/angus.goucher/Desktop/hydrogen -BC:/Users/angus.goucher/Desktop/hydrogen/cmake-build-debug-visual-studio --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/angus.goucher/Desktop/hydrogen/cmake-build-debug-visual-studio/Hydrogen.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

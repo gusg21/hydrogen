@@ -6,6 +6,7 @@
 #include "core/project.h"
 #include "core/scene.h"
 #include "core/system.h"
+#include "core/systems.h"
 #include "core/window.h"
 
 #define ENGINE_SYSTEM_COUNT 3
@@ -31,20 +32,22 @@ class Engine {
     /// @brief run the game loop (blocking)
     void run();
 
-    uint32_t getWidth();
-    uint32_t getHeight();
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
 
     h_core::math::Color getClearColor();
 
   private:
+    h_core::Systems m_systems {};
+
     h_core::Assets* m_assets = nullptr;
     h_core::Project* m_project = nullptr;
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
     h_core::Scene m_scene {};
-    h_core::System* m_systems[ENGINE_SYSTEM_COUNT];
 
-    uint32_t m_windowWidth, m_windowHeight;
+    uint32_t m_windowWidth = 1600;
+    uint32_t m_windowHeight = 900;
     h_core::math::Color m_clearColor;
 };
 }  // namespace h_core

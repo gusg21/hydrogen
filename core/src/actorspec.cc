@@ -1,12 +1,13 @@
 #include "core/actorspec.h"
 
 
-uint32_t h_core::ActorSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::ActorSpec::initFromYaml(
+    h_core::Assets* assets, YAML::Node yaml) {
     // TODO: Error handling
 
-    if (!yaml["mask"].IsDefined()) 
+    if (!yaml["mask"].IsDefined())
         printf("WARN: ACTORSPEC: No mask on actor spec!\n");
-    
+
     mask = yaml["mask"].as<h_core::ComponentBitmask>(0);
 
     if (yaml["transform"].IsDefined())
@@ -16,8 +17,10 @@ uint32_t h_core::ActorSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml
 
     // TODO: Convert to model loading
     if (yaml["model"].IsDefined()) mesh.initFromYaml(assets, yaml["model"]);
-    
-    if (yaml["script"].IsDefined()) script.initFromYaml(assets, yaml["script"]);
+
+    if (yaml["script"].IsDefined())
+        assets->getOrLoadAsset<h_core::script::ScriptAsset>(
+            yaml["script"]["file"].as<std::string>(""));
 
     return 0;
 }

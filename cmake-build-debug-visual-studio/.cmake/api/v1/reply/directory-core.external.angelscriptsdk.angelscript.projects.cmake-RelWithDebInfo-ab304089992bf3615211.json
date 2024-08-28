@@ -1,0 +1,102 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"core/external/angelscriptsdk/angelscript/projects/cmake/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 196,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 203,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 226,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 231,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"core/external/angelscriptsdk/angelscript/projects/cmake/RelWithDebInfo/angelscript.lib"
+			],
+			"targetId" : "angelscript::@51e5a1e49f068a818cfb",
+			"targetIndex" : 22,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Devel",
+			"destination" : "include",
+			"paths" : 
+			[
+				"core/external/angelscriptsdk/angelscript/projects/cmake/../../include/angelscript.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/Angelscript",
+			"exportName" : "AngelscriptTargets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "angelscript::@51e5a1e49f068a818cfb",
+					"index" : 22
+				}
+			],
+			"paths" : 
+			[
+				"core/external/angelscriptsdk/angelscript/projects/cmake/CMakeFiles/Export/lib/cmake/Angelscript/AngelscriptTargets.cmake"
+			],
+			"type" : "export"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Devel",
+			"destination" : "lib/cmake/Angelscript",
+			"paths" : 
+			[
+				"core/external/angelscriptsdk/angelscript/projects/cmake/cmake/AngelscriptConfig.cmake",
+				"cmake-build-debug-visual-studio/core/external/angelscriptsdk/angelscript/projects/cmake/Angelscript/AngelscriptConfigVersion.cmake"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "core/external/angelscriptsdk/angelscript/projects/cmake",
+		"source" : "core/external/angelscriptsdk/angelscript/projects/cmake"
+	}
+}
