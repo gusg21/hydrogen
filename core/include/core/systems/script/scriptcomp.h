@@ -19,6 +19,13 @@ class ScriptComp {
 
     h_core::script::ScriptAsset* scriptAsset;
     asIScriptObject* instance;
+
+    uint32_t runMethodIfExists(
+        asIScriptContext* context,
+        std::string methodDecl);
+    uint32_t runMethod(
+        asIScriptContext* context,
+        std::string methodDecl);
 };
 
 }

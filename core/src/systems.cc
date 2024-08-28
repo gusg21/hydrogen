@@ -3,11 +3,24 @@
 //
 
 #include "core/systems.h"
+#include "core/system.h"
+#include "core/systems/gravity.h"
+#include "core/systems/render/renderer.h"
+#include "core/systems/script/scripting.h"
 
 uint32_t h_core::Systems::init(h_core::Engine* engine) {
-    renderer->init(engine);
-    gravity->init(engine);
-    scripting->init(engine);
+    uint32_t result;
+
+    result = renderer->init(engine);
+    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
+
+    result = gravity->init(engine);
+    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
+
+    result = scripting->init(engine);
+    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
+
+    return 0;
 }
 
 void h_core::Systems::destroy() {
@@ -101,4 +114,3 @@ void h_core::Systems::endFrame() {
         system->endFrame();
     }
 }
-

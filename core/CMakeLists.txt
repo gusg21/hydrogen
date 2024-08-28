@@ -139,5 +139,7 @@ function(HydrogenCore_SetupMain target)
         target_link_libraries(${target} PRIVATE SDL2::SDL2main)
     endif()
 
-    target_sources(${target} PRIVATE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/icon/app.o)
+    if (MSVC)
+        target_sources(${target} PRIVATE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/icon/app.o)
+    endif()
 endfunction()

@@ -7,7 +7,7 @@
 
 #include "core/assets.h"
 
-uint32_t h_core::SceneSpec::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::SceneSpec::initFromYaml(h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
     std::vector<YAML::Node> actorSpecYamls =
         yaml["actors"].as<std::vector<YAML::Node>>(std::vector<YAML::Node> {});
     actorSpecIndices.clear();

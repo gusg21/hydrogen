@@ -2,6 +2,7 @@
 
 #include "angelscript.h"
 
+#include "core/math/math.h"
 #include "core/system.h"
 
 namespace h_core {
@@ -18,6 +19,7 @@ class Scripting : public System {
     void endFrame();
 
     uint32_t getMask();
+    asIScriptContext* getContext();
 
     h_core::Transform getBoundTransform();
     void setBoundTransform(h_core::Transform newTrans);
@@ -28,7 +30,6 @@ class Scripting : public System {
     asIScriptContext* scriptContext = nullptr;
 
     bool scriptModuleBuilt = true;
-      
 };
 }  // namespace script
 

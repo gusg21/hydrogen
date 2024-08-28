@@ -2,7 +2,7 @@
 
 
 uint32_t h_core::ActorSpec::initFromYaml(
-    h_core::Assets* assets, YAML::Node yaml) {
+    h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
     // TODO: Error handling
 
     if (!yaml["mask"].IsDefined())

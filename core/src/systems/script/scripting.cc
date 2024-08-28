@@ -2,7 +2,9 @@
 
 #include "scriptstdstring.h"
 
-#include "core/systems/script/script.h"
+#include "core/math/math.h"
+#include "core/transform.h"
+#include "core/systems/script/scriptcomp.h"
 
 #define SCRIPTING_ANGELSCRIPT_VERSION 23700  // AngelScript v23.7.0
 
@@ -99,8 +101,7 @@ uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
 void h_core::script::Scripting::destroy() {}
 
 void h_core::script::Scripting::initPerActor() {
-    scriptModule->AddScriptSection(script->name.c_str(), script->code.c_str());
-    scriptModuleBuilt = false;
+
 }
 
 void h_core::script::Scripting::beginFrame() {}
@@ -120,6 +121,10 @@ void h_core::script::Scripting::endFrame() {}
 
 uint32_t h_core::script::Scripting::getMask() {
     return SCRIPT_COMPONENT_BITMASK;
+}
+
+asIScriptContext* h_core::script::Scripting::getContext() {
+    return scriptContext;
 }
 
 h_core::Transform h_core::script::Scripting::getBoundTransform() {

@@ -2,13 +2,17 @@
 
 #include "core/actor.h"
 #include "core/componentbitmask.h"
-#include "core/transform.h"
-#include "core/systems/render/mesh.h"
-#include "core/systems/script/scriptcomp.h"
 
 namespace h_core {
-//class Model;
+namespace script {
+class ScriptComp;
+}
+namespace render {
+class Mesh;
+}
+// class Model;
 class Engine;
+class Transform;
 
 class System {
   public:

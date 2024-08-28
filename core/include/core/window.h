@@ -6,9 +6,12 @@
 
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
-#include "core/systems/render/renderer.h"
 
 namespace h_core {
+namespace render {
+class Renderer;
+}
+
 class Window {
   public:
     Window() = default;
@@ -22,8 +25,7 @@ class Window {
     /// @param fullscreen fullscreen or no
     /// @return 0 on success, WINDOW_FAIL_* on fail
     uint32_t init(
-        std::string title, uint32_t width, uint32_t height,
-        bool fullscreen);
+        std::string title, uint32_t width, uint32_t height, bool fullscreen);
 
     /// @brief clean up the window
     void destroy();

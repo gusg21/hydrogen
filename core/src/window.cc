@@ -3,6 +3,8 @@
 #include "SDL2/SDL.h"
 #include "imgui_impl_sdl2.h"
 
+#include "core/systems/render/renderer.h"
+
 #define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
 uint32_t h_core::Window::init(

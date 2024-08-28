@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stdio.h>
 
 #include "core/actorspec.h"
@@ -7,25 +5,29 @@
 #include "core/system.h"
 
 void h_core::Scene::initFromSceneSpecAssetIndex(
-    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex) {
+    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex,
+    asIScriptContext* scriptingContext) {
     h_core::SceneSpec* sceneSpec =
         assets->getAssetByIndex<h_core::SceneSpec>(sceneSpecIndex);
 
     for (uint32_t actorSpecIndex = 0;
          actorSpecIndex < sceneSpec->actorSpecIndices.size();
          actorSpecIndex++) {
-        addActor(assets->getAssetByIndex<h_core::ActorSpec>(
-            sceneSpec->actorSpecIndices[actorSpecIndex]));
+        addActor(
+            assets->getAssetByIndex<h_core::ActorSpec>(
+                sceneSpec->actorSpecIndices[actorSpecIndex]),
+            scriptingContext);
     }
 }
 
-h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
+h_core::ActorId h_core::Scene::addActor(
+    ActorSpec* spec, asIScriptContext* scriptingContext) {
     ActorId newId = m_nextId;
-    m_masks[newId] = spec->mask;
-    m_transforms[newId] = spec->transform;
-    m_meshes[newId] = spec->mesh;
-    m_scripts[newId].initFromScriptAsset(spec->script, engine);
-    printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, m_masks[newId]);
+    masks[newId] = spec->mask;
+    transforms[newId] = spec->transform;
+    meshes[newId] = spec->mesh;
+    scripts[newId].init(spec->script, scriptingContext, newId);
+    printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
     m_nextId++;
     return newId;
 }

@@ -6,7 +6,7 @@
 #include "core/actor.h"
 
 uint32_t h_core::script::ScriptAsset::initFromYaml(
-    h_core::Assets* assets, YAML::Node node) {
+    h_core::Assets* assets, h_core::Systems* systems, YAML::Node node) {
     std::string filePath = node["script_file"].as<std::string>("");
 
     std::string yamlName =
@@ -41,50 +41,6 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(
 
     printf("DEBUG: SCRIPT: chose name %s\n", name.c_str());
     printf("DEBUG: SCRIPT: \n%s\n", code.c_str());
-
-    return 0;
-}
-
-// TODO: Chit-chat with Xav about whether these belong in script.cc or
-// scripting.cc
-uint32_t h_core::script::ScriptAsset::runMethodIfExists(
-    asIScriptContext* context, asIScriptObject* instance,
-    std::string methodDecl) {
-    asIScriptFunction* func = type->GetMethodByDecl(methodDecl.c_str());
-
-    if (func != nullptr) {
-        // TODO(optimization): `func` is rederived in runMethod()
-        return runMethod(context, instance, methodDecl);
-    }
-
-    return 0;
-}
-
-uint32_t h_core::script::ScriptAsset::runMethod(
-    asIScriptContext* context, asIScriptObject* instance,
-    std::string methodDecl) {
-    asIScriptFunction* func = type->GetMethodByDecl(methodDecl.c_str());
-
-    int result;
-
-    result = context->Prepare(func);
-    if (result != 0) {
-        // TODO: AngelScript returns more specific error codes, probably
-        // worth it to specialize this error code if we ever use it
-        return SCRIPT_RUN_METHOD_FAIL_BAD_PREPARE;
-    }
-
-    result = context->SetObject(instance);
-    if (result != 0) {
-        // TODO: See above
-        return SCRIPT_RUN_METHOD_FAIL_BAD_INSTANCE;
-    }
-
-    result = context->Execute();
-    if (result != 0) {
-        // TODO: See above
-        return SCRIPT_RUN_METHOD_FAIL_BAD_EXECUTE;
-    }
 
     return 0;
 }

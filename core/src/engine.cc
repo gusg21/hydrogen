@@ -24,6 +24,7 @@ uint32_t h_core::Engine::init(
         windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_systems.renderer = m_window->getRendererSystem();
+    m_systems.renderer->init(this);
 
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
@@ -43,12 +44,12 @@ uint32_t h_core::Engine::init(
         m_window->getRendererSystem()->getGLContext());
 
     m_systems.gravity = new h_core::systems::Gravity();
+    m_systems.gravity->init(this);
     m_systems.scripting = new h_core::script::Scripting();
-
-
+    m_systems.scripting->init(this);
 
     m_assets = out_assets;
-    m_assets->loadFromProject(project);
+    m_assets->loadFromProject(project, &m_systems);
 
     return 0;
 }
@@ -70,7 +71,7 @@ void h_core::Engine::run() {
     // Set up first scene
     if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
         m_scene.initFromSceneSpecAssetIndex(
-            m_assets, m_project->initialSceneSpec);
+            m_assets, m_project->initialSceneSpec, m_systems.scripting->getContext());
     }
 
     m_systems.initScene(&m_scene);

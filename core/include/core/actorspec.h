@@ -10,7 +10,7 @@
 namespace h_core {
 class ActorSpec : public Asset {
   public:
-    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node yaml);
+    uint32_t initFromYaml(h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml);
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;
