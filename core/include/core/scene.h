@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 #include "core/actor.h"
-#include "core/actorspec.h"
+#include "core/actorspecasset.h"
 #include "core/componentbitmask.h"
-#include "core/scenespec.h"
+#include "core/scenespecasset.h"
 #include "core/system.h"
 #include "core/systems/render/mesh.h"
 #include "core/systems/script/scriptcomp.h"
@@ -25,7 +25,7 @@ class Scene {
         asIScriptContext* scriptingContext);
 
     ActorId addActor(
-        h_core::ActorSpec* actorSpec, asIScriptContext* scriptingContext);
+        h_core::ActorSpecAsset* actorSpec, asIScriptContext* scriptingContext);
 
     h_core::ComponentBitmask masks[SCENE_MAX_ACTORS] = {};
     h_core::Transform transforms[SCENE_MAX_ACTORS] = {};

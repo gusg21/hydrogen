@@ -3,20 +3,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "core/assets.h"
 #include "core/math/color.h"
-#include "core/scenespec.h"
+#include "core/scenespecasset.h"
+#include "core/projectassetentry.h"
 
 namespace h_core {
-struct ProjectAssetEntry {
-    ProjectAssetEntry(uint32_t index, uint32_t typeId, std::string assetPath)
-        : index(index), typeId(typeId), assetPath(assetPath) {}
-
-    uint32_t index;
-    uint32_t typeId;
-    std::string assetPath;
-};
-
 class Project {
   public:
     Project() = default;

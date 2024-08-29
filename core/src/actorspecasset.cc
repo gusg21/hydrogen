@@ -1,7 +1,7 @@
-#include "core/actorspec.h"
+#include "core/actorspecasset.h"
 
 
-uint32_t h_core::ActorSpec::initFromYaml(
+uint32_t h_core::ActorSpecAsset::initFromYaml(
     h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
     // TODO: Error handling
 

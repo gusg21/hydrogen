@@ -17,9 +17,15 @@ void h_core::Assets::loadFromProject(
     for (h_core::ProjectAssetEntry assetInfo : project->assets) {
         switch (assetInfo.typeId) {
             case 0: {  // Scene spec
-                h_core::SceneSpec* spec = new h_core::SceneSpec();
-                loadAssetFromFile<h_core::SceneSpec>(spec, systems, assetInfo.assetPath);
-                m_assets[assetInfo.index] = spec;
+                loadTyped<h_core::SceneSpecAsset>(m_assets, assetInfo, systems);
+                break;
+            }
+            case 1: {
+                loadTyped<h_core::ActorSpecAsset>(m_assets, assetInfo, systems);
+                break;
+            }
+            case 2: {
+                loadTyped<h_core::script::ScriptAsset>(m_assets, assetInfo, systems);
                 break;
             }
         }

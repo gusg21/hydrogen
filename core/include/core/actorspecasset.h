@@ -8,7 +8,7 @@
 #include "core/systems/script/scriptcomp.h"
 
 namespace h_core {
-class ActorSpec : public Asset {
+class ActorSpecAsset : public Asset {
   public:
     uint32_t initFromYaml(h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml);
 

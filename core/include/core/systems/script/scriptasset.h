@@ -21,6 +21,8 @@ namespace script {
 
 class ScriptAsset : public Asset {
   public:
+    ScriptAsset() = default;
+
     uint32_t initFromYaml(
         h_core::Assets* assets, h_core::Systems* system,
         YAML::Node node) override;

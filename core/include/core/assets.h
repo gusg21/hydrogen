@@ -13,6 +13,7 @@
 
 #include "core/asset.h"
 #include "core/systems.h"
+#include "core/projectassetentry.h"
 
 #define ASSETS_LOAD_FAIL_CANT_OPEN_FILE 1
 #define ASSETS_LOAD_FAIL_FILE_TOO_BIG   2
@@ -55,10 +56,14 @@ class Assets {
     template<typename AssetType>
     AssetType* getAssetByIndex(h_core::AssetIndex index);
 
+
   private:
     template<typename AssetType>
     h_core::AssetIndex loadAssetFromFile(
         AssetType* out_asset, h_core::Systems* systems, std::string filePath);
+
+    template <typename AssetType>
+    void loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo, h_core::Systems* systems);
 
     h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex>
@@ -125,4 +130,11 @@ inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) {
         "Can't get asset type that does not derive from Asset");
 
     return static_cast<AssetType*>(m_assets[index]);
+}
+
+template <typename AssetType>
+void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo, h_core::Systems* systems) {
+    AssetType* spec = new AssetType();
+    loadAssetFromFile<AssetType>(spec, systems, assetInfo.assetPath);
+    *out_assets[assetInfo.index] = spec;
 }
