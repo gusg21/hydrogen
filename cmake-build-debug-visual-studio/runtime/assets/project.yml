@@ -1,7 +1,0 @@
-initialSceneSpec: 0
-name: "Hello World"
-assets:
-  - 
-    index: 0
-    type: 0
-    path: "assets/test_scene.yml"
