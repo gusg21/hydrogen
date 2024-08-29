@@ -13,7 +13,7 @@ uint32_t h_core::script::ScriptComp::init(
 }
 
 uint32_t h_core::script::ScriptComp::runMethodIfExists(
-    asIScriptContext* context, std::string methodDecl) {
+    asIScriptContext* context, std::string methodDecl) const {
     asIScriptFunction* func = scriptAsset->type->GetMethodByDecl(methodDecl.c_str());
 
     if (func != nullptr) {
@@ -26,7 +26,7 @@ uint32_t h_core::script::ScriptComp::runMethodIfExists(
 
 
 uint32_t h_core::script::ScriptComp::runMethod(
-    asIScriptContext* context, std::string methodDecl) {
+    asIScriptContext* context, std::string methodDecl) const {
     asIScriptFunction* func = scriptAsset->type->GetMethodByDecl(methodDecl.c_str());
 
     int result;

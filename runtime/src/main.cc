@@ -1,9 +1,5 @@
 #include <stdio.h>
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/ext.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
 #include <core/engine.h>
 
 // void pmat(h_core::math::Mat4x4 m) {

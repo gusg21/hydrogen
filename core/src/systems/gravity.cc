@@ -2,9 +2,6 @@
 
 #include "stdio.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/quaternion.hpp"
-
 #include "core/scene.h"
 
 // NOTE: This system is a dummy! Useful for reference and testing but probably

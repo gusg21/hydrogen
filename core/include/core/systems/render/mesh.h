@@ -1,9 +1,10 @@
 #pragma once
 
+#include "glad/glad.h"
+
 #include "core/asset.h"
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
-#include "glad/glad.h"
 
 #define MODEL_COMPONENT_BITMASK                 (1 << 1)
 #define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH      1

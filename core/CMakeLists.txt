@@ -81,11 +81,11 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
 
 # GLM
-set(GLM_BUILD_TESTS OFF)
-set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(external/glm)
-target_link_libraries(HydrogenCore PUBLIC glm::glm)
-set_target_properties(glm PROPERTIES FOLDER "Vendored/GLM")
+#set(GLM_BUILD_TESTS OFF)
+#set(BUILD_SHARED_LIBS OFF)
+#add_subdirectory(external/glm)
+#target_link_libraries(HydrogenCore PUBLIC glm::glm)
+#set_target_properties(glm PROPERTIES FOLDER "Vendored/GLM")
 
 # GLAD
 add_subdirectory(external/glad)
