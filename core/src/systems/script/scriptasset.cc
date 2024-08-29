@@ -39,8 +39,8 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(
         }
     }
 
-    printf("DEBUG: SCRIPT: chose name %s\n", name.c_str());
-    printf("DEBUG: SCRIPT: \n%s\n", code.c_str());
+    ::printf("DEBUG: SCRIPT: chose name %s\n", name.c_str());
+    ::printf("DEBUG: SCRIPT: \n%s\n", code.c_str());
 
     return 0;
 }
@@ -76,7 +76,7 @@ uint32_t h_core::script::ScriptAsset::compile(asIScriptContext* context) {
                 type->GetFactoryByDecl(typeConstructorDecl.c_str());
         }
         else {
-            printf(
+            ::printf(
                 "ERROR: SCRIPT: No defined types in module %s!\n",
                 module->GetName());
 
@@ -84,7 +84,7 @@ uint32_t h_core::script::ScriptAsset::compile(asIScriptContext* context) {
         }
     }
     else {
-        printf("ERROR: SCRIPT: Failed to build module.\n");
+        ::printf("ERROR: SCRIPT: Failed to build module.\n");
 
         return SCRIPT_COMPILE_FAIL_BAD_BUILD;
     }

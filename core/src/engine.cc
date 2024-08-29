@@ -38,8 +38,8 @@ uint32_t h_core::Engine::init(
     h_core::theming::cherry();
     // ImGui::StyleColorsLight();
 
-    ImGui_ImplOpenGL3_Init();
-    ImGui_ImplSDL2_InitForOpenGL(
+    ::ImGui_ImplOpenGL3_Init();
+    ::ImGui_ImplSDL2_InitForOpenGL(
         m_window->getSDLWindow(),
         m_window->getRendererSystem()->getGLContext());
 
@@ -57,8 +57,8 @@ uint32_t h_core::Engine::init(
 void h_core::Engine::destroy() {
     m_systems.destroy();
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
+    ::ImGui_ImplOpenGL3_Shutdown();
+    ::ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
     m_window->destroy();
@@ -88,7 +88,7 @@ void h_core::Engine::run() {
                     engineRunning = false;
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    printf("INFO: ENGINE: Wow!\n");
+                    ::printf("INFO: ENGINE: Wow!\n");
                     m_windowWidth = event.newWindowWidth;
                     m_windowHeight = event.newWindowHeight;
                     break;
@@ -98,8 +98,8 @@ void h_core::Engine::run() {
         }
 
         // Begin ImGui Frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
+        ::ImGui_ImplOpenGL3_NewFrame();
+        ::ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
         // Demo window
@@ -112,7 +112,7 @@ void h_core::Engine::run() {
 
         // Send ImGui draw data
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ::ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update the window
         m_window->swap();

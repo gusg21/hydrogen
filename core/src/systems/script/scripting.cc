@@ -41,13 +41,13 @@ std::string actorIdToString(h_core::ActorId id) {
 
 uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
     // Setup engine
-    scriptEngine = asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
+    scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
     scriptModule =
         scriptEngine->GetModule("hyScripting", asGM_CREATE_IF_NOT_EXISTS);
     scriptContext = scriptEngine->CreateContext();
 
     // Engine utils
-    RegisterStdString(scriptEngine);
+    ::RegisterStdString(scriptEngine);
     scriptEngine->SetMessageCallback(
         asFUNCTION(angelScriptMessageCallback), nullptr, asCALL_CDECL);
     scriptEngine->RegisterGlobalFunction(
@@ -100,9 +100,7 @@ uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
 
 void h_core::script::Scripting::destroy() {}
 
-void h_core::script::Scripting::initPerActor() {
-
-}
+void h_core::script::Scripting::initPerActor() {}
 
 void h_core::script::Scripting::beginFrame() {}
 

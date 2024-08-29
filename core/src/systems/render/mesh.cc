@@ -38,11 +38,11 @@ static const uint16_t cubeTriList[] = {
 
 
 uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
-    printf("INFO: MESH: loading model from YAML spec...\n");
+    ::printf("INFO: MESH: loading model from YAML spec...\n");
 
     if (yaml["primitive"].as<bool>(false)) {
         // Just load cube
-        printf("DEBUG: MESH: Loading cube primitive mesh\n");
+        ::printf("DEBUG: MESH: Loading cube primitive mesh\n");
         loadModel(
             8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT);
 
@@ -54,7 +54,7 @@ uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node y
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
 
     if (gltfFilePath.empty()) {
-        printf("ERROR: MODEL: no gltf key in model YAML\n");
+        ::printf("ERROR: MODEL: no gltf key in model YAML\n");
         return MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH;
     }
 
@@ -75,11 +75,11 @@ uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node y
     }
 
     if (!warningText.empty()) {
-        printf(("WARN: MODEL: " + warningText + "\n").c_str());
+        ::printf(("WARN: MODEL: " + warningText + "\n").c_str());
     }
 
     if (!success) {
-        printf(("ERROR: MODEL: " + errorText + "\n").c_str());
+        ::printf(("ERROR: MODEL: " + errorText + "\n").c_str());
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
 
@@ -169,39 +169,39 @@ void h_core::render::Mesh::loadModel(
     uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer,
     uint32_t inidicesCount, const void* indexBuffer, MeshIndexType indexType) {
     // Generate buffers and load attributes
-    glGenVertexArrays(1, &m_vertexAttributesHandle);
-    glBindVertexArray(m_vertexAttributesHandle);
+    ::glGenVertexArrays(1, &m_vertexAttributesHandle);
+    ::glBindVertexArray(m_vertexAttributesHandle);
 
-    printf("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
+    ::printf("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
 
-    glGenBuffers(1, &m_vertexBufferHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
+    ::glGenBuffers(1, &m_vertexBufferHandle);
+    ::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
 
-    glGenBuffers(1, &m_indexBufferHandle);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
+    ::glGenBuffers(1, &m_indexBufferHandle);
+    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 
-    glVertexAttribPointer(
+    ::glVertexAttribPointer(
         0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, position));
-    glEnableVertexAttribArray(0);
+    ::glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(
+    ::glVertexAttribPointer(
         1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, normal));
-    glEnableVertexAttribArray(1);
+    ::glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(
+    ::glVertexAttribPointer(
         2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, texCoord));
-    glEnableVertexAttribArray(2);
+    ::glEnableVertexAttribArray(2);
 
     // Bind the vertex and index buffers to this VAO
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
+    ::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
+    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferHandle);
 
     // Mark buffers for static drawing (not updated)
     if (vertexBufferCount > 0) {
-        glBufferData(
+        ::glBufferData(
             GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * vertexBufferCount,
             vertexBuffer, GL_STATIC_DRAW);
     }
@@ -220,11 +220,11 @@ void h_core::render::Mesh::loadModel(
                 indexTypeSize = sizeof(unsigned int);
                 break;
             default:
-                printf("Undefined mesh index type value!! What!!!\n");
+                ::printf("Undefined mesh index type value!! What!!!\n");
                 break;
         }
 
-        glBufferData(
+       ::glBufferData(
             GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * inidicesCount, indexBuffer,
             GL_STATIC_DRAW);
     }
@@ -235,9 +235,9 @@ void h_core::render::Mesh::loadModel(
     m_meshIndexType = indexType;
 
     // Clean up
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    ::glBindVertexArray(0);
+    ::glBindBuffer(GL_ARRAY_BUFFER, 0);
+    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
