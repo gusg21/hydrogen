@@ -2,7 +2,9 @@
 
 #include "scriptstdstring.h"
 
-#include "core/systems/script/script.h"
+#include "core/math/math.h"
+#include "core/transform.h"
+#include "core/systems/script/scriptcomp.h"
 
 #define SCRIPTING_ANGELSCRIPT_VERSION 23700  // AngelScript v23.7.0
 
@@ -37,15 +39,17 @@ std::string actorIdToString(h_core::ActorId id) {
     return std::to_string(id);
 }
 
-uint32_t h_core::script::Scripting::init() {
+uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
+    h_core::System::init(engine);
+
     // Setup engine
-    scriptEngine = asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
+    scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
     scriptModule =
         scriptEngine->GetModule("hyScripting", asGM_CREATE_IF_NOT_EXISTS);
     scriptContext = scriptEngine->CreateContext();
 
     // Engine utils
-    RegisterStdString(scriptEngine);
+    ::RegisterStdString(scriptEngine);
     scriptEngine->SetMessageCallback(
         asFUNCTION(angelScriptMessageCallback), nullptr, asCALL_CDECL);
     scriptEngine->RegisterGlobalFunction(
@@ -98,51 +102,13 @@ uint32_t h_core::script::Scripting::init() {
 
 void h_core::script::Scripting::destroy() {}
 
-void h_core::script::Scripting::initPerActor() {
-    scriptModule->AddScriptSection(script->name.c_str(), script->code.c_str());
-    scriptModuleBuilt = false;
-}
+void h_core::script::Scripting::initPerActor() {}
 
 void h_core::script::Scripting::beginFrame() {}
 
 void h_core::script::Scripting::process() {
     // Build script if the script is not yet built
     // TODO: Is this good? Might be better to have a post-init hook for systems
-    if (!scriptModuleBuilt) {
-        int result = scriptModule->Build();
-        if (!(result < 0)) {
-            if (scriptModule->GetObjectTypeCount() > 0) {
-                // Get the first type
-                script->type = scriptModule->GetObjectTypeByIndex(0);
-                // Determine constructor of form "MyClass @MyClass()"
-                std::string typeName = script->type->GetName();
-                std::string typeConstructorDecl =
-                    typeName + " @" + typeName + "(ActorId id)";
-                asIScriptFunction* typeConstructor =
-                    script->type->GetFactoryByDecl(typeConstructorDecl.c_str());
-
-                // Construct object
-                scriptContext->Prepare(typeConstructor);
-                scriptContext->SetArgObject(0, &actorId);
-                scriptContext->Execute();
-
-                // Retreive instance pointer
-                script->instance =
-                    *(asIScriptObject**)
-                         scriptContext->GetAddressOfReturnValue();
-
-                script->instance->AddRef();  // We're holding onto it
-
-                scriptModuleBuilt = true;
-            }
-            else {
-                printf(
-                    "ERROR: SCRIPTING: No defined types in module %s!\n",
-                    scriptModule->GetName());
-            }
-        }
-        else { printf("ERROR: SCRIPTING: Failed to build module.\n"); }
-    }
 
     script->runMethodIfExists(scriptContext, "void process()");
 }
@@ -155,6 +121,10 @@ void h_core::script::Scripting::endFrame() {}
 
 uint32_t h_core::script::Scripting::getMask() {
     return SCRIPT_COMPONENT_BITMASK;
+}
+
+asIScriptContext* h_core::script::Scripting::getContext() {
+    return scriptContext;
 }
 
 h_core::Transform h_core::script::Scripting::getBoundTransform() {

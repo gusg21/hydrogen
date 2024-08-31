@@ -1,0 +1,15 @@
+initialSceneSpec: 0
+name: "Hello World"
+assets:
+  - 
+    index: 0
+    type: 0
+    path: "assets/test_scene.yml"
+  -
+    index: 1
+    type: 1
+    path: "assets/test_actor2.yml"
+  -
+    index: 2
+    type: 2
+    path: "assets/test_script.yml"

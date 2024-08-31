@@ -1,30 +1,29 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
-#include "core/assets.h"
 #include "core/math/color.h"
-#include "core/scenespec.h"
+#include "core/scenespecasset.h"
+#include "core/projectassetentry.h"
 
 namespace h_core {
 class Project {
   public:
     Project() = default;
 
+    void initFromYaml(std::string yamlPath);
+
     /// @brief the name of the project
-    std::string projectName = "Unnamed Project";
+    std::string name = "Unnamed Project";
 
     uint32_t windowWidth = 1600;
     uint32_t windowHeight = 900;
 
-    h_core::
-        math::
-            Color clearColor;
+    h_core::math::Color clearColor {};
 
-    /// @brief the assets contained in the project
-    h_core::Assets assets = {};
-
-    /// @brief a pointer to the scene spec to initialize on game start
     h_core::AssetIndex initialSceneSpec = ASSETS_ASSET_INDEX_BAD;
+
+    std::vector<h_core::ProjectAssetEntry> assets {};
 };
 }  // namespace h_core

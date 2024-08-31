@@ -3,14 +3,16 @@
 #include "SDL2/SDL.h"
 #include "imgui_impl_sdl2.h"
 
+#include "core/systems/render/renderer.h"
+
 #define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
 uint32_t h_core::Window::init(
     std::string title, uint32_t width, uint32_t height, bool fullscreen) {
     // Init SDL
-    SDL_Init(SDL_INIT_EVERYTHING);
+    ::SDL_Init(SDL_INIT_EVERYTHING);
 
-    m_sdlWindow = SDL_CreateWindow(
+    m_sdlWindow = ::SDL_CreateWindow(
         title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width,
         height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
@@ -19,7 +21,7 @@ uint32_t h_core::Window::init(
         return WINDOW_INIT_FAIL_INIT_RENDERER;
     }
 
-    printf("INFO: RENDERING: OpenGL version: %s\n", glGetString(GL_VERSION));
+    ::printf("INFO: RENDERING: OpenGL version: %s\n", ::glGetString(GL_VERSION));
 
 
     // Set up resolution + backbuffer settings
@@ -37,14 +39,14 @@ uint32_t h_core::Window::init(
 }
 
 void h_core::Window::destroy() {
-    SDL_DestroyWindow(m_sdlWindow);
-    SDL_Quit();
+    ::SDL_DestroyWindow(m_sdlWindow);
+    ::SDL_Quit();
 }
 
 void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
     SDL_Event sdlEvent;
-    while (SDL_PollEvent(&sdlEvent)) {
-        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+    while (::SDL_PollEvent(&sdlEvent)) {
+        ::ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
 
         switch (sdlEvent.type) {
             case SDL_QUIT: {
@@ -85,7 +87,7 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
 }
 
 void h_core::Window::swap() {
-    SDL_GL_SwapWindow(m_sdlWindow);
+    ::SDL_GL_SwapWindow(m_sdlWindow);
 }
 
 h_core::render::Renderer* h_core::Window::getRendererSystem() {
