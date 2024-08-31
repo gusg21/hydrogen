@@ -23,8 +23,6 @@ uint32_t h_core::Engine::init(
     uint32_t windowInitResult = m_window->init(
         windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
-    m_systems.renderer = m_window->getRendererSystem();
-    m_systems.renderer->init(this);
 
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
@@ -43,11 +41,13 @@ uint32_t h_core::Engine::init(
         m_window->getSDLWindow(),
         m_window->getRendererSystem()->getGLContext());
 
+    // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
-    m_systems.gravity->init(this);
+    m_systems.renderer = m_window->getRendererSystem();
     m_systems.scripting = new h_core::script::Scripting();
-    m_systems.scripting->init(this);
+    m_systems.init(this);
 
+    // load the assets
     m_assets = out_assets;
     m_assets->loadFromProject(project, &m_systems);
 

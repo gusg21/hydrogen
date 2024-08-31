@@ -8,7 +8,7 @@
 
 #include "core/engine.h"
 #include "core/math/mat4x4.h"
-#include "core/systems/render/mesh.h"
+#include "core/systems/render/meshasset.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
@@ -99,6 +99,8 @@ uint32_t loadProgram(
 }
 
 uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
+    h_core::System::init(engine);
+
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",
@@ -151,7 +153,7 @@ void h_core::render::Renderer::draw() {
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
-    switch (mesh->getMeshIndexType()) {
+    switch (meshComp->mesh->getMeshIndexType()) {
         case h_core::render::MeshIndexType::BYTE:
             glElementType = GL_UNSIGNED_BYTE;
             break;
@@ -163,9 +165,9 @@ void h_core::render::Renderer::draw() {
             break;
     }
 
-    ::glBindVertexArray(mesh->getVertexAttributesHandle());
+    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
     ::glDrawElements(
-        mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType,
+        meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType,
         nullptr);
 }
 

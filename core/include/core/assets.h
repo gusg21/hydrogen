@@ -77,7 +77,7 @@ template<typename AssetType>
 inline uint32_t h_core::Assets::loadAssetFromFile(
     AssetType* out_asset, h_core::Systems* systems, std::string filePath) {
     static_assert(
-        std::is_base_of<h_core::Asset, AssetType>::value,
+        std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't load asset type that does not derive from Asset");
 
     // Load file
@@ -95,7 +95,7 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
 template<typename AssetType>
 inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
     static_assert(
-        std::is_base_of<h_core::Asset, AssetType>::value,
+        std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't load asset type that does not derive from Asset");
 
     h_core::AssetHash hash = getAssetHashFromString(filePath);
@@ -126,7 +126,7 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
 template<typename AssetType>
 inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) {
     static_assert(
-        std::is_base_of<h_core::Asset, AssetType>::value,
+        std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't get asset type that does not derive from Asset");
 
     return static_cast<AssetType*>(m_assets[index]);
@@ -134,7 +134,11 @@ inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) {
 
 template <typename AssetType>
 void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo, h_core::Systems* systems) {
-    AssetType* spec = new AssetType();
-    loadAssetFromFile<AssetType>(spec, systems, assetInfo.assetPath);
-    *out_assets[assetInfo.index] = spec;
+    static_assert(
+        std::is_base_of_v<h_core::Asset, AssetType>,
+        "Can't get asset type that does not derive from Asset");
+
+    AssetType* asset = new AssetType();
+    loadAssetFromFile<AssetType>(asset, systems, assetInfo.assetPath);
+    out_assets[assetInfo.index] = asset;
 }

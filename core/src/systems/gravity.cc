@@ -8,6 +8,8 @@
 // not in any other cases.
 
 uint32_t h_core::systems::Gravity::init(h_core::Engine* engine) {
+    h_core::System::init(engine);
+
     return 0;
 }
 

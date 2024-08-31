@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.21)
 # Core sources
 add_library(HydrogenCore STATIC
 
-            src/actorspecasset.cc                           include/core/actorspecasset.h
-            src/asset.cc                                    include/core/asset.h
-            src/assets.cc                                   include/core/assets.h
-            src/engine.cc                                   include/core/engine.h
-                                                            include/core/engineevents.h
-            src/event.cc                                    include/core/event.h
-            src/eventqueue.cc                               include/core/eventqueue.h
-            src/project.cc                                  include/core/project.h
-            src/scene.cc                                    include/core/scene.h
-            src/system.cc                                   include/core/system.h
+            src/actorspecasset.cc include/core/actorspecasset.h
+            src/asset.cc include/core/asset.h
+            src/assets.cc include/core/assets.h
+            src/engine.cc include/core/engine.h
+            include/core/engineevents.h
+            src/event.cc include/core/event.h
+            src/eventqueue.cc include/core/eventqueue.h
+            src/project.cc include/core/project.h
+            src/scene.cc include/core/scene.h
+            src/system.cc include/core/system.h
             src/systems.cc include/core/systems.h
             src/scenespecasset.cc include/core/scenespecasset.h
             src/transform.cc include/core/transform.h
@@ -25,14 +25,16 @@ add_library(HydrogenCore STATIC
             src/math/vector3.cc include/core/math/vector3.h
 
             src/systems/gravity.cc include/core/systems/gravity.h
-            src/systems/render/mesh.cc include/core/systems/render/mesh.h
+            src/systems/render/meshasset.cc include/core/systems/render/meshasset.h
             src/systems/render/renderer.cc include/core/systems/render/renderer.h
             src/systems/render/shader.cc include/core/systems/render/shader.h
             include/core/systems/render/vertex.h
             src/systems/script/scriptasset.cc include/core/systems/script/scriptasset.h
             src/systems/script/scriptcomp.cc include/core/systems/script/scriptcomp.h
             src/systems/script/scripting.cc include/core/systems/script/scripting.h
-            )
+            include/core/systems/render/meshcomp.h
+            src/systems/render/meshcomp.cc
+)
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:library")

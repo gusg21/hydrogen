@@ -14,20 +14,30 @@ void h_core::Scene::initFromSceneSpecAssetIndex(
          actorSpecIndex < sceneSpec->actorSpecIndices.size();
          actorSpecIndex++) {
         addActor(
-            assets->getAssetByIndex<h_core::ActorSpecAsset>(
-                sceneSpec->actorSpecIndices[actorSpecIndex]),
+            assets, sceneSpec->actorSpecIndices[actorSpecIndex],
             scriptingContext);
     }
 }
 
 h_core::ActorId h_core::Scene::addActor(
-    ActorSpecAsset* spec, asIScriptContext* scriptingContext) {
+    h_core::Assets* assets, h_core::AssetIndex actorSpecIndex,
+    asIScriptContext* scriptingContext) {
+    h_core::ActorSpecAsset* spec =
+        assets->getAssetByIndex<h_core::ActorSpecAsset>(actorSpecIndex);
+
     ActorId newId = m_nextId;
     masks[newId] = spec->mask;
     transforms[newId] = spec->transform;
-    meshes[newId] = spec->mesh;
-    scripts[newId].init(spec->script, scriptingContext, newId);
+
+    // components
+    meshes[newId].init(
+        assets->getAssetByIndex<h_core::render::MeshAsset>(spec->meshIndex));
+    scripts[newId].init(
+        assets->getAssetByIndex<h_core::script::ScriptAsset>(spec->scriptIndex),
+        scriptingContext, newId);
+
     ::printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
+
     m_nextId++;
     return newId;
 }

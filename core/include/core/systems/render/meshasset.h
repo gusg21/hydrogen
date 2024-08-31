@@ -31,11 +31,11 @@ struct Vertex {
 
 enum class MeshIndexType { BYTE, SHORT, INT };
 
-class Mesh : public Asset {
+class MeshAsset : public Asset {
   public:
-    Mesh() = default;
+    MeshAsset() = default;
 
-    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
+    uint32_t initFromYaml(h_core::Assets* assets, h_core::Systems* systems, YAML::Node node);
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
         uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);

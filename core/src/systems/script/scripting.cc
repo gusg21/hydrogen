@@ -40,6 +40,8 @@ std::string actorIdToString(h_core::ActorId id) {
 }
 
 uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
+    h_core::System::init(engine);
+
     // Setup engine
     scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
     scriptModule =

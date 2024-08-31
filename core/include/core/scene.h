@@ -1,13 +1,10 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "core/actor.h"
 #include "core/actorspecasset.h"
 #include "core/componentbitmask.h"
 #include "core/scenespecasset.h"
-#include "core/system.h"
-#include "core/systems/render/mesh.h"
+#include "core/systems/render/meshcomp.h"
 #include "core/systems/script/scriptcomp.h"
 #include "core/transform.h"
 
@@ -25,11 +22,11 @@ class Scene {
         asIScriptContext* scriptingContext);
 
     ActorId addActor(
-        h_core::ActorSpecAsset* actorSpec, asIScriptContext* scriptingContext);
+        h_core::Assets* assets, h_core::AssetIndex actorSpecIndex, asIScriptContext* scriptingContext);
 
     h_core::ComponentBitmask masks[SCENE_MAX_ACTORS] = {};
     h_core::Transform transforms[SCENE_MAX_ACTORS] = {};
-    h_core::render::Mesh meshes[SCENE_MAX_ACTORS] = {};
+    h_core::render::MeshComp meshes[SCENE_MAX_ACTORS] = {};
     h_core::script::ScriptComp scripts[SCENE_MAX_ACTORS] = {};
 
   private:

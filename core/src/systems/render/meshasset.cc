@@ -1,4 +1,4 @@
-#include "core/systems/render/mesh.h"
+#include "core/systems/render/meshasset.h"
 
 #include <string>
 
@@ -37,7 +37,7 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
     ::printf("INFO: MESH: loading model from YAML spec...\n");
 
     if (yaml["primitive"].as<bool>(false)) {
@@ -165,7 +165,7 @@ uint32_t h_core::render::Mesh::initFromYaml(h_core::Assets* assets, YAML::Node y
     return 0;
 }
 
-void h_core::render::Mesh::loadModel(
+void h_core::render::MeshAsset::loadModel(
     uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer,
     uint32_t inidicesCount, const void* indexBuffer, MeshIndexType indexType) {
     // Generate buffers and load attributes
@@ -241,30 +241,30 @@ void h_core::render::Mesh::loadModel(
 }
 
 
-GLuint h_core::render::Mesh::getIndexBufferHandle() {
+GLuint h_core::render::MeshAsset::getIndexBufferHandle() {
     return m_indexBufferHandle;
 }
 
-GLuint h_core::render::Mesh::getVertexAttributesHandle() {
+GLuint h_core::render::MeshAsset::getVertexAttributesHandle() {
     return m_vertexAttributesHandle;
 }
 
-GLuint h_core::render::Mesh::getVertexBufferHandle() {
+GLuint h_core::render::MeshAsset::getVertexBufferHandle() {
     return m_vertexBufferHandle;
 }
 
-size_t h_core::render::Mesh::getNumVertices() {
+size_t h_core::render::MeshAsset::getNumVertices() {
     return m_numVertices;
 }
 
-size_t h_core::render::Mesh::getNumIndices() {
+size_t h_core::render::MeshAsset::getNumIndices() {
     return m_numIndices;
 }
 
-h_core::render::MeshIndexType h_core::render::Mesh::getMeshIndexType() {
+h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() {
     return m_meshIndexType;
 }
 
-uint32_t h_core::render::Mesh::getPrimitiveMode() {
+uint32_t h_core::render::MeshAsset::getPrimitiveMode() {
     return m_primitiveMode;
 }
