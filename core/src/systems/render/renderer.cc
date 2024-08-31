@@ -2,18 +2,13 @@
 
 #include <fstream>
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/glm.hpp"
 #include "imgui_impl_sdl2.h"
 
 #include "core/engine.h"
 #include "core/math/mat4x4.h"
-#include "core/systems/render/mesh.h"
+#include "core/systems/render/meshasset.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
@@ -28,7 +23,7 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     // Read code from file
     std::ifstream shaderCodeFile { filePath };
     if (!shaderCodeFile.good()) {
-        printf(
+        ::printf(
             "ERROR: RENDERER: Failed to load shader from path %s\n",
             filePath.c_str());
         return RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM;
@@ -44,18 +39,18 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     // Load in the code
     const GLint shaderCodeLength = shaderCode.size();
     const char* shaderCodeRaw = shaderCode.data();
-    glShaderSource(
+    ::glShaderSource(
         *out_shaderId, 1, (const GLchar**)&shaderCodeRaw, &shaderCodeLength);
 
     // Compile + verify
-    glCompileShader(*out_shaderId);
+    ::glCompileShader(*out_shaderId);
     GLint status;
-    glGetShaderiv(*out_shaderId, GL_COMPILE_STATUS, &status);
+    ::glGetShaderiv(*out_shaderId, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
-        glGetShaderInfoLog(
+        ::glGetShaderInfoLog(
             *out_shaderId, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        printf("ERROR: RENDERER: %s\n", log);
+        ::printf("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE;
     }
 
@@ -67,35 +62,35 @@ uint32_t loadProgram(
     std::string fragmentPath) {
     uint32_t result;
 
-    out_shader->vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    out_shader->vertexShader = ::glCreateShader(GL_VERTEX_SHADER);
     result = loadShader(&out_shader->vertexShader, vertexPath);
     if (result != 0) { return RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE; }
 
-    out_shader->fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    out_shader->fragmentShader = ::glCreateShader(GL_FRAGMENT_SHADER);
     result = loadShader(&out_shader->fragmentShader, fragmentPath);
     if (result != 0) { return RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE; }
 
-    out_shader->program = glCreateProgram();
-    glAttachShader(out_shader->program, out_shader->vertexShader);
-    glAttachShader(out_shader->program, out_shader->fragmentShader);
+    out_shader->program = ::glCreateProgram();
+    ::glAttachShader(out_shader->program, out_shader->vertexShader);
+    ::glAttachShader(out_shader->program, out_shader->fragmentShader);
 
-    glBindAttribLocation(out_shader->program, 0, "in_position");
-    glBindAttribLocation(out_shader->program, 1, "in_normal");
-    glBindAttribLocation(out_shader->program, 2, "in_texCoord");
-    glLinkProgram(out_shader->program);
+    ::glBindAttribLocation(out_shader->program, 0, "in_position");
+    ::glBindAttribLocation(out_shader->program, 1, "in_normal");
+    ::glBindAttribLocation(out_shader->program, 2, "in_texCoord");
+    ::glLinkProgram(out_shader->program);
 
     GLint linkStatus;
-    glGetProgramiv(out_shader->program, GL_LINK_STATUS, &linkStatus);
+    ::glGetProgramiv(out_shader->program, GL_LINK_STATUS, &linkStatus);
     if (linkStatus != GL_TRUE) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
-        glGetProgramInfoLog(
+        ::glGetProgramInfoLog(
             out_shader->program, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        printf("ERROR: RENDERER: %s\n", log);
+        ::printf("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK;
     }
 
 #if HCORE_DEBUG
-    printf(
+    ::printf(
         "DEBUG: RENDERER: Shaders (%s, %s) compiled + linked + loaded successfully\n",
         vertexPath.c_str(), fragmentPath.c_str());
 #endif
@@ -103,7 +98,9 @@ uint32_t loadProgram(
     return 0;
 }
 
-uint32_t h_core::render::Renderer::init() {
+uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
+    h_core::System::init(engine);
+
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",
@@ -114,14 +111,15 @@ uint32_t h_core::render::Renderer::init() {
 }
 
 void h_core::render::Renderer::destroy() {
-    SDL_GL_DeleteContext(m_glContext);
+    ::SDL_GL_DeleteContext(m_glContext);
 }
 
 void h_core::render::Renderer::beginFrame() {
-    glViewport(0, 0, engine->getWidth(), engine->getHeight());
+    ::glViewport(0, 0, engine->getWidth(), engine->getHeight());
     h_core::math::Color clearColor = engine->getClearColor();
-    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ::glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ::glFrontFace(m_ccw ? GL_CCW : GL_CW);
 
     m_shader.use();
     h_core::math::Vector3 up { 0.f, 1.f, 0.f };
@@ -144,7 +142,6 @@ void h_core::render::Renderer::beginFrame() {
         ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
         ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
         ImGui::Checkbox("CCW", &m_ccw);
-        glFrontFace(m_ccw ? GL_CCW : GL_CW);
 
         ImGui::End();
     }
@@ -156,7 +153,7 @@ void h_core::render::Renderer::draw() {
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
-    switch (mesh->getMeshIndexType()) {
+    switch (meshComp->mesh->getMeshIndexType()) {
         case h_core::render::MeshIndexType::BYTE:
             glElementType = GL_UNSIGNED_BYTE;
             break;
@@ -168,35 +165,35 @@ void h_core::render::Renderer::draw() {
             break;
     }
 
-    glBindVertexArray(mesh->getVertexAttributesHandle());
-    glDrawElements(
-        mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType,
+    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
+    ::glDrawElements(
+        meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType,
         nullptr);
 }
 
 uint32_t h_core::render::Renderer::initFromWindow(
     uint32_t width, uint32_t height, SDL_Window* window) {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    ::SDL_GL_SetAttribute(
         SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    ::SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    ::SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    ::SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-    m_glContext = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, m_glContext);
+    m_glContext = ::SDL_GL_CreateContext(window);
+    ::SDL_GL_MakeCurrent(window, m_glContext);
 
-    SDL_GL_SetShwapInterval(1);
+    ::SDL_GL_SetShwapInterval(1);
 
-    gladLoadGLLoader(SDL_GL_GetProcAddress);
+    ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ::glEnable(GL_DEPTH_TEST);
+    ::glDepthFunc(GL_LEQUAL);
+    ::glEnable(GL_CULL_FACE);
+    ::glCullFace(GL_BACK);
 
     return 0;
 }

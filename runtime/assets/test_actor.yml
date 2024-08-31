@@ -1,9 +1,9 @@
-mask: 3
+mask: 7
 transform:
   position:
     x: 0
-    y: 0
-    z: 0 
+    y: 5
+    z: 0
   rotation:
     x: 0
     y: 0
@@ -14,5 +14,6 @@ transform:
     y: 1
     z: 1
 model:
-  gltf: "assets/butter/Butter.glb"
-  gltf_binary: true
+  index: 3
+script:
+  index: 2

@@ -14,6 +14,6 @@ transform:
     y: 1
     z: 1
 model:
-  gltf: "assets/camera/AntiqueCamera.gltf"
+  index: 3
 script:
-  script_file: "assets/scripts/test1.as"
+  index: 2

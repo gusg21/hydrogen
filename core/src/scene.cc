@@ -1,75 +1,43 @@
-#pragma once
-
 #include <stdio.h>
 
-#include "core/actorspec.h"
+#include "core/actorspecasset.h"
 #include "core/scene.h"
 #include "core/system.h"
 
 void h_core::Scene::initFromSceneSpecAssetIndex(
-    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex) {
-    h_core::SceneSpec* sceneSpec =
-        assets->getAssetByIndex<h_core::SceneSpec>(sceneSpecIndex);
+    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex,
+    asIScriptContext* scriptingContext) {
+    h_core::SceneSpecAsset* sceneSpec =
+        assets->getAssetByIndex<h_core::SceneSpecAsset>(sceneSpecIndex);
 
     for (uint32_t actorSpecIndex = 0;
          actorSpecIndex < sceneSpec->actorSpecIndices.size();
          actorSpecIndex++) {
-        addActor(assets->getAssetByIndex<h_core::ActorSpec>(
-            sceneSpec->actorSpecIndices[actorSpecIndex]));
+        addActor(
+            assets, sceneSpec->actorSpecIndices[actorSpecIndex],
+            scriptingContext);
     }
 }
 
-h_core::ActorId h_core::Scene::addActor(ActorSpec* spec) {
+h_core::ActorId h_core::Scene::addActor(
+    h_core::Assets* assets, h_core::AssetIndex actorSpecIndex,
+    asIScriptContext* scriptingContext) {
+    h_core::ActorSpecAsset* spec =
+        assets->getAssetByIndex<h_core::ActorSpecAsset>(actorSpecIndex);
+
     ActorId newId = m_nextId;
-    m_masks[newId] = spec->mask;
-    m_transforms[newId] = spec->transform;
-    m_meshes[newId] = spec->mesh;
-    m_scripts[newId] = spec->script;
-    printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, m_masks[newId]);
+    masks[newId] = spec->mask;
+    transforms[newId] = spec->transform;
+
+    // components
+    meshes[newId].init(
+        assets->getAssetByIndex<h_core::render::MeshAsset>(spec->meshIndex));
+    scripts[newId].init(
+        assets->getAssetByIndex<h_core::script::ScriptAsset>(spec->scriptIndex),
+        scriptingContext, newId);
+
+    ::printf("INFO: SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
+
     m_nextId++;
     return newId;
-}
-
-void h_core::Scene::updateSystemReferences(
-    h_core::System* system, h_core::ActorId id) {
-    system->actorId = id;
-    system->transform = &m_transforms[id];
-    system->mesh = &m_meshes[id];
-    system->script = &m_scripts[id];
-}
-
-void h_core::Scene::initSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->initPerActor();
-        }
-    }
-}
-
-void h_core::Scene::processSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->process();
-        }
-    }
-}
-
-void h_core::Scene::drawSystem(h_core::System* system) {
-    ComponentBitmask requiredMask = system->getMask();
-
-    for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-        ComponentBitmask actorMask = m_masks[id];
-        if ((requiredMask & actorMask) == requiredMask) {
-            updateSystemReferences(system, id);
-            system->draw();
-        }
-    }
 }

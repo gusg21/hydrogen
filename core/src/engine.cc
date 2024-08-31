@@ -13,20 +13,16 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-uint32_t h_core::Engine::init(h_core::Project* project) {
-    m_systems[0] = new h_core::systems::Gravity();
-    m_systems[1] = nullptr;  // Renderer
-    m_systems[2] = new h_core::script::Scripting();
-
+uint32_t h_core::Engine::init(
+    h_core::Assets* out_assets, h_core::Project* project) {
     m_project = project;
 
-    std::string windowTitle = "hydrogen runtime - " + project->projectName;
+    std::string windowTitle = "hydrogen runtime - " + project->name;
 
     m_window = new h_core::Window();
     uint32_t windowInitResult = m_window->init(
         windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
-    m_systems[1] = m_window->getRendererSystem();
 
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
@@ -40,58 +36,45 @@ uint32_t h_core::Engine::init(h_core::Project* project) {
     h_core::theming::cherry();
     // ImGui::StyleColorsLight();
 
-    ImGui_ImplOpenGL3_Init();
-    ImGui_ImplSDL2_InitForOpenGL(
+    ::ImGui_ImplOpenGL3_Init();
+    ::ImGui_ImplSDL2_InitForOpenGL(
         m_window->getSDLWindow(),
         m_window->getRendererSystem()->getGLContext());
 
-    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-         systemIndex++) {
-        m_systems[systemIndex]->engine = this;
-        if (m_systems[systemIndex]->init() != 0) {
-            printf(
-                "ERROR: ENGINE: Failed to init system index %d\n", systemIndex);
-            return ENGINE_INIT_FAIL_BAD_SYSTEM_INIT;
-        }
-    }
+    // set up systems
+    m_systems.gravity = new h_core::systems::Gravity();
+    m_systems.renderer = m_window->getRendererSystem();
+    m_systems.scripting = new h_core::script::Scripting();
+    m_systems.init(this);
+
+    // load the assets
+    m_assets = out_assets;
+    m_assets->loadFromProject(project, &m_systems);
 
     return 0;
 }
 
 void h_core::Engine::destroy() {
-    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-         systemIndex++) {
-        // Call it to tell it it's going to die
-        m_systems[systemIndex]->destroy();
+    m_systems.destroy();
 
-        // Shoot it
-        delete m_systems[systemIndex];
-
-        // Bury it and erase its memory
-        m_systems[systemIndex] = nullptr;
-
-        // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
-    }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
+    ::ImGui_ImplOpenGL3_Shutdown();
+    ::ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
     m_window->destroy();
     delete m_window;
+
+    // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 }
 
 void h_core::Engine::run() {
     // Set up first scene
     if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
         m_scene.initFromSceneSpecAssetIndex(
-            &m_project->assets, m_project->initialSceneSpec);
+            m_assets, m_project->initialSceneSpec, m_systems.scripting->getContext());
     }
 
-    for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-         systemIndex++) {
-        m_scene.initSystem(m_systems[systemIndex]);
-    }
+    m_systems.initScene(&m_scene);
 
     bool engineRunning = true;
     while (engineRunning) {
@@ -105,7 +88,7 @@ void h_core::Engine::run() {
                     engineRunning = false;
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    printf("INFO: ENGINE: Wow!\n");
+                    ::printf("INFO: ENGINE: Wow!\n");
                     m_windowWidth = event.newWindowWidth;
                     m_windowHeight = event.newWindowHeight;
                     break;
@@ -115,40 +98,21 @@ void h_core::Engine::run() {
         }
 
         // Begin ImGui Frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
+        ::ImGui_ImplOpenGL3_NewFrame();
+        ::ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
         // Demo window
         ImGui::ShowDemoWindow();
 
-        // Begin drawing for every system
-        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-             systemIndex++) {
-            m_systems[systemIndex]->beginFrame();
-        }
-
-        // Update all actors
-        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-             systemIndex++) {
-            m_scene.processSystem(m_systems[systemIndex]);
-        }
-
-        // Draw the actors
-        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-             systemIndex++) {
-            m_scene.drawSystem(m_systems[systemIndex]);
-        }
-
-        // End the frame for every system
-        for (uint32_t systemIndex = 0; systemIndex < ENGINE_SYSTEM_COUNT;
-             systemIndex++) {
-            m_systems[systemIndex]->endFrame();
-        }
+        m_systems.beginFrame();
+        m_systems.processScene(&m_scene);
+        m_systems.drawScene(&m_scene);
+        m_systems.endFrame();
 
         // Send ImGui draw data
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ::ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update the window
         m_window->swap();
@@ -159,11 +123,11 @@ void h_core::Engine::run() {
 }
 
 
-uint32_t h_core::Engine::getWidth() {
+uint32_t h_core::Engine::getWidth() const {
     return m_windowWidth;
 }
 
-uint32_t h_core::Engine::getHeight() {
+uint32_t h_core::Engine::getHeight() const {
     return m_windowHeight;
 }
 

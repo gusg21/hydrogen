@@ -1,9 +1,10 @@
 #pragma once
 
+#include "glad/glad.h"
+
 #include "core/asset.h"
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
-#include "glad/glad.h"
 
 #define MODEL_COMPONENT_BITMASK                 (1 << 1)
 #define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH      1
@@ -30,11 +31,14 @@ struct Vertex {
 
 enum class MeshIndexType { BYTE, SHORT, INT };
 
-class Mesh : public Asset {
+class MeshAsset : public Asset {
   public:
-    Mesh() = default;
+    MeshAsset() = default;
 
-    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
+    uint32_t initFromYaml(
+        h_core::Assets* assets, h_core::Systems* systems,
+        YAML::Node node) override;
+
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
         uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);

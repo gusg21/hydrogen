@@ -3,11 +3,13 @@
     "*.mal": "clojure",
     "*.asm": "gbz80",
     "*.json": "jsonc",
+    "*.inc": "php",
     "*.tsx": "xml",
     "*.h": "cpp",
     "*.rh": "cpp",
     "xiosbase": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "string": "cpp"
   },
   "editor.rulers": [
     80
