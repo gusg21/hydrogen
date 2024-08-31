@@ -80,7 +80,7 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't load asset type that does not derive from Asset");
 
-    size_t dotIndex = filePath.find_first_of('.');
+/*    size_t dotIndex = filePath.find_first_of('.');
 
     if(dotIndex != std::string::npos && dotIndex < filePath.size() - 1) {
         std::string fileType = filePath.substr(dotIndex + 1);
@@ -89,7 +89,7 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
             out_asset->initFromFile(this, systems, filePath);
             return 0;
         }
-    }
+    }*/
 
     // Load file
     std::stringstream yamlBufferStream;

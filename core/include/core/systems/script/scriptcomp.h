@@ -22,10 +22,10 @@ class ScriptComp {
 
     uint32_t runMethodIfExists(
         asIScriptContext* context,
-        std::string methodDecl) const;
+        const std::string& methodDecl) const;
     uint32_t runMethod(
         asIScriptContext* context,
-        std::string methodDecl) const;
+        const std::string& methodDecl) const;
 };
 
 }

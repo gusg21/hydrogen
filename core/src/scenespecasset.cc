@@ -26,9 +26,3 @@ uint32_t h_core::SceneSpecAsset::initFromYaml(
 
     return 0;
 }
-uint32_t h_core::SceneSpecAsset::initFromFile(
-    h_core::Assets* assets, h_core::Systems* systems, std::string filepath) {
-    printf("ERROR: SCENESPEC: trying to load scene from file");
-
-    return 1;
-}

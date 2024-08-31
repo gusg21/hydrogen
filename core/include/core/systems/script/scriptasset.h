@@ -26,12 +26,9 @@ class ScriptAsset : public Asset {
     uint32_t initFromYaml(
         h_core::Assets* assets, h_core::Systems* system,
         YAML::Node node) override;
-    uint32_t initFromFile(
-        h_core::Assets* assets, h_core::Systems* systems,
-        std::string filepath) override;
 
-
-    uint32_t compile(asIScriptContext* context);
+    void loadCode(asIScriptModule* module);
+    uint32_t compile(asIScriptModule* module);
     asIScriptObject* constructInstance(
         asIScriptContext* context, h_core::ActorId id) const;
 
@@ -40,7 +37,6 @@ class ScriptAsset : public Asset {
 
     asITypeInfo* type = nullptr;
     asIScriptFunction* typeConstructor = nullptr;
-    asIScriptModule* module = nullptr;
 };
 }  // namespace script
 

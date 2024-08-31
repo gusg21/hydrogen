@@ -20,6 +20,7 @@ class Scripting : public System {
 
     uint32_t getMask();
     asIScriptContext* getContext();
+    asIScriptModule* getModule();
 
     h_core::Transform getBoundTransform();
     void setBoundTransform(h_core::Transform newTrans);

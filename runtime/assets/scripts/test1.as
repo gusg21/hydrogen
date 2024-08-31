@@ -10,7 +10,7 @@ class Test1 {
         // print("Howdy!");
 
         engine::Transform trans = engine::getBoundTransform(); // Gets current transform
-        trans.position.x += 0.01f; // Changes position
+        // trans.position.x += 0.01f; // Changes position
         engine::setBoundTransform(trans); // Reapply to current actor
     }
 }

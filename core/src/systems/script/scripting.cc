@@ -134,3 +134,6 @@ h_core::Transform h_core::script::Scripting::getBoundTransform() {
 void h_core::script::Scripting::setBoundTransform(h_core::Transform newTrans) {
     *transform = newTrans;
 }
+asIScriptModule* h_core::script::Scripting::getModule() {
+    return scriptModule;
+}

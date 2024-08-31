@@ -26,8 +26,8 @@ class Renderer : public System {
     h_core::ComponentBitmask getMask() override;
 
   private:
-    h_core::math::Vector3 m_cameraPosition { 10.f, 10.f, 0.f };
-    h_core::math::Vector3 m_cameraDirection { -1.f, 0.f, 0.f };
+    h_core::math::Vector3 m_cameraPosition { 0.f, 10.f, -10.f };
+    h_core::math::Vector3 m_cameraDirection { 0.f, 0.f, 1.f };
     float m_fovDegrees = 70.f;
     float m_nearZ = 1.f;
     float m_farZ = 100.f;
