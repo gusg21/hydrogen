@@ -20,7 +20,7 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
     // TODO: Convert to model loading
     if (yaml["model"].IsDefined()) {
         meshIndex = assets->getOrLoadAsset<h_core::render::MeshAsset>(
-            yaml["mesh"]["file"].as<std::string>(""));
+            yaml["model"]["gltf"].as<std::string>(""));
     }
 
     if (yaml["script"].IsDefined())
@@ -28,4 +28,10 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
             yaml["script"]["file"].as<std::string>(""));
 
     return 0;
+}
+uint32_t h_core::ActorSpecAsset::initFromFile(
+    h_core::Assets* assets, h_core::Systems* systems, std::string filepath) {
+    printf("ERROR: ACTORSPEC: Trying to load actor from file");
+
+    return 1;
 }

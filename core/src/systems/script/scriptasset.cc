@@ -30,17 +30,29 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(
                 slashIndex < filePath.size() - 1) {
                 name = filePath.substr(slashIndex + 1);
             }
-            else {
-                name = filePath;
-            }
+            else { name = filePath; }
         }
-        else {
-            name = yamlName;
-        }
+        else { name = yamlName; }
     }
 
     ::printf("DEBUG: SCRIPT: chose name %s\n", name.c_str());
     ::printf("DEBUG: SCRIPT: \n%s\n", code.c_str());
+
+    return 0;
+}
+uint32_t h_core::script::ScriptAsset::initFromFile(
+    h_core::Assets* assets, h_core::Systems* systems, std::string filepath) {
+    std::ifstream scriptCodeFileStream { filepath };
+    std::stringstream scriptCodeStream;
+    scriptCodeStream << scriptCodeFileStream.rdbuf();
+    code = scriptCodeStream.str();
+
+    size_t slashIndex = filepath.find_last_of('/');
+    if (slashIndex != std::string::npos &&
+        slashIndex < filepath.size() - 1) {
+        name = filepath.substr(slashIndex + 1);
+        }
+    else { name = filepath; }
 
     return 0;
 }

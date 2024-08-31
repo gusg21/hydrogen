@@ -26,6 +26,10 @@ class ScriptAsset : public Asset {
     uint32_t initFromYaml(
         h_core::Assets* assets, h_core::Systems* system,
         YAML::Node node) override;
+    uint32_t initFromFile(
+        h_core::Assets* assets, h_core::Systems* systems,
+        std::string filepath) override;
+
 
     uint32_t compile(asIScriptContext* context);
     asIScriptObject* constructInstance(
