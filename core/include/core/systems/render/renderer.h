@@ -15,6 +15,7 @@ class Renderer : public System {
 
     uint32_t init(h_core::Engine* engine) override;
     void destroy() override;
+    void doGUI() override;
     void beginFrame() override;
     void draw() override;
     void endFrame() override;

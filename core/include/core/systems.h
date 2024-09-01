@@ -29,6 +29,7 @@ class Systems {
     void destroy();
 
     void prepareScene(h_core::Scene* scene);
+    void doGUI();
     void beginFrame();
     void processScene(h_core::Scene* scene);
     void drawScene(h_core::Scene* scene);

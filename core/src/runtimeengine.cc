@@ -9,6 +9,35 @@
 #include "core/systems/render/renderer.h"
 #include "core/systems/script/scripting.h"
 
+void h_core::RuntimeEngine::doInit() {
+    Engine::doInit();
+
+    // set up systems
+    m_systems.gravity = new h_core::systems::Gravity();
+    m_systems.renderer = new h_core::render::Renderer();
+    m_systems.scripting = new h_core::script::Scripting();
+    m_systems.init(this);
+}
+
+void h_core::RuntimeEngine::doPostLoad() {
+    Engine::doPostLoad();
+
+    getAssets()->precompile(&m_systems);
+}
+
+void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
+    // Prepare the actors for this scene
+    if (sceneSpecIndex != ASSETS_ASSET_INDEX_BAD) {
+        getScene()->addActorsFromSceneSpec(
+            getAssets(), sceneSpecIndex,
+            m_systems.scripting->getContext());
+    }
+
+    // Prepare the systems for this scene
+    m_systems.prepareScene(getScene());
+}
+
+
 void h_core::RuntimeEngine::doGUI() {
     Engine::doGUI();
 
@@ -55,8 +84,14 @@ void h_core::RuntimeEngine::doGUI() {
             }
             ImGui::EndTable();
         }
+
+        ImGui::SeparatorText("Statistics");
+        ImGui::Text("FPS: %.3f", getFPS());
+        ImGui::Text("Frame Time: %.3fs", getDeltaSecs());
     }
     ImGui::End();
+
+    m_systems.doGUI();
 }
 
 void h_core::RuntimeEngine::beginFrame() {
@@ -82,37 +117,10 @@ void h_core::RuntimeEngine::endFrame() {
 
     m_systems.endFrame();
 }
+
 void h_core::RuntimeEngine::destroy() {
     m_systems.destroy();
 
     // THEN destroy the engine internals
     Engine::destroy();
-}
-
-void h_core::RuntimeEngine::doInit() {
-    Engine::doInit();
-
-    // set up systems
-    m_systems.gravity = new h_core::systems::Gravity();
-    m_systems.renderer = new h_core::render::Renderer();
-    m_systems.scripting = new h_core::script::Scripting();
-    m_systems.init(this);
-}
-
-void h_core::RuntimeEngine::doPostLoad() {
-    Engine::doPostLoad();
-
-    getAssets()->precompile(&m_systems);
-}
-
-void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
-    // Prepare the actors for this scene
-    if (sceneSpecIndex != ASSETS_ASSET_INDEX_BAD) {
-        getScene()->addActorsFromSceneSpec(
-            getAssets(), sceneSpecIndex,
-            m_systems.scripting->getContext());
-    }
-
-    // Prepare the systems for this scene
-    m_systems.prepareScene(getScene());
 }

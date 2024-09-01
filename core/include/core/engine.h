@@ -39,6 +39,8 @@ class Engine {
     [[nodiscard]] h_core::Window* getWindow();
     [[nodiscard]] h_core::Assets* getAssets();
     [[nodiscard]] const h_core::Project* getProject();
+    [[nodiscard]] double getDeltaSecs();
+    [[nodiscard]] double getFPS();
 
   protected:
     virtual void doInit() {};
@@ -60,5 +62,6 @@ class Engine {
     uint32_t m_windowWidth = 1600;
     uint32_t m_windowHeight = 900;
     h_core::math::Color m_clearColor;
+    uint64_t m_deltaMsecs = 0;
 };
 }  // namespace h_core

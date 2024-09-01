@@ -8,32 +8,35 @@
 #include "core/systems/render/renderer.h"
 #include "core/systems/script/scripting.h"
 
-uint32_t h_core::Systems::init(h_core::Engine* engine) {
-    uint32_t result;
-
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        system->init(engine);
+// These macros are evil!
+#define FOR_EACH_SYSTEM_PER_ACTOR_IN_SCENE(functionName, ...)                   \
+    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT; \
+         systemIndex++) {                                              \
+        System* system = ((System**)this)[systemIndex];                \
+        ComponentBitmask requiredMask = system->getMask();             \
+        for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {            \
+            ComponentBitmask actorMask = scene->masks[id];             \
+            if ((requiredMask & actorMask) == requiredMask) {          \
+                updateSystemReferences(system, scene, id);             \
+                system->functionName(__VA_ARGS__);                     \
+            }                                                          \
+        }                                                              \
     }
+
+#define FOR_EACH_SYSTEM(functionName, ...)                             \
+    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT; \
+         systemIndex++) {                                              \
+        System* system = ((System**)this)[systemIndex];                \
+        system->functionName(__VA_ARGS__);                             \
+    }
+
+uint32_t h_core::Systems::init(h_core::Engine* engine) {
+    FOR_EACH_SYSTEM(init, engine);
 
     return 0;
 }
 
 void h_core::Systems::destroy() {
-    //    renderer->destroy();
-    //    delete renderer;
-    //    renderer = nullptr;
-    //
-    //    gravity->destroy();
-    //    delete gravity;
-    //    gravity = nullptr;
-    //
-    //    scripting->destroy();
-    //    delete scripting;
-    //    scripting = nullptr;
-
     for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
          systemIndex++) {
         // EVIL! EVIL! EVIL!
@@ -56,70 +59,25 @@ void h_core::Systems::updateSystemReferences(
 }
 
 void h_core::Systems::prepareScene(h_core::Scene* scene) {
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        ComponentBitmask requiredMask = system->getMask();
+    FOR_EACH_SYSTEM_PER_ACTOR_IN_SCENE(initPerActor);
+}
 
-        for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-            ComponentBitmask actorMask = scene->masks[id];
-            if ((requiredMask & actorMask) == requiredMask) {
-                updateSystemReferences(system, scene, id);
-                system->initPerActor();
-            }
-        }
-    }
+void h_core::Systems::doGUI() {
+    FOR_EACH_SYSTEM(doGUI);
 }
 
 void h_core::Systems::beginFrame() {
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        system->beginFrame();
-    }
+    FOR_EACH_SYSTEM(beginFrame);
 }
 
 void h_core::Systems::processScene(h_core::Scene* scene) {
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        ComponentBitmask requiredMask = system->getMask();
-
-        for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-            ComponentBitmask actorMask = scene->masks[id];
-            if ((requiredMask & actorMask) == requiredMask) {
-                updateSystemReferences(system, scene, id);
-                system->process();
-            }
-        }
-    }
+    FOR_EACH_SYSTEM_PER_ACTOR_IN_SCENE(process);
 }
 
 void h_core::Systems::drawScene(h_core::Scene* scene) {
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        ComponentBitmask requiredMask = system->getMask();
-
-        for (ActorId id = 0; id < SCENE_MAX_ACTORS; id++) {
-            ComponentBitmask actorMask = scene->masks[id];
-            if ((requiredMask & actorMask) == requiredMask) {
-                updateSystemReferences(system, scene, id);
-                system->draw();
-            }
-        }
-    }
+    FOR_EACH_SYSTEM_PER_ACTOR_IN_SCENE(draw);
 }
 
 void h_core::Systems::endFrame() {
-    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
-         systemIndex++) {
-        // EVIL! EVIL! EVIL!
-        System* system = ((System**)this)[systemIndex];
-        system->endFrame();
-    }
+    FOR_EACH_SYSTEM(endFrame);
 }

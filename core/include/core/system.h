@@ -19,6 +19,7 @@ class System {
     virtual uint32_t init(h_core::Engine* engine);
     virtual void destroy() {};
     virtual void initPerActor() {};
+    virtual void doGUI() {};
     virtual void beginFrame() {};
     virtual void process() {};
     virtual void draw() {};

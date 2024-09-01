@@ -118,6 +118,23 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
 void h_core::render::Renderer::destroy() {
 }
 
+void h_core::render::Renderer::doGUI() {
+    h_core::System::doGUI();
+
+    if (ImGui::Begin("Renderer Debugger")) {
+        ImGui::SeparatorText("Camera");
+        ImGui::SliderFloat3(
+            "Camera Position", &m_cameraPosition.x, -10.f, 10.f);
+        ImGui::SliderFloat("FOV", &m_fovDegrees, 0.f, 180.f);
+        ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
+        ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
+
+        ImGui::SeparatorText("Render Configuration");
+        ImGui::Checkbox("CCW", &m_ccw);
+    }
+    ImGui::End();
+}
+
 void h_core::render::Renderer::beginFrame() {
     ::glViewport(0, 0, engine->getWidth(), engine->getHeight());
     h_core::math::Color clearColor = engine->getClearColor();
@@ -138,16 +155,6 @@ void h_core::render::Renderer::beginFrame() {
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
-
-    if (ImGui::Begin("Camera Settings")) {
-        ImGui::SliderFloat3(
-            "Camera Position", &m_cameraPosition.x, -10.f, 10.f);
-        ImGui::SliderFloat("FOV", &m_fovDegrees, 0.f, 180.f);
-        ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
-        ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
-        ImGui::Checkbox("CCW", &m_ccw);
-    }
-    ImGui::End();
 }
 
 void h_core::render::Renderer::draw() {

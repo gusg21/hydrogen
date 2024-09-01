@@ -65,6 +65,7 @@ void h_core::Engine::run() {
     //    m_systems.initScene(&m_scene);
 
     // Loop
+    uint64_t frameBeginTicks = SDL_GetTicks64();
     bool engineRunning = true;
     while (engineRunning) {
         m_window->postEventsToQueue(&m_events);
@@ -115,6 +116,10 @@ void h_core::Engine::run() {
 
         // Clear the queue
         m_events.clear();
+
+        // Update delta
+        m_deltaMsecs = SDL_GetTicks64() - frameBeginTicks;
+        frameBeginTicks = SDL_GetTicks64();
     }
 }
 
@@ -143,4 +148,11 @@ h_core::Assets* h_core::Engine::getAssets() {
 }
 const h_core::Project* h_core::Engine::getProject() {
     return m_project;
+}
+
+double h_core::Engine::getDeltaSecs() {
+    return (double)m_deltaMsecs / 1000.0;
+}
+double h_core::Engine::getFPS() {
+    return 1.0 / getDeltaSecs();
 }
