@@ -15,7 +15,7 @@ void h_core::Transform::initFromYaml(YAML::Node yaml) {
     scale.z = yaml["scale"]["z"].as<float>();
 }
 
-h_core::math::Mat4x4 h_core::Transform::getMatrix() {
+h_core::math::Mat4x4 h_core::Transform::getMatrix() const {
     return h_core::math::Mat4x4::createTransformMatrix(
         position, rotation, scale);
 }

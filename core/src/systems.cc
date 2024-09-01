@@ -11,30 +11,39 @@
 uint32_t h_core::Systems::init(h_core::Engine* engine) {
     uint32_t result;
 
-    result = renderer->init(engine);
-    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
-
-    result = gravity->init(engine);
-    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
-
-    result = scripting->init(engine);
-    if (result != 0) return SYSTEMS_INIT_FAIL_BAD_SYSTEM;
+    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
+         systemIndex++) {
+        // EVIL! EVIL! EVIL!
+        System* system = ((System**)this)[systemIndex];
+        system->init(engine);
+    }
 
     return 0;
 }
 
 void h_core::Systems::destroy() {
-    renderer->destroy();
-    delete renderer;
-    renderer = nullptr;
+    //    renderer->destroy();
+    //    delete renderer;
+    //    renderer = nullptr;
+    //
+    //    gravity->destroy();
+    //    delete gravity;
+    //    gravity = nullptr;
+    //
+    //    scripting->destroy();
+    //    delete scripting;
+    //    scripting = nullptr;
 
-    gravity->destroy();
-    delete gravity;
-    gravity = nullptr;
-
-    scripting->destroy();
-    delete scripting;
-    scripting = nullptr;
+    for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
+         systemIndex++) {
+        // EVIL! EVIL! EVIL!
+        // Note the double-pointer screwery so that we can properly modify the
+        // contents of the variable
+        System** system = &((System**)this)[systemIndex];
+        (*system)->destroy();
+        //        delete system;
+        *system = nullptr;
+    }
 }
 
 

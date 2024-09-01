@@ -43,18 +43,18 @@ class MeshAsset : public Asset {
         uint32_t vertexCount, const Vertex* vertexBuffer,
         uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);
 
-    GLuint getVertexBufferHandle();
-    GLuint getIndexBufferHandle();
-    GLuint getVertexAttributesHandle();
-    size_t getNumVertices();
-    size_t getNumIndices();
-    MeshIndexType getMeshIndexType();
-    uint32_t getPrimitiveMode();
+    [[nodiscard]] GLuint getVertexBufferHandle() const;
+    [[nodiscard]] GLuint getIndexBufferHandle() const;
+    [[nodiscard]] GLuint getVertexAttributesHandle() const;
+    [[nodiscard]] size_t getNumVertices() const;
+    [[nodiscard]] size_t getNumIndices() const;
+    [[nodiscard]] MeshIndexType getMeshIndexType() const;
+    [[nodiscard]] uint32_t getPrimitiveMode() const;
 
   private:
     // Shouldn't need an initialized flag - should only be initted once!
     // bool m_initialized = false;
-    GLuint m_vertexBufferHandle, m_vertexAttributesHandle, m_indexBufferHandle;
+    GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
     h_core::render::MeshIndexType m_meshIndexType =

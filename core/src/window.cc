@@ -90,10 +90,10 @@ void h_core::Window::swap() {
     ::SDL_GL_SwapWindow(m_sdlWindow);
 }
 
-h_core::render::Renderer* h_core::Window::getRendererSystem() {
+h_core::render::Renderer* h_core::Window::getRendererSystem() const {
     return m_renderer;
 }
 
-SDL_Window* h_core::Window::getSDLWindow() {
+SDL_Window* h_core::Window::getSDLWindow() const {
     return m_sdlWindow;
 }

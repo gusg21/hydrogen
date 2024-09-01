@@ -37,8 +37,8 @@ class Window {
 
     void swap();
 
-    h_core::render::Renderer* getRendererSystem();
-    SDL_Window* getSDLWindow();
+    h_core::render::Renderer* getRendererSystem() const;
+    SDL_Window* getSDLWindow() const;
 
   private:
     SDL_Window* m_sdlWindow = nullptr;

@@ -54,7 +54,7 @@ class Assets {
     /// @param index the index to load
     /// @return a pointer (not managed by you!) to the asset
     template<typename AssetType>
-    AssetType* getAssetByIndex(h_core::AssetIndex index);
+    AssetType* getAssetByIndex(h_core::AssetIndex index) const;
 
 
   private:
@@ -135,7 +135,7 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
 }
 
 template<typename AssetType>
-inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) {
+inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
     static_assert(
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't get asset type that does not derive from Asset");

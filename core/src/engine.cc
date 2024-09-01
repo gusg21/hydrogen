@@ -15,15 +15,15 @@
 
 uint32_t h_core::Engine::init(
     h_core::Assets* out_assets, h_core::Project* project) {
+    // Store the project
     m_project = project;
 
-    std::string windowTitle = "hydrogen runtime - " + project->name;
-
+    // Window initialization
     m_window = new h_core::Window();
+    std::string windowTitle = "hydrogen runtime - " + project->name;
     uint32_t windowInitResult = m_window->init(
         windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
-
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
 
@@ -33,16 +33,15 @@ uint32_t h_core::Engine::init(
     io.ConfigFlags |=
         ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
 
-    h_core::theming::cherry();
-    // ImGui::StyleColorsLight();
-
     ::ImGui_ImplOpenGL3_Init();
     ::ImGui_ImplSDL2_InitForOpenGL(
         m_window->getSDLWindow(),
         m_window->getRendererSystem()->getGLContext());
+    h_core::theming::cherry();
 
     // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
+    // renderer is from the window (not owned by the engine directly)
     m_systems.renderer = m_window->getRendererSystem();
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
@@ -74,8 +73,10 @@ void h_core::Engine::run() {
             m_assets, m_project->initialSceneSpec, m_systems.scripting->getContext());
     }
 
+    // Prepare the systems for this scene
     m_systems.initScene(&m_scene);
 
+    // Loop
     bool engineRunning = true;
     while (engineRunning) {
         m_window->postEventsToQueue(&m_events);
@@ -131,6 +132,6 @@ uint32_t h_core::Engine::getHeight() const {
     return m_windowHeight;
 }
 
-h_core::math::Color h_core::Engine::getClearColor() {
+h_core::math::Color h_core::Engine::getClearColor() const {
     return m_clearColor;
 }

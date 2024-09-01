@@ -21,7 +21,7 @@ h_core::AssetHash h_core::Assets::getAssetHashFromString(std::string string) {
 
 void h_core::Assets::loadFromProject(
     h_core::Project* project, h_core::Systems* systems) {
-    for (const h_core::ProjectAssetEntry& assetInfo : project->assets) {
+    for (const h_core::ProjectAssetEntry& assetInfo : project->requiredAssets) {
         switch (assetInfo.typeId) {
             LOAD_ASSET_TYPE_FROM_NUMBER(h_core::SceneSpecAsset, 0)
             LOAD_ASSET_TYPE_FROM_NUMBER(h_core::ActorSpecAsset, 1)

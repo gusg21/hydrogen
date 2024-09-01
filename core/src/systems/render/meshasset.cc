@@ -243,30 +243,30 @@ void h_core::render::MeshAsset::loadModel(
 }
 
 
-GLuint h_core::render::MeshAsset::getIndexBufferHandle() {
+GLuint h_core::render::MeshAsset::getIndexBufferHandle() const {
     return m_indexBufferHandle;
 }
 
-GLuint h_core::render::MeshAsset::getVertexAttributesHandle() {
+GLuint h_core::render::MeshAsset::getVertexAttributesHandle() const {
     return m_vertexAttributesHandle;
 }
 
-GLuint h_core::render::MeshAsset::getVertexBufferHandle() {
+GLuint h_core::render::MeshAsset::getVertexBufferHandle() const {
     return m_vertexBufferHandle;
 }
 
-size_t h_core::render::MeshAsset::getNumVertices() {
+size_t h_core::render::MeshAsset::getNumVertices() const {
     return m_numVertices;
 }
 
-size_t h_core::render::MeshAsset::getNumIndices() {
+size_t h_core::render::MeshAsset::getNumIndices() const {
     return m_numIndices;
 }
 
-h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() {
+h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() const {
     return m_meshIndexType;
 }
 
-uint32_t h_core::render::MeshAsset::getPrimitiveMode() {
+uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
 }

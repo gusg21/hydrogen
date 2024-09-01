@@ -32,10 +32,9 @@ class Engine {
     /// @brief run the game loop (blocking)
     void run();
 
-    uint32_t getWidth() const;
-    uint32_t getHeight() const;
-
-    h_core::math::Color getClearColor();
+    [[nodiscard]] uint32_t getWidth() const;
+    [[nodiscard]] uint32_t getHeight() const;
+    [[nodiscard]] h_core::math::Color getClearColor() const;
 
   private:
     h_core::Systems m_systems {};

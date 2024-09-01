@@ -22,8 +22,8 @@ class Renderer : public System {
     uint32_t initFromWindow(
         uint32_t width, uint32_t height, SDL_Window* window);
 
-    SDL_GLContext getGLContext();
-    h_core::ComponentBitmask getMask() override;
+    [[nodiscard]] SDL_GLContext getGLContext() const;
+    [[nodiscard]] h_core::ComponentBitmask getMask() const override;
 
   private:
     h_core::math::Vector3 m_cameraPosition { 0.f, 10.f, -10.f };

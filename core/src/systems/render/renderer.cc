@@ -142,9 +142,8 @@ void h_core::render::Renderer::beginFrame() {
         ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
         ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
         ImGui::Checkbox("CCW", &m_ccw);
-
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 void h_core::render::Renderer::draw() {
@@ -200,10 +199,10 @@ uint32_t h_core::render::Renderer::initFromWindow(
 
 void h_core::render::Renderer::endFrame() {}
 
-h_core::ComponentBitmask h_core::render::Renderer::getMask() {
+h_core::ComponentBitmask h_core::render::Renderer::getMask() const {
     return TRANSFORM_COMPONENT_BITMASK | MODEL_COMPONENT_BITMASK;
 }
 
-SDL_GLContext h_core::render::Renderer::getGLContext() {
+SDL_GLContext h_core::render::Renderer::getGLContext() const {
     return m_glContext;
 }

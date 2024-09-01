@@ -7,7 +7,7 @@ float h_core::math::Vector3::dot(
     return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 }
 
-float h_core::math::Vector3::dot(h_core::math::Vector3 otherVector) {
+float h_core::math::Vector3::dot(h_core::math::Vector3 otherVector) const {
     return h_core::math::Vector3::dot(Vector3(x, y, z), otherVector);
 }
 
@@ -20,7 +20,8 @@ h_core::math::Vector3 h_core::math::Vector3::cross(
         (v1.x * v2.y) - (v2.x * v1.y));
 }  // clang-format on
 
-h_core::math::Vector3 h_core::math::Vector3::cross(h_core::math::Vector3 v) {
+h_core::math::Vector3 h_core::math::Vector3::cross(
+    h_core::math::Vector3 v) const {
     return h_core::math::Vector3::cross(Vector3(x, y, z), v);
 }
 

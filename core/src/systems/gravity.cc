@@ -17,6 +17,6 @@ void h_core::systems::Gravity::process() {
 
 }
 
-h_core::ComponentBitmask h_core::systems::Gravity::getMask() {
+h_core::ComponentBitmask h_core::systems::Gravity::getMask() const {
     return TRANSFORM_COMPONENT_BITMASK;
 }

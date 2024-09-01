@@ -109,61 +109,61 @@ uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
     h_core::System::init(engine);
 
     // Setup engine
-    scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
-    scriptModule =
-        scriptEngine->GetModule("hyScripting", asGM_CREATE_IF_NOT_EXISTS);
-    scriptContext = scriptEngine->CreateContext();
+    m_scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);
+    m_scriptModule =
+        m_scriptEngine->GetModule("hyScripting", asGM_CREATE_IF_NOT_EXISTS);
+    m_scriptContext = m_scriptEngine->CreateContext();
 
     // Engine utils
-    ::RegisterStdString(scriptEngine);
-    scriptEngine->SetMessageCallback(
+    ::RegisterStdString(m_scriptEngine);
+    m_scriptEngine->SetMessageCallback(
         asFUNCTION(angelScriptMessageCallback), nullptr, asCALL_CDECL);
-    scriptEngine->RegisterGlobalFunction(
+    m_scriptEngine->RegisterGlobalFunction(
         "void print(const string &in)", asFUNCTION(angelScriptPrint),
         asCALL_CDECL);
 
     // ENGINE INTERFACE BEGIN
-    scriptEngine->SetDefaultNamespace("engine");
+    m_scriptEngine->SetDefaultNamespace("engine");
 
     // -> Types
 
     // Vector2
-    scriptEngine->RegisterObjectType(
+    m_scriptEngine->RegisterObjectType(
         "Vector2", sizeof(h_core::math::Vector2),
         asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector2>());
-    scriptEngine->RegisterObjectProperty(
+    m_scriptEngine->RegisterObjectProperty(
         "Vector2", "float x", asOFFSET(h_core::math::Vector2, x));
-    scriptEngine->RegisterObjectProperty(
+    m_scriptEngine->RegisterObjectProperty(
         "Vector2", "float y", asOFFSET(h_core::math::Vector2, y));
 
-    RegisterVector3(scriptEngine);
-    RegisterQuaternion(scriptEngine);
+    RegisterVector3(m_scriptEngine);
+    RegisterQuaternion(m_scriptEngine);
 
     // Transform
-    scriptEngine->RegisterObjectType(
+    m_scriptEngine->RegisterObjectType(
         "Transform", sizeof(h_core::Transform),
         asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
-    scriptEngine->RegisterObjectProperty(
+    m_scriptEngine->RegisterObjectProperty(
         "Transform", "Vector3 position", asOFFSET(h_core::Transform, position));
-    scriptEngine->RegisterObjectProperty(
+    m_scriptEngine->RegisterObjectProperty(
         "Transform", "Quaternion rotation",
         asOFFSET(h_core::Transform, rotation));
-    scriptEngine->RegisterObjectProperty(
+    m_scriptEngine->RegisterObjectProperty(
         "Transform", "Vector3 scale", asOFFSET(h_core::Transform, scale));
 
     // ActorId
-    scriptEngine->RegisterObjectType(
+    m_scriptEngine->RegisterObjectType(
         "ActorId", sizeof(h_core::ActorId),
         asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::ActorId>());
 
     // -> Global Functions
-    scriptEngine->RegisterGlobalFunction(
+    m_scriptEngine->RegisterGlobalFunction(
         "Transform getBoundTransform()", asMETHOD(Scripting, getBoundTransform),
         asCALL_THISCALL_ASGLOBAL, this);
-    scriptEngine->RegisterGlobalFunction(
+    m_scriptEngine->RegisterGlobalFunction(
         "void setBoundTransform(Transform)",
         asMETHOD(Scripting, setBoundTransform), asCALL_THISCALL_ASGLOBAL, this);
-    scriptEngine->RegisterGlobalFunction(
+    m_scriptEngine->RegisterGlobalFunction(
         "string toString(ActorId id)",
         asFUNCTIONPR(actorIdToString, (ActorId), std::string), asCALL_CDECL);
 
@@ -182,21 +182,21 @@ void h_core::script::Scripting::process() {
     // Build script if the script is not yet built
     // TODO: Is this good? Might be better to have a post-init hook for systems
 
-    script->runMethodIfExists(scriptContext, "void process()");
+    script->runMethodIfExists(m_scriptContext, "void process()");
 }
 
 void h_core::script::Scripting::draw() {
-    script->runMethodIfExists(scriptContext, "void draw()");
+    script->runMethodIfExists(m_scriptContext, "void draw()");
 }
 
 void h_core::script::Scripting::endFrame() {}
 
-uint32_t h_core::script::Scripting::getMask() {
+uint32_t h_core::script::Scripting::getMask() const {
     return SCRIPT_COMPONENT_BITMASK;
 }
 
-asIScriptContext* h_core::script::Scripting::getContext() {
-    return scriptContext;
+asIScriptContext* h_core::script::Scripting::getContext() const {
+    return m_scriptContext;
 }
 
 h_core::Transform h_core::script::Scripting::getBoundTransform() {
@@ -206,6 +206,6 @@ h_core::Transform h_core::script::Scripting::getBoundTransform() {
 void h_core::script::Scripting::setBoundTransform(h_core::Transform newTrans) {
     *transform = newTrans;
 }
-asIScriptModule* h_core::script::Scripting::getModule() {
-    return scriptModule;
+asIScriptModule* h_core::script::Scripting::getModule() const {
+    return m_scriptModule;
 }

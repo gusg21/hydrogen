@@ -24,7 +24,7 @@ class System {
     virtual void draw() {};
     virtual void endFrame() {};
 
-    virtual h_core::ComponentBitmask getMask() = 0;
+    [[nodiscard]] virtual h_core::ComponentBitmask getMask() const = 0;
 
     h_core::ActorId actorId = 0;
     h_core::Engine* engine = nullptr;
