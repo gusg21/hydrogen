@@ -24,8 +24,9 @@ class ScriptAsset : public Asset {
     ScriptAsset() = default;
 
     uint32_t initFromYaml(
-        h_core::Assets* assets, h_core::Systems* system,
+        h_core::Assets* assets,
         YAML::Node node) override;
+    uint32_t precompile(h_core::Systems* systems) override;
 
     void loadCode(asIScriptModule* module);
     uint32_t compile(asIScriptModule* module);
@@ -37,6 +38,8 @@ class ScriptAsset : public Asset {
 
     asITypeInfo* type = nullptr;
     asIScriptFunction* typeConstructor = nullptr;
+
+    HYASSET(2);
 };
 }  // namespace script
 

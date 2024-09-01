@@ -4,7 +4,6 @@
 
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
-#include "tiny_gltf.h"
 
 // TODO: move these godless monstrosities to a subf
 
@@ -38,7 +37,7 @@ static const uint16_t cubeTriList[] = {
 
 
 uint32_t h_core::render::MeshAsset::initFromYaml(
-    h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
+    h_core::Assets* assets, YAML::Node yaml) {
     ::printf("INFO: MESH: loading model from YAML spec...\n");
 
     if (yaml["primitive"].as<bool>(false)) {
@@ -62,18 +61,17 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
 
     // Load model
     tinygltf::TinyGLTF loader {};
-    tinygltf::Model model {};
     std::string errorText {};
     std::string warningText {};
 
     bool success;
     if (!gltfBinaryMode) {
         success = loader.LoadASCIIFromFile(
-            &model, &errorText, &warningText, gltfFilePath);
+            &m_model, &errorText, &warningText, gltfFilePath);
     }
     else {
         success = loader.LoadBinaryFromFile(
-            &model, &errorText, &warningText, gltfFilePath);
+            &m_model, &errorText, &warningText, gltfFilePath);
     }
 
     if (!warningText.empty()) {
@@ -85,37 +83,41 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
 
+    return 0;
+}
+
+uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
     // TODO: VERY TESTING. MUCH WOW
-    tinygltf::Node node = model.nodes.front();
-    tinygltf::Mesh mesh = model.meshes[node.mesh];
+    tinygltf::Node node = m_model.nodes.front();
+    tinygltf::Mesh mesh = m_model.meshes[node.mesh];
     tinygltf::Primitive primitiveInfo = mesh.primitives.front();
     m_primitiveMode = primitiveInfo.mode;
 
     // pos attribute
     uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
-    tinygltf::Accessor posAccessor = model.accessors[posAccessorIndex];
+    tinygltf::Accessor posAccessor = m_model.accessors[posAccessorIndex];
     tinygltf::BufferView posBufferView =
-        model.bufferViews[posAccessor.bufferView];
-    const uint8_t* posBuffer = model.buffers[posBufferView.buffer].data.data() +
+        m_model.bufferViews[posAccessor.bufferView];
+    const uint8_t* posBuffer = m_model.buffers[posBufferView.buffer].data.data() +
                                posBufferView.byteOffset;
 
     // normal attribute
     uint32_t normalAccessorIndex = primitiveInfo.attributes["NORMAL"];
-    tinygltf::Accessor normalAccessor = model.accessors[normalAccessorIndex];
+    tinygltf::Accessor normalAccessor = m_model.accessors[normalAccessorIndex];
     tinygltf::BufferView normalBufferView =
-        model.bufferViews[normalAccessor.bufferView];
+        m_model.bufferViews[normalAccessor.bufferView];
     const uint8_t* normalBuffer =
-        model.buffers[normalBufferView.buffer].data.data() +
+        m_model.buffers[normalBufferView.buffer].data.data() +
         normalBufferView.byteOffset;
 
     // uv attribute
     uint32_t texCoordAccessorIndex = primitiveInfo.attributes["TEXCOORD_0"];
     tinygltf::Accessor texCoordAccessor =
-        model.accessors[texCoordAccessorIndex];
+        m_model.accessors[texCoordAccessorIndex];
     tinygltf::BufferView texCoordBufferView =
-        model.bufferViews[texCoordAccessor.bufferView];
+        m_model.bufferViews[texCoordAccessor.bufferView];
     const uint8_t* texCoordBuffer =
-        model.buffers[texCoordBufferView.buffer].data.data() +
+        m_model.buffers[texCoordBufferView.buffer].data.data() +
         texCoordBufferView.byteOffset;
 
     // load vertex data
@@ -137,9 +139,9 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
     // load index buffer
     uint32_t indexBufferAccessorIndex = primitiveInfo.indices;
     tinygltf::Accessor indexBufferAccessor =
-        model.accessors[indexBufferAccessorIndex];
+        m_model.accessors[indexBufferAccessorIndex];
     tinygltf::BufferView indexBufferView =
-        model.bufferViews[indexBufferAccessor.bufferView];
+        m_model.bufferViews[indexBufferAccessor.bufferView];
     size_t indexBufferCount = indexBufferAccessor.count;
 
     // determine index type
@@ -160,7 +162,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
 
     loadModel(
         vertexBufferCount, vertexBuffer, indexBufferCount,
-        model.buffers[indexBufferView.buffer].data.data() +
+        m_model.buffers[indexBufferView.buffer].data.data() +
             indexBufferView.byteOffset,
         m_meshIndexType);
 
@@ -270,3 +272,4 @@ h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() cons
 uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
 }
+

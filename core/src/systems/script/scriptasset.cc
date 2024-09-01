@@ -7,7 +7,7 @@
 #include "core/actor.h"
 
 uint32_t h_core::script::ScriptAsset::initFromYaml(
-    h_core::Assets* assets, h_core::Systems* systems, YAML::Node node) {
+    h_core::Assets* assets, YAML::Node node) {
     std::string filePath = node["file"].as<std::string>("");
 
     std::string yamlName =
@@ -39,6 +39,10 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(
     ::printf("DEBUG: SCRIPT: chose name %s\n", name.c_str());
     ::printf("DEBUG: SCRIPT: \n%s\n", code.c_str());
 
+    return 0;
+}
+
+uint32_t h_core::script::ScriptAsset::precompile(h_core::Systems* systems) {
     // Load + compile script
     loadCode(systems->scripting->getModule());
     compile(systems->scripting->getModule());
@@ -97,3 +101,4 @@ uint32_t h_core::script::ScriptAsset::compile(asIScriptModule* module) {
 
     return 0;
 }
+

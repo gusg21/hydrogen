@@ -34,7 +34,8 @@ class Assets {
 
     void init(h_core::Systems* systems);
 
-    void loadFromProject(h_core::Project* project, h_core::Systems* systems);
+    void loadFromProject(h_core::Project* project);
+    void precompile(h_core::Systems* systems);
 
     /// @brief convert the name of an asset to its hash
     /// @param string the string to convert (asset name)
@@ -60,10 +61,10 @@ class Assets {
   private:
     template<typename AssetType>
     h_core::AssetIndex loadAssetFromFile(
-        AssetType* out_asset, h_core::Systems* systems, std::string filePath);
+        AssetType* out_asset, std::string filePath);
 
     template <typename AssetType>
-    void loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo, h_core::Systems* systems);
+    void loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo);
 
     h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex>
@@ -75,21 +76,10 @@ class Assets {
 
 template<typename AssetType>
 inline uint32_t h_core::Assets::loadAssetFromFile(
-    AssetType* out_asset, h_core::Systems* systems, std::string filePath) {
+    AssetType* out_asset, std::string filePath) {
     static_assert(
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't load asset type that does not derive from Asset");
-
-/*    size_t dotIndex = filePath.find_first_of('.');
-
-    if(dotIndex != std::string::npos && dotIndex < filePath.size() - 1) {
-        std::string fileType = filePath.substr(dotIndex + 1);
-
-        if (fileType != "yml") {
-            out_asset->initFromFile(this, systems, filePath);
-            return 0;
-        }
-    }*/
 
     // Load file
     std::stringstream yamlBufferStream;
@@ -98,7 +88,7 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
 
     // Parse YAML and load asset
     YAML::Node yaml = YAML::Load(yamlBufferStream.str());
-    out_asset->initFromYaml(this, systems, yaml);
+    out_asset->initFromYaml(this, yaml);
 
     return 0;
 }
@@ -109,6 +99,7 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't load asset type that does not derive from Asset");
 
+    // TODO: This hashing piece to the loading can probably be removed
     h_core::AssetHash hash = getAssetHashFromString(filePath);
     if (m_assetIndexMap.count(hash) > 0) {
         // Load existing asset
@@ -144,12 +135,12 @@ inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) cons
 }
 
 template <typename AssetType>
-void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo, h_core::Systems* systems) {
+void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo) {
     static_assert(
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't get asset type that does not derive from Asset");
 
     AssetType* asset = new AssetType();
-    loadAssetFromFile<AssetType>(asset, systems, assetInfo.assetPath);
+    loadAssetFromFile<AssetType>(asset, assetInfo.assetPath);
     out_assets[assetInfo.index] = asset;
 }

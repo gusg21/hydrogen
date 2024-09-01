@@ -27,7 +27,7 @@ class Engine {
     uint32_t init(h_core::Assets* assets, h_core::Project* project);
 
     /// @brief clean up the engine
-    void destroy();
+    virtual void destroy();
 
     /// @brief run the game loop (blocking)
     void run();
@@ -35,10 +35,22 @@ class Engine {
     [[nodiscard]] uint32_t getWidth() const;
     [[nodiscard]] uint32_t getHeight() const;
     [[nodiscard]] h_core::math::Color getClearColor() const;
+    [[nodiscard]] h_core::Scene* getScene();
+    [[nodiscard]] h_core::Window* getWindow();
+    [[nodiscard]] h_core::Assets* getAssets();
+    [[nodiscard]] const h_core::Project* getProject();
+
+  protected:
+    virtual void doInit() {};
+    virtual void doPostLoad() {};
+    virtual void prepareScene(h_core::AssetIndex sceneSpecIndex) {};
+    virtual void doGUI() {};
+    virtual void beginFrame() {};
+    virtual void doProcess() {};
+    virtual void doDraw() {};
+    virtual void endFrame() {};
 
   private:
-    h_core::Systems m_systems {};
-
     h_core::Assets* m_assets = nullptr;
     h_core::Project* m_project = nullptr;
     h_core::Window* m_window = nullptr;

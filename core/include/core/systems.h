@@ -28,7 +28,7 @@ class Systems {
     uint32_t init(h_core::Engine* engine);
     void destroy();
 
-    void initScene(h_core::Scene* scene);
+    void prepareScene(h_core::Scene* scene);
     void beginFrame();
     void processScene(h_core::Scene* scene);
     void drawScene(h_core::Scene* scene);

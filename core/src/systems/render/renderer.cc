@@ -10,7 +10,6 @@
 #include "core/math/mat4x4.h"
 #include "core/systems/render/meshasset.h"
 
-#define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
 #define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
@@ -101,6 +100,12 @@ uint32_t loadProgram(
 uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
     h_core::System::init(engine);
 
+    ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    ::glEnable(GL_DEPTH_TEST);
+    ::glDepthFunc(GL_LEQUAL);
+    ::glEnable(GL_CULL_FACE);
+    ::glCullFace(GL_BACK);
+
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(
         &m_shader, "hcore_assets/vs_default.glsl",
@@ -111,7 +116,6 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
 }
 
 void h_core::render::Renderer::destroy() {
-    ::SDL_GL_DeleteContext(m_glContext);
 }
 
 void h_core::render::Renderer::beginFrame() {
@@ -168,33 +172,6 @@ void h_core::render::Renderer::draw() {
     ::glDrawElements(
         meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType,
         nullptr);
-}
-
-uint32_t h_core::render::Renderer::initFromWindow(
-    uint32_t width, uint32_t height, SDL_Window* window) {
-    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    ::SDL_GL_SetAttribute(
-        SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    ::SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    ::SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    ::SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-    m_glContext = ::SDL_GL_CreateContext(window);
-    ::SDL_GL_MakeCurrent(window, m_glContext);
-
-    ::SDL_GL_SetShwapInterval(1);
-
-    ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
-
-    ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    ::glEnable(GL_DEPTH_TEST);
-    ::glDepthFunc(GL_LEQUAL);
-    ::glEnable(GL_CULL_FACE);
-    ::glCullFace(GL_BACK);
-
-    return 0;
 }
 
 void h_core::render::Renderer::endFrame() {}

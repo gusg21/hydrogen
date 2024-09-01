@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad/glad.h"
+#include "tiny_gltf.h"
 
 #include "core/asset.h"
 #include "core/math/vector2.h"
@@ -36,8 +37,9 @@ class MeshAsset : public Asset {
     MeshAsset() = default;
 
     uint32_t initFromYaml(
-        h_core::Assets* assets, h_core::Systems* systems,
+        h_core::Assets* assets,
         YAML::Node node) override;
+    uint32_t precompile(h_core::Systems* systems) override;
 
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
@@ -51,9 +53,12 @@ class MeshAsset : public Asset {
     [[nodiscard]] MeshIndexType getMeshIndexType() const;
     [[nodiscard]] uint32_t getPrimitiveMode() const;
 
+    HYASSET(3);
+
   private:
     // Shouldn't need an initialized flag - should only be initted once!
     // bool m_initialized = false;
+    tinygltf::Model m_model {};
     GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;

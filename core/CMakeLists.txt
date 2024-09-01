@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 # Core sources
 add_library(HydrogenCore STATIC
 
+            # Core
             src/actorspecasset.cc include/core/actorspecasset.h
             src/asset.cc include/core/asset.h
             src/assets.cc include/core/assets.h
@@ -11,6 +12,7 @@ add_library(HydrogenCore STATIC
             src/event.cc include/core/event.h
             src/eventqueue.cc include/core/eventqueue.h
             src/project.cc include/core/project.h
+            src/runtimeengine.cc include/core/runtimeengine.h
             src/scene.cc include/core/scene.h
             src/system.cc include/core/system.h
             src/systems.cc include/core/systems.h
@@ -18,12 +20,14 @@ add_library(HydrogenCore STATIC
             src/transform.cc include/core/transform.h
             src/window.cc include/core/window.h
 
+            # Math
             src/math/mat4x4.cc include/core/math/mat4x4.h
             include/core/math/math.h
             src/math/quaternion.cc include/core/math/quaternion.h
             src/math/vector2.cc include/core/math/vector2.h
             src/math/vector3.cc include/core/math/vector3.h
 
+            # Systems
             src/systems/gravity.cc include/core/systems/gravity.h
             src/systems/render/meshasset.cc include/core/systems/render/meshasset.h
             src/systems/render/renderer.cc include/core/systems/render/renderer.h
@@ -32,8 +36,8 @@ add_library(HydrogenCore STATIC
             src/systems/script/scriptasset.cc include/core/systems/script/scriptasset.h
             src/systems/script/scriptcomp.cc include/core/systems/script/scriptcomp.h
             src/systems/script/scripting.cc include/core/systems/script/scripting.h
-            include/core/systems/render/meshcomp.h
-            src/systems/render/meshcomp.cc
+            src/systems/render/meshcomp.cc include/core/systems/render/meshcomp.h
+
 )
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -109,9 +113,10 @@ set_target_properties(imgui.cmake PROPERTIES FOLDER "Vendored/imgui")
 
 # tinygltf integration
 set(TINYGLTF_INSTALL OFF)
+set(TINYGLTF_HEADER_ONLY OFF)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 add_subdirectory(external/tinygltf EXCLUDE_FROM_ALL)
-target_link_libraries(HydrogenCore PRIVATE tinygltf)
+target_link_libraries(HydrogenCore PUBLIC tinygltf)
 
 set_target_properties(tinygltf PROPERTIES FOLDER "Vendored/tinygltf")
 

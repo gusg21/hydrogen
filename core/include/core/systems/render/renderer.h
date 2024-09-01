@@ -19,9 +19,6 @@ class Renderer : public System {
     void draw() override;
     void endFrame() override;
 
-    uint32_t initFromWindow(
-        uint32_t width, uint32_t height, SDL_Window* window);
-
     [[nodiscard]] SDL_GLContext getGLContext() const;
     [[nodiscard]] h_core::ComponentBitmask getMask() const override;
 

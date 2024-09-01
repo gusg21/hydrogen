@@ -55,7 +55,7 @@ void h_core::Systems::updateSystemReferences(
     system->script = &scene->scripts[id];
 }
 
-void h_core::Systems::initScene(h_core::Scene* scene) {
+void h_core::Systems::prepareScene(h_core::Scene* scene) {
     for (uint32_t systemIndex = 0; systemIndex < SYSTEMS_SYSTEM_COUNT;
          systemIndex++) {
         // EVIL! EVIL! EVIL!

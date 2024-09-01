@@ -4,9 +4,6 @@
 #define TINYGLTF_NOEXCEPTION
 #include "tiny_gltf.h"
 
-#include "core/systems/gravity.h"
-#include "core/systems/render/renderer.h"
-#include "core/systems/script/scripting.h"
 #include "core/theming/theming.h"
 
 #include "imgui.h"
@@ -35,27 +32,21 @@ uint32_t h_core::Engine::init(
 
     ::ImGui_ImplOpenGL3_Init();
     ::ImGui_ImplSDL2_InitForOpenGL(
-        m_window->getSDLWindow(),
-        m_window->getRendererSystem()->getGLContext());
+        m_window->getSDLWindow(), m_window->getGLContext());
     h_core::theming::cherry();
 
-    // set up systems
-    m_systems.gravity = new h_core::systems::Gravity();
-    // renderer is from the window (not owned by the engine directly)
-    m_systems.renderer = m_window->getRendererSystem();
-    m_systems.scripting = new h_core::script::Scripting();
-    m_systems.init(this);
+    doInit();
 
     // load the assets
     m_assets = out_assets;
-    m_assets->loadFromProject(project, &m_systems);
+    m_assets->loadFromProject(project);
+
+    doPostLoad();
 
     return 0;
 }
 
 void h_core::Engine::destroy() {
-    m_systems.destroy();
-
     ::ImGui_ImplOpenGL3_Shutdown();
     ::ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -68,13 +59,10 @@ void h_core::Engine::destroy() {
 
 void h_core::Engine::run() {
     // Set up first scene
-    if (m_project->initialSceneSpec != ASSETS_ASSET_INDEX_BAD) {
-        m_scene.initFromSceneSpecAssetIndex(
-            m_assets, m_project->initialSceneSpec, m_systems.scripting->getContext());
-    }
 
-    // Prepare the systems for this scene
-    m_systems.initScene(&m_scene);
+    prepareScene(m_project->initialSceneSpec);
+    //    // Prepare the systems for this scene
+    //    m_systems.initScene(&m_scene);
 
     // Loop
     bool engineRunning = true;
@@ -103,13 +91,20 @@ void h_core::Engine::run() {
         ::ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        // Demo window
-        ImGui::ShowDemoWindow();
+        // Make the game happen!
+        doGUI();
+        beginFrame();
+        doProcess();
+        doDraw();
+        endFrame();
 
-        m_systems.beginFrame();
-        m_systems.processScene(&m_scene);
-        m_systems.drawScene(&m_scene);
-        m_systems.endFrame();
+        //        // Demo window
+        //        ImGui::ShowDemoWindow();
+        //
+        //        m_systems.beginFrame();
+        //        m_systems.processScene(&m_scene);
+        //        m_systems.drawScene(&m_scene);
+        //        m_systems.endFrame();
 
         // Send ImGui draw data
         ImGui::Render();
@@ -123,7 +118,6 @@ void h_core::Engine::run() {
     }
 }
 
-
 uint32_t h_core::Engine::getWidth() const {
     return m_windowWidth;
 }
@@ -134,4 +128,19 @@ uint32_t h_core::Engine::getHeight() const {
 
 h_core::math::Color h_core::Engine::getClearColor() const {
     return m_clearColor;
+}
+
+h_core::Scene* h_core::Engine::getScene() {
+    return &m_scene;
+}
+
+h_core::Window* h_core::Engine::getWindow() {
+    return m_window;
+}
+
+h_core::Assets* h_core::Engine::getAssets() {
+    return m_assets;
+}
+const h_core::Project* h_core::Engine::getProject() {
+    return m_project;
 }

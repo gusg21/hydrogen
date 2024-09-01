@@ -4,7 +4,7 @@
 #include "core/scene.h"
 #include "core/system.h"
 
-void h_core::Scene::initFromSceneSpecAssetIndex(
+void h_core::Scene::addActorsFromSceneSpec(
     h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex,
     asIScriptContext* scriptingContext) {
     h_core::SceneSpecAsset* sceneSpec =

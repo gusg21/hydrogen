@@ -10,12 +10,14 @@ namespace h_core {
 class ActorSpecAsset : public Asset {
   public:
     uint32_t initFromYaml(
-        h_core::Assets* assets, h_core::Systems* systems,
+        h_core::Assets* assets,
         YAML::Node yaml) override;
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;
     h_core::AssetIndex meshIndex;
     h_core::AssetIndex scriptIndex;
+
+    HYASSET(1);
 };
 }  // namespace h_core
