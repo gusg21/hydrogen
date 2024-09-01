@@ -22,14 +22,17 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest]
         build_type: [Release]
         hydrogen_component: [[HydrogenRuntime, runtime]]
-        c_compiler: [cl]
-#        include:
-#          - os: windows-latest
-#            c_compiler: cl
-#            cpp_compiler: cl
+        c_compiler: [cl, clang]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang
 
     steps:
     - uses: actions/checkout@v4
