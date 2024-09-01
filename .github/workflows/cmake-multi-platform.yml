@@ -26,13 +26,13 @@ jobs:
         build_type: [Release]
         hydrogen_component: [[HydrogenRuntime, runtime]]
         c_compiler: [cl, clang]
-        include:
+        exclude:
           - os: windows-latest
-            c_compiler: cl
-            cpp_compiler: cl
-          - os: macos-latest
             c_compiler: clang
             cpp_compiler: clang
+          - os: macos-latest
+            c_compiler: cl
+            cpp_compiler: cl
 
     steps:
     - uses: actions/checkout@v4
