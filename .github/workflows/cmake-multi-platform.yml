@@ -25,12 +25,12 @@ jobs:
         os: [windows-latest, macos-latest]
         build_type: [Release]
         hydrogen_component: [[HydrogenRuntime, runtime]]
-        c_compiler: [cl, clang]
+        compiler: [cl, clang]
         exclude:
           - os: windows-latest
-            c_compiler: clang
+            compiler: clang
           - os: macos-latest
-            c_compiler: cl
+            compiler: cl
 
     steps:
     - uses: actions/checkout@v4
@@ -47,8 +47,8 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
