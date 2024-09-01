@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Release]
-        hydrogen_component: [HydrogenRuntime]
+        hydrogen_component: [[HydrogenRuntime, runtime]]
         c_compiler: [cl]
 #        include:
 #          - os: windows-latest
@@ -55,13 +55,13 @@ jobs:
       run: > 
         cmake 
         --build ${{ steps.strings.outputs.build-output-dir }}
-        --target ${{ matrix.hydrogen_component }}
+        --target ${{ matrix.hydrogen_component[0] }}
         --config ${{ matrix.build_type }}
 
     - uses: actions/upload-artifact@v4
       with:
-        name: "${{ matrix.hydrogen_component }}-${{ matrix.os }}-${{ matrix.build_type }}"
-        path: ${{ steps.strings.outputs.build-output-dir }}
+        name: "${{ matrix.hydrogen_component[0] }}-${{ matrix.os }}-${{ matrix.build_type }}"
+        path: "${{ steps.strings.outputs.build-output-dir }}/${{ matrix.hydrogen_component[1] }}"
 
     # - name: Test
     #   working-directory: ${{ steps.strings.outputs.build-output-dir }}
