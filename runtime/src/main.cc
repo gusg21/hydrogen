@@ -3,9 +3,9 @@
 #include <core/runtimeengine.h>
 
 int main(int argc, char* args[]) {
-    h_core::RuntimeEngine* engine = new h_core::RuntimeEngine();
+    h_core::Engine* engine = new h_core::Engine();
 
-    h_core::Project project {};
+    h_core::project::Project project {};
     project.loadFromFile("assets/project.yml");
 
     h_core::Assets assets {};

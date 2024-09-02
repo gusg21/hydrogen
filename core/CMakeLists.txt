@@ -11,7 +11,7 @@ add_library(HydrogenCore STATIC
             include/core/engineevents.h
             src/event.cc include/core/event.h
             src/eventqueue.cc include/core/eventqueue.h
-            src/project.cc include/core/project.h
+            src/project/project.cc include/core/project/project.h
             src/runtimeengine.cc include/core/runtimeengine.h
             src/scene.cc include/core/scene.h
             src/system.cc include/core/system.h
@@ -37,6 +37,14 @@ add_library(HydrogenCore STATIC
             src/systems/script/scriptcomp.cc include/core/systems/script/scriptcomp.h
             src/systems/script/scripting.cc include/core/systems/script/scripting.h
             src/systems/render/meshcomp.cc include/core/systems/render/meshcomp.h
+            include/core/input/input.h
+            include/core/input/inputactionsource.h
+            include/core/input/keyinputactionsource.h
+            src/input/input.cc
+            src/input/keyinputactionsource.cc
+            include/core/project/projectactionentry.h
+            include/core/input/inputaction.h
+            src/input/inputaction.cc
 
 )
 if (MSVC)

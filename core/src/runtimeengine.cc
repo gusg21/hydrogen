@@ -8,6 +8,7 @@
 #include "core/systems/gravity.h"
 #include "core/systems/render/renderer.h"
 #include "core/systems/script/scripting.h"
+#include "core/input/keyinputactionsource.h"
 
 void h_core::RuntimeEngine::doInit() {
     Engine::doInit();
@@ -74,7 +75,7 @@ void h_core::RuntimeEngine::doGUI() {
             ImGui::TableSetupColumn("Path", 0, 200.f);
             ImGui::TableHeadersRow();
 
-            for (const h_core::ProjectAssetEntry& entry : getProject()->requiredAssets) {
+            for (const h_core::project::ProjectAssetEntry& entry : getProject()->requiredAssets) {
                 ImGui::TableNextColumn();
                 ImGui::Text("%u", entry.index);
                 ImGui::TableNextColumn();
@@ -85,10 +86,38 @@ void h_core::RuntimeEngine::doGUI() {
             ImGui::EndTable();
         }
 
+        if (ImGui::CollapsingHeader("Input Actions")) {
+            uint32_t actionIndex = 0;
+            for (const h_core::input::InputAction* action : *getInput()->getActions()) {
+                ImGui::PushID(actionIndex);
+                if (ImGui::CollapsingHeader(action->name.c_str())) {
+                    ImGui::BeginGroup();
+
+                    for (const h_core::input::InputActionSource* source : action->sources) {
+                        switch (source->type) {
+                            case input::InputActionSourceType::KEY: {
+                                const h_core::input::KeyInputActionSource* keySource =
+                                    dynamic_cast<const h_core::input::KeyInputActionSource*>
+                                        (source);
+                                ImGui::Text("Key: %s (%d)", SDL_GetKeyName(keySource->scanCode), keySource->scanCode);
+                                break;
+                            }
+                        }
+                    }
+
+                    ImGui::EndGroup();
+                }
+                ImGui::PopID();
+
+                actionIndex++;
+            }
+        }
+
         ImGui::SeparatorText("Statistics");
         ImGui::Text("FPS: %.3f", getFPS());
         ImGui::Text("Avg FPS: %.3f", m_averageFPS);
         ImGui::Text("Frame Time: %.3fs", getDeltaSecs());
+
     }
     ImGui::End();
 

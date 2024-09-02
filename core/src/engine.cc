@@ -11,7 +11,7 @@
 #include "imgui_impl_sdl2.h"
 
 uint32_t h_core::Engine::init(
-    h_core::Assets* out_assets, h_core::Project* project) {
+    h_core::Assets* out_assets, h_core::project::Project* project) {
     // Store the project
     m_project = project;
 
@@ -23,6 +23,10 @@ uint32_t h_core::Engine::init(
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
+
+    // Input initialization
+    m_input = new h_core::input::Input();
+    m_input->init(project);
 
     // ImGui setup
     ImGui::CreateContext();
@@ -117,6 +121,9 @@ void h_core::Engine::run() {
         // Clear the queue
         m_events.clear();
 
+        // Swap the input buffers
+        m_input->swapInputBuffers();
+
         // Update delta
         m_deltaMsecs = SDL_GetTicks64() - frameBeginTicks;
         frameBeginTicks = SDL_GetTicks64();
@@ -146,13 +153,17 @@ h_core::Window* h_core::Engine::getWindow() {
 h_core::Assets* h_core::Engine::getAssets() {
     return m_assets;
 }
-const h_core::Project* h_core::Engine::getProject() {
+const h_core::project::Project* h_core::Engine::getProject() {
     return m_project;
 }
 
 double h_core::Engine::getDeltaSecs() {
     return (double)m_deltaMsecs / 1000.0;
 }
+
 double h_core::Engine::getFPS() {
     return 1.0 / getDeltaSecs();
+}
+h_core::input::Input* h_core::Engine::getInput() {
+    return m_input;
 }

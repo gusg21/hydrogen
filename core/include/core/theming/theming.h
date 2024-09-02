@@ -57,7 +57,7 @@ void cherry() {
     // style.ItemSpacing = ImVec2(7, 1);
     // style.ItemInnerSpacing = ImVec2(1, 1);
     style.TouchExtraPadding = ImVec2(0, 0);
-    style.IndentSpacing = 6.0f;
+//    style.IndentSpacing = 6.0f;
     style.ScrollbarSize = 12.0f;
     style.ScrollbarRounding = 16.0f;
     style.GrabMinSize = 20.0f;

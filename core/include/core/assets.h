@@ -13,7 +13,7 @@
 
 #include "core/asset.h"
 #include "core/systems.h"
-#include "core/projectassetentry.h"
+#include "core/project/projectassetentry.h"
 
 #define ASSETS_LOAD_FAIL_CANT_OPEN_FILE 1
 #define ASSETS_LOAD_FAIL_FILE_TOO_BIG   2
@@ -25,7 +25,7 @@ namespace h_core {
 typedef uint32_t AssetHash;
 typedef uint32_t AssetIndex;
 
-class Project;
+namespace project { class Project; }
 
 // Base class for all sources of assets (packed/unpacked)
 class Assets {
@@ -34,7 +34,7 @@ class Assets {
 
     void init(h_core::Systems* systems);
 
-    void loadFromProject(h_core::Project* project);
+    void loadFromProject(h_core::project::Project* project);
     void precompile(h_core::Systems* systems);
 
     /// @brief convert the name of an asset to its hash
@@ -64,7 +64,7 @@ class Assets {
         AssetType* out_asset, std::string filePath);
 
     template <typename AssetType>
-    void loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo);
+    void loadTyped(h_core::Asset** out_assets, h_core::project::ProjectAssetEntry assetInfo);
 
     h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex>
@@ -135,7 +135,7 @@ inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) cons
 }
 
 template <typename AssetType>
-void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::ProjectAssetEntry assetInfo) {
+void h_core::Assets::loadTyped(h_core::Asset** out_assets, h_core::project::ProjectAssetEntry assetInfo) {
     static_assert(
         std::is_base_of_v<h_core::Asset, AssetType>,
         "Can't get asset type that does not derive from Asset");

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "core/project.h"
+#include "core/project/project.h"
 #include "core/systems/render/meshasset.h"
 
 #define LOAD_ASSET_TYPE_CASE(type)            \
@@ -26,8 +26,8 @@ void h_core::Assets::precompile(h_core::Systems* systems) {
     }
 }
 
-void h_core::Assets::loadFromProject(h_core::Project* project) {
-    for (const h_core::ProjectAssetEntry& assetInfo : project->requiredAssets) {
+void h_core::Assets::loadFromProject(h_core::project::Project* project) {
+    for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
         switch (assetInfo.typeId) {
             LOAD_ASSET_TYPE_CASE(h_core::SceneSpecAsset)
             LOAD_ASSET_TYPE_CASE(h_core::ActorSpecAsset)

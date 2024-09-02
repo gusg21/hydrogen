@@ -7,6 +7,7 @@
 #include "imgui_impl_sdl2.h"
 
 #include "core/engine.h"
+#include "core/input/keyinputactionsource.h"
 #include "core/math/mat4x4.h"
 #include "core/systems/render/meshasset.h"
 
@@ -112,11 +113,16 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
         "hcore_assets/fs_default.glsl");
     if (shaderLoadResult != 0) { return RENDERING_INIT_FAIL_BAD_PROGRAM; }
 
+    m_camForwardInputIndex = engine->getInput()->newAction("cam_forward");
+    engine->getInput()
+        ->getAction(m_camForwardInputIndex)
+        ->sources.push_back(
+            new h_core::input::KeyInputActionSource(SDL_SCANCODE_W));
+
     return 0;
 }
 
-void h_core::render::Renderer::destroy() {
-}
+void h_core::render::Renderer::destroy() {}
 
 void h_core::render::Renderer::doGUI() {
     h_core::System::doGUI();
@@ -143,18 +149,23 @@ void h_core::render::Renderer::beginFrame() {
     ::glFrontFace(m_ccw ? GL_CCW : GL_CW);
 
     m_shader.use();
-    h_core::math::Vector3 up { 0.f, 1.f, 0.f };
     h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(
         m_cameraPosition,
         h_core::math::Vector3::add(m_cameraPosition, m_cameraDirection));
 
-    float aspect =
-        (float)engine->getWidth() / (float)engine->getHeight();
+    float aspect = (float)engine->getWidth() / (float)engine->getHeight();
     h_core::math::Mat4x4 projMatrix = h_core::math::Mat4x4::getProjMatrix(
-        (m_fovDegrees / 180.f) * M_PI, aspect, m_nearZ, m_farZ);
+        (m_fovDegrees / 180.f) * (float)M_PI, aspect, m_nearZ, m_farZ);
     m_shader.setMat4(
         "uni_viewProjectionMatrix",
         h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
+
+    // Camera controls
+    bool goForward =
+        engine->getInput()->getDigitalValue(m_camForwardInputIndex);
+    if (goForward) {
+        m_cameraPosition.z += engine->getDeltaSecs() * 2.f;
+    }
 }
 
 void h_core::render::Renderer::draw() {
@@ -177,8 +188,8 @@ void h_core::render::Renderer::draw() {
 
     ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
     ::glDrawElements(
-        meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType,
-        nullptr);
+        meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(),
+        glElementType, nullptr);
 }
 
 void h_core::render::Renderer::endFrame() {}
