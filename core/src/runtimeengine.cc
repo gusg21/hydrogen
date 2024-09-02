@@ -87,6 +87,7 @@ void h_core::RuntimeEngine::doGUI() {
 
         ImGui::SeparatorText("Statistics");
         ImGui::Text("FPS: %.3f", getFPS());
+        ImGui::Text("Avg FPS: %.3f", m_averageFPS);
         ImGui::Text("Frame Time: %.3fs", getDeltaSecs());
     }
     ImGui::End();
@@ -116,6 +117,16 @@ void h_core::RuntimeEngine::endFrame() {
     Engine::endFrame();
 
     m_systems.endFrame();
+
+    m_fpsSamples.push_back(getFPS());
+    if (m_fpsSamples.size() > RUNTIMEENGINE_MAX_FPS_SAMPLES) {
+        m_fpsSamples.pop_front();
+    }
+    m_averageFPS = 0;
+    for (uint32_t sampleIndex = 0; sampleIndex < m_fpsSamples.size(); sampleIndex++) {
+        m_averageFPS += m_fpsSamples[sampleIndex];
+    }
+    m_averageFPS = m_averageFPS / (double)m_fpsSamples.size();
 }
 
 void h_core::RuntimeEngine::destroy() {

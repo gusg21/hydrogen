@@ -4,7 +4,11 @@
 
 #pragma once
 
+#include <deque>
+
 #include "core/engine.h"
+
+#define RUNTIMEENGINE_MAX_FPS_SAMPLES 120
 
 namespace h_core {
 class RuntimeEngine : public h_core::Engine {
@@ -23,6 +27,9 @@ class RuntimeEngine : public h_core::Engine {
 
   private:
     bool m_showImGuiDemo = false;
+
+    std::deque<double> m_fpsSamples { RUNTIMEENGINE_MAX_FPS_SAMPLES, 0.f };
+    double m_averageFPS = 0.f;
 
     h_core::Systems m_systems {};
 };
