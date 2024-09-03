@@ -120,6 +120,8 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
         ->getAction(m_camGrabMouseInputIndex)
         ->sources.push_back(new h_core::input::KeyInputActionSource(SDL_SCANCODE_GRAVE));
 
+    m_flyCamYaw = ((::acosf(-m_cameraDirection.z)) / (float)MATH_TAU) * 360.f;
+
     return 0;
 }
 
@@ -130,7 +132,8 @@ void h_core::render::Renderer::doGUI() {
 
     if (ImGui::Begin("Renderer Debugger")) {
         ImGui::SeparatorText("Camera");
-        ImGui::SliderFloat3("Position", &m_cameraPosition.x, -10.f, 10.f);
+        ImGui::DragFloat3("Position", &m_cameraPosition.x);
+        ImGui::DragFloat3("Direction", &m_cameraDirection.x);
         ImGui::SliderFloat("FOV", &m_fovDegrees, 0.f, 180.f);
         ImGui::SliderFloat("Near Z", &m_nearZ, 0.001f, 100.f);
         ImGui::SliderFloat("Far Z", &m_farZ, 0.001f, 100.f);
@@ -138,7 +141,8 @@ void h_core::render::Renderer::doGUI() {
         ImGui::SeparatorText("FlyCam");
         ImGui::Checkbox("Enabled", &m_flyCamEnabled);
         ImGui::SliderFloat("Speed", &m_flyCamSpeed, 0.1f, 100.f);
-        ImGui::SliderFloat("Sensitivity", &m_flyCamSensitivity, 0.01f, 1.f);
+        ImGui::DragFloat("Sensitivity", &m_flyCamSensitivity, 10.f);
+        ImGui::Text("Yaw: %.3f Pitch: %.3f", m_flyCamYaw, m_flyCamPitch);
 
         ImGui::SeparatorText("Render Configuration");
         ImGui::Checkbox("CCW", &m_ccw);
@@ -166,8 +170,8 @@ void h_core::render::Renderer::beginFrame() {
     if (m_flyCamEnabled) {
         // Mouse looking (if captured)
         if (engine->getInput()->mouseCaptured) {
-            m_flyCamYaw += engine->getInput()->getMouseDeltaX() * m_flyCamSensitivity;
-            m_flyCamPitch -= engine->getInput()->getMouseDeltaY() * m_flyCamSensitivity;
+            m_flyCamYaw += engine->getInput()->getMouseDeltaX() * m_flyCamSensitivity * engine->getDeltaSecs();
+            m_flyCamPitch -= engine->getInput()->getMouseDeltaY() * m_flyCamSensitivity * engine->getDeltaSecs();
             m_flyCamPitch = MATH_CLAMP(m_flyCamPitch, -89.0f, 89.0f);
         }
 

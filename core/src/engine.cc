@@ -10,16 +10,14 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-uint32_t h_core::Engine::init(
-    h_core::Assets* out_assets, h_core::project::Project* project) {
+uint32_t h_core::Engine::init(h_core::Assets* out_assets, h_core::project::Project* project) {
     // Store the project
     m_project = project;
 
     // Window initialization
     m_window = new h_core::Window();
     std::string windowTitle = "hydrogen runtime - " + project->name;
-    uint32_t windowInitResult = m_window->init(
-        windowTitle, project->windowWidth, project->windowHeight, false);
+    uint32_t windowInitResult = m_window->init(windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_windowWidth = project->windowWidth;
     m_windowHeight = project->windowHeight;
@@ -31,12 +29,10 @@ uint32_t h_core::Engine::init(
     // ImGui setup
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |=
-        ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
 
     ::ImGui_ImplOpenGL3_Init();
-    ::ImGui_ImplSDL2_InitForOpenGL(
-        m_window->getSDLWindow(), m_window->getGLContext());
+    ::ImGui_ImplSDL2_InitForOpenGL(m_window->getSDLWindow(), m_window->getGLContext());
     h_core::theming::cherry();
 
     doInit();
@@ -69,7 +65,7 @@ void h_core::Engine::run() {
     //    m_systems.initScene(&m_scene);
 
     // Loop
-    uint64_t frameBeginTicks = SDL_GetTicks64();
+    std::chrono::time_point frameBeginTime = std::chrono::high_resolution_clock::now();
     bool engineRunning = true;
     while (engineRunning) {
         m_window->postEventsToQueue(&m_events);
@@ -77,8 +73,7 @@ void h_core::Engine::run() {
         // Reset delta
         m_input->setMouseDelta(0, 0);
 
-        for (uint32_t eventIndex = 0; eventIndex < m_events.getSize();
-             eventIndex++) {
+        for (uint32_t eventIndex = 0; eventIndex < m_events.getSize(); eventIndex++) {
             h_core::Event event = m_events.getHeadPointer()[eventIndex];
             switch (event.type) {
                 case ENGINE_EVENT_QUIT:
@@ -135,8 +130,11 @@ void h_core::Engine::run() {
         m_input->updateInternals();
 
         // Update delta
-        m_deltaMsecs = SDL_GetTicks64() - frameBeginTicks;
-        frameBeginTicks = SDL_GetTicks64();
+        m_deltaNanosecs = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                              std::chrono::high_resolution_clock::now() - frameBeginTime)
+                              .count();
+        m_deltaNanosecs = MATH_MAX(m_deltaNanosecs, 1);
+        frameBeginTime = std::chrono::high_resolution_clock::now();
     }
 }
 
@@ -167,11 +165,11 @@ const h_core::project::Project* h_core::Engine::getProject() {
     return m_project;
 }
 
-double h_core::Engine::getDeltaSecs() {
-    return (double)m_deltaMsecs / 1000.0;
+double h_core::Engine::getDeltaSecs() const {
+    return (double)m_deltaNanosecs / 1'000'000'000.0;
 }
 
-double h_core::Engine::getFPS() {
+double h_core::Engine::getFPS() const {
     return 1.0 / getDeltaSecs();
 }
 h_core::input::Input* h_core::Engine::getInput() {

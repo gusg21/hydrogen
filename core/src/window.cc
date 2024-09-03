@@ -30,7 +30,7 @@ uint32_t h_core::Window::init(
     m_glContext = ::SDL_GL_CreateContext(m_sdlWindow);
     ::SDL_GL_MakeCurrent(m_sdlWindow, m_glContext);
 
-//    ::SDL_GL_SetShwapInterval(1);
+    ::SDL_GL_SetShwapInterval(0);
 
     ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
     ::printf("INFO: RENDERING: OpenGL version: %s\n", ::glGetString(GL_VERSION));

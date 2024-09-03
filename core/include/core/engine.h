@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "core/engineevents.h"
 #include "core/eventqueue.h"
 #include "core/input/input.h"
@@ -42,8 +44,8 @@ class Engine {
     [[nodiscard]] const h_core::project::Project* getProject();
     [[nodiscard]] h_core::input::Input* getInput();
 
-    [[nodiscard]] double getDeltaSecs();
-    [[nodiscard]] double getFPS();
+    [[nodiscard]] double getDeltaSecs() const;
+    [[nodiscard]] double getFPS() const;
 
   protected:
     virtual void doInit() {};
@@ -66,6 +68,6 @@ class Engine {
     uint32_t m_windowWidth = 1600;
     uint32_t m_windowHeight = 900;
     h_core::math::Color m_clearColor {};
-    uint64_t m_deltaMsecs = 0;
+    uint64_t m_deltaNanosecs = 0;
 };
 }  // namespace h_core

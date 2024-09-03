@@ -25,13 +25,13 @@ class Renderer : public System {
     [[nodiscard]] h_core::ComponentBitmask getMask() const override;
 
   private:
-    h_core::math::Vector3 m_cameraPosition { 0.f, 10.f, -10.f };
-    h_core::math::Vector3 m_cameraDirection { 0.f, 0.f, 1.f };
+    h_core::math::Vector3 m_cameraPosition { -10.f, 10.f, 0.f };
+    h_core::math::Vector3 m_cameraDirection { 1.f, 0.f, 0.f };
 
     // Flycam stuff
-    bool m_flyCamEnabled = true;
+    bool m_flyCamEnabled = false;
     float m_flyCamSpeed = 20.f;
-    float m_flyCamSensitivity = MATH_PI / 10.f; // Using math constants provides an air of legitimacy
+    float m_flyCamSensitivity = MATH_PI * 100.f; // Using math constants provides an air of legitimacy
     float m_flyCamYaw = 0.f;
     float m_flyCamPitch = 0.f;
     h_core::input::InputActionIndex m_camForwardInputIndex {};
