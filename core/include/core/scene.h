@@ -17,7 +17,7 @@ class Scene {
 
     /// @brief set up a scene based on a scene spec
     /// @param sceneSpec scene spec to use
-    void initFromSceneSpecAssetIndex(
+    void addActorsFromSceneSpec(
         h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex,
         asIScriptContext* scriptingContext);
 

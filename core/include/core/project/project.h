@@ -5,14 +5,16 @@
 
 #include "core/math/color.h"
 #include "core/scenespecasset.h"
-#include "core/projectassetentry.h"
+#include "core/project/projectassetentry.h"
+#include "core/project/projectactionentry.h"
 
 namespace h_core {
+namespace project {
 class Project {
   public:
     Project() = default;
 
-    void initFromYaml(std::string yamlPath);
+    void loadFromFile(const std::string& yamlPath);
 
     /// @brief the name of the project
     std::string name = "Unnamed Project";
@@ -24,6 +26,8 @@ class Project {
 
     h_core::AssetIndex initialSceneSpec = ASSETS_ASSET_INDEX_BAD;
 
-    std::vector<h_core::ProjectAssetEntry> assets {};
+    std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
+    std::vector<h_core::project::ProjectActionEntry> actions {};
 };
+}
 }  // namespace h_core

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-float h_core::math::Quaternion::getLength() {
+float h_core::math::Quaternion::getLength() const {
     return h_core::math::Quaternion::getLength(*this);
 }
 

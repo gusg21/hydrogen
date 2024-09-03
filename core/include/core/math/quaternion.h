@@ -9,7 +9,7 @@ namespace h_core {
 namespace math {
 struct Quaternion {
     Quaternion() : x(0.f), y(0.f), z(0.f), w(1.f) {}
-    Quaternion(float value) : x(value), y(value), z(value), w(value) {}
+    explicit Quaternion(float value) : x(value), y(value), z(value), w(value) {}
     Quaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
     float x;
@@ -17,7 +17,7 @@ struct Quaternion {
     float z;
     float w;
 
-    float getLength();
+    [[nodiscard]] float getLength() const;
 
     static h_core::math::Quaternion normalize(h_core::math::Quaternion a);
 

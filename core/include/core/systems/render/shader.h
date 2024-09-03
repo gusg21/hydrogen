@@ -14,7 +14,7 @@ struct Shader {
     GLuint program;
 
     void use();
-    void setMat4(std::string name, h_core::math::Mat4x4 matrix);
+    void setMat4(const std::string& name, h_core::math::Mat4x4 matrix);
 };
 }  // namespace render
 }  // namespace h_core

@@ -5,6 +5,8 @@
 
 #include "core/systems/render/renderer.h"
 
+#define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
+
 #define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
 uint32_t h_core::Window::init(
@@ -16,13 +18,22 @@ uint32_t h_core::Window::init(
         title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width,
         height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    m_renderer = new h_core::render::Renderer();
-    if (m_renderer->initFromWindow(width, height, m_sdlWindow)) {
-        return WINDOW_INIT_FAIL_INIT_RENDERER;
-    }
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    ::SDL_GL_SetAttribute(
+        SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    ::SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    ::SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    ::SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
+    m_glContext = ::SDL_GL_CreateContext(m_sdlWindow);
+    ::SDL_GL_MakeCurrent(m_sdlWindow, m_glContext);
+
+    ::SDL_GL_SetShwapInterval(0);
+
+    ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
     ::printf("INFO: RENDERING: OpenGL version: %s\n", ::glGetString(GL_VERSION));
-
 
     // Set up resolution + backbuffer settings
     // Set up imgui
@@ -39,6 +50,7 @@ uint32_t h_core::Window::init(
 }
 
 void h_core::Window::destroy() {
+    ::SDL_GL_DeleteContext(m_glContext);
     ::SDL_DestroyWindow(m_sdlWindow);
     ::SDL_Quit();
 }
@@ -55,6 +67,16 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                 queue->postEvent(hEvent);
                 break;
             } // QUIT
+            case SDL_MOUSEMOTION: {
+                h_core::Event hEvent = h_core::Event();
+                hEvent.type = ENGINE_EVENT_MOUSE_MOTION;
+                hEvent.mouseDx = sdlEvent.motion.xrel;
+                hEvent.mouseDy = sdlEvent.motion.yrel;
+                hEvent.mouseX = sdlEvent.motion.x;
+                hEvent.mouseY = sdlEvent.motion.y;
+                queue->postEvent(hEvent);
+                break;
+            }
             case SDL_WINDOWEVENT: {
                 switch (sdlEvent.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
@@ -90,10 +112,10 @@ void h_core::Window::swap() {
     ::SDL_GL_SwapWindow(m_sdlWindow);
 }
 
-h_core::render::Renderer* h_core::Window::getRendererSystem() {
-    return m_renderer;
+SDL_Window* h_core::Window::getSDLWindow() const {
+    return m_sdlWindow;
 }
 
-SDL_Window* h_core::Window::getSDLWindow() {
-    return m_sdlWindow;
+SDL_GLContext h_core::Window::getGLContext() const {
+    return m_glContext;
 }

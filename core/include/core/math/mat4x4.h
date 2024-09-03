@@ -21,13 +21,13 @@ struct Mat4x4 {
         matrix[15] = 1.0f;
     }
 
-    Mat4x4(float data[16]) {
+    explicit Mat4x4(float data[16]) {
         for (int i = 0; i < 16; i++) {
             matrix[i] = data[i];
         }
     }
 
-    float matrix[16];
+    float matrix[16] { 0.f };
 
     static Mat4x4 translation(Vector3 position);
     // static Mat4x4 rotation(float angle, Axis axis);

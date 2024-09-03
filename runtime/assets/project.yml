@@ -1,5 +1,13 @@
-initialSceneSpec: 7
+initial_scene_spec: 7
 name: "Hello World"
+input_actions:
+  - name: fire
+    sources:
+      - key: 4
+  - name: move_x
+    sources:
+      - positive_key: 79
+        negative_key: 80
 assets:
   - index: 1
     type: 1

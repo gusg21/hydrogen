@@ -52,6 +52,8 @@ else (TINYGLTF_HEADER_ONLY)
   add_library(tinygltf)
   target_sources(tinygltf PRIVATE
           ${CMAKE_CURRENT_SOURCE_DIR}/tiny_gltf.cc)
+  message(STATUS "TinyGLTF Current Source: ${CMAKE_CURRENT_SOURCE_DIR}")
+  message(STATUS "TinyGLTF Include Dir: ${CMAKE_INSTALL_INCLUDEDIR}")
   target_include_directories(tinygltf
           INTERFACE
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

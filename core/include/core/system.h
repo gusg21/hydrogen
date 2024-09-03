@@ -19,12 +19,13 @@ class System {
     virtual uint32_t init(h_core::Engine* engine);
     virtual void destroy() {};
     virtual void initPerActor() {};
+    virtual void doGUI() {};
     virtual void beginFrame() {};
     virtual void process() {};
     virtual void draw() {};
     virtual void endFrame() {};
 
-    virtual h_core::ComponentBitmask getMask() = 0;
+    [[nodiscard]] virtual h_core::ComponentBitmask getMask() const = 0;
 
     h_core::ActorId actorId = 0;
     h_core::Engine* engine = nullptr;

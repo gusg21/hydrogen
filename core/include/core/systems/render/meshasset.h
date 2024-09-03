@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad/glad.h"
+#include "tiny_gltf.h"
 
 #include "core/asset.h"
 #include "core/math/vector2.h"
@@ -36,25 +37,29 @@ class MeshAsset : public Asset {
     MeshAsset() = default;
 
     uint32_t initFromYaml(
-        h_core::Assets* assets, h_core::Systems* systems,
+        h_core::Assets* assets,
         YAML::Node node) override;
+    uint32_t precompile(h_core::Systems* systems) override;
 
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer,
         uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);
 
-    GLuint getVertexBufferHandle();
-    GLuint getIndexBufferHandle();
-    GLuint getVertexAttributesHandle();
-    size_t getNumVertices();
-    size_t getNumIndices();
-    MeshIndexType getMeshIndexType();
-    uint32_t getPrimitiveMode();
+    [[nodiscard]] GLuint getVertexBufferHandle() const;
+    [[nodiscard]] GLuint getIndexBufferHandle() const;
+    [[nodiscard]] GLuint getVertexAttributesHandle() const;
+    [[nodiscard]] size_t getNumVertices() const;
+    [[nodiscard]] size_t getNumIndices() const;
+    [[nodiscard]] MeshIndexType getMeshIndexType() const;
+    [[nodiscard]] uint32_t getPrimitiveMode() const;
+
+    HYASSET(3);
 
   private:
     // Shouldn't need an initialized flag - should only be initted once!
     // bool m_initialized = false;
-    GLuint m_vertexBufferHandle, m_vertexAttributesHandle, m_indexBufferHandle;
+    tinygltf::Model m_model {};
+    GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
     h_core::render::MeshIndexType m_meshIndexType =

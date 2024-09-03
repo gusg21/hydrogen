@@ -20,11 +20,11 @@ class EventQueue {
 
     /// @brief get the current size of the queue
     /// @return the size
-    size_t getSize();
+    [[nodiscard]] size_t getSize() const;
 
     /// @brief get a pointer to the beginning of the queue
     /// @return head pointer
-    h_core::Event* getHeadPointer();
+    [[nodiscard]] const h_core::Event* getHeadPointer() const;
 
   private:
     std::vector<h_core::Event> m_queue {};

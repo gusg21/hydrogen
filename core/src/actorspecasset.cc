@@ -4,7 +4,7 @@
 #include "core/systems/script/scriptasset.h"
 
 uint32_t h_core::ActorSpecAsset::initFromYaml(
-    h_core::Assets* assets, h_core::Systems* systems, YAML::Node yaml) {
+    h_core::Assets* assets, YAML::Node yaml) {
     // TODO: Error handling
 
     if (!yaml["mask"].IsDefined())
@@ -19,11 +19,13 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
 
     // TODO: Convert to model loading
     if (yaml["model"].IsDefined()) {
-        meshIndex = yaml["model"]["index"].as<h_core::AssetIndex>(ASSETS_ASSET_INDEX_BAD);
+        meshIndex = yaml["model"]["index"].as<h_core::AssetIndex>(
+            ASSETS_ASSET_INDEX_BAD);
     }
 
     if (yaml["script"].IsDefined())
-        scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(ASSETS_ASSET_INDEX_BAD);
+        scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(
+            ASSETS_ASSET_INDEX_BAD);
 
     return 0;
 }

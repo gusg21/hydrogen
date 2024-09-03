@@ -8,12 +8,15 @@
 #include <string>
 
 namespace h_core {
+namespace project {
 struct ProjectAssetEntry {
-    ProjectAssetEntry(uint32_t index, uint32_t typeId, std::string assetPath)
+    ProjectAssetEntry(
+        uint32_t index, uint32_t typeId, const std::string& assetPath)
         : index(index), typeId(typeId), assetPath(assetPath) {}
 
     uint32_t index;
     uint32_t typeId;
     std::string assetPath;
 };
+}
 }
