@@ -1,4 +1,4 @@
-# hydrogen
+# hydrogen 
 
 A small experimental game engine by Xavier Olmstead (@XavOlmst) and Angus Goucher (@gusg21).
 
@@ -9,6 +9,10 @@ A small experimental game engine by Xavier Olmstead (@XavOlmst) and Angus Gouche
 * [SDL2](https://www.libsdl.org/)
 * [tinygltf](https://github.com/syoyo/tinygltf)
 * [yaml-cpp](https://github.com/jbeder/yaml-cpp)
+
+`dev` status: ![dev status](https://github.com/gusg21/hydrogen/actions/workflows/autobuild.yml/badge.svg?branch=dev) 
+
+`main` status: ![main status](https://github.com/gusg21/hydrogen/actions/workflows/autobuild.yml/badge.svg?branch=main)
 
 ### Project Structure
 
