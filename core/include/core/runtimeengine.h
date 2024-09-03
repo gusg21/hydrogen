@@ -8,7 +8,7 @@
 
 #include "core/engine.h"
 
-#define RUNTIMEENGINE_MAX_FPS_SAMPLES 120
+#define RUNTIMEENGINE_MAX_FPS_SAMPLES 600
 
 namespace h_core {
 class RuntimeEngine : public h_core::Engine {
