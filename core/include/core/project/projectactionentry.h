@@ -10,13 +10,14 @@
 
 namespace h_core {
 namespace project {
-struct ActionSourceEntry {
-    ActionSourceEntry() = default;
+struct ProjectActionSourceEntry {
+    ProjectActionSourceEntry() = default;
 
     h_core::input::InputActionSourceType type =
         h_core::input::InputActionSourceType::KEY;
     union {
         SDL_Scancode scanCode;
+        SDL_Scancode dualScanCodes[2];
     } value {};
 };
 
@@ -24,7 +25,7 @@ struct ProjectActionEntry {
     ProjectActionEntry() = default;
 
     std::string name {};
-    std::vector<h_core::project::ActionSourceEntry> sources {};
+    std::vector<h_core::project::ProjectActionSourceEntry> sources {};
 };
 }  // namespace project
 }  // namespace h_core

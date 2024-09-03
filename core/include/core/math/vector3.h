@@ -7,6 +7,20 @@ struct Vector3 {
     explicit Vector3(float value) : x(value), y(value), z(value) {}
     Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
+    constexpr Vector3& operator+=(const Vector3& other) {
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+        return *this;
+    }
+
+    constexpr Vector3& operator*=(float other) {
+        this->x *= other;
+        this->y *= other;
+        this->z *= other;
+        return *this;
+    }
+
     static float dot(Vector3 lhs, Vector3 rhs);
     [[nodiscard]] float dot(Vector3 otherVector) const;
 
@@ -26,3 +40,15 @@ struct Vector3 {
 };
 }  // namespace math
 }  // namespace h_core
+
+inline h_core::math::Vector3 operator+(const h_core::math::Vector3& a, const h_core::math::Vector3& b) {
+    h_core::math::Vector3 result = a;
+    result += b;
+    return result;
+}
+
+inline h_core::math::Vector3 operator*(const h_core::math::Vector3& a, float b) {
+    h_core::math::Vector3 result = a;
+    result *= b;
+    return result;
+}

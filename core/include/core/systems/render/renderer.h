@@ -27,7 +27,16 @@ class Renderer : public System {
   private:
     h_core::math::Vector3 m_cameraPosition { 0.f, 10.f, -10.f };
     h_core::math::Vector3 m_cameraDirection { 0.f, 0.f, 1.f };
+
+    // Flycam stuff
+    bool m_flyCamEnabled = true;
+    float m_flyCamSpeed = 20.f;
+    float m_flyCamSensitivity = MATH_PI / 10.f; // Using math constants provides an air of legitimacy
+    float m_flyCamYaw = 0.f;
+    float m_flyCamPitch = 0.f;
     h_core::input::InputActionIndex m_camForwardInputIndex {};
+    h_core::input::InputActionIndex m_camRightInputIndex {};
+    h_core::input::InputActionIndex m_camGrabMouseInputIndex {};
 
     float m_fovDegrees = 70.f;
     float m_nearZ = 1.f;

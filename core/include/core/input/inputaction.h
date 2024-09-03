@@ -15,6 +15,7 @@ class InputAction {
   public:
     std::string name {};
     std::vector<h_core::input::InputActionSource*> sources {};
+    float lastFrameValue = 0.f;
 
     float getValue(h_core::input::Input* input);
 };

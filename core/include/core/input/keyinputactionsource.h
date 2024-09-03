@@ -10,10 +10,15 @@ namespace h_core {
 namespace input {
 class KeyInputActionSource : public InputActionSource {
   public:
-    KeyInputActionSource() = default;
-    explicit KeyInputActionSource(SDL_Scancode scanCode) : scanCode(scanCode) {}
+    KeyInputActionSource() {
+        type = InputActionSourceType::KEY;
+    };
+    explicit KeyInputActionSource(SDL_Scancode scanCode) : scanCode(scanCode) {
+        type = InputActionSourceType::KEY;
+    }
 
     float getValue(h_core::input::Input* input) override;
+    [[nodiscard]] const char* getName() const override;
 
     SDL_Scancode scanCode = SDL_SCANCODE_0;
 };

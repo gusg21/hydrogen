@@ -45,6 +45,8 @@ add_library(HydrogenCore STATIC
             include/core/project/projectactionentry.h
             include/core/input/inputaction.h
             src/input/inputaction.cc
+            include/core/input/dualkeyinputactionsource.h
+            src/input/dualkeyinputactionsource.cc
 
 )
 if (MSVC)

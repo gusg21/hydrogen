@@ -26,7 +26,7 @@ uint32_t h_core::Engine::init(
 
     // Input initialization
     m_input = new h_core::input::Input();
-    m_input->init(project);
+    m_input->init(project, m_window);
 
     // ImGui setup
     ImGui::CreateContext();
@@ -74,12 +74,19 @@ void h_core::Engine::run() {
     while (engineRunning) {
         m_window->postEventsToQueue(&m_events);
 
+        // Reset delta
+        m_input->setMouseDelta(0, 0);
+
         for (uint32_t eventIndex = 0; eventIndex < m_events.getSize();
              eventIndex++) {
             h_core::Event event = m_events.getHeadPointer()[eventIndex];
             switch (event.type) {
                 case ENGINE_EVENT_QUIT:
                     engineRunning = false;
+                    break;
+                case ENGINE_EVENT_MOUSE_MOTION:
+                    m_input->setMousePos(event.mouseX, event.mouseY);
+                    m_input->setMouseDelta(event.mouseDx, event.mouseDy);
                     break;
                 case ENGINE_EVENT_RESIZED:
                     ::printf("INFO: ENGINE: Wow!\n");
@@ -95,6 +102,9 @@ void h_core::Engine::run() {
         ::ImGui_ImplOpenGL3_NewFrame();
         ::ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+
+        // Input debugger GUI
+        m_input->doGUI();
 
         // Make the game happen!
         doGUI();
@@ -122,7 +132,7 @@ void h_core::Engine::run() {
         m_events.clear();
 
         // Swap the input buffers
-        m_input->swapInputBuffers();
+        m_input->updateInternals();
 
         // Update delta
         m_deltaMsecs = SDL_GetTicks64() - frameBeginTicks;

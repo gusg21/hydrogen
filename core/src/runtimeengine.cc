@@ -5,10 +5,11 @@
 #include "core/runtimeengine.h"
 #include "imgui.h"
 
+#include "core/input/dualkeyinputactionsource.h"
+#include "core/input/keyinputactionsource.h"
 #include "core/systems/gravity.h"
 #include "core/systems/render/renderer.h"
 #include "core/systems/script/scripting.h"
-#include "core/input/keyinputactionsource.h"
 
 void h_core::RuntimeEngine::doInit() {
     Engine::doInit();
@@ -29,9 +30,7 @@ void h_core::RuntimeEngine::doPostLoad() {
 void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
     // Prepare the actors for this scene
     if (sceneSpecIndex != ASSETS_ASSET_INDEX_BAD) {
-        getScene()->addActorsFromSceneSpec(
-            getAssets(), sceneSpecIndex,
-            m_systems.scripting->getContext());
+        getScene()->addActorsFromSceneSpec(getAssets(), sceneSpecIndex, m_systems.scripting->getContext());
     }
 
     // Prepare the systems for this scene
@@ -68,7 +67,8 @@ void h_core::RuntimeEngine::doGUI() {
             // Asset List
             ImGui::SeparatorText("Assets");
 
-            ImGui::BeginTable("Project Info", 3, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
+            ImGui::BeginTable(
+                "Project Info", 3, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
             ImGui::TableSetupScrollFreeze(3, 1);
             ImGui::TableSetupColumn("Index", 0, 20.f);
             ImGui::TableSetupColumn("Type", 0, 20.f);
@@ -86,38 +86,10 @@ void h_core::RuntimeEngine::doGUI() {
             ImGui::EndTable();
         }
 
-        if (ImGui::CollapsingHeader("Input Actions")) {
-            uint32_t actionIndex = 0;
-            for (const h_core::input::InputAction* action : *getInput()->getActions()) {
-                ImGui::PushID(actionIndex);
-                if (ImGui::CollapsingHeader(action->name.c_str())) {
-                    ImGui::BeginGroup();
-
-                    for (const h_core::input::InputActionSource* source : action->sources) {
-                        switch (source->type) {
-                            case input::InputActionSourceType::KEY: {
-                                const h_core::input::KeyInputActionSource* keySource =
-                                    dynamic_cast<const h_core::input::KeyInputActionSource*>
-                                        (source);
-                                ImGui::Text("Key: %s (%d)", SDL_GetKeyName(keySource->scanCode), keySource->scanCode);
-                                break;
-                            }
-                        }
-                    }
-
-                    ImGui::EndGroup();
-                }
-                ImGui::PopID();
-
-                actionIndex++;
-            }
-        }
-
         ImGui::SeparatorText("Statistics");
         ImGui::Text("FPS: %.3f", getFPS());
         ImGui::Text("Avg FPS: %.3f", m_averageFPS);
         ImGui::Text("Frame Time: %.3fs", getDeltaSecs());
-
     }
     ImGui::End();
 
@@ -148,9 +120,7 @@ void h_core::RuntimeEngine::endFrame() {
     m_systems.endFrame();
 
     m_fpsSamples.push_back(getFPS());
-    if (m_fpsSamples.size() > RUNTIMEENGINE_MAX_FPS_SAMPLES) {
-        m_fpsSamples.pop_front();
-    }
+    if (m_fpsSamples.size() > RUNTIMEENGINE_MAX_FPS_SAMPLES) { m_fpsSamples.pop_front(); }
     m_averageFPS = 0;
     for (uint32_t sampleIndex = 0; sampleIndex < m_fpsSamples.size(); sampleIndex++) {
         m_averageFPS += m_fpsSamples[sampleIndex];

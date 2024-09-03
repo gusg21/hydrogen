@@ -18,6 +18,7 @@ void h_core::Assets::init(h_core::Systems* systems) {
 h_core::AssetHash h_core::Assets::getAssetHashFromString(std::string string) {
     return std::hash<std::string>()(string);
 }
+
 void h_core::Assets::precompile(h_core::Systems* systems) {
     for (int assetIndex = 0; assetIndex < ASSETS_MAX_ASSET_COUNT;
          ++assetIndex) {

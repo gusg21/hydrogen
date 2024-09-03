@@ -7,3 +7,7 @@
 float h_core::input::KeyInputActionSource::getValue(h_core::input::Input* input) {
     return input->isKeyDown(scanCode) ? 1.f : 0.f;
 }
+
+const char* h_core::input::KeyInputActionSource::getName() const {
+    return "KEY";
+}

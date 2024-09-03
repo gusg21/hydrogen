@@ -67,6 +67,16 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                 queue->postEvent(hEvent);
                 break;
             } // QUIT
+            case SDL_MOUSEMOTION: {
+                h_core::Event hEvent = h_core::Event();
+                hEvent.type = ENGINE_EVENT_MOUSE_MOTION;
+                hEvent.mouseDx = sdlEvent.motion.xrel;
+                hEvent.mouseDy = sdlEvent.motion.yrel;
+                hEvent.mouseX = sdlEvent.motion.x;
+                hEvent.mouseY = sdlEvent.motion.y;
+                queue->postEvent(hEvent);
+                break;
+            }
             case SDL_WINDOWEVENT: {
                 switch (sdlEvent.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {

@@ -21,10 +21,15 @@ void h_core::project::Project::loadFromFile(const std::string& yamlPath) {
         entry.name = actionInfo["name"].as<std::string>("");
 
         for (YAML::Node actionSourceInfo : actionInfo["sources"]) {
-            h_core::project::ActionSourceEntry source {};
+            h_core::project::ProjectActionSourceEntry source {};
             if (actionSourceInfo["key"].IsDefined()) {
                 source.type = h_core::input::InputActionSourceType::KEY;
                 source.value.scanCode = (SDL_Scancode)actionSourceInfo["key"].as<uint32_t>(SDL_SCANCODE_0);
+            }
+            else if (actionSourceInfo["negative_key"].IsDefined() && actionSourceInfo["positive_key"].IsDefined()) {
+                source.type = h_core::input::InputActionSourceType::DUAL_KEY;
+                source.value.dualScanCodes[0] = (SDL_Scancode)actionSourceInfo["negative_key"].as<uint32_t>(SDL_SCANCODE_0);
+                source.value.dualScanCodes[1] = (SDL_Scancode)actionSourceInfo["positive_key"].as<uint32_t>(SDL_SCANCODE_0);
             }
             entry.sources.push_back(source);
         }
