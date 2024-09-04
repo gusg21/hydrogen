@@ -52,7 +52,7 @@ add_library(HydrogenCore STATIC
             include/core/systems/render/gl4renderer.h
             src/systems/render/gl4renderer.cc
 
-)
+            include/core/physics/rigidbody.h include/core/physics/rigidbodycomp.h)
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:library")
