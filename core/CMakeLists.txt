@@ -47,6 +47,10 @@ add_library(HydrogenCore STATIC
             src/input/inputaction.cc
             include/core/input/dualkeyinputactionsource.h
             src/input/dualkeyinputactionsource.cc
+            include/core/systems/render/gles3renderer.h
+            src/systems/render/gles3renderer.cc
+            include/core/systems/render/gl4renderer.h
+            src/systems/render/gl4renderer.cc
 
 )
 if (MSVC)
@@ -72,29 +76,46 @@ set_target_properties(angelscript PROPERTIES FOLDER "Vendored/AngelScript")
 set_target_properties(HydrogenCore_AngelScriptExtensions PROPERTIES FOLDER "Vendored/AngelScript")
 
 # SDL
-set(SDL_STATIC ON)
+#if (NOT ANDROID)
+    set(SDL_STATIC ON)
+#else ()
+#    set(SDL_STATIC OFF)
+#endif ()
 set(SDL_SHARED ON) # not required but sometimes SDL will not build without it :(
 set(SDL_DISABLE_UNINSTALL ON)
 set(SDL_TEST_LIBRARY OFF)
 set(SDL_TESTS OFF)
 set(SDL_EXAMPLES OFF)
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
-target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-static)
+
+if (TARGET SDL2::SDL2-static)
+    message(STATUS "(HydrogenCore) Using SDL2 static")
+    target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-static)
+    set_target_properties(SDL2-static PROPERTIES FOLDER "Vendored/SDL")
+endif()
+if (TARGET SDL2::SDL2-shared)
+    message(STATUS "(HydrogenCore) Using SDL2 shared")
+    target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-shared)
+    set_target_properties(SDL2 PROPERTIES FOLDER "Vendored/SDL")
+endif()
 if (TARGET SDL2::SDL2main)
     target_link_libraries(HydrogenCore PRIVATE SDL2::SDL2main)
+    set_target_properties(SDL2main PROPERTIES FOLDER "Vendored/SDL")
 endif ()
 
-set_target_properties(SDL2-static PROPERTIES FOLDER "Vendored/SDL")
 set_target_properties(SDL2_test PROPERTIES FOLDER "Vendored/SDL")
-set_target_properties(SDL2main PROPERTIES FOLDER "Vendored/SDL")
 set_target_properties(sdl_headers_copy PROPERTIES FOLDER "Vendored/SDL")
 if (TARGET SDL2)
     set_target_properties(SDL2 PROPERTIES FOLDER "Vendored/SDL") # see above comment
 endif ()
 
 # OpenGL
-find_package(OpenGL REQUIRED)
-target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
+if (DEFINED ANDROID)
+    target_link_libraries(HydrogenCore PUBLIC GLESv3 ${log-lib})
+else ()
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
+endif ()
 
 # GLM
 #set(GLM_BUILD_TESTS OFF)
@@ -143,9 +164,22 @@ target_link_libraries(HydrogenCore PUBLIC yaml-cpp::yaml-cpp)
 
 # generated shader code
 function(HydrogenCore_CopyShaders folder)
-    add_custom_target(HydrogenCore_CopyShaders
-                      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
-                      )
+    if (ANDROID)
+        set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
+#        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+#        file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+#        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
+#        file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
+        message(STATUS "(HydrogenCore_CopyShaders) ${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
+        add_custom_target(HydrogenCore_CopyShaders
+                          COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_SOURCE_DIR}/android/hydrogen/app/src/main/assets/hcore_assets
+        )
+    else()
+        add_custom_target(HydrogenCore_CopyShaders
+                          COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
+        )
+    endif()
+
     add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
     set_target_properties(HydrogenCore_CopyShaders PROPERTIES FOLDER "HyCoreSupport")
 endfunction()
@@ -153,7 +187,8 @@ endfunction()
 # setup a runtime target with the SDL2main library and the windows icon resource
 function(HydrogenCore_SetupMain target)
     if (TARGET SDL2::SDL2main)
-        target_link_libraries(${target} PRIVATE SDL2::SDL2main)
+        message(STATUS "(HydrogenCore_SetupMain) Linking SDL2main")
+        target_link_libraries(${target} PUBLIC SDL2::SDL2main)
     endif ()
 
     if (MSVC)

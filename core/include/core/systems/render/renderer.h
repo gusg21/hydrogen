@@ -8,6 +8,13 @@
 #include "core/system.h"
 #include "core/input/input.h"
 
+#define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
+#define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
+#define RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE 1
+#define RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK           2
+#define RENDERING_INIT_FAIL_BAD_PROGRAM                1
+#define RENDERING_OPENGL_LOG_MAX_SIZE                  1024
+
 namespace h_core {
 namespace render {
 class Renderer : public System {
@@ -23,10 +30,26 @@ class Renderer : public System {
 
     [[nodiscard]] SDL_GLContext getGLContext() const;
     [[nodiscard]] h_core::ComponentBitmask getMask() const override;
+    [[nodiscard]] bool isGles3();
 
-  private:
+    static uint32_t loadShader(GLuint* out_shaderId, std::string filePath);
+    static uint32_t loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath);
+
+  protected:
+    void setRendererName(const std::string& name);
+    void setIsGles3(bool isGles3);
+
     h_core::math::Vector3 m_cameraPosition { -10.f, 10.f, 0.f };
     h_core::math::Vector3 m_cameraDirection { 1.f, 0.f, 0.f };
+
+    float m_fovDegrees = 70.f;
+    float m_nearZ = 1.f;
+    float m_farZ = 100.f;
+    bool m_ccw = true;
+
+  private:
+    std::string m_rendererName { "UNKNOWN" };
+    bool m_isGles3 = false;
 
     // Flycam stuff
     bool m_flyCamEnabled = false;
@@ -38,12 +61,6 @@ class Renderer : public System {
     h_core::input::InputActionIndex m_camRightInputIndex {};
     h_core::input::InputActionIndex m_camGrabMouseInputIndex {};
 
-    float m_fovDegrees = 70.f;
-    float m_nearZ = 1.f;
-    float m_farZ = 100.f;
-    bool m_ccw = true;
-
-    h_core::render::Shader m_shader {};
     SDL_GLContext m_glContext = nullptr;
 };
 }  // namespace systems

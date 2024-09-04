@@ -12,33 +12,13 @@
 #include "core/math/mat4x4.h"
 #include "core/systems/render/meshasset.h"
 
-
-#define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
-#define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
-#define RENDERING_LOAD_PROGRAM_FAIL_BAD_SHADER_COMPILE 1
-#define RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK           2
-#define RENDERING_INIT_FAIL_BAD_PROGRAM                1
-#define RENDERING_OPENGL_LOG_MAX_SIZE                  1024
-
-uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
-    // Read code from file
-    std::ifstream shaderCodeFile { filePath };
-    if (!shaderCodeFile.good()) {
-        ::printf("ERROR: RENDERER: Failed to load shader from path %s\n", filePath.c_str());
-        return RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM;
-    }
-    std::stringstream shaderCodeStream;
-    shaderCodeStream << shaderCodeFile.rdbuf();
-    std::string shaderCode = shaderCodeStream.str();
-
-#if HCORE_DEBUG
-    // printf("DEBUG: RENDERER: %s\n", shaderCode.c_str());
-#endif
-
+uint32_t h_core::render::Renderer::loadShader(GLuint* out_shaderId, std::string filePath) {
     // Load in the code
-    const GLint shaderCodeLength = shaderCode.size();
-    const char* shaderCodeRaw = shaderCode.data();
-    ::glShaderSource(*out_shaderId, 1, (const GLchar**)&shaderCodeRaw, &shaderCodeLength);
+    size_t shaderCodeLength;
+    const char* shaderCodeRaw = (const char*)SDL_LoadFile(filePath.c_str(), &shaderCodeLength);
+    SDL_Log("INFO: SHADER: Code:\n%s\n", shaderCodeRaw);
+    int shaderCodeLengthInt = shaderCodeLength;
+    ::glShaderSource(*out_shaderId, 1, (const GLchar**)&shaderCodeRaw, &shaderCodeLengthInt);
 
     // Compile + verify
     ::glCompileShader(*out_shaderId);
@@ -47,14 +27,14 @@ uint32_t loadShader(GLuint* out_shaderId, std::string filePath) {
     if (status == GL_FALSE) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
         ::glGetShaderInfoLog(*out_shaderId, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        ::printf("ERROR: RENDERER: %s\n", log);
+        ::SDL_Log("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE;
     }
 
     return 0;
 }
 
-uint32_t loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath) {
+uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath) {
     uint32_t result;
 
     out_shader->vertexShader = ::glCreateShader(GL_VERTEX_SHADER);
@@ -79,12 +59,12 @@ uint32_t loadProgram(h_core::render::Shader* out_shader, std::string vertexPath,
     if (linkStatus != GL_TRUE) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
         ::glGetProgramInfoLog(out_shader->program, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        ::printf("ERROR: RENDERER: %s\n", log);
+        ::SDL_Log("ERROR: RENDERER: %s\n", log);
         return RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK;
     }
 
 #if HCORE_DEBUG
-    ::printf(
+    ::SDL_Log(
         "DEBUG: RENDERER: Shaders (%s, %s) compiled + linked + loaded successfully\n", vertexPath.c_str(),
         fragmentPath.c_str());
 #endif
@@ -100,10 +80,6 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
     ::glDepthFunc(GL_LEQUAL);
     ::glEnable(GL_CULL_FACE);
     ::glCullFace(GL_BACK);
-
-    m_shader = h_core::render::Shader {};
-    uint32_t shaderLoadResult = loadProgram(&m_shader, "hcore_assets/vs_default.glsl", "hcore_assets/fs_default.glsl");
-    if (shaderLoadResult != 0) { return RENDERING_INIT_FAIL_BAD_PROGRAM; }
 
     m_camForwardInputIndex = engine->getInput()->newAction("cam_forward");
     engine->getInput()
@@ -131,6 +107,8 @@ void h_core::render::Renderer::doGUI() {
     h_core::System::doGUI();
 
     if (ImGui::Begin("Renderer Debugger")) {
+        ImGui::Text("Renderer Name: %s", m_rendererName.c_str());
+
         ImGui::SeparatorText("Camera");
         ImGui::DragFloat3("Position", &m_cameraPosition.x);
         ImGui::DragFloat3("Direction", &m_cameraDirection.x);
@@ -156,15 +134,6 @@ void h_core::render::Renderer::beginFrame() {
     ::glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ::glFrontFace(m_ccw ? GL_CCW : GL_CW);
-
-    m_shader.use();
-    h_core::math::Mat4x4 viewMatrix = h_core::math::Mat4x4::lookAtMat(
-        m_cameraPosition, h_core::math::Vector3::add(m_cameraPosition, m_cameraDirection));
-
-    float aspect = (float)engine->getWidth() / (float)engine->getHeight();
-    h_core::math::Mat4x4 projMatrix =
-        h_core::math::Mat4x4::getProjMatrix((m_fovDegrees / 180.f) * (float)M_PI, aspect, m_nearZ, m_farZ);
-    m_shader.setMat4("uni_viewProjectionMatrix", h_core::math::Mat4x4::multiply(projMatrix, viewMatrix));
 
     // Camera controls
     if (m_flyCamEnabled) {
@@ -205,24 +174,6 @@ void h_core::render::Renderer::beginFrame() {
 
 void h_core::render::Renderer::draw() {
     // printf("DEBUG: RENDERER: actor id %d\n", actorId);
-
-    m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
-
-    GLenum glElementType;
-    switch (meshComp->mesh->getMeshIndexType()) {
-        case h_core::render::MeshIndexType::BYTE:
-            glElementType = GL_UNSIGNED_BYTE;
-            break;
-        case h_core::render::MeshIndexType::SHORT:
-            glElementType = GL_UNSIGNED_SHORT;
-            break;
-        case h_core::render::MeshIndexType::INT:
-            glElementType = GL_UNSIGNED_INT;
-            break;
-    }
-
-    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
-    ::glDrawElements(meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType, nullptr);
 }
 
 void h_core::render::Renderer::endFrame() {}
@@ -233,4 +184,16 @@ h_core::ComponentBitmask h_core::render::Renderer::getMask() const {
 
 SDL_GLContext h_core::render::Renderer::getGLContext() const {
     return m_glContext;
+}
+
+void h_core::render::Renderer::setRendererName(const std::string& name) {
+    m_rendererName = name;
+}
+
+void h_core::render::Renderer::setIsGles3(bool isGles3) {
+    m_isGles3 = isGles3;
+}
+
+bool h_core::render::Renderer::isGles3() {
+    return m_isGles3;
 }

@@ -8,12 +8,14 @@
 #include "core/systems/script/scriptcomp.h"
 #include "core/transform.h"
 
-#define SCENE_MAX_ACTORS 1024
+#define SCENE_MAX_ACTORS 4096
 
 namespace h_core {
 class Scene {
   public:
     Scene() = default;
+
+    void doGUI();
 
     /// @brief set up a scene based on a scene spec
     /// @param sceneSpec scene spec to use
@@ -31,5 +33,6 @@ class Scene {
 
   private:
     ActorId m_nextId = 0;
+    size_t m_numActors = 0;
 };
 }  // namespace h_core

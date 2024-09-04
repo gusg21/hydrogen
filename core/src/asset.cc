@@ -1,8 +1,10 @@
 #include "core/asset.h"
 
+#include <SDL.h>
+
 uint32_t h_core::Asset::initFromYaml(
     h_core::Assets* assets, YAML::Node yaml) {
-    ::printf("WARN: ASSET: Undefined initFromYaml method.\n");
+    ::SDL_Log("WARN: ASSET: Undefined initFromYaml method.\n");
 
     return 1;
 }

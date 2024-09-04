@@ -35,6 +35,12 @@ uint32_t h_core::Engine::init(h_core::Assets* out_assets, h_core::project::Proje
     ::ImGui_ImplSDL2_InitForOpenGL(m_window->getSDLWindow(), m_window->getGLContext());
     h_core::theming::cherry();
 
+//#if IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
+//    SDL_Log("Using vertex array\n");
+//#else
+//    SDL_Log("NOT Using vertex array\n");
+//#endif
+
     doInit();
 
     // load the assets
@@ -84,7 +90,7 @@ void h_core::Engine::run() {
                     m_input->setMouseDelta(event.mouseDx, event.mouseDy);
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    ::printf("INFO: ENGINE: Wow!\n");
+                    ::SDL_Log("INFO: ENGINE: Wow!\n");
                     m_windowWidth = event.newWindowWidth;
                     m_windowHeight = event.newWindowHeight;
                     break;
@@ -97,9 +103,6 @@ void h_core::Engine::run() {
         ::ImGui_ImplOpenGL3_NewFrame();
         ::ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
-
-        // Input debugger GUI
-        m_input->doGUI();
 
         // Make the game happen!
         doGUI();

@@ -27,7 +27,7 @@ void angelScriptMessageCallback(const asSMessageInfo* message, void* params) {
             break;
     }
 
-    printf(
+    ::SDL_Log(
         "%s: SCRIPTING: %s:%d,%d\n%s\n", messageType, message->section, message->row, message->col, message->message);
 }
 
@@ -36,7 +36,7 @@ h_core::math::Vector3 newVector3(float x, float y, float z) {
 }
 
 void angelScriptPrint(std::string& message) {
-    printf("INFO: SCRIPTING: %s\n", message.c_str());
+    ::SDL_Log("INFO: SCRIPTING: %s\n", message.c_str());
 }
 
 std::string actorIdToString(h_core::ActorId id) {
@@ -45,7 +45,7 @@ std::string actorIdToString(h_core::ActorId id) {
 
 void RegisterVector3(asIScriptEngine* scriptingEngine) {
     scriptingEngine->RegisterObjectType(
-        "Vector3", sizeof(h_core::math::Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector3>());
+        "Vector3", sizeof(h_core::math::Vector3), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
     scriptingEngine->RegisterObjectProperty("Vector3", "float x", asOFFSET(h_core::math::Vector3, x));
     scriptingEngine->RegisterObjectProperty("Vector3", "float y", asOFFSET(h_core::math::Vector3, y));
     scriptingEngine->RegisterObjectProperty("Vector3", "float z", asOFFSET(h_core::math::Vector3, z));
@@ -62,7 +62,7 @@ void RegisterVector3(asIScriptEngine* scriptingEngine) {
 void RegisterQuaternion(asIScriptEngine* scriptingEngine) {
     scriptingEngine->RegisterObjectType(
         "Quaternion", sizeof(h_core::math::Quaternion),
-        asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Quaternion>());
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
 
     scriptingEngine->RegisterObjectProperty("Quaternion", "float x", asOFFSET(h_core::math::Quaternion, x));
     scriptingEngine->RegisterObjectProperty("Quaternion", "float y", asOFFSET(h_core::math::Quaternion, y));
@@ -108,7 +108,7 @@ uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
 
     // Vector2
     m_scriptEngine->RegisterObjectType(
-        "Vector2", sizeof(h_core::math::Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector2>());
+        "Vector2", sizeof(h_core::math::Vector2), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
     m_scriptEngine->RegisterObjectProperty("Vector2", "float x", asOFFSET(h_core::math::Vector2, x));
     m_scriptEngine->RegisterObjectProperty("Vector2", "float y", asOFFSET(h_core::math::Vector2, y));
 
@@ -117,14 +117,14 @@ uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
 
     // Transform
     m_scriptEngine->RegisterObjectType(
-        "Transform", sizeof(h_core::Transform), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::Transform>());
+        "Transform", sizeof(h_core::Transform), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
     m_scriptEngine->RegisterObjectProperty("Transform", "Vector3 position", asOFFSET(h_core::Transform, position));
     m_scriptEngine->RegisterObjectProperty("Transform", "Quaternion rotation", asOFFSET(h_core::Transform, rotation));
     m_scriptEngine->RegisterObjectProperty("Transform", "Vector3 scale", asOFFSET(h_core::Transform, scale));
 
     // ActorId
     m_scriptEngine->RegisterObjectType(
-        "ActorId", sizeof(h_core::ActorId), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::ActorId>());
+        "ActorId", sizeof(h_core::ActorId), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_PRIMITIVE);
 
     // -> Global Functions
     m_scriptEngine->RegisterGlobalFunction(

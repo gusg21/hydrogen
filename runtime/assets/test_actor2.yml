@@ -14,6 +14,6 @@ transform:
     y: 1
     z: 1
 model:
-  index: 3
+  index: 40
 script:
   index: 2

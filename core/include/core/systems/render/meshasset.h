@@ -36,14 +36,12 @@ class MeshAsset : public Asset {
   public:
     MeshAsset() = default;
 
-    uint32_t initFromYaml(
-        h_core::Assets* assets,
-        YAML::Node node) override;
+    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node) override;
     uint32_t precompile(h_core::Systems* systems) override;
 
     void loadModel(
-        uint32_t vertexCount, const Vertex* vertexBuffer,
-        uint32_t inidicesCount, const void* indexBuffer, MeshIndexType type);
+        uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,
+        MeshIndexType type, bool useGles3);
 
     [[nodiscard]] GLuint getVertexBufferHandle() const;
     [[nodiscard]] GLuint getIndexBufferHandle() const;
@@ -62,9 +60,9 @@ class MeshAsset : public Asset {
     GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
-    h_core::render::MeshIndexType m_meshIndexType =
-        h_core::render::MeshIndexType::BYTE;
+    h_core::render::MeshIndexType m_meshIndexType = h_core::render::MeshIndexType::BYTE;
     uint32_t m_primitiveMode = 4;
+    bool m_isCube = false;
 };
 }  // namespace render
 }  // namespace h_core

@@ -15,3 +15,9 @@ _deps
 CMakeUserPresets.json
 cmake-build-debug-visual-studio/
 cmake-build-*/
+
+android/hydrogen/app/.cxx/
+
+android/hydrogen/app/jni.bak/
+
+android/hydrogen/app/src/main/assets/

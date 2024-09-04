@@ -5,25 +5,19 @@
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
+#include "core/systems/render/renderer.h"
+
 // TODO: move these godless monstrosities to a subf
 
 static h_core::render::Vertex cubeVertices[] = {
-    { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(1.0f, 1.0f, 1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(-1.0f, -1.0f, 1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(1.0f, -1.0f, 1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(-1.0f, 1.0f, -1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(1.0f, 1.0f, -1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(-1.0f, -1.0f, -1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
-    { h_core::math::Vector3(1.0f, -1.0f, -1.0f), h_core::math::Vector3(0),
-      h_core::math::Vector2(0) },
+    { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(1.0f, 1.0f, 1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(-1.0f, -1.0f, 1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(1.0f, -1.0f, 1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(-1.0f, 1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(1.0f, 1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(-1.0f, -1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
+    { h_core::math::Vector3(1.0f, -1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
 };
 static const uint16_t cubeTriList[] = {
     0, 1, 2,           // 0
@@ -36,26 +30,17 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::render::MeshAsset::initFromYaml(
-    h_core::Assets* assets, YAML::Node yaml) {
-    ::printf("INFO: MESH: loading model from YAML spec...\n");
-
-    if (yaml["primitive"].as<bool>(false)) {
-        // Just load cube
-        ::printf("DEBUG: MESH: Loading cube primitive mesh\n");
-        loadModel(
-            8, cubeVertices, 36, cubeTriList,
-            h_core::render::MeshIndexType::SHORT);
-
-        return 0;
-    }
+uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
+    ::SDL_Log("INFO: MESH: loading model from YAML spec...\n");
 
     // Parse YAML
     std::string gltfFilePath = yaml["gltf"].as<std::string>("");
+    std::string gltfBasePath = yaml["gltf_base_path"].as<std::string>("");
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
+    m_isCube = yaml["primitive"].as<bool>(false);
 
     if (gltfFilePath.empty()) {
-        ::printf("ERROR: MODEL: no gltf key in model YAML\n");
+        ::SDL_Log("ERROR: MODEL: no gltf key in model YAML\n");
         return MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH;
     }
 
@@ -66,20 +51,24 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
 
     bool success;
     if (!gltfBinaryMode) {
-        success = loader.LoadASCIIFromFile(
-            &m_model, &errorText, &warningText, gltfFilePath);
+        size_t gltfTextLength;
+        const char* gltfText = (const char*)SDL_LoadFile(gltfFilePath.c_str(), &gltfTextLength);
+        success =
+            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, gltfText, gltfTextLength, gltfBasePath);
     }
     else {
-        success = loader.LoadBinaryFromFile(
-            &m_model, &errorText, &warningText, gltfFilePath);
+        size_t glbDataLength;
+        const uint8_t* glbData = (const uint8_t*)SDL_LoadFile(gltfFilePath.c_str(), &glbDataLength);
+        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, glbData, glbDataLength, gltfBasePath);
     }
 
-    if (!warningText.empty()) {
-        ::printf(("WARN: MODEL: " + warningText + "\n").c_str());
-    }
+    if (!warningText.empty()) { ::SDL_Log("WARN: MODEL: %s\n", warningText.c_str()); }
 
     if (!success) {
-        ::printf(("ERROR: MODEL: " + errorText + "\n").c_str());
+        ::SDL_Log("ERROR: MODEL: %s\n", errorText.c_str());
+        ::SDL_Log(
+            "ERROR: MODEL: gltfFilePath = %s, gltfBasePath = %s, gltfBinaryMode = %s\n", gltfFilePath.c_str(),
+            gltfBasePath.c_str(), gltfBinaryMode ? "YES" : "NO");
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
 
@@ -87,6 +76,14 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
 }
 
 uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
+    if (m_isCube) {
+        // Just load cube
+        ::SDL_Log("DEBUG: MESH: Loading cube primitive mesh\n");
+        loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT, systems->renderer->isGles3());
+
+        return 0;
+    }
+
     // TODO: VERY TESTING. MUCH WOW
     tinygltf::Node node = m_model.nodes.front();
     tinygltf::Mesh mesh = m_model.meshes[node.mesh];
@@ -96,52 +93,37 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
     // pos attribute
     uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
     tinygltf::Accessor posAccessor = m_model.accessors[posAccessorIndex];
-    tinygltf::BufferView posBufferView =
-        m_model.bufferViews[posAccessor.bufferView];
-    const uint8_t* posBuffer = m_model.buffers[posBufferView.buffer].data.data() +
-                               posBufferView.byteOffset;
+    tinygltf::BufferView posBufferView = m_model.bufferViews[posAccessor.bufferView];
+    const uint8_t* posBuffer = m_model.buffers[posBufferView.buffer].data.data() + posBufferView.byteOffset;
 
     // normal attribute
     uint32_t normalAccessorIndex = primitiveInfo.attributes["NORMAL"];
     tinygltf::Accessor normalAccessor = m_model.accessors[normalAccessorIndex];
-    tinygltf::BufferView normalBufferView =
-        m_model.bufferViews[normalAccessor.bufferView];
-    const uint8_t* normalBuffer =
-        m_model.buffers[normalBufferView.buffer].data.data() +
-        normalBufferView.byteOffset;
+    tinygltf::BufferView normalBufferView = m_model.bufferViews[normalAccessor.bufferView];
+    const uint8_t* normalBuffer = m_model.buffers[normalBufferView.buffer].data.data() + normalBufferView.byteOffset;
 
     // uv attribute
     uint32_t texCoordAccessorIndex = primitiveInfo.attributes["TEXCOORD_0"];
-    tinygltf::Accessor texCoordAccessor =
-        m_model.accessors[texCoordAccessorIndex];
-    tinygltf::BufferView texCoordBufferView =
-        m_model.bufferViews[texCoordAccessor.bufferView];
+    tinygltf::Accessor texCoordAccessor = m_model.accessors[texCoordAccessorIndex];
+    tinygltf::BufferView texCoordBufferView = m_model.bufferViews[texCoordAccessor.bufferView];
     const uint8_t* texCoordBuffer =
-        m_model.buffers[texCoordBufferView.buffer].data.data() +
-        texCoordBufferView.byteOffset;
+        m_model.buffers[texCoordBufferView.buffer].data.data() + texCoordBufferView.byteOffset;
 
     // load vertex data
     size_t vertexBufferCount = posAccessor.count;
-    h_core::render::Vertex* vertexBuffer =
-        new h_core::render::Vertex[vertexBufferCount] {};
+    h_core::render::Vertex* vertexBuffer = new h_core::render::Vertex[vertexBufferCount] {};
 
-    for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount;
-         vertexIndex++) {
+    for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount; vertexIndex++) {
         h_core::render::Vertex* vertex = &vertexBuffer[vertexIndex];
-        vertex->position = reinterpret_cast<const h_core::math::Vector3*>(
-            posBuffer)[vertexIndex];
-        vertex->normal = reinterpret_cast<const h_core::math::Vector3*>(
-            normalBuffer)[vertexIndex];
-        vertex->texCoord = reinterpret_cast<const h_core::math::Vector2*>(
-            texCoordBuffer)[vertexIndex];
+        vertex->position = reinterpret_cast<const h_core::math::Vector3*>(posBuffer)[vertexIndex];
+        vertex->normal = reinterpret_cast<const h_core::math::Vector3*>(normalBuffer)[vertexIndex];
+        vertex->texCoord = reinterpret_cast<const h_core::math::Vector2*>(texCoordBuffer)[vertexIndex];
     }
 
     // load index buffer
     uint32_t indexBufferAccessorIndex = primitiveInfo.indices;
-    tinygltf::Accessor indexBufferAccessor =
-        m_model.accessors[indexBufferAccessorIndex];
-    tinygltf::BufferView indexBufferView =
-        m_model.bufferViews[indexBufferAccessor.bufferView];
+    tinygltf::Accessor indexBufferAccessor = m_model.accessors[indexBufferAccessorIndex];
+    tinygltf::BufferView indexBufferView = m_model.bufferViews[indexBufferAccessor.bufferView];
     size_t indexBufferCount = indexBufferAccessor.count;
 
     // determine index type
@@ -162,21 +144,24 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
 
     loadModel(
         vertexBufferCount, vertexBuffer, indexBufferCount,
-        m_model.buffers[indexBufferView.buffer].data.data() +
-            indexBufferView.byteOffset,
-        m_meshIndexType);
+        m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset, m_meshIndexType,
+        systems->renderer->isGles3());
+
+    ::SDL_Log("MESH: INFO: Loaded %zu vertices (%zu indices)\n", vertexBufferCount, indexBufferCount);
 
     return 0;
 }
 
 void h_core::render::MeshAsset::loadModel(
-    uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer,
-    uint32_t inidicesCount, const void* indexBuffer, MeshIndexType indexType) {
+    uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer, uint32_t inidicesCount,
+    const void* indexBuffer, MeshIndexType indexType, bool useGles3) {
     // Generate buffers and load attributes
-    ::glGenVertexArrays(1, &m_vertexAttributesHandle);
-    ::glBindVertexArray(m_vertexAttributesHandle);
+    if (!useGles3) {
+        ::glGenVertexArrays(1, &m_vertexAttributesHandle);
+        ::glBindVertexArray(m_vertexAttributesHandle);
+    }
 
-    ::printf("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
+    ::SDL_Log("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
 
     ::glGenBuffers(1, &m_vertexBufferHandle);
     ::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
@@ -206,8 +191,7 @@ void h_core::render::MeshAsset::loadModel(
     // Mark buffers for static drawing (not updated)
     if (vertexBufferCount > 0) {
         ::glBufferData(
-            GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * vertexBufferCount,
-            vertexBuffer, GL_STATIC_DRAW);
+            GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * vertexBufferCount, vertexBuffer, GL_STATIC_DRAW);
     }
 
     if (inidicesCount > 0) {
@@ -224,13 +208,11 @@ void h_core::render::MeshAsset::loadModel(
                 indexTypeSize = sizeof(unsigned int);
                 break;
             default:
-                ::printf("Undefined mesh index type value!! What!!!\n");
+                ::SDL_Log("Undefined mesh index type value!! What!!!\n");
                 break;
         }
 
-       ::glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * inidicesCount, indexBuffer,
-            GL_STATIC_DRAW);
+        ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * inidicesCount, indexBuffer, GL_STATIC_DRAW);
     }
 
     // Store buffer sizes
@@ -239,7 +221,9 @@ void h_core::render::MeshAsset::loadModel(
     m_meshIndexType = indexType;
 
     // Clean up
-    ::glBindVertexArray(0);
+    if (!useGles3) {
+        ::glBindVertexArray(0);
+    }
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
@@ -272,4 +256,3 @@ h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() cons
 uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
 }
-

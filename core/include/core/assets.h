@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "SDL.h"
 #include "yaml-cpp/yaml.h"
 
 #include "core/asset.h"
@@ -82,12 +83,10 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
         "Can't load asset type that does not derive from Asset");
 
     // Load file
-    std::stringstream yamlBufferStream;
-    std::ifstream yamlFileStream { filePath };
-    yamlBufferStream << yamlFileStream.rdbuf();
+    const char* fileText = (const char*)SDL_LoadFile(filePath.c_str(), nullptr);
 
     // Parse YAML and load asset
-    YAML::Node yaml = YAML::Load(yamlBufferStream.str());
+    YAML::Node yaml = YAML::Load(fileText);
     out_asset->initFromYaml(this, yaml);
 
     return 0;
@@ -112,7 +111,7 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
         AssetType* asset = new AssetType();
         uint32_t result = loadAssetFromFile<AssetType>(asset, m_systems, filePath);
         if (result != 0) {
-            printf("ERROR: Failed to load asset %s\n", filePath.c_str());
+            ::SDL_Log("ERROR: Failed to load asset %s\n", filePath.c_str());
             return ASSETS_ASSET_INDEX_BAD;
         }
         else {

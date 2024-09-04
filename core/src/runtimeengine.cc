@@ -8,7 +8,8 @@
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/input/keyinputactionsource.h"
 #include "core/systems/gravity.h"
-#include "core/systems/render/renderer.h"
+#include "core/systems/render/gles3renderer.h"
+#include "core/systems/render/gl4renderer.h"
 #include "core/systems/script/scripting.h"
 
 void h_core::RuntimeEngine::doInit() {
@@ -16,7 +17,12 @@ void h_core::RuntimeEngine::doInit() {
 
     // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
-    m_systems.renderer = new h_core::render::Renderer();
+    if (getWindow()->isGles3()) {
+        m_systems.renderer = new h_core::render::Gles3Renderer();
+    }
+    else {
+        m_systems.renderer = new h_core::render::Gles3Renderer();
+    }
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
 }
@@ -89,11 +95,13 @@ void h_core::RuntimeEngine::doGUI() {
         ImGui::SeparatorText("Statistics");
         ImGui::Text("FPS: %.3f", getFPS());
         ImGui::Text("Avg FPS: %.3f", m_averageFPS);
-        ImGui::Text("Frame Time: %.3fs", getDeltaSecs());
+        ImGui::Text("Frame Time: %.3fms", getDeltaSecs() * 1000.0);
     }
     ImGui::End();
 
     m_systems.doGUI();
+    getInput()->doGUI();
+    getScene()->doGUI();
 }
 
 void h_core::RuntimeEngine::beginFrame() {

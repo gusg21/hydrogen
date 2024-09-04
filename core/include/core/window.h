@@ -39,9 +39,11 @@ class Window {
 
     [[nodiscard]] SDL_Window* getSDLWindow() const;
     [[nodiscard]] SDL_GLContext getGLContext() const;
+    [[nodiscard]] bool isGles3() const;
 
   private:
     SDL_GLContext m_glContext = nullptr;
     SDL_Window* m_sdlWindow = nullptr;
+    bool m_isGles3 = false;
 };
 }  // namespace h_core

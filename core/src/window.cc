@@ -9,31 +9,50 @@
 
 #define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
-uint32_t h_core::Window::init(
-    std::string title, uint32_t width, uint32_t height, bool fullscreen) {
-    // Init SDL
-    ::SDL_Init(SDL_INIT_EVERYTHING);
-
-    m_sdlWindow = ::SDL_CreateWindow(
-        title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width,
-        height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-
-    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    ::SDL_GL_SetAttribute(
-        SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height, bool fullscreen) {
+//    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_);
+#if __ANDROID__
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    m_isGles3 = true;
+#else
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    m_isGles3 = false;
+#endif
     ::SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     ::SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     ::SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
+    // Init SDL
+    ::SDL_Init(SDL_INIT_EVERYTHING);
+
+    m_sdlWindow = ::SDL_CreateWindow(
+        title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
     m_glContext = ::SDL_GL_CreateContext(m_sdlWindow);
+    if (m_glContext == nullptr) {
+        ::SDL_Log("ERROR: WINDOW: GL Context error: %s", SDL_GetError());
+        return 1; // TODO: Make actual error code
+    }
     ::SDL_GL_MakeCurrent(m_sdlWindow, m_glContext);
 
     ::SDL_GL_SetShwapInterval(0);
 
-    ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
-    ::printf("INFO: RENDERING: OpenGL version: %s\n", ::glGetString(GL_VERSION));
+    int gladInitResult = ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
+    if (gladInitResult == 0) {
+        ::SDL_Log("ERROR: WINDOW: Failed to init OpenGL context\n");
+        return 1; // TODO: Make actual error code
+    }
+    const uint8_t* glVersionStr = ::glGetString(GL_VERSION);
+    if (glVersionStr == nullptr) { // TODO: does the above if block cover all cases?
+        ::SDL_Log("ERROR: WINDOW: OpenGL version error: %s\n", glGetError());
+        return 1; // TODO: Make actual error code
+    }
+    ::SDL_Log("INFO: WINDOW: OpenGL version: %s\n", glVersionStr);
 
     // Set up resolution + backbuffer settings
     // Set up imgui
@@ -66,7 +85,7 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                 hEvent.type = ENGINE_EVENT_QUIT;
                 queue->postEvent(hEvent);
                 break;
-            } // QUIT
+            }  // QUIT
             case SDL_MOUSEMOTION: {
                 h_core::Event hEvent = h_core::Event();
                 hEvent.type = ENGINE_EVENT_MOUSE_MOTION;
@@ -100,11 +119,11 @@ void h_core::Window::postEventsToQueue(h_core::EventQueue* queue) {
                         break;
                 }
                 break;
-            } // WINDOWEVENT
+            }  // WINDOWEVENT
 
             default:
                 break;
-        } // SDL POLL EVENT
+        }  // SDL POLL EVENT
     }
 }
 
@@ -118,4 +137,7 @@ SDL_Window* h_core::Window::getSDLWindow() const {
 
 SDL_GLContext h_core::Window::getGLContext() const {
     return m_glContext;
+}
+bool h_core::Window::isGles3() const {
+    return false;
 }

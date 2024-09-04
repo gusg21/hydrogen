@@ -3,7 +3,12 @@
 #include "core/input/inputactionsource.h"
 
 void h_core::project::Project::loadFromFile(const std::string& yamlPath) {
-    YAML::Node projectYaml = YAML::LoadFile(yamlPath);
+    ::SDL_Log("INFO: PROJECT: Loading from path %s\n", yamlPath.c_str());
+    ::SDL_Log("INFO: PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
+//    printf("INFO: PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
+    const char* projectYamlText = (const char*)SDL_LoadFile(yamlPath.c_str(), nullptr);
+    ::SDL_Log("INFO: PROJECT: %s\n", projectYamlText);
+    YAML::Node projectYaml = YAML::Load(projectYamlText);
 
     name = projectYaml["name"].as<std::string>("Unnamed Project");
     initialSceneSpec =

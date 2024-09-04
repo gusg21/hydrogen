@@ -1,8 +1,6 @@
 //
 // Created by Angus Goucher on 9/2/2024.
 //
-#pragma once
-
 #include "core/input/input.h"
 #include "core/input/dualkeyinputactionsource.h"
 
