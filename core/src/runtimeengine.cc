@@ -21,7 +21,7 @@ void h_core::RuntimeEngine::doInit() {
         m_systems.renderer = new h_core::render::Gles3Renderer();
     }
     else {
-        m_systems.renderer = new h_core::render::Gles3Renderer();
+        m_systems.renderer = new h_core::render::Gl4Renderer();
     }
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
