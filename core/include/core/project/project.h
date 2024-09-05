@@ -12,7 +12,7 @@ namespace h_core {
 namespace project {
 class Project {
   public:
-    Project() = default;
+    Project() noexcept = default;
 
     void loadFromFile(const std::string& yamlPath);
 
