@@ -8,6 +8,7 @@ uint32_t h_core::render::Gl4Renderer::init(h_core::Engine* engine) {
     Renderer::init(engine);
 
     setRendererName("GL4 Renderer");
+    setIsGles3(false);
 
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult =

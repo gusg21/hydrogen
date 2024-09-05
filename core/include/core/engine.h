@@ -27,7 +27,7 @@ class Engine {
 
     /// @brief set up the engine with a given project
     /// @param project the project
-    uint32_t init(h_core::Assets* assets, h_core::project::Project* project);
+    uint32_t init(h_core::project::Project* project);
 
     /// @brief clean up the engine
     virtual void destroy();

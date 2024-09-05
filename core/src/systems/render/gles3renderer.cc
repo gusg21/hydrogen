@@ -7,6 +7,7 @@ uint32_t h_core::render::Gles3Renderer::init(h_core::Engine* engine) {
     Renderer::init(engine);
 
     setRendererName("GLES3 Renderer");
+    setIsGles3(true);
 
     m_shader = h_core::render::Shader {};
     uint32_t shaderLoadResult = loadProgram(&m_shader, "hcore_assets/es/vs_default.glsl", "hcore_assets/es/fs_default.glsl");

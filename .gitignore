@@ -21,3 +21,5 @@ android/hydrogen/app/.cxx/
 android/hydrogen/app/jni.bak/
 
 android/hydrogen/app/src/main/assets/
+
+server/__pycache__/

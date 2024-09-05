@@ -49,7 +49,7 @@ uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height
     }
     const uint8_t* glVersionStr = ::glGetString(GL_VERSION);
     if (glVersionStr == nullptr) { // TODO: does the above if block cover all cases?
-        ::SDL_Log("ERROR: WINDOW: OpenGL version error: %s\n", glGetError());
+        ::SDL_Log("ERROR: WINDOW: OpenGL version error: %u\n", glGetError());
         return 1; // TODO: Make actual error code
     }
     ::SDL_Log("INFO: WINDOW: OpenGL version: %s\n", glVersionStr);

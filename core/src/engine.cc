@@ -10,7 +10,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-uint32_t h_core::Engine::init(h_core::Assets* out_assets, h_core::project::Project* project) {
+uint32_t h_core::Engine::init(h_core::project::Project* project) {
     // Store the project
     m_project = project;
 
@@ -44,7 +44,7 @@ uint32_t h_core::Engine::init(h_core::Assets* out_assets, h_core::project::Proje
     doInit();
 
     // load the assets
-    m_assets = out_assets;
+    m_assets = new h_core::Assets();
     m_assets->loadFromProject(project);
 
     doPostLoad();

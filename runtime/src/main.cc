@@ -8,9 +8,7 @@ int main(int argc, char* args[]) {
     h_core::project::Project project {};
     project.loadFromFile("assets/project.yml");
 
-    h_core::Assets assets {};
-
-    uint32_t engineInitResult = engine->init(&assets, &project);
+    uint32_t engineInitResult = engine->init(&project);
     if (engineInitResult != 0) { return engineInitResult; }
 
     engine->run();
