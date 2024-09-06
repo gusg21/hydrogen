@@ -11,17 +11,12 @@
         break;                                \
     }
 
-void h_core::Assets::init(h_core::Systems* systems) {
-    m_systems = systems;
-}
-
 h_core::AssetHash h_core::Assets::getAssetHashFromString(std::string string) {
     return std::hash<std::string>()(string);
 }
 
 void h_core::Assets::precompile(h_core::Systems* systems) {
-    for (int assetIndex = 0; assetIndex < ASSETS_MAX_ASSET_COUNT;
-         ++assetIndex) {
+    for (int assetIndex = 0; assetIndex < ASSETS_MAX_ASSET_COUNT; ++assetIndex) {
         h_core::Asset* asset = m_assets[assetIndex];
         if (asset != nullptr) { asset->precompile(systems); }
     }
@@ -36,4 +31,8 @@ void h_core::Assets::loadFromProject(h_core::project::Project* project) {
             LOAD_ASSET_TYPE_CASE(h_core::render::MeshAsset)
         }
     }
+}
+
+uint32_t h_core::Assets::getAssetCount() const {
+    return m_assetCount;
 }

@@ -33,8 +33,6 @@ class Assets {
   public:
     Assets() = default;
 
-    void init(h_core::Systems* systems);
-
     void loadFromProject(h_core::project::Project* project);
     void precompile(h_core::Systems* systems);
 
@@ -58,6 +56,7 @@ class Assets {
     template<typename AssetType>
     AssetType* getAssetByIndex(h_core::AssetIndex index) const;
 
+    uint32_t getAssetCount() const;
 
   private:
     template<typename AssetType>
@@ -71,6 +70,7 @@ class Assets {
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex>
         m_assetIndexMap {};  // hash -> asset index
     h_core::AssetIndex m_nextAssetIndex = 0;
+    uint32_t m_assetCount = 0;
     h_core::Systems* m_systems;
 };
 }  // namespace h_core
@@ -88,6 +88,8 @@ inline uint32_t h_core::Assets::loadAssetFromFile(
     // Parse YAML and load asset
     YAML::Node yaml = YAML::Load(fileText);
     out_asset->initFromYaml(this, yaml);
+
+    m_assetCount++;
 
     return 0;
 }

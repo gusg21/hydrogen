@@ -17,7 +17,6 @@ set(HydrogenCore_Sources
             src/system.cc include/core/system.h
             src/systems.cc include/core/systems.h
             src/scenespecasset.cc include/core/scenespecasset.h
-            src/serverengine.cc include/core/serverengine.h
             src/transform.cc include/core/transform.h
             src/window.cc include/core/window.h
 

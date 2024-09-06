@@ -20,6 +20,12 @@ class PackedAsset:
     def __len__(self):
         return core.get_length_of_packed_asset(self.packed_asset_pointer)
 
+    def to_bytes(self) -> bytes:
+        data = bytes()
+        for i in range(len(self)):
+            data += self[i][0:1]
+        return data
+
     def __repr__(self):
         return '[{}]'.format(', '.join("0x{0:x}".format(self[i][0]) for i in range(len(self))))
 
@@ -33,6 +39,10 @@ def load_core(dll_path: str) -> None:
     core.create_engine.argtypes = []
     core.load_project.restype = None
     core.load_project.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    core.get_loaded_asset_count.restype = ctypes.c_uint32
+    core.get_loaded_asset_count.argtypes = []
+    core.get_max_asset_count.restype = ctypes.c_uint32
+    core.get_max_asset_count.argtypes = []
     core.get_packed_asset_from_index.restype = ctypes.c_void_p
     core.get_packed_asset_from_index.argtypes = [ctypes.c_uint32]
     core.delete_packed_asset.restype = None
@@ -49,6 +59,14 @@ def create_engine() -> None:
 
 def load_project(project_file: str, assets_base_path: str) -> None:
     core.load_project(ctypes.c_char_p(project_file.encode("utf-8")), ctypes.c_char_p(assets_base_path.encode("utf-8")))
+
+
+def get_loaded_asset_count() -> int:
+    return core.get_loaded_asset_count()
+
+
+def get_max_asset_count() -> int:
+    return core.get_max_asset_count()
 
 
 def get_packed_data_from_index(asset_index: int) -> PackedAsset:

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include <core/runtimeengine.h>
-#include <core/serverengine.h>
 
 int main(int argc, char* args[]) {
     h_core::RuntimeEngine* engine = new h_core::RuntimeEngine();
