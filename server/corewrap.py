@@ -68,6 +68,8 @@ def get_loaded_asset_count() -> int:
 def get_max_asset_count() -> int:
     return core.get_max_asset_count()
 
+def is_packed_asset_index_valid(asset_index: int) -> bool:
+    return core.is_packed_asset_index_valid(asset_index)
 
-def get_packed_data_from_index(asset_index: int) -> PackedAsset:
-    return PackedAsset(core.get_packed_asset_from_index(ctypes.c_uint32(asset_index)))
+def get_packed_asset_from_index(asset_index: int) -> PackedAsset:
+    return PackedAsset(core.get_packed_asset_from_index(asset_index))

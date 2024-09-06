@@ -38,6 +38,11 @@ WRAP_DECL std::vector<char>* get_packed_asset_from_index(uint32_t asset_index) {
     return asset->toPacked();
 }
 
+WRAP_DECL bool is_packed_asset_index_valid(uint32_t asset_index) {
+    h_core::Asset* asset = assets->getAssetByIndex<h_core::Asset>(asset_index);
+    return asset != nullptr;
+}
+
 WRAP_DECL void delete_packed_asset(std::vector<char>* packed_asset) {
     delete packed_asset;
 }

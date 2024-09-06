@@ -5,13 +5,6 @@ import flask
 import corewrap
 
 
-# corewrap.load_core(dll_path)
-# corewrap.create_engine()
-# corewrap.load_project("assets/project.yml", os.getcwd() + "/")
-# asset = corewrap.get_packed_data_from_index(40)  # test_model2.yml
-# print(len(asset), flush=True)
-# print(asset, flush=True)
-
 class HyAssetServer():
     app = flask.Flask("server")
 
@@ -30,8 +23,20 @@ def status_page():
                                  max_asset_count=corewrap.get_max_asset_count())
 
 
+@HyAssetServer.app.route("/asset/", defaults={"asset_id": -1})
 @HyAssetServer.app.route("/asset/<int:asset_id>")
 def get_asset(asset_id: int):
-    return flask.Response(
-        corewrap.get_packed_data_from_index(asset_id).to_bytes(), mimetype="bin/hya"
-    )
+    if asset_id < 0:
+        return flask.render_template("bad_asset_get.html", asset_id=asset_id), 404
+
+    if corewrap.is_packed_asset_index_valid(asset_id):
+        return flask.Response(
+            corewrap.get_packed_asset_from_index(asset_id).to_bytes(), mimetype="bin/hya"
+        ), 200
+    else:
+        return flask.render_template("bad_asset_get.html", asset_id=asset_id), 404
+
+
+@HyAssetServer.app.errorhandler(404)
+def not_found(e):
+    return flask.render_template("404.html"), 404
