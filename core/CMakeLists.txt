@@ -79,6 +79,13 @@ target_link_libraries(HydrogenCore_Shared PUBLIC HydrogenCore_AngelScriptExtensi
 set_target_properties(angelscript PROPERTIES FOLDER "Vendored/AngelScript")
 set_target_properties(HydrogenCore_AngelScriptExtensions PROPERTIES FOLDER "Vendored/AngelScript")
 
+# Curl
+set(ENABLE_CURL_MANUAL OFF)
+set(BUILD_LIBCURL_DOCS OFF)
+set(CURL_USE_LIBPSL OFF)
+add_subdirectory(external/curl)
+target_link_libraries(HydrogenCore PUBLIC libcurl)
+
 # SDL
 #if (NOT ANDROID)
     set(SDL_STATIC ON)

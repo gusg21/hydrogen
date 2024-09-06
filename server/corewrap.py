@@ -4,7 +4,6 @@ core: ctypes.CDLL
 c_str = ctypes.POINTER(ctypes.c_char)
 
 
-
 class PackedAsset:
     def __init__(self, packed_asset_pointer: ctypes.c_void_p):
         print(f"Got packed asset @ {packed_asset_pointer}", flush=True)
@@ -43,6 +42,8 @@ def load_core(dll_path: str) -> None:
     core.get_loaded_asset_count.argtypes = []
     core.get_max_asset_count.restype = ctypes.c_uint32
     core.get_max_asset_count.argtypes = []
+    core.is_packed_asset_index_valid.restype = ctypes.c_bool
+    core.is_packed_asset_index_valid.argtypes = [ctypes.c_uint32]
     core.get_packed_asset_from_index.restype = ctypes.c_void_p
     core.get_packed_asset_from_index.argtypes = [ctypes.c_uint32]
     core.delete_packed_asset.restype = None
@@ -68,8 +69,10 @@ def get_loaded_asset_count() -> int:
 def get_max_asset_count() -> int:
     return core.get_max_asset_count()
 
+
 def is_packed_asset_index_valid(asset_index: int) -> bool:
     return core.is_packed_asset_index_valid(asset_index)
+
 
 def get_packed_asset_from_index(asset_index: int) -> PackedAsset:
     return PackedAsset(core.get_packed_asset_from_index(asset_index))

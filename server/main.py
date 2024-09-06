@@ -1,6 +1,7 @@
 import argparse
 import hyassetserver
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Hydrogen Asset Server")
     parser.add_argument("dll", type=str, help="path to the HydrogenServer_Wrapper .dll/.so/.dylib")
