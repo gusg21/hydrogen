@@ -72,18 +72,6 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::N
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
 
-    return 0;
-}
-
-uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
-    if (m_isCube) {
-        // Just load cube
-        ::SDL_Log("DEBUG: MESH: Loading cube primitive mesh\n");
-        loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT, systems->renderer->isGles3());
-
-        return 0;
-    }
-
     // TODO: VERY TESTING. MUCH WOW
     tinygltf::Node node = m_model.nodes.front();
     tinygltf::Mesh mesh = m_model.meshes[node.mesh];
@@ -110,11 +98,11 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
         m_model.buffers[texCoordBufferView.buffer].data.data() + texCoordBufferView.byteOffset;
 
     // load vertex data
-    size_t vertexBufferCount = posAccessor.count;
-    h_core::render::Vertex* vertexBuffer = new h_core::render::Vertex[vertexBufferCount] {};
+    m_numVertices = posAccessor.count;
+    m_vertices = new h_core::render::Vertex[m_numVertices] {};
 
-    for (uint32_t vertexIndex = 0; vertexIndex < vertexBufferCount; vertexIndex++) {
-        h_core::render::Vertex* vertex = &vertexBuffer[vertexIndex];
+    for (uint32_t vertexIndex = 0; vertexIndex < m_numVertices; vertexIndex++) {
+        h_core::render::Vertex* vertex = &m_vertices[vertexIndex];
         vertex->position = reinterpret_cast<const h_core::math::Vector3*>(posBuffer)[vertexIndex];
         vertex->normal = reinterpret_cast<const h_core::math::Vector3*>(normalBuffer)[vertexIndex];
         vertex->texCoord = reinterpret_cast<const h_core::math::Vector2*>(texCoordBuffer)[vertexIndex];
@@ -124,7 +112,7 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
     uint32_t indexBufferAccessorIndex = primitiveInfo.indices;
     tinygltf::Accessor indexBufferAccessor = m_model.accessors[indexBufferAccessorIndex];
     tinygltf::BufferView indexBufferView = m_model.bufferViews[indexBufferAccessor.bufferView];
-    size_t indexBufferCount = indexBufferAccessor.count;
+    m_numIndices = indexBufferAccessor.count;
 
     // determine index type
     switch (indexBufferAccessor.componentType) {
@@ -142,12 +130,24 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
             return MODEL_INIT_FAIL_INVALID_INDEX_DATA_TYPE;
     }
 
-    loadModel(
-        vertexBufferCount, vertexBuffer, indexBufferCount,
-        m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset, m_meshIndexType,
-        systems->renderer->isGles3());
+    m_indices = m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset;
 
-    ::SDL_Log("MESH: INFO: Loaded %zu vertices (%zu indices)\n", vertexBufferCount, indexBufferCount);
+    return 0;
+}
+
+uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
+    if (m_isCube) {
+        // Just load cube
+        ::SDL_Log("DEBUG: MESH: Loading cube primitive mesh\n");
+        loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT, systems->renderer->isGles3());
+
+        return 0;
+    }
+
+    loadModel(
+        m_numVertices, m_vertices, m_numIndices, m_indices, m_meshIndexType, systems->renderer->isGles3());
+
+    ::SDL_Log("MESH: INFO: Loaded %zu vertices (%zu indices)\n", m_numVertices, m_numIndices);
 
     return 0;
 }
@@ -221,9 +221,7 @@ void h_core::render::MeshAsset::loadModel(
     m_meshIndexType = indexType;
 
     // Clean up
-    if (!useGles3) {
-        ::glBindVertexArray(0);
-    }
+    if (!useGles3) { ::glBindVertexArray(0); }
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
@@ -255,4 +253,28 @@ h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() cons
 
 uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
+}
+
+std::vector<char>* h_core::render::MeshAsset::toPacked() {
+    std::vector<char>* bytes = new std::vector<char>();
+    bytes->reserve(m_numVertices + m_numIndices + 2); // Try to keep in sync with actual byte requirements
+
+    bytes->insert(bytes->end(), (char*)&m_numVertices, (char*)&m_numVertices + sizeof(uint32_t));
+    bytes->insert(bytes->end(), (char*)m_vertices, (char*)(m_vertices) + (m_numVertices * sizeof(h_core::render::Vertex)));
+    bytes->insert(bytes->end(), (char*)&m_numIndices, (char*)&m_numIndices + sizeof(uint32_t));
+    uint32_t indexSize = 1;
+    switch (m_meshIndexType) {
+        case MeshIndexType::BYTE:
+            indexSize = 1;
+            break;
+        case MeshIndexType::SHORT:
+            indexSize = 2;
+            break;
+        case MeshIndexType::INT:
+            indexSize = 4;
+            break;
+    }
+    bytes->insert(bytes->end(), (char*)m_indices, (char*)(m_indices) + (m_numIndices * indexSize));
+
+    return bytes;
 }

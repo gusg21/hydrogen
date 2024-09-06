@@ -17,6 +17,8 @@ class Asset {
 
     virtual uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node);
     virtual uint32_t precompile(h_core::Systems* systems);
+    virtual std::vector<char>* toPacked();
+    virtual void fromPacked(const char* packedData, uint32_t length);
 
     HYASSET(UINT32_MAX);
 };

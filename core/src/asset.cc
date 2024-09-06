@@ -14,3 +14,12 @@ uint32_t h_core::Asset::precompile(h_core::Systems* systems) {
 
     return 0;
 }
+
+std::vector<char>* h_core::Asset::toPacked() {
+    SDL_Log("WARN: ASSET: Undefined toPacked method, returning empty\n");
+    return new std::vector<char>();
+}
+
+void h_core::Asset::fromPacked(const char* packedData, uint32_t length) {
+    SDL_Log("WARN: ASSET: Undefined fromPacked method, not loading\n");
+}

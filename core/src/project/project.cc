@@ -2,11 +2,12 @@
 
 #include "core/input/inputactionsource.h"
 
-void h_core::project::Project::loadFromFile(const std::string& yamlPath) {
+void h_core::project::Project::loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath) {
     ::SDL_Log("INFO: PROJECT: Loading from path %s\n", yamlPath.c_str());
-    ::SDL_Log("INFO: PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
-//    printf("INFO: PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
-    const char* projectYamlText = (const char*)SDL_LoadFile(yamlPath.c_str(), nullptr);
+    ::SDL_Log("INFO: PROJECT: !SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
+    std::string projectYamlPath = assetsBasePath + yamlPath;
+    ::SDL_Log("INFO: PROJECT: Full Project YAML Path = %s\n", projectYamlPath.c_str());
+    const char* projectYamlText = (const char*)SDL_LoadFile(projectYamlPath.c_str(), nullptr);
     ::SDL_Log("INFO: PROJECT: YAML: %s\n", projectYamlText);
     YAML::Node projectYaml = YAML::Load(projectYamlText);
 

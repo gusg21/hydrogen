@@ -3,11 +3,11 @@
 
 #include "core/window.h"
 
-int main() {
-    h_core::Window* window = new h_core::Window();
-    window->init("", 1600, 900, false);
+int main(char* argv, int argc) {
+//    h_core::Window* window = new h_core::Window();
+//    window->init("", 1600, 900, false);
 
-    printf("Editor built successfully!\n");
+    SDL_Log("You built the editor, silly!\n");
 
     return 0;
 }

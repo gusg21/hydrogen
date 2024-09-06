@@ -1,12 +1,13 @@
 #include <stdio.h>
 
 #include <core/runtimeengine.h>
+#include <core/serverengine.h>
 
 int main(int argc, char* args[]) {
     h_core::RuntimeEngine* engine = new h_core::RuntimeEngine();
 
     h_core::project::Project project {};
-    project.loadFromFile("assets/project.yml");
+    project.loadFromFile("assets/project.yml", "");
 
     uint32_t engineInitResult = engine->init(&project);
     if (engineInitResult != 0) { return engineInitResult; }
