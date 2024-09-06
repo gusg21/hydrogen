@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "curl/curl.h"
+
 #include "core/project/project.h"
 #include "core/systems/render/meshasset.h"
 
@@ -10,6 +12,10 @@
         loadTyped<type>(m_assets, assetInfo); \
         break;                                \
     }
+
+h_core::Assets::Assets() {
+    curl_global_init(CURL_GLOBAL_ALL);
+}
 
 h_core::AssetHash h_core::Assets::getAssetHashFromString(std::string string) {
     return std::hash<std::string>()(string);

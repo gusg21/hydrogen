@@ -9,6 +9,8 @@ def main() -> int:
     parser.add_argument("--port", type=int, help="host port")
     args = parser.parse_args()
 
+    print(f"Got DLL file: {args.dll}")
+
     server = hyassetserver.HyAssetServer(args.dll)
     server.run(host=args.host, port=args.port)
     return 0

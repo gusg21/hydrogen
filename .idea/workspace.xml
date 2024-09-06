@@ -8,372 +8,55 @@
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="Hydrogen" targetName="unit1606" />
-      <config projectName="Hydrogen" targetName="unit1605" />
-      <config projectName="Hydrogen" targetName="unit1604" />
-      <config projectName="Hydrogen" targetName="libprereq" />
-      <config projectName="Hydrogen" targetName="unit1603" />
-      <config projectName="Hydrogen" targetName="unit1602" />
-      <config projectName="Hydrogen" targetName="unit1601" />
-      <config projectName="Hydrogen" targetName="unit1600" />
-      <config projectName="Hydrogen" targetName="curl" />
+      <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
+      <config projectName="Hydrogen" targetName="angelscript" />
+      <config projectName="Hydrogen" targetName="NightlyTest" />
+      <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
+      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
       <config projectName="Hydrogen" targetName="ExperimentalTest" />
       <config projectName="Hydrogen" targetName="SDL2main" />
-      <config projectName="Hydrogen" targetName="lib1545" />
-      <config projectName="Hydrogen" targetName="lib1301" />
-      <config projectName="Hydrogen" targetName="lib1543" />
-      <config projectName="Hydrogen" targetName="curlt-client-h2-download" />
-      <config projectName="Hydrogen" targetName="lib1542" />
-      <config projectName="Hydrogen" targetName="lib1541" />
-      <config projectName="Hydrogen" targetName="lib1662" />
-      <config projectName="Hydrogen" targetName="unit1609" />
-      <config projectName="Hydrogen" targetName="lib1540" />
-      <config projectName="Hydrogen" targetName="unit1608" />
-      <config projectName="Hydrogen" targetName="unit1607" />
-      <config projectName="Hydrogen" targetName="unit1399" />
-      <config projectName="Hydrogen" targetName="unit1398" />
-      <config projectName="Hydrogen" targetName="curltool" />
-      <config projectName="Hydrogen" targetName="unit1397" />
-      <config projectName="Hydrogen" targetName="unit1396" />
-      <config projectName="Hydrogen" targetName="unit1395" />
-      <config projectName="Hydrogen" targetName="unit1394" />
-      <config projectName="Hydrogen" targetName="lib1535" />
-      <config projectName="Hydrogen" targetName="lib1534" />
-      <config projectName="Hydrogen" targetName="lib2502" />
-      <config projectName="Hydrogen" targetName="lib1533" />
-      <config projectName="Hydrogen" targetName="lib1532" />
-      <config projectName="Hydrogen" targetName="lib1539" />
-      <config projectName="Hydrogen" targetName="lib1538" />
-      <config projectName="Hydrogen" targetName="lib1537" />
-      <config projectName="Hydrogen" targetName="lib1536" />
-      <config projectName="Hydrogen" targetName="test-full" />
-      <config projectName="Hydrogen" targetName="curlt-client-tls-session-reuse" />
-      <config projectName="Hydrogen" targetName="lib1531" />
-      <config projectName="Hydrogen" targetName="lib1530" />
-      <config projectName="Hydrogen" targetName="lib512" />
-      <config projectName="Hydrogen" targetName="clean-certs" />
-      <config projectName="Hydrogen" targetName="lib511" />
-      <config projectName="Hydrogen" targetName="lib514" />
-      <config projectName="Hydrogen" targetName="lib513" />
-      <config projectName="Hydrogen" targetName="lib516" />
-      <config projectName="Hydrogen" targetName="uninstall" />
-      <config projectName="Hydrogen" targetName="lib515" />
-      <config projectName="Hydrogen" targetName="lib518" />
-      <config projectName="Hydrogen" targetName="lib517" />
-      <config projectName="Hydrogen" targetName="unit3205" />
-      <config projectName="Hydrogen" targetName="testdeps" />
-      <config projectName="Hydrogen" targetName="lib519" />
-      <config projectName="Hydrogen" targetName="rtspd" />
-      <config projectName="Hydrogen" targetName="unit3200" />
-      <config projectName="Hydrogen" targetName="curlt-client-h2-pausing" />
-      <config projectName="Hydrogen" targetName="lib1568" />
-      <config projectName="Hydrogen" targetName="lib1567" />
-      <config projectName="Hydrogen" targetName="curlu" />
-      <config projectName="Hydrogen" targetName="lib1565" />
-      <config projectName="Hydrogen" targetName="lib1569" />
-      <config projectName="Hydrogen" targetName="lib1560" />
-      <config projectName="Hydrogen" targetName="lib1564" />
-      <config projectName="Hydrogen" targetName="lib510" />
-      <config projectName="Hydrogen" targetName="test-am" />
-      <config projectName="Hydrogen" targetName="lib501" />
-      <config projectName="Hydrogen" targetName="lib500" />
-      <config projectName="Hydrogen" targetName="lib503" />
-      <config projectName="Hydrogen" targetName="lib502" />
-      <config projectName="Hydrogen" targetName="lib505" />
-      <config projectName="Hydrogen" targetName="lib504" />
-      <config projectName="Hydrogen" targetName="lib507" />
-      <config projectName="Hydrogen" targetName="lib506" />
-      <config projectName="Hydrogen" targetName="lib509" />
-      <config projectName="Hydrogen" targetName="lib508" />
-      <config projectName="Hydrogen" targetName="disabled" />
-      <config projectName="Hydrogen" targetName="lib1557" />
-      <config projectName="Hydrogen" targetName="lib2404" />
-      <config projectName="Hydrogen" targetName="lib1556" />
-      <config projectName="Hydrogen" targetName="lib1555" />
-      <config projectName="Hydrogen" targetName="lib2402" />
-      <config projectName="Hydrogen" targetName="Continuous" />
-      <config projectName="Hydrogen" targetName="lib1554" />
-      <config projectName="Hydrogen" targetName="lib1559" />
-      <config projectName="Hydrogen" targetName="lib1558" />
-      <config projectName="Hydrogen" targetName="lib2405" />
-      <config projectName="Hydrogen" targetName="NightlyStart" />
-      <config projectName="Hydrogen" targetName="curlt-client-upload-pausing" />
-      <config projectName="Hydrogen" targetName="lib1553" />
-      <config projectName="Hydrogen" targetName="lib1552" />
-      <config projectName="Hydrogen" targetName="lib1551" />
-      <config projectName="Hydrogen" targetName="lib1550" />
-      <config projectName="Hydrogen" targetName="NightlyTest" />
-      <config projectName="Hydrogen" targetName="lib1906" />
-      <config projectName="Hydrogen" targetName="lib1905" />
-      <config projectName="Hydrogen" targetName="lib1903" />
-      <config projectName="Hydrogen" targetName="lib1908" />
-      <config projectName="Hydrogen" targetName="lib1907" />
-      <config projectName="Hydrogen" targetName="curlt-client-ws-pingpong" />
-      <config projectName="Hydrogen" targetName="lib1901" />
-      <config projectName="Hydrogen" targetName="lib1900" />
-      <config projectName="Hydrogen" targetName="sockfilt" />
-      <config projectName="Hydrogen" targetName="ContinuousStart" />
-      <config projectName="Hydrogen" targetName="lib2305" />
-      <config projectName="Hydrogen" targetName="lib2304" />
-      <config projectName="Hydrogen" targetName="lib2302" />
-      <config projectName="Hydrogen" targetName="lib2308" />
-      <config projectName="Hydrogen" targetName="lib2306" />
-      <config projectName="Hydrogen" targetName="ContinuousMemCheck" />
-      <config projectName="Hydrogen" targetName="test-nonflaky" />
-      <config projectName="Hydrogen" targetName="lib2301" />
-      <config projectName="Hydrogen" targetName="ExperimentalBuild" />
-      <config projectName="Hydrogen" targetName="curlt-client-h2-serverpush" />
-      <config projectName="Hydrogen" targetName="getpart" />
-      <config projectName="Hydrogen" targetName="NightlyMemoryCheck" />
-      <config projectName="Hydrogen" targetName="yaml-cpp" />
-      <config projectName="Hydrogen" targetName="lib1485" />
-      <config projectName="Hydrogen" targetName="tinygltf" />
-      <config projectName="Hydrogen" targetName="mqttd" />
-      <config projectName="Hydrogen" targetName="lib1917" />
-      <config projectName="Hydrogen" targetName="lib1916" />
-      <config projectName="Hydrogen" targetName="glad" />
-      <config projectName="Hydrogen" targetName="lib1915" />
-      <config projectName="Hydrogen" targetName="unit1330" />
-      <config projectName="Hydrogen" targetName="lib1919" />
-      <config projectName="Hydrogen" targetName="lib1918" />
-      <config projectName="Hydrogen" targetName="NightlyCoverage" />
-      <config projectName="Hydrogen" targetName="lib1598" />
-      <config projectName="Hydrogen" targetName="lib1913" />
-      <config projectName="Hydrogen" targetName="lib1912" />
-      <config projectName="Hydrogen" targetName="lib1911" />
-      <config projectName="Hydrogen" targetName="lib1910" />
-      <config projectName="Hydrogen" targetName="lib1593" />
-      <config projectName="Hydrogen" targetName="lib1592" />
-      <config projectName="Hydrogen" targetName="lib1591" />
-      <config projectName="Hydrogen" targetName="fake_ntlm" />
-      <config projectName="Hydrogen" targetName="lib1597" />
-      <config projectName="Hydrogen" targetName="lib1596" />
-      <config projectName="Hydrogen" targetName="libauthretry" />
-      <config projectName="Hydrogen" targetName="lib1594" />
-      <config projectName="Hydrogen" targetName="lib578" />
-      <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
-      <config projectName="Hydrogen" targetName="lib579" />
-      <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
-      <config projectName="Hydrogen" targetName="unit1323" />
-      <config projectName="Hydrogen" targetName="lib1948" />
-      <config projectName="Hydrogen" targetName="lib1947" />
-      <config projectName="Hydrogen" targetName="lib1940" />
-      <config projectName="Hydrogen" targetName="lib1946" />
-      <config projectName="Hydrogen" targetName="lib1945" />
-      <config projectName="Hydrogen" targetName="lib3207" />
-      <config projectName="Hydrogen" targetName="lib570" />
-      <config projectName="Hydrogen" targetName="lib572" />
-      <config projectName="Hydrogen" targetName="lib571" />
-      <config projectName="Hydrogen" targetName="lib574" />
-      <config projectName="Hydrogen" targetName="lib573" />
-      <config projectName="Hydrogen" targetName="lib576" />
-      <config projectName="Hydrogen" targetName="HydrogenEditor" />
-      <config projectName="Hydrogen" targetName="lib575" />
-      <config projectName="Hydrogen" targetName="lib567" />
-      <config projectName="Hydrogen" targetName="lib566" />
-      <config projectName="Hydrogen" targetName="lib569" />
-      <config projectName="Hydrogen" targetName="lib568" />
-      <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
-      <config projectName="Hydrogen" targetName="curlt-client-h2-upgrade-extreme" />
-      <config projectName="Hydrogen" targetName="lib1939" />
-      <config projectName="Hydrogen" targetName="lib1938" />
-      <config projectName="Hydrogen" targetName="lib1937" />
-      <config projectName="Hydrogen" targetName="lib1936" />
-      <config projectName="Hydrogen" targetName="tftpd" />
-      <config projectName="Hydrogen" targetName="lib1935" />
-      <config projectName="Hydrogen" targetName="lib1934" />
-      <config projectName="Hydrogen" targetName="lib1933" />
-      <config projectName="Hydrogen" targetName="lib560" />
-      <config projectName="Hydrogen" targetName="lib562" />
-      <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
-      <config projectName="Hydrogen" targetName="lib565" />
-      <config projectName="Hydrogen" targetName="lib564" />
-      <config projectName="Hydrogen" targetName="unit1309" />
-      <config projectName="Hydrogen" targetName="lib599" />
-      <config projectName="Hydrogen" targetName="unit1308" />
-      <config projectName="Hydrogen" targetName="unit1307" />
-      <config projectName="Hydrogen" targetName="sdl_headers_copy" />
-      <config projectName="Hydrogen" targetName="unit1305" />
-      <config projectName="Hydrogen" targetName="unit1304" />
-      <config projectName="Hydrogen" targetName="unit1303" />
-      <config projectName="Hydrogen" targetName="unit1302" />
-      <config projectName="Hydrogen" targetName="unit1300" />
-      <config projectName="Hydrogen" targetName="unit1663" />
-      <config projectName="Hydrogen" targetName="ContinuousTest" />
-      <config projectName="Hydrogen" targetName="unit1661" />
-      <config projectName="Hydrogen" targetName="unit1660" />
-      <config projectName="Hydrogen" targetName="lib1964" />
-      <config projectName="Hydrogen" targetName="SDL2_test" />
-      <config projectName="Hydrogen" targetName="NightlySubmit" />
-      <config projectName="Hydrogen" targetName="lib590" />
-      <config projectName="Hydrogen" targetName="lib3101" />
-      <config projectName="Hydrogen" targetName="lib3102" />
-      <config projectName="Hydrogen" targetName="lib591" />
-      <config projectName="Hydrogen" targetName="lib3103" />
-      <config projectName="Hydrogen" targetName="NightlyBuild" />
-      <config projectName="Hydrogen" targetName="lib1960" />
-      <config projectName="Hydrogen" targetName="lib598" />
-      <config projectName="Hydrogen" targetName="lib3100" />
-      <config projectName="Hydrogen" targetName="lib597" />
-      <config projectName="Hydrogen" targetName="ContinuousConfigure" />
-      <config projectName="Hydrogen" targetName="lib589" />
-      <config projectName="Hydrogen" targetName="NightlyUpdate" />
-      <config projectName="Hydrogen" targetName="unit1656" />
-      <config projectName="Hydrogen" targetName="unit1655" />
-      <config projectName="Hydrogen" targetName="unit1654" />
-      <config projectName="Hydrogen" targetName="unit1653" />
-      <config projectName="Hydrogen" targetName="test-torture" />
-      <config projectName="Hydrogen" targetName="unit1652" />
-      <config projectName="Hydrogen" targetName="lib1959" />
-      <config projectName="Hydrogen" targetName="unit1651" />
-      <config projectName="Hydrogen" targetName="lib1958" />
-      <config projectName="Hydrogen" targetName="unit1650" />
-      <config projectName="Hydrogen" targetName="socksd" />
-      <config projectName="Hydrogen" targetName="SDL2" />
-      <config projectName="Hydrogen" targetName="lib1957" />
-      <config projectName="Hydrogen" targetName="lib1956" />
-      <config projectName="Hydrogen" targetName="lib1955" />
-      <config projectName="Hydrogen" targetName="lib583" />
-      <config projectName="Hydrogen" targetName="curlt-client-ws-data" />
-      <config projectName="Hydrogen" targetName="lib582" />
-      <config projectName="Hydrogen" targetName="lib585" />
-      <config projectName="Hydrogen" targetName="sws" />
-      <config projectName="Hydrogen" targetName="lib1156" />
-      <config projectName="Hydrogen" targetName="lib584" />
-      <config projectName="Hydrogen" targetName="lib587" />
-      <config projectName="Hydrogen" targetName="lib586" />
-      <config projectName="Hydrogen" targetName="lib655" />
-      <config projectName="Hydrogen" targetName="lib533" />
-      <config projectName="Hydrogen" targetName="lib654" />
-      <config projectName="Hydrogen" targetName="angelscript" />
-      <config projectName="Hydrogen" targetName="lib536" />
-      <config projectName="Hydrogen" targetName="lib659" />
-      <config projectName="Hydrogen" targetName="lib537" />
-      <config projectName="Hydrogen" targetName="lib658" />
-      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
-      <config projectName="Hydrogen" targetName="lib539" />
-      <config projectName="Hydrogen" targetName="lib1509" />
-      <config projectName="Hydrogen" targetName="lib1508" />
-      <config projectName="Hydrogen" targetName="lib1507" />
-      <config projectName="Hydrogen" targetName="lib1502" />
-      <config projectName="Hydrogen" targetName="lib1501" />
-      <config projectName="Hydrogen" targetName="lib1500" />
-      <config projectName="Hydrogen" targetName="lib1506" />
-      <config projectName="Hydrogen" targetName="lib1505" />
-      <config projectName="Hydrogen" targetName="lib1504" />
       <config projectName="Hydrogen" targetName="ContinuousBuild" />
       <config projectName="Hydrogen" targetName="Experimental" />
-      <config projectName="Hydrogen" targetName="lib1503" />
-      <config projectName="Hydrogen" targetName="lib530" />
-      <config projectName="Hydrogen" targetName="lib651" />
-      <config projectName="Hydrogen" targetName="lib650" />
-      <config projectName="Hydrogen" targetName="lib532" />
-      <config projectName="Hydrogen" targetName="lib653" />
-      <config projectName="Hydrogen" targetName="lib652" />
-      <config projectName="Hydrogen" targetName="lib523" />
-      <config projectName="Hydrogen" targetName="lib643" />
-      <config projectName="Hydrogen" targetName="lib525" />
-      <config projectName="Hydrogen" targetName="lib524" />
-      <config projectName="Hydrogen" targetName="lib645" />
-      <config projectName="Hydrogen" targetName="unit2604" />
-      <config projectName="Hydrogen" targetName="lib527" />
-      <config projectName="Hydrogen" targetName="unit2603" />
+      <config projectName="Hydrogen" targetName="HydrogenEditor" />
+      <config projectName="Hydrogen" targetName="ContinuousStart" />
       <config projectName="Hydrogen" targetName="Nightly" />
-      <config projectName="Hydrogen" targetName="lib526" />
-      <config projectName="Hydrogen" targetName="unit2602" />
-      <config projectName="Hydrogen" targetName="test-ci" />
-      <config projectName="Hydrogen" targetName="lib529" />
-      <config projectName="Hydrogen" targetName="unit2601" />
-      <config projectName="Hydrogen" targetName="unit2600" />
-      <config projectName="Hydrogen" targetName="curl_uninstall" />
+      <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
       <config projectName="Hydrogen" targetName="ExperimentalSubmit" />
       <config projectName="Hydrogen" targetName="SDL2-static" />
-      <config projectName="Hydrogen" targetName="lib1975" />
-      <config projectName="Hydrogen" targetName="lib1974" />
-      <config projectName="Hydrogen" targetName="lib1973" />
       <config projectName="Hydrogen" targetName="imgui.cmake" />
-      <config projectName="Hydrogen" targetName="lib1972" />
-      <config projectName="Hydrogen" targetName="resolve" />
-      <config projectName="Hydrogen" targetName="lib1971" />
-      <config projectName="Hydrogen" targetName="lib1970" />
-      <config projectName="Hydrogen" targetName="lib521" />
-      <config projectName="Hydrogen" targetName="lib520" />
-      <config projectName="Hydrogen" targetName="lib556" />
-      <config projectName="Hydrogen" targetName="lib677" />
-      <config projectName="Hydrogen" targetName="lib555" />
-      <config projectName="Hydrogen" targetName="lib676" />
-      <config projectName="Hydrogen" targetName="lib558" />
-      <config projectName="Hydrogen" targetName="lib557" />
-      <config projectName="Hydrogen" targetName="lib678" />
+      <config projectName="Hydrogen" targetName="ContinuousMemCheck" />
+      <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
+      <config projectName="Hydrogen" targetName="ExperimentalBuild" />
+      <config projectName="Hydrogen" targetName="sdl_headers_copy" />
       <config projectName="Hydrogen" targetName="ContinuousSubmit" />
       <config projectName="Hydrogen" targetName="HydrogenServer_Wrapper" />
+      <config projectName="Hydrogen" targetName="uninstall" />
       <config projectName="Hydrogen" targetName="libcurl_static" />
-      <config projectName="Hydrogen" targetName="lib559" />
-      <config projectName="Hydrogen" targetName="unit1621" />
-      <config projectName="Hydrogen" targetName="unit1620" />
       <config projectName="Hydrogen" targetName="HydrogenCore" />
       <config projectName="Hydrogen" targetName="HydrogenRuntime_Assets" />
+      <config projectName="Hydrogen" targetName="ContinuousTest" />
       <config projectName="Hydrogen" targetName="ExperimentalConfigure" />
-      <config projectName="Hydrogen" targetName="build-certs" />
-      <config projectName="Hydrogen" targetName="lib1529" />
-      <config projectName="Hydrogen" targetName="lib1523" />
+      <config projectName="Hydrogen" targetName="NightlyMemoryCheck" />
       <config projectName="Hydrogen" targetName="ExperimentalStart" />
-      <config projectName="Hydrogen" targetName="test-quiet" />
-      <config projectName="Hydrogen" targetName="lib1522" />
-      <config projectName="Hydrogen" targetName="lib1521" />
+      <config projectName="Hydrogen" targetName="SDL2_test" />
       <config projectName="Hydrogen" targetName="NightlyMemCheck" />
-      <config projectName="Hydrogen" targetName="lib1528" />
-      <config projectName="Hydrogen" targetName="lib1527" />
-      <config projectName="Hydrogen" targetName="lib1526" />
-      <config projectName="Hydrogen" targetName="lib1525" />
-      <config projectName="Hydrogen" targetName="lib3025" />
-      <config projectName="Hydrogen" targetName="lib3026" />
-      <config projectName="Hydrogen" targetName="lib671" />
-      <config projectName="Hydrogen" targetName="lib3027" />
-      <config projectName="Hydrogen" targetName="lib670" />
-      <config projectName="Hydrogen" targetName="test-event" />
-      <config projectName="Hydrogen" targetName="lib1520" />
-      <config projectName="Hydrogen" targetName="lib552" />
-      <config projectName="Hydrogen" targetName="lib673" />
-      <config projectName="Hydrogen" targetName="lib672" />
-      <config projectName="Hydrogen" targetName="lib554" />
+      <config projectName="Hydrogen" targetName="NightlySubmit" />
+      <config projectName="Hydrogen" targetName="yaml-cpp" />
+      <config projectName="Hydrogen" targetName="NightlyBuild" />
       <config projectName="Hydrogen" targetName="ContinuousUpdate" />
       <config projectName="Hydrogen" targetName="HydrogenRuntime" />
-      <config projectName="Hydrogen" targetName="lib553" />
-      <config projectName="Hydrogen" targetName="lib674" />
-      <config projectName="Hydrogen" targetName="libntlmconnect" />
-      <config projectName="Hydrogen" targetName="lib545" />
-      <config projectName="Hydrogen" targetName="lib666" />
-      <config projectName="Hydrogen" targetName="lib544" />
-      <config projectName="Hydrogen" targetName="unit1616" />
-      <config projectName="Hydrogen" targetName="lib547" />
-      <config projectName="Hydrogen" targetName="lib668" />
-      <config projectName="Hydrogen" targetName="unit1615" />
-      <config projectName="Hydrogen" targetName="lib667" />
-      <config projectName="Hydrogen" targetName="unit1614" />
-      <config projectName="Hydrogen" targetName="lib549" />
-      <config projectName="Hydrogen" targetName="lib548" />
-      <config projectName="Hydrogen" targetName="unit1612" />
-      <config projectName="Hydrogen" targetName="unit1611" />
-      <config projectName="Hydrogen" targetName="unit1610" />
+      <config projectName="Hydrogen" targetName="ContinuousConfigure" />
+      <config projectName="Hydrogen" targetName="tinygltf" />
+      <config projectName="Hydrogen" targetName="NightlyUpdate" />
       <config projectName="Hydrogen" targetName="NightlyConfigure" />
+      <config projectName="Hydrogen" targetName="glad" />
       <config projectName="Hydrogen" targetName="HydrogenServer" />
-      <config projectName="Hydrogen" targetName="lib1518" />
-      <config projectName="Hydrogen" targetName="lib1513" />
-      <config projectName="Hydrogen" targetName="lib1512" />
-      <config projectName="Hydrogen" targetName="lib1511" />
-      <config projectName="Hydrogen" targetName="lib1510" />
-      <config projectName="Hydrogen" targetName="lib1517" />
+      <config projectName="Hydrogen" targetName="SDL2" />
+      <config projectName="Hydrogen" targetName="Continuous" />
+      <config projectName="Hydrogen" targetName="NightlyCoverage" />
       <config projectName="Hydrogen" targetName="ExperimentalCoverage" />
-      <config projectName="Hydrogen" targetName="lib1515" />
-      <config projectName="Hydrogen" targetName="lib1514" />
-      <config projectName="Hydrogen" targetName="lib541" />
-      <config projectName="Hydrogen" targetName="lib3010" />
-      <config projectName="Hydrogen" targetName="lib540" />
-      <config projectName="Hydrogen" targetName="lib661" />
-      <config projectName="Hydrogen" targetName="lib543" />
+      <config projectName="Hydrogen" targetName="NightlyStart" />
       <config projectName="Hydrogen" targetName="ExperimentalUpdate" />
-      <config projectName="Hydrogen" targetName="lib542" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -383,13 +66,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="don't try to return bad assets">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/hydrogen.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/hydrogen.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/assets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/assets.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/server/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -434,9 +116,14 @@
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -669,21 +356,6 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="curl" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="curl" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="curl">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="curl_uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="curl_uninstall" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="curltool" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="curltool" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="glad" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="glad" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -746,10 +418,7 @@
       <item itemvalue="CMake Application.HydrogenCore_CopyShaders" />
       <item itemvalue="CMake Application.HydrogenCore_Shared" />
       <item itemvalue="CMake Application.angelscript" />
-      <item itemvalue="CMake Application.curl_uninstall" />
       <item itemvalue="CMake Application.libcurl_static" />
-      <item itemvalue="CMake Application.curl" />
-      <item itemvalue="CMake Application.curltool" />
       <item itemvalue="CMake Application.glad" />
       <item itemvalue="CMake Application.imgui.cmake" />
       <item itemvalue="CMake Application.SDL2" />
@@ -820,7 +489,9 @@
       <workItem from="1725421405150" duration="23873000" />
       <workItem from="1725585006797" duration="1178000" />
       <workItem from="1725591940685" duration="17603000" />
-      <workItem from="1725647719999" duration="330000" />
+      <workItem from="1725647719999" duration="506000" />
+      <workItem from="1725648239146" duration="527000" />
+      <workItem from="1725648777909" duration="3162000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />

@@ -84,6 +84,8 @@ set(ENABLE_CURL_MANUAL OFF)
 set(BUILD_LIBCURL_DOCS OFF)
 set(CURL_USE_LIBPSL OFF)
 set(CURL_DISABLE_TESTS ON)
+set(BUILD_CURL_EXE OFF)
+set(CURL_DISABLE_INSTALL ON)
 add_subdirectory(external/curl)
 target_link_libraries(HydrogenCore PUBLIC libcurl)
 
