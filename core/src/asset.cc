@@ -20,6 +20,6 @@ std::vector<char>* h_core::Asset::toPacked() {
     return new std::vector<char>();
 }
 
-void h_core::Asset::fromPacked(const char* packedData, uint32_t length) {
+void h_core::Asset::fromPacked(const void* packedData, size_t length) {
     SDL_Log("WARN: ASSET: Undefined fromPacked method, not loading\n");
 }

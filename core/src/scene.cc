@@ -1,52 +1,40 @@
 #include <stdio.h>
 
-#include "imgui.h"
 #include "SDL.h"
+#include "imgui.h"
 
 #include "core/actorspecasset.h"
 #include "core/scene.h"
 #include "core/system.h"
 
 void h_core::Scene::addActorsFromSceneSpec(
-    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex,
-    asIScriptContext* scriptingContext) {
-    h_core::SceneSpecAsset* sceneSpec =
-        assets->getAssetByIndex<h_core::SceneSpecAsset>(sceneSpecIndex);
+    h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex, asIScriptContext* scriptingContext) {
+    h_core::SceneSpecAsset* sceneSpec = assets->getAssetByIndex<h_core::SceneSpecAsset>(sceneSpecIndex);
 
-    for (uint32_t actorSpecIndex = 0;
-         actorSpecIndex < sceneSpec->actorSpecIndices.size();
-         actorSpecIndex++) {
-        addActor(
-            assets, sceneSpec->actorSpecIndices[actorSpecIndex],
-            scriptingContext);
+    for (uint32_t actorSpecIndex = 0; actorSpecIndex < sceneSpec->actorSpecIndices.size(); actorSpecIndex++) {
+        addActor(assets, sceneSpec->actorSpecIndices[actorSpecIndex], scriptingContext);
     }
 }
 
 h_core::ActorId h_core::Scene::addActor(
-    h_core::Assets* assets, h_core::AssetIndex actorSpecIndex,
-    asIScriptContext* scriptingContext) {
-    h_core::ActorSpecAsset* spec =
-        assets->getAssetByIndex<h_core::ActorSpecAsset>(actorSpecIndex);
+    h_core::Assets* assets, h_core::AssetIndex actorSpecIndex, asIScriptContext* scriptingContext) {
+    h_core::ActorSpecAsset* spec = assets->getAssetByIndex<h_core::ActorSpecAsset>(actorSpecIndex);
 
     ActorId newId = m_nextId;
     masks[newId] = spec->mask;
     transforms[newId] = spec->transform;
 
     // components
-    meshes[newId].init(
-        assets->getAssetByIndex<h_core::render::MeshAsset>(spec->meshIndex));
+    meshes[newId].init(assets->getAssetByIndex<h_core::render::MeshAsset>(spec->meshIndex));
     scripts[newId].init(
-        assets->getAssetByIndex<h_core::script::ScriptAsset>(spec->scriptIndex),
-        scriptingContext, newId);
+        assets->getAssetByIndex<h_core::script::ScriptAsset>(spec->scriptIndex), scriptingContext, newId);
 
     ::SDL_Log("INFO: SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
 
     m_nextId++;
     m_numActors++;
 
-    if (m_nextId >= SCENE_MAX_ACTORS) {
-        ::SDL_Log("ERROR: SCENE: Too many actors!\n");
-    }
+    if (m_nextId >= SCENE_MAX_ACTORS) { ::SDL_Log("ERROR: SCENE: Too many actors!\n"); }
 
     return newId;
 }

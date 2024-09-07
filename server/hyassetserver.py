@@ -1,4 +1,5 @@
 import os
+import time
 
 import flask
 
@@ -30,6 +31,8 @@ def get_asset(asset_id: int):
         return flask.render_template("bad_asset_get.html", asset_id=asset_id), 404
 
     if corewrap.is_packed_asset_index_valid(asset_id):
+        print("Simulating heavy load...")
+        time.sleep(5)
         return flask.Response(
             corewrap.get_packed_asset_from_index(asset_id).to_bytes(), mimetype="bin/hya"
         ), 200

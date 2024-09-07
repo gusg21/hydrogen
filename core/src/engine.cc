@@ -60,6 +60,8 @@ void h_core::Engine::destroy() {
     m_window->destroy();
     delete m_window;
 
+    m_assets->destroy();
+
     // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 }
 

@@ -278,3 +278,30 @@ std::vector<char>* h_core::render::MeshAsset::toPacked() {
 
     return bytes;
 }
+
+void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
+    const char* bytes = (const char*)data;
+
+    SDL_Log("INFO: MESH: loading from packed (%zu bytes)\n", length);
+    SDL_Log("INFO: MESH: first byte %x\n", bytes[0]);
+
+    uint32_t numVertices = *(uint32_t*)(bytes + 0);
+    SDL_Log("INFO: MESH: # of vertices: %d\n", numVertices);
+
+    m_vertices = new h_core::render::Vertex[numVertices];
+    memcpy(m_vertices, bytes + sizeof(uint32_t), numVertices * sizeof(h_core::render::Vertex));
+
+    uint32_t numIndices = *(uint32_t*)(bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex));
+    SDL_Log("INFO: MESH: # of indices: %d\n", numIndices);
+
+    m_indices = new uint16_t[numIndices]; // TODO: use actual index type
+    memcpy(m_indices,
+           bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex) + sizeof(uint32_t),
+           numIndices * sizeof(uint16_t));
+
+    m_numVertices = numVertices;
+    m_numIndices = numIndices;
+    m_meshIndexType = MeshIndexType::SHORT;
+    m_primitiveMode = GL_TRIANGLES;
+    m_isCube = false;
+}

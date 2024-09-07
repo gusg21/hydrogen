@@ -10,7 +10,7 @@ message(STATUS "(HydrogenServer) Have Python3 Executable: ${Python3_EXECUTABLE}"
 
 add_custom_target(
         HydrogenServer
-        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/main.py $<TARGET_FILE:HydrogenServer_Wrapper>
+#        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/main.py $<TARGET_FILE:HydrogenServer_Wrapper>
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         DEPENDS HydrogenServer_Wrapper
 )

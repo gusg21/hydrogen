@@ -12,14 +12,12 @@ void h_core::project::Project::loadFromFile(const std::string& yamlPath, const s
     YAML::Node projectYaml = YAML::Load(projectYamlText);
 
     name = projectYaml["name"].as<std::string>("Unnamed Project");
-    initialSceneSpec =
-        projectYaml["initial_scene_spec"].as<h_core::AssetIndex>(ASSETS_ASSET_INDEX_BAD);
+    initialSceneSpec = projectYaml["initial_scene_spec"].as<h_core::AssetIndex>(ASSETS_ASSET_INDEX_BAD);
 
     for (YAML::Node assetInfo : projectYaml["assets"]) {
         requiredAssets.emplace_back(
-            assetInfo["index"].as<uint32_t>(0),
-            assetInfo["type"].as<uint32_t>(0),
-            assetInfo["path"].as<std::string>(""));
+            assetInfo["index"].as<uint32_t>(0), assetInfo["type"].as<uint32_t>(0),
+            assetInfo["path"].as<std::string>(""), assetInfo["remote"].as<bool>(false));
     }
 
     for (YAML::Node actionInfo : projectYaml["input_actions"]) {
@@ -34,8 +32,10 @@ void h_core::project::Project::loadFromFile(const std::string& yamlPath, const s
             }
             else if (actionSourceInfo["negative_key"].IsDefined() && actionSourceInfo["positive_key"].IsDefined()) {
                 source.type = h_core::input::InputActionSourceType::DUAL_KEY;
-                source.value.dualScanCodes[0] = (SDL_Scancode)actionSourceInfo["negative_key"].as<uint32_t>(SDL_SCANCODE_0);
-                source.value.dualScanCodes[1] = (SDL_Scancode)actionSourceInfo["positive_key"].as<uint32_t>(SDL_SCANCODE_0);
+                source.value.dualScanCodes[0] =
+                    (SDL_Scancode)actionSourceInfo["negative_key"].as<uint32_t>(SDL_SCANCODE_0);
+                source.value.dualScanCodes[1] =
+                    (SDL_Scancode)actionSourceInfo["positive_key"].as<uint32_t>(SDL_SCANCODE_0);
             }
             entry.sources.push_back(source);
         }

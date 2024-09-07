@@ -39,6 +39,7 @@ class MeshAsset : public Asset {
     uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node) override;
     uint32_t precompile(h_core::Systems* systems) override;
     std::vector<char>* toPacked() override;
+    void fromPacked(const void* data, size_t length) override;
 
     void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,

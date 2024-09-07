@@ -33,6 +33,9 @@ void h_core::render::Gl4Renderer::beginFrame() {
 void h_core::render::Gl4Renderer::draw() {
     Renderer::draw();
 
+    if (meshComp == nullptr) return;
+    if (meshComp->mesh == nullptr) return;
+
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
