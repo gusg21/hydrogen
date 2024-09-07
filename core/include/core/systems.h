@@ -6,7 +6,7 @@
 
 #include "core/actor.h"
 
-#define SYSTEMS_SYSTEM_COUNT         3
+#define SYSTEMS_SYSTEM_COUNT         4
 #define SYSTEMS_INIT_FAIL_BAD_SYSTEM 1
 
 namespace h_core {
@@ -21,6 +21,10 @@ namespace h_core {
   }
   namespace script {
     class Scripting;
+  }
+
+  namespace physics {
+  class Physics;
   }
 
 class Systems {
@@ -38,6 +42,7 @@ class Systems {
     h_core::systems::Gravity* gravity = nullptr;
     h_core::render::Renderer* renderer = nullptr;
     h_core::script::Scripting* scripting = nullptr;
+    h_core::physics::Physics* physics = nullptr;
     // Make sure to update SYSTEMS_SYSTEM_COUNT or the whole thing will crash!
 
   private:
