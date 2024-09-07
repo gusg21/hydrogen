@@ -10,6 +10,9 @@
 #define WINDOW_INIT_FAIL_INIT_RENDERER 1
 
 uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height, bool fullscreen) {
+    // Init SDL
+    ::SDL_Init(SDL_INIT_EVERYTHING);
+
 //    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_);
 #if __ANDROID__
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -17,17 +20,14 @@ uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     m_isGles3 = true;
 #else
-    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     m_isGles3 = false;
 #endif
     ::SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     ::SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     ::SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-    // Init SDL
-    ::SDL_Init(SDL_INIT_EVERYTHING);
 
     m_sdlWindow = ::SDL_CreateWindow(
         title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,

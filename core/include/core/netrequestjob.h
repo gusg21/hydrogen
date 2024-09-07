@@ -9,8 +9,9 @@
 namespace h_core {
 class NetRequestJob {
   public:
+    NetRequestJob(AssetIndex assetIndex, uint32_t assetType) : assetIndex(assetIndex), assetType(assetType) {}
+
     h_core::AssetIndex assetIndex;
     uint32_t assetType;
-    h_core::Assets* assets;
 };
 }

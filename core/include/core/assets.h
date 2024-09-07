@@ -14,9 +14,11 @@
 #include "yaml-cpp/yaml.h"
 
 #include "core/asset.h"
-#include "core/project/projectassetentry.h"
 #include "core/netrequestthreadcontext.h"
+#include "core/project/projectassetentry.h"
 #include "core/systems.h"
+
+#define ASSERT_TYPE_IS_ASSET_TYPE(type, error_msg) static_assert(std::is_base_of_v<h_core::Asset, type>, error_msg)
 
 #define ASSETS_LOAD_FAIL_CANT_OPEN_FILE 1
 #define ASSETS_LOAD_FAIL_FILE_TOO_BIG   2
@@ -64,14 +66,14 @@ class Assets {
     uint32_t getAssetCount() const;
 
     template<typename AssetType>
-    void requestNetAssetNow(h_core::AssetIndex index) const;
-
-    template<typename AssetType>
-    void requestNetAsset(h_core::AssetIndex index) const;
+    void requestNetAsset(h_core::AssetIndex index);
 
     static void netRequestThreadFunction(h_core::NetRequestThreadContext* context);
 
   private:
+    template<typename AssetType>
+    static void requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr);
+
     template<typename AssetType>
     h_core::AssetIndex loadAssetFromFile(AssetType* out_asset, std::string filePath);
 
@@ -91,7 +93,7 @@ class Assets {
 
 template<typename AssetType>
 inline uint32_t h_core::Assets::loadAssetFromFile(AssetType* out_asset, std::string filePath) {
-    static_assert(std::is_base_of_v<h_core::Asset, AssetType>, "Can't load asset type that does not derive from Asset");
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't load asset type that does not derive from Asset");
 
     // Load file
     const char* fileText = (const char*)SDL_LoadFile(filePath.c_str(), nullptr);
@@ -107,7 +109,7 @@ inline uint32_t h_core::Assets::loadAssetFromFile(AssetType* out_asset, std::str
 
 template<typename AssetType>
 inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
-    static_assert(std::is_base_of_v<h_core::Asset, AssetType>, "Can't load asset type that does not derive from Asset");
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't load asset type that does not derive from Asset");
 
     // TODO: This hashing piece to the loading can probably be removed
     h_core::AssetHash hash = getAssetHashFromString(filePath);
@@ -137,18 +139,18 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
 
 template<typename AssetType>
 inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
-    static_assert(std::is_base_of_v<h_core::Asset, AssetType>, "Can't get asset type that does not derive from Asset");
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
 
     return static_cast<AssetType*>(m_assets[index]);
 }
 
 template<typename AssetType>
 void h_core::Assets::loadTyped(h_core::project::ProjectAssetEntry assetInfo) {
-    static_assert(std::is_base_of_v<h_core::Asset, AssetType>, "Can't get asset type that does not derive from Asset");
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
 
     if (assetInfo.isRemote) {
         // Load from server
-        requestNetAssetNow<AssetType>(assetInfo.index);
+        requestNetAsset<AssetType>(assetInfo.index);
         return;
     }
     else {
@@ -161,8 +163,7 @@ void h_core::Assets::loadTyped(h_core::project::ProjectAssetEntry assetInfo) {
 
 template<typename AssetType>
 size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* out_asset) {
-    static_assert(
-        std::is_base_of_v<h_core::Asset, AssetType>, "Can't netload asset type that does not inherit from Asset");
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't netload asset type that does not inherit from Asset");
 
     AssetType* asset = new AssetType();
     size_t byteCount = pieceSize * pieceCount;
@@ -175,27 +176,37 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
 }
 
 template<typename AssetType>
-void h_core::Assets::requestNetAssetNow(h_core::AssetIndex index) const {
+static void h_core::Assets::requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr) {
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
+
     CURL* netHandle = curl_easy_init();
     std::string url = std::string("localhost:5000/asset/") + std::to_string(index);
     SDL_Log("INFO: ASSETS: Requesting %s\n...", url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
-    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, &m_assets[index]);
+    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, out_assetPtr);
     CURLcode result = curl_easy_perform(netHandle);
     if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl asset %d error: %s\n", index, curl_easy_strerror(result)); }
-    else { SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index); }
+    else {
+        SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index);
+    }
 }
 
 template<typename AssetType>
-void h_core::Assets::requestNetAsset(h_core::AssetIndex index) const {
-    CURL* netHandle = curl_easy_init();
-    std::string url = std::string("localhost:5000/asset/") + std::to_string(index);
-    SDL_Log("INFO: ASSETS: Requesting %s\n...", url.c_str());
-    curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
-    curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
-    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, &m_assets[index]);
-    CURLcode result = curl_easy_perform(netHandle);
-    if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl asset %d error: %s\n", index, curl_easy_strerror(result)); }
-    else { SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index); }
+void h_core::Assets::requestNetAsset(h_core::AssetIndex index) {
+    //    CURL* netHandle = curl_easy_init();
+    //    std::string url = std::string("localhost:5000/asset/") + std::to_string(index);
+    //    SDL_Log("INFO: ASSETS: Requesting %s\n...", url.c_str());
+    //    curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
+    //    curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
+    //    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, &m_assets[index]);
+    //    CURLcode result = curl_easy_perform(netHandle);
+    //    if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl asset %d error: %s\n", index,
+    //    curl_easy_strerror(result)); } else { SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index); }
+
+    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
+
+    m_netRequestThreadContext.jobQueueLock.lock();
+    { m_netRequestThreadContext.jobs.emplace_back(index, AssetType::getTypeId()); }
+    m_netRequestThreadContext.jobQueueLock.unlock();
 }

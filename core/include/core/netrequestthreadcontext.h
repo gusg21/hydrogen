@@ -20,5 +20,6 @@ class NetRequestThreadContext {
     std::mutex assetListLock {};
     std::mutex jobQueueLock {};
     std::deque<h_core::NetRequestJob> jobs {};
+    h_core::Assets* assets = nullptr;
 };
 }

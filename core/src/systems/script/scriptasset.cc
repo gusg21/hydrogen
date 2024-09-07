@@ -3,6 +3,7 @@
 #include "SDL.h"
 
 #include "core/actor.h"
+#include "core/systems.h"
 #include "core/systems/script/scripting.h"
 
 uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML::Node node) {

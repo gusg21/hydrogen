@@ -8,17 +8,18 @@
 #include "core/project/project.h"
 #include "core/systems/render/meshasset.h"
 
-#define LOAD_ASSET_TYPE_CASE(type)  \
-    case type::getTypeId(): {       \
-        loadTyped<type>(assetInfo); \
-        break;                      \
+#define TYPED_SWITCH_CASE(type, func, ...) \
+    case type::getTypeId(): {              \
+        func<type>(__VA_ARGS__);           \
+        break;                             \
     }
 
-
-#define REQUEST_ASSET_TYPE_CASE(type)  \
-    case type::getTypeId(): {       \
-        loadTyped<type>(assetInfo); \
-        break;                      \
+#define CALL_TYPED_FUNC_WITH_ASSET_ID(id, func, ...)                         \
+    switch ((id)) {                                                          \
+        TYPED_SWITCH_CASE(h_core::SceneSpecAsset, func, ##__VA_ARGS__);      \
+        TYPED_SWITCH_CASE(h_core::ActorSpecAsset, func, ##__VA_ARGS__);      \
+        TYPED_SWITCH_CASE(h_core::script::ScriptAsset, func, ##__VA_ARGS__); \
+        TYPED_SWITCH_CASE(h_core::render::MeshAsset, func, ##__VA_ARGS__);   \
     }
 
 h_core::Assets::Assets() {
@@ -26,6 +27,7 @@ h_core::Assets::Assets() {
 
     m_netRequestThreadContext.shouldNetRequestThreadDie = false;
     m_netRequestThreadContext.assetListLock.lock();
+    m_netRequestThreadContext.assets = this;
     m_netRequestThread = std::thread { netRequestThreadFunction, &m_netRequestThreadContext };
 }
 
@@ -47,12 +49,13 @@ void h_core::Assets::destroy() {
 
 void h_core::Assets::loadFromProject(h_core::project::Project* project) {
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        switch (assetInfo.typeId) {
-            LOAD_ASSET_TYPE_CASE(h_core::SceneSpecAsset)
-            LOAD_ASSET_TYPE_CASE(h_core::ActorSpecAsset)
-            LOAD_ASSET_TYPE_CASE(h_core::script::ScriptAsset)
-            LOAD_ASSET_TYPE_CASE(h_core::render::MeshAsset)
-        }
+        //        switch (assetInfo.typeId) {
+        //            LOAD_ASSET_TYPE_CASE(h_core::SceneSpecAsset)
+        //            LOAD_ASSET_TYPE_CASE(h_core::ActorSpecAsset)
+        //            LOAD_ASSET_TYPE_CASE(h_core::script::ScriptAsset)
+        //            LOAD_ASSET_TYPE_CASE(h_core::render::MeshAsset)
+        //        }
+        CALL_TYPED_FUNC_WITH_ASSET_ID(assetInfo.typeId, loadTyped, assetInfo);
     }
 }
 
@@ -67,11 +70,14 @@ void h_core::Assets::netRequestThreadFunction(h_core::NetRequestThreadContext* c
         if (!context->jobs.empty()) {
             // Request asset
             NetRequestJob job = context->jobs.front();
-            if (job.assetType == h_core::render::MeshAsset::getTypeId()) {
-                
+            h_core::Asset* newAsset;
+            context->assetListLock.lock();
+            {
+                CALL_TYPED_FUNC_WITH_ASSET_ID(
+                    job.assetType, h_core::Assets::requestNetAssetNow, job.assetIndex, &newAsset);
             }
+            context->assetListLock.unlock();
         }
-
     }
 
     SDL_Log("INFO: ASSETS: Killing net request thread...\n");
