@@ -1,15 +1,10 @@
 #pragma once
 
-#include <chrono>
-
-#include "core/engineevents.h"
 #include "core/eventqueue.h"
 #include "core/input/input.h"
 #include "core/math/math.h"
 #include "core/project/project.h"
-#include "core/runtimesystems.h"
 #include "core/scene.h"
-#include "core/system.h"
 #include "core/window.h"
 
 #define ENGINE_SYSTEM_COUNT 3
@@ -27,7 +22,7 @@ class Engine {
 
     /// @brief set up the engine with a given project
     /// @param project the project
-    uint32_t init(h_core::project::Project* project);
+    uint32_t init(const h_core::project::Project* project);
 
     /// @brief clean up the engine
     virtual void destroy();
@@ -40,7 +35,6 @@ class Engine {
     [[nodiscard]] h_core::math::Color getClearColor() const;
     [[nodiscard]] h_core::Scene* getScene();
     [[nodiscard]] h_core::Window* getWindow();
-    [[nodiscard]] h_core::Assets* getAssets();
     [[nodiscard]] const h_core::project::Project* getProject();
     [[nodiscard]] h_core::input::Input* getInput();
 
@@ -48,7 +42,7 @@ class Engine {
     [[nodiscard]] double getFPS() const;
 
   protected:
-    virtual void doInit() {};
+    virtual void doInit(const h_core::project::Project* project) {};
     virtual void doPostLoad() {};
     virtual void prepareScene(h_core::AssetIndex sceneSpecIndex) {};
     virtual void doGUI() {};
@@ -58,8 +52,7 @@ class Engine {
     virtual void endFrame() {};
 
   private:
-    h_core::Assets* m_assets = nullptr;
-    h_core::project::Project* m_project = nullptr;
+    const h_core::project::Project* m_project = nullptr;
     h_core::Window* m_window = nullptr;
     h_core::input::Input* m_input = nullptr;
     h_core::EventQueue m_events {};

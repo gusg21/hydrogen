@@ -2,6 +2,7 @@
 
 #include "core/actor.h"
 #include "core/componentbitmask.h"
+#include "core/runtimeengine.h"
 
 #define HYSYSTEM(mask) [[nodiscard]] constexpr static h_core::ComponentBitmask getMask() { return mask; }
 
@@ -13,12 +14,12 @@ namespace render {
 class MeshComp;
 }
 // class Model;
-class Engine;
+class RuntimeEngine;
 class Transform;
 
-class System {
+class RuntimeSystem {
   public:
-    virtual uint32_t init(h_core::Engine* engine);
+    virtual uint32_t init(h_core::RuntimeEngine* engine);
     virtual void destroy() {};
     virtual void initPerActor() {};
     virtual void doGUI() {};
@@ -30,7 +31,7 @@ class System {
     HYSYSTEM(0);
 
     h_core::ActorId actorId = 0;
-    h_core::Engine* engine = nullptr;
+    h_core::RuntimeEngine* engine = nullptr;
     h_core::Transform* transform = nullptr;
     h_core::render::MeshComp* meshComp = nullptr;
     h_core::script::ScriptComp* script = nullptr;

@@ -11,14 +11,17 @@ set(HydrogenCore_Sources
             include/core/engineevents.h
             src/event.cc include/core/event.h
             src/eventqueue.cc include/core/eventqueue.h
-            src/project/project.cc include/core/project/project.h
+            src/runtimeassets.cc include/core/runtimeassets.h
             src/runtimeengine.cc include/core/runtimeengine.h
+            src/runtimesystems.cc include/core/runtimesystems.h
             src/scene.cc include/core/scene.h
-            src/system.cc include/core/system.h
-        src/runtimesystems.cc include/core/runtimesystems.h
+        src/runtimesystem.cc include/core/runtimesystem.h
             src/scenespecasset.cc include/core/scenespecasset.h
             src/transform.cc include/core/transform.h
             src/window.cc include/core/window.h
+
+            # Project
+            src/project/project.cc include/core/project/project.h
 
             # Math
             src/math/mat4x4.cc include/core/math/mat4x4.h

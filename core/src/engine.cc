@@ -10,7 +10,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
 
-uint32_t h_core::Engine::init(h_core::project::Project* project) {
+uint32_t h_core::Engine::init(const h_core::project::Project* project) {
     // Store the project
     m_project = project;
 
@@ -41,11 +41,7 @@ uint32_t h_core::Engine::init(h_core::project::Project* project) {
 //    SDL_Log("NOT Using vertex array\n");
 //#endif
 
-    doInit();
-
-    // load the assets
-    m_assets = new h_core::Assets();
-    m_assets->loadFromProject(project);
+    doInit(project);
 
     doPostLoad();
 
@@ -59,8 +55,6 @@ void h_core::Engine::destroy() {
 
     m_window->destroy();
     delete m_window;
-
-    m_assets->destroy();
 
     // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 }
@@ -163,9 +157,6 @@ h_core::Window* h_core::Engine::getWindow() {
     return m_window;
 }
 
-h_core::Assets* h_core::Engine::getAssets() {
-    return m_assets;
-}
 const h_core::project::Project* h_core::Engine::getProject() {
     return m_project;
 }

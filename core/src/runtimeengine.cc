@@ -12,8 +12,8 @@
 #include "core/systems/render/gl4renderer.h"
 #include "core/systems/script/scripting.h"
 
-void h_core::RuntimeEngine::doInit() {
-    Engine::doInit();
+void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
+    Engine::doInit(project);
 
     // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
@@ -25,18 +25,23 @@ void h_core::RuntimeEngine::doInit() {
     }
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
+
+    // set up assets
+    m_assets = new h_core::RuntimeAssets();
+    m_assets->init();
+    m_assets->loadFromProject(project);
 }
 
 void h_core::RuntimeEngine::doPostLoad() {
     Engine::doPostLoad();
 
-    getAssets()->precompile(&m_systems);
+    m_assets->precompile(&m_systems);
 }
 
 void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
     // Prepare the actors for this scene
     if (sceneSpecIndex != ASSET_INDEX_BAD) {
-        getScene()->addActorsFromSceneSpec(getAssets(), sceneSpecIndex, m_systems.scripting->getContext());
+        getScene()->addActorsFromSceneSpec(m_assets, sceneSpecIndex, m_systems.scripting->getContext());
     }
 
     // Prepare the systems for this scene
@@ -101,7 +106,7 @@ void h_core::RuntimeEngine::doGUI() {
 
     m_systems.doGUI();
     getInput()->doGUI();
-    getScene()->doGUI(getAssets());
+    getScene()->doGUI(m_assets);
 }
 
 void h_core::RuntimeEngine::beginFrame() {
@@ -128,7 +133,7 @@ void h_core::RuntimeEngine::endFrame() {
     m_systems.endFrame();
 
     // Flush newly loaded assets from the internal net requests thread to the main thread asset list
-    getAssets()->flushAndPrecompileNetAssets(&m_systems);
+    m_assets->flushAndPrecompileNetAssets(&m_systems);
 
     // Calculate average FPS
     m_fpsSamples.push_back(getFPS());
@@ -142,7 +147,12 @@ void h_core::RuntimeEngine::endFrame() {
 
 void h_core::RuntimeEngine::destroy() {
     m_systems.destroy();
+    m_assets->destroy();
 
     // THEN destroy the engine internals
     Engine::destroy();
+}
+
+h_core::RuntimeAssets* h_core::RuntimeEngine::getRuntimeAssets() {
+    return m_assets;
 }

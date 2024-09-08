@@ -10,8 +10,7 @@
 namespace h_core {
 namespace project {
 struct ProjectAssetEntry {
-    ProjectAssetEntry(
-        uint32_t index, uint32_t typeId, const std::string& assetPath, bool isRemote)
+    ProjectAssetEntry(uint32_t index, uint32_t typeId, const std::string& assetPath, bool isRemote)
         : index(index), typeId(typeId), assetPath(assetPath), isRemote(isRemote) {}
 
     uint32_t index;
@@ -19,5 +18,5 @@ struct ProjectAssetEntry {
     std::string assetPath;
     bool isRemote;
 };
-}
-}
+}  // namespace project
+}  // namespace h_core

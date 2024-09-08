@@ -72,8 +72,8 @@ uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shade
     return 0;
 }
 
-uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
-    h_core::System::init(engine);
+uint32_t h_core::render::Renderer::init(h_core::RuntimeEngine* engine) {
+    h_core::RuntimeSystem::init(engine);
 
     ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ::glEnable(GL_DEPTH_TEST);
@@ -104,7 +104,7 @@ uint32_t h_core::render::Renderer::init(h_core::Engine* engine) {
 void h_core::render::Renderer::destroy() {}
 
 void h_core::render::Renderer::doGUI() {
-    h_core::System::doGUI();
+    h_core::RuntimeSystem::doGUI();
 
     if (ImGui::Begin("Renderer Debugger")) {
         ImGui::Text("Renderer Name: %s", m_rendererName.c_str());

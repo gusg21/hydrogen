@@ -9,9 +9,9 @@
 #define SYSTEMS_SYSTEM_COUNT 3
 
 namespace h_core {
-class Engine;
+class RuntimeEngine;
 class Scene;
-class System;
+class RuntimeSystem;
 namespace systems {
 class Gravity;
 }
@@ -24,7 +24,7 @@ class Scripting;
 
 class RuntimeSystems {
   public:
-    uint32_t init(h_core::Engine* engine);
+    uint32_t init(h_core::RuntimeEngine* engine);
     void destroy();
 
     void prepareScene(h_core::Scene* scene);
@@ -40,7 +40,7 @@ class RuntimeSystems {
     // Make sure to update SYSTEMS_SYSTEM_COUNT or the whole thing will crash!
 
   private:
-    void updateSystemReferences(h_core::System* system, h_core::Scene* scene, h_core::ActorId id);
+    void updateSystemReferences(h_core::RuntimeSystem* system, h_core::Scene* scene, h_core::ActorId id);
 };
 
 }  // namespace h_core

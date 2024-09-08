@@ -5,8 +5,6 @@
 
 #include "core/actorspecasset.h"
 #include "core/scene.h"
-#include "core/system.h"
-#include "core/systems/render/meshasset.h"
 #include "core/widgets.h"
 
 #define IMGUI_COLOR_WARN   \

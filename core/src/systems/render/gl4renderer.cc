@@ -6,7 +6,7 @@
 
 #include "core/systems/render/meshasset.h"
 
-uint32_t h_core::render::Gl4Renderer::init(h_core::Engine* engine) {
+uint32_t h_core::render::Gl4Renderer::init(h_core::RuntimeEngine* engine) {
     Renderer::init(engine);
 
     setRendererName("GL4 Renderer");
@@ -35,7 +35,7 @@ void h_core::render::Gl4Renderer::beginFrame() {
 void h_core::render::Gl4Renderer::draw() {
     Renderer::draw();
 
-    h_core::render::MeshAsset* mesh = engine->getAssets()->getAssetByIndex<h_core::render::MeshAsset>(meshComp->mesh);
+    h_core::render::MeshAsset* mesh = engine->getRuntimeAssets()->getAssetByIndex<h_core::render::MeshAsset>(meshComp->mesh);
     if (mesh == nullptr) return;
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());

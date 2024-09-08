@@ -88,8 +88,8 @@ void RegisterQuaternion(asIScriptEngine* scriptingEngine) {
         "Quaternion rotate(Quaternion a, Quaternion b)", asFUNCTION(h_core::math::Quaternion::multiply), asCALL_CDECL);
 }
 
-uint32_t h_core::script::Scripting::init(h_core::Engine* engine) {
-    h_core::System::init(engine);
+uint32_t h_core::script::Scripting::init(h_core::RuntimeEngine* engine) {
+    h_core::RuntimeSystem::init(engine);
 
     // Setup engine
     m_scriptEngine = ::asCreateScriptEngine(SCRIPTING_ANGELSCRIPT_VERSION);

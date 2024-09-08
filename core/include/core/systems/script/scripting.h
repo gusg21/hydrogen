@@ -2,16 +2,15 @@
 
 #include "angelscript.h"
 
-#include "core/math/math.h"
-#include "core/system.h"
+#include "core/runtimesystem.h"
 #include "core/systems/script/scriptcomp.h"
 
 namespace h_core {
 namespace script {
 
-class Scripting : public System {
+class Scripting : public RuntimeSystem {
   public:
-    uint32_t init(h_core::Engine* engine) override;
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void destroy() override;
     void initPerActor() override;
     void beginFrame() override;
