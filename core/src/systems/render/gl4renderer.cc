@@ -4,6 +4,8 @@
 
 #include "core/systems/render/gl4renderer.h"
 
+#include "core/systems/render/meshasset.h"
+
 uint32_t h_core::render::Gl4Renderer::init(h_core::Engine* engine) {
     Renderer::init(engine);
 
@@ -33,13 +35,13 @@ void h_core::render::Gl4Renderer::beginFrame() {
 void h_core::render::Gl4Renderer::draw() {
     Renderer::draw();
 
-    if (meshComp == nullptr) return;
-    if (meshComp->mesh == nullptr) return;
+    h_core::render::MeshAsset* mesh = engine->getAssets()->getAssetByIndex<h_core::render::MeshAsset>(meshComp->mesh);
+    if (mesh == nullptr) return;
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
-    switch (meshComp->mesh->getMeshIndexType()) {
+    switch (mesh->getMeshIndexType()) {
         case h_core::render::MeshIndexType::BYTE:
             glElementType = GL_UNSIGNED_BYTE;
             break;
@@ -51,6 +53,6 @@ void h_core::render::Gl4Renderer::draw() {
             break;
     }
 
-    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
-    ::glDrawElements(meshComp->mesh->getPrimitiveMode(), meshComp->mesh->getNumIndices(), glElementType, nullptr);
+    ::glBindVertexArray(mesh->getVertexAttributesHandle());
+    ::glDrawElements(mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType, nullptr);
 }

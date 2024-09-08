@@ -7,6 +7,8 @@
 #include "core/systems/render/shader.h"
 #include "core/system.h"
 #include "core/input/input.h"
+#include "core/transform.h"
+#include "core/systems/render/meshasset.h"
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
 #define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
@@ -29,7 +31,6 @@ class Renderer : public System {
     void endFrame() override;
 
     [[nodiscard]] SDL_GLContext getGLContext() const;
-    [[nodiscard]] h_core::ComponentBitmask getMask() const override;
     [[nodiscard]] bool isGles3();
 
     static uint32_t loadShader(GLuint* out_shaderId, std::string filePath);
@@ -46,6 +47,8 @@ class Renderer : public System {
     float m_nearZ = 1.f;
     float m_farZ = 100.f;
     bool m_ccw = true;
+
+    HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
 
   private:
     std::string m_rendererName { "UNKNOWN" };

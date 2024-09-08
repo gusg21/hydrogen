@@ -3,7 +3,7 @@
 #include "SDL.h"
 
 #include "core/actor.h"
-#include "core/systems.h"
+#include "core/runtimesystems.h"
 #include "core/systems/script/scripting.h"
 
 uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML::Node node) {
@@ -36,7 +36,7 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML:
     return 0;
 }
 
-uint32_t h_core::script::ScriptAsset::precompile(h_core::Systems* systems) {
+uint32_t h_core::script::ScriptAsset::precompile(h_core::RuntimeSystems* systems) {
     // Load + compile script
     loadCode(systems->scripting->getModule());
     compile(systems->scripting->getModule());

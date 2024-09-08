@@ -7,18 +7,20 @@
 
 #include "core/assets.h"
 #include "core/systems/script/scriptasset.h"
-
-#define SCRIPT_COMPONENT_BITMASK (1 << 2)
+#include "core/component.h"
 
 namespace h_core {
 namespace script {
 
-class ScriptComp {
+class ScriptComp : public Component {
   public:
-    uint32_t init(h_core::script::ScriptAsset* asset, asIScriptContext* context, h_core::ActorId id);
+    ScriptComp() = default;
 
-    h_core::script::ScriptAsset* scriptAsset;
-    asIScriptObject* instance;
+    uint32_t init(h_core::AssetIndex asset, h_core::Assets* assets, asIScriptContext* context, h_core::ActorId id);
+
+    h_core::Assets* assets = nullptr;
+    h_core::AssetIndex scriptAsset = ASSET_INDEX_BAD;
+    asIScriptObject* instance = nullptr;
 
     uint32_t runMethodIfExists(
         asIScriptContext* context,
@@ -26,6 +28,8 @@ class ScriptComp {
     uint32_t runMethod(
         asIScriptContext* context,
         const std::string& methodDecl) const;
+
+    HYCOMPONENT(2);
 };
 
 }

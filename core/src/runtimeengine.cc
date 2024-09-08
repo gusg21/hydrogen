@@ -35,7 +35,7 @@ void h_core::RuntimeEngine::doPostLoad() {
 
 void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
     // Prepare the actors for this scene
-    if (sceneSpecIndex != ASSETS_ASSET_INDEX_BAD) {
+    if (sceneSpecIndex != ASSET_INDEX_BAD) {
         getScene()->addActorsFromSceneSpec(getAssets(), sceneSpecIndex, m_systems.scripting->getContext());
     }
 
@@ -101,7 +101,7 @@ void h_core::RuntimeEngine::doGUI() {
 
     m_systems.doGUI();
     getInput()->doGUI();
-    getScene()->doGUI();
+    getScene()->doGUI(getAssets());
 }
 
 void h_core::RuntimeEngine::beginFrame() {
@@ -127,6 +127,10 @@ void h_core::RuntimeEngine::endFrame() {
 
     m_systems.endFrame();
 
+    // Flush newly loaded assets from the internal net requests thread to the main thread asset list
+    getAssets()->flushAndPrecompileNetAssets(&m_systems);
+
+    // Calculate average FPS
     m_fpsSamples.push_back(getFPS());
     if (m_fpsSamples.size() > RUNTIMEENGINE_MAX_FPS_SAMPLES) { m_fpsSamples.pop_front(); }
     m_averageFPS = 0;

@@ -135,7 +135,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::N
     return 0;
 }
 
-uint32_t h_core::render::MeshAsset::precompile(h_core::Systems* systems) {
+uint32_t h_core::render::MeshAsset::precompile(h_core::RuntimeSystems* systems) {
     if (m_isCube) {
         // Just load cube
         ::SDL_Log("DEBUG: MESH: Loading cube primitive mesh\n");

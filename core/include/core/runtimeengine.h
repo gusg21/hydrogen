@@ -31,6 +31,6 @@ class RuntimeEngine : public h_core::Engine {
     std::deque<double> m_fpsSamples { RUNTIMEENGINE_MAX_FPS_SAMPLES, 0.f };
     double m_averageFPS = 0.f;
 
-    h_core::Systems m_systems {};
+    h_core::RuntimeSystems m_systems {};
 };
 }  // namespace h_core

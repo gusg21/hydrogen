@@ -4,6 +4,6 @@
 
 #include "core/systems/render/meshcomp.h"
 
-void h_core::render::MeshComp::init(h_core::render::MeshAsset* mesh) {
+void h_core::render::MeshComp::init(h_core::AssetIndex mesh) {
     this->mesh = mesh;
 }

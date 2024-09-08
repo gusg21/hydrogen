@@ -21,13 +21,11 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
 
     // TODO: Convert to model loading
     if (yaml["model"].IsDefined()) {
-        meshIndex = yaml["model"]["index"].as<h_core::AssetIndex>(
-            ASSETS_ASSET_INDEX_BAD);
+        meshIndex = yaml["model"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
     }
 
     if (yaml["script"].IsDefined())
-        scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(
-            ASSETS_ASSET_INDEX_BAD);
+        scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
 
     return 0;
 }

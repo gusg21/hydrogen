@@ -4,6 +4,7 @@
 
 #include "core/math/math.h"
 #include "core/system.h"
+#include "core/systems/script/scriptcomp.h"
 
 namespace h_core {
 namespace script {
@@ -18,12 +19,13 @@ class Scripting : public System {
     void draw() override;
     void endFrame() override;
 
-    [[nodiscard]] uint32_t getMask() const override;
     [[nodiscard]] asIScriptContext* getContext() const;
     [[nodiscard]] asIScriptModule* getModule() const;
 
     h_core::Transform getBoundTransform();
     void setBoundTransform(h_core::Transform newTrans);
+
+    HYSYSTEM(h_core::script::ScriptComp::getMask());
 
   private:
     asIScriptEngine* m_scriptEngine = nullptr;

@@ -24,7 +24,7 @@ class Project {
 
     h_core::math::Color clearColor {};
 
-    h_core::AssetIndex initialSceneSpec = ASSETS_ASSET_INDEX_BAD;
+    h_core::AssetIndex initialSceneSpec = ASSET_INDEX_BAD;
 
     std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
     std::vector<h_core::project::ProjectActionEntry> actions {};

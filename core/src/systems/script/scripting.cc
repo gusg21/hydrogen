@@ -151,18 +151,16 @@ void h_core::script::Scripting::process() {
     // Build script if the script is not yet built
     // TODO: Is this good? Might be better to have a post-init hook for systems
 
+    if (script->scriptAsset == ASSET_INDEX_BAD) return;
     script->runMethodIfExists(m_scriptContext, "void process()");
 }
 
 void h_core::script::Scripting::draw() {
+    if (script->scriptAsset == ASSET_INDEX_BAD) return;
     script->runMethodIfExists(m_scriptContext, "void draw()");
 }
 
 void h_core::script::Scripting::endFrame() {}
-
-uint32_t h_core::script::Scripting::getMask() const {
-    return SCRIPT_COMPONENT_BITMASK;
-}
 
 asIScriptContext* h_core::script::Scripting::getContext() const {
     return m_scriptContext;

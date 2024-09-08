@@ -12,7 +12,7 @@ void h_core::project::Project::loadFromFile(const std::string& yamlPath, const s
     YAML::Node projectYaml = YAML::Load(projectYamlText);
 
     name = projectYaml["name"].as<std::string>("Unnamed Project");
-    initialSceneSpec = projectYaml["initial_scene_spec"].as<h_core::AssetIndex>(ASSETS_ASSET_INDEX_BAD);
+    initialSceneSpec = projectYaml["initial_scene_spec"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
 
     for (YAML::Node assetInfo : projectYaml["assets"]) {
         requiredAssets.emplace_back(

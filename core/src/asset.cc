@@ -8,7 +8,7 @@ uint32_t h_core::Asset::initFromYaml(
 
     return 1;
 }
-uint32_t h_core::Asset::precompile(h_core::Systems* systems) {
+uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     // A precompile() definition isn't necessary in all/many cases
     // ::printf("WARN: ASSET: Undefined precompile method.\n");
 

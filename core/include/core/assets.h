@@ -16,7 +16,7 @@
 #include "core/asset.h"
 #include "core/netrequestthreadcontext.h"
 #include "core/project/projectassetentry.h"
-#include "core/systems.h"
+#include "core/runtimesystems.h"
 
 #define ASSERT_TYPE_IS_ASSET_TYPE(type, error_msg) static_assert(std::is_base_of_v<h_core::Asset, type>, error_msg)
 
@@ -24,7 +24,6 @@
 #define ASSETS_LOAD_FAIL_FILE_TOO_BIG   2
 
 #define ASSETS_MAX_ASSET_COUNT 128
-#define ASSETS_ASSET_INDEX_BAD UINT32_MAX
 
 namespace h_core {
 typedef uint32_t AssetHash;
@@ -39,8 +38,8 @@ class Assets {
     Assets();
 
     void loadFromProject(h_core::project::Project* project);
-    void precompile(h_core::Systems* systems);
-    void flushNetAssets();
+    void precompile(h_core::RuntimeSystems* systems);
+    void flushAndPrecompileNetAssets(h_core::RuntimeSystems* systems);
     void destroy();
 
     /// @brief convert the name of an asset to its hash
@@ -87,7 +86,7 @@ class Assets {
 
     std::thread m_netRequestThread;
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
-    h_core::Systems* m_systems;
+    h_core::RuntimeSystems* m_systems;
 };
 }  // namespace h_core
 
@@ -125,7 +124,7 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
         uint32_t result = loadAssetFromFile<AssetType>(asset, m_systems, filePath);
         if (result != 0) {
             ::SDL_Log("ERROR: Failed to load asset %s\n", filePath.c_str());
-            return ASSETS_ASSET_INDEX_BAD;
+            return ASSET_INDEX_BAD;
         }
         else {
             m_assets[assetIndex] = asset;
@@ -134,12 +133,14 @@ inline h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
         }
     }
 
-    return ASSETS_ASSET_INDEX_BAD;
+    return ASSET_INDEX_BAD;
 }
 
 template<typename AssetType>
 inline AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
+
+    if (index == ASSET_INDEX_BAD) return nullptr;
 
     return static_cast<AssetType*>(m_assets[index]);
 }
@@ -176,7 +177,7 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
 }
 
 template<typename AssetType>
-static void h_core::Assets::requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr) {
+void h_core::Assets::requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
     CURL* netHandle = curl_easy_init();

@@ -32,7 +32,7 @@ def get_asset(asset_id: int):
 
     if corewrap.is_packed_asset_index_valid(asset_id):
         print("Simulating heavy load...")
-        time.sleep(5)
+        time.sleep(7)
         return flask.Response(
             corewrap.get_packed_asset_from_index(asset_id).to_bytes(), mimetype="bin/hya"
         ), 200

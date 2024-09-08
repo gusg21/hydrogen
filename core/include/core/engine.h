@@ -7,9 +7,9 @@
 #include "core/input/input.h"
 #include "core/math/math.h"
 #include "core/project/project.h"
+#include "core/runtimesystems.h"
 #include "core/scene.h"
 #include "core/system.h"
-#include "core/systems.h"
 #include "core/window.h"
 
 #define ENGINE_SYSTEM_COUNT 3

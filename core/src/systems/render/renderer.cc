@@ -178,10 +178,6 @@ void h_core::render::Renderer::draw() {
 
 void h_core::render::Renderer::endFrame() {}
 
-h_core::ComponentBitmask h_core::render::Renderer::getMask() const {
-    return TRANSFORM_COMPONENT_BITMASK | MODEL_COMPONENT_BITMASK;
-}
-
 SDL_GLContext h_core::render::Renderer::getGLContext() const {
     return m_glContext;
 }

@@ -3,6 +3,8 @@
 #include "core/actor.h"
 #include "core/componentbitmask.h"
 
+#define HYSYSTEM(mask) [[nodiscard]] constexpr static h_core::ComponentBitmask getMask() { return mask; }
+
 namespace h_core {
 namespace script {
 class ScriptComp;
@@ -25,7 +27,7 @@ class System {
     virtual void draw() {};
     virtual void endFrame() {};
 
-    [[nodiscard]] virtual h_core::ComponentBitmask getMask() const = 0;
+    HYSYSTEM(0);
 
     h_core::ActorId actorId = 0;
     h_core::Engine* engine = nullptr;

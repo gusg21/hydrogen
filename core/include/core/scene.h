@@ -15,7 +15,7 @@ class Scene {
   public:
     Scene() = default;
 
-    void doGUI();
+    void doGUI(h_core::Assets* assets);
 
     /// @brief set up a scene based on a scene spec
     /// @param sceneSpec scene spec to use

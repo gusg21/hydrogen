@@ -9,17 +9,18 @@
 #include <deque>
 
 #include "core/netrequestjob.h"
+#include "core/netrequestresult.h"
 
 namespace h_core {
 class NetRequestThreadContext {
   public:
     NetRequestThreadContext() = default;
 
-    std::atomic_bool shouldNetRequestThreadDie = false;
-    std::atomic_bool netAssetsFlushDone = false;
-    std::mutex assetListLock {};
+    std::atomic_bool netRequestThreadAlive = false;
+
+    std::mutex resultQueueLock {};
     std::mutex jobQueueLock {};
     std::deque<h_core::NetRequestJob> jobs {};
-    h_core::Assets* assets = nullptr;
+    std::deque<h_core::NetRequestResult> results {};
 };
 }
