@@ -14,7 +14,7 @@ class Project {
   public:
     Project() noexcept = default;
 
-    void loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath);
+    uint32_t loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath);
 
     /// @brief the name of the project
     std::string name = "Unnamed Project";
