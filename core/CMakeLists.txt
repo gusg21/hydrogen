@@ -102,6 +102,9 @@ set(CURL_DISABLE_INSTALL ON)
 add_subdirectory(external/curl)
 target_link_libraries(HydrogenCore PUBLIC libcurl)
 
+set_target_properties(libcurl_static PROPERTIES FOLDER "Vendored/libcurl")
+set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
+
 # SDL
 #if (NOT ANDROID)
     set(SDL_STATIC ON)
