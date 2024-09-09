@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
+
 # Core sources
 set(HydrogenCore_Sources 
 
@@ -205,27 +207,12 @@ set_target_properties(yaml-cpp PROPERTIES FOLDER "Vendored/yaml-cpp")
 set_target_properties(uninstall PROPERTIES FOLDER "Vendored/yaml-cpp/misc")
 
 # generated shader code
-function(HydrogenCore_CopyShaders folder)
-    if (NOT TARGET HydrogenCore_CopyShaders)
-        if (ANDROID)
-            set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
-    #        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
-    #        file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
-    #        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
-    #        file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
-            message(STATUS "(HydrogenCore_CopyShaders) ${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
-            add_custom_target(HydrogenCore_CopyShaders
-                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_SOURCE_DIR}/android/hydrogen/app/src/main/assets/hcore_assets
-            )
-        else()
-            add_custom_target(HydrogenCore_CopyShaders
-                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
-            )
-        endif()
+function(HydrogenCore_CopyShaders target folder)
+    add_custom_target(HydrogenCore_CopyShaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/hcore_assets
+    )
 
-        add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
-        add_dependencies(HydrogenCore_Shared HydrogenCore_CopyShaders)
-    endif()
+    add_dependencies(${target} HydrogenCore_CopyShaders)
 
     set_target_properties(HydrogenCore_CopyShaders PROPERTIES FOLDER "HyCoreSupport")
 endfunction()

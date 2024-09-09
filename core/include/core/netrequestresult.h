@@ -10,10 +10,12 @@
 namespace h_core {
 class NetRequestResult {
   public:
-    NetRequestResult(h_core::Asset* newAsset, h_core::AssetIndex assetIndex)
-        : newAsset(newAsset), assetIndex(assetIndex) {}
+    NetRequestResult(h_core::Asset* newAsset, NetRequestJob job, bool success)
+        : newAsset(newAsset), job(job), success(success) {}
 
-    h_core::Asset* newAsset;
-    h_core::AssetIndex assetIndex;
+    NetRequestJob job {std::string {}, ASSET_INDEX_BAD, UINT32_MAX};
+
+    h_core::Asset* newAsset = nullptr;
+    bool success = false;
 };
 }  // namespace h_core

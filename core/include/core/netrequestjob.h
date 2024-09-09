@@ -9,9 +9,11 @@
 namespace h_core {
 class NetRequestJob {
   public:
-    NetRequestJob(AssetIndex assetIndex, uint32_t assetType) : assetIndex(assetIndex), assetType(assetType) {}
+    NetRequestJob(const std::string& serverAddress, AssetIndex assetIndex, uint32_t assetType)
+        : serverAddress(serverAddress), assetIndex(assetIndex), assetType(assetType) {}
 
-    h_core::AssetIndex assetIndex;
-    uint32_t assetType;
+    std::string serverAddress {};
+    h_core::AssetIndex assetIndex = ASSET_INDEX_BAD;
+    uint32_t assetType = UINT32_MAX;
 };
-}
+}  // namespace h_core

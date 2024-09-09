@@ -16,12 +16,12 @@ class RuntimeAssets : public Assets {
   public:
     RuntimeAssets() = default;
 
+    void init(const std::string& serverAddress);
+    void destroy();
+    void doGUI();
+
     void loadFromProject(const h_core::project::Project* project);
     void precompile(h_core::RuntimeSystems* systems);
-
-    void init();
-    void destroy();
-
     void flushAndPrecompileNetAssets(h_core::RuntimeSystems* systems);
 
     template<typename AssetType>
@@ -29,14 +29,18 @@ class RuntimeAssets : public Assets {
 
     static void netRequestThreadFunction(h_core::NetRequestThreadContext* context);
 
+    bool hasServerConnection();
+
   private:
     template<typename AssetType>
-    static void requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr);
+    static void requestNetAssetNow(
+        h_core::Asset** out_assetPtr, CURLcode* out_error, const std::string& serverAddress, h_core::AssetIndex index);
 
     template<typename AssetType>
     void loadTyped(h_core::project::ProjectAssetEntry assetInfo);
 
-    std::thread m_netRequestThread;
+    std::string m_serverAddress {};
+    std::thread m_netRequestThread {};
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
 };
 }  // namespace h_core
@@ -46,7 +50,7 @@ void h_core::RuntimeAssets::requestNetAsset(h_core::AssetIndex index) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
     m_netRequestThreadContext.jobQueueLock.lock();
-    { m_netRequestThreadContext.jobs.emplace_back(index, AssetType::getTypeId()); }
+    { m_netRequestThreadContext.jobs.emplace_back(m_serverAddress, index, AssetType::getTypeId()); }
     m_netRequestThreadContext.jobQueueLock.unlock();
 }
 
@@ -65,18 +69,21 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
 }
 
 template<typename AssetType>
-void h_core::RuntimeAssets::requestNetAssetNow(h_core::AssetIndex index, h_core::Asset** out_assetPtr) {
+void h_core::RuntimeAssets::requestNetAssetNow(
+    h_core::Asset** out_assetPtr, CURLcode* out_error, const std::string& serverAddress, h_core::AssetIndex index) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
     CURL* netHandle = curl_easy_init();
-    std::string url = std::string("localhost:5000/asset/") + std::to_string(index);
+    std::string url = serverAddress + std::string("asset/") + std::to_string(index);
     SDL_Log("INFO: ASSETS: Requesting %s\n...", url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
     curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, out_assetPtr);
+    curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 0.5);
     CURLcode result = curl_easy_perform(netHandle);
-    if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl asset %d error: %s\n", index, curl_easy_strerror(result)); }
+    if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result)); }
     else { SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index); }
+    if (out_error != nullptr) *out_error = result;
 }
 
 template<typename AssetType>

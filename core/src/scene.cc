@@ -5,16 +5,8 @@
 
 #include "core/actorspecasset.h"
 #include "core/scene.h"
+#include "core/theming/guicolors.h"
 #include "core/widgets.h"
-
-#define IMGUI_COLOR_WARN   \
-    ImVec4 {               \
-        0.8, 0.9, 0.1, 1.0 \
-    }
-#define IMGUI_COLOR_ERROR   \
-    ImVec4 {                \
-        0.8, 0.0, 0.15, 1.0 \
-    }
 
 void h_core::Scene::addActorsFromSceneSpec(
     h_core::Assets* assets, h_core::AssetIndex sceneSpecIndex, asIScriptContext* scriptingContext) {

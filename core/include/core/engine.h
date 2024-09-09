@@ -43,9 +43,8 @@ class Engine {
 
   protected:
     virtual void doInit(const h_core::project::Project* project) {};
-    virtual void doPostLoad() {};
+    virtual void doPostLoad() {}; // TODO: currently unused. keep?
     virtual void prepareScene(h_core::AssetIndex sceneSpecIndex) {};
-    virtual void doGUI() {};
     virtual void beginFrame() {};
     virtual void doProcess() {};
     virtual void doDraw() {};

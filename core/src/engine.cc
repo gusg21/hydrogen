@@ -101,7 +101,6 @@ void h_core::Engine::run() {
         ImGui::NewFrame();
 
         // Make the game happen!
-        doGUI();
         beginFrame();
         doProcess();
         doDraw();

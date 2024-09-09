@@ -17,6 +17,8 @@ class NetRequestThreadContext {
     NetRequestThreadContext() = default;
 
     std::atomic_bool netRequestThreadAlive = false;
+    std::atomic_bool hasServerConnection = false;
+    std::string pingServerAddress {};
 
     std::mutex resultQueueLock {};
     std::mutex jobQueueLock {};

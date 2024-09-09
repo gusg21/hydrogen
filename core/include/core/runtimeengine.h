@@ -21,13 +21,13 @@ class RuntimeEngine : public h_core::Engine {
 
   protected:
     void doInit(const h_core::project::Project* project) override;
-    void doPostLoad() override;
-    void doGUI() override;
     void prepareScene(h_core::AssetIndex sceneSpecIndex) override;
     void beginFrame() override;
     void doProcess() override;
     void doDraw() override;
     void endFrame() override;
+
+    void doGUI();
 
   private:
     bool m_showImGuiDemo = false;

@@ -28,13 +28,8 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
 
     // set up assets
     m_assets = new h_core::RuntimeAssets();
-    m_assets->init();
+    m_assets->init("http://localhost:5000/"); // TODO: Local server. update with remote server
     m_assets->loadFromProject(project);
-}
-
-void h_core::RuntimeEngine::doPostLoad() {
-    Engine::doPostLoad();
-
     m_assets->precompile(&m_systems);
 }
 
@@ -50,8 +45,6 @@ void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
 
 
 void h_core::RuntimeEngine::doGUI() {
-    Engine::doGUI();
-
     // Demo ImGui window
     if (m_showImGuiDemo) ImGui::ShowDemoWindow();
 
@@ -107,12 +100,15 @@ void h_core::RuntimeEngine::doGUI() {
     m_systems.doGUI();
     getInput()->doGUI();
     getScene()->doGUI(m_assets);
+    m_assets->doGUI();
 }
 
 void h_core::RuntimeEngine::beginFrame() {
     Engine::beginFrame();
 
-    m_systems.beginFrame();
+    doGUI();
+
+        m_systems.beginFrame();
 }
 
 void h_core::RuntimeEngine::doProcess() {
