@@ -71,28 +71,20 @@ uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shade
     return 0;
 }
 
-void h_core::render::Renderer::callback_setFov(const std::string& args, void* data) {
+uint32_t h_core::render::Renderer::callback_setFov(const std::string& args, void* data) {
     h_core::render::Renderer* self = (h_core::render::Renderer*) data;
-    SDL_Log(args.c_str());
-    return;
-    YAML::Node yaml;
-    try {
-        yaml = YAML::Load(args);
-    } catch (YAML::ParserException&) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Bad YAML");
-        return;
-    }
-    if (!yaml["fov"].IsDefined()) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Bad YAML");
-        return;
-    }
+    RUNTIMECONSOLE_PARSE_ARGS(args, yaml);
+
+    if (!yaml.IsMap()) return 2;
     self->m_fovDegrees = yaml["fov"].as<float>(70.f);
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Set FOV to %.2f degrees", self->m_fovDegrees);
+    return 0;
 }
 
 uint32_t h_core::render::Renderer::init(h_core::RuntimeEngine* engine) {
     h_core::RuntimeSystem::init(engine);
 
-    engine->getConsole()->newCommand("setFov", h_core::render::Renderer::callback_setFov, this);
+    engine->getConsole()->newCommandWithHelp("setFov", h_core::render::Renderer::callback_setFov, this, "{ fov: [float] } set the renderer's FOV");
 
     ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ::glEnable(GL_DEPTH_TEST);

@@ -51,7 +51,7 @@ class Renderer : public RuntimeSystem {
     HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
 
   private:
-    static void callback_setFov(const std::string& args, void* data);
+    static uint32_t callback_setFov(const std::string& args, void* data);
 
     std::string m_rendererName { "UNKNOWN" };
     bool m_isGles3 = false;

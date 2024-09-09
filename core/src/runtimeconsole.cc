@@ -7,15 +7,23 @@
 #include "imgui.h"
 
 
-void callback_print(const std::string& arguments, void* data) {
+uint32_t callback_print(const std::string& arguments, void* data) {
     h_core::RuntimeConsole* self = (h_core::RuntimeConsole*)data;
     self->printToConsole(arguments);
+    return 0;
+}
+
+uint32_t callback_clear(const std::string& arguments, void* data) {
+    h_core::RuntimeConsole* self = (h_core::RuntimeConsole*)data;
+    self->clearConsole();
+    return 0;
 }
 
 void h_core::RuntimeConsole::init() {
     SDL_LogSetOutputFunction(h_core::RuntimeConsole::logCallback, this);
 
-    newCommand("print", callback_print, this);
+    newCommandWithHelp("print", callback_print, this, "[unformatted args] prints args to console");
+    newCommandWithHelp("clear", callback_clear, this, "[no args] clears the console");
 }
 
 void h_core::RuntimeConsole::printToConsole(const std::string& message) {
@@ -44,6 +52,7 @@ void h_core::RuntimeConsole::doGUI() {
         ImGui::SetNextItemWidth(-2);
         if (ImGui::InputText("##Input", m_textEntry, RUNTIMECONSOLE_ENTRY_SIZE, ImGuiInputTextFlags_EnterReturnsTrue)) {
             runCommand(m_textEntry);
+            memset(m_textEntry, 0, sizeof(char) * RUNTIMECONSOLE_ENTRY_SIZE);
         }
     }
     ImGui::End();
@@ -84,19 +93,59 @@ void h_core::RuntimeConsole::logCallback(void* userdata, int category, SDL_LogPr
 
 void h_core::RuntimeConsole::newCommand(
     const std::string& command, h_core::RuntimeConsoleCommandCallback callback, void* data) {
-    m_commands.emplace(command, std::pair<RuntimeConsoleCommandCallback, void*> { callback, data });
+    newCommandWithHelp(command, callback, data, "");
 }
 
-void h_core::RuntimeConsole::runCommand(const std::string& command) {
-    std::string firstWord = command.substr(0, command.find_first_of(' '));
+void h_core::RuntimeConsole::newCommandWithHelp(
+    const std::string& command, h_core::RuntimeConsoleCommandCallback callback, void* data, const std::string& help) {
+    m_commands.emplace(command, RuntimeCommand { data, help, callback });
+}
+
+uint32_t h_core::RuntimeConsole::runCommand(const std::string& command) {
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "> %s", command.c_str());
+
+    size_t spacePos = command.find_first_of(' ');
+    std::string firstWord;
+    if (spacePos != std::string::npos) { firstWord = command.substr(0, spacePos); }
+    else { firstWord = command; }
+
+    if (firstWord == "help" || firstWord == "?") {
+        showHelp();
+        return 0;
+    }
+
     for (CommandMap::iterator iterator = m_commands.begin(); iterator != m_commands.end(); iterator++) {
         if (iterator->first == firstWord) {
             // callback(args, data)
-            iterator->second.first(command.substr(command.find(' ') + 1), iterator->second.second);
-            return;
+            uint32_t result = 0;
+            if (spacePos != std::string::npos) {
+                result = iterator->second.callback(command.substr(spacePos + 1), iterator->second.data);
+            }
+            else { result = iterator->second.callback("", iterator->second.data); }
+            if (result != 0) {
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "BAD COMMAND (error %d)", result);
+                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Help: %s", iterator->second.help.c_str());
+            }
+            return result;
         }
     }
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unknown command %s", firstWord.c_str());
 }
 
-// void h_core::RuntimeConsole::printToConsole(const std::string& message) {}
+void h_core::RuntimeConsole::showHelp() {
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "=== COMMAND LIST: ===");
+    for (CommandMap::iterator iterator = m_commands.begin(); iterator != m_commands.end(); iterator++) {
+        if (iterator->second.help.empty()) {
+            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "\t%s", iterator->first.c_str());
+        }
+        else {
+            SDL_LogInfo(
+                SDL_LOG_CATEGORY_APPLICATION, "\t%s - %s", iterator->first.c_str(), iterator->second.help.c_str());
+        }
+    }
+}
+
+void h_core::RuntimeConsole::clearConsole() {
+    m_log.clear();
+    m_log = std::deque<std::string> { RUNTIMECONSOLE_LOG_LENGTH, "" };
+}
