@@ -6,8 +6,8 @@
 
 #include "imgui.h"
 
-#include "core/theming/guicolors.h"
 #include "core/project/project.h"
+#include "core/theming/guicolors.h"
 
 void h_core::RuntimeAssets::init(const std::string& serverAddress) {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -26,7 +26,41 @@ void h_core::RuntimeAssets::destroy() {
 
 void h_core::RuntimeAssets::doGUI() {
     if (ImGui::Begin("Runtime Assets Debugger")) {
-        ImGui::TextColored(hasServerConnection() ? IMGUI_COLOR_GOOD : IMGUI_COLOR_WARN, hasServerConnection() ? "CONNECTED TO SERVER" : "NOT CONNECTED TO SERVER");
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, hasServerConnection() ? IMGUI_COLOR_GOOD : IMGUI_COLOR_WARN);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4 { 0, 0, 0, 0.5 });
+        constexpr float statusAreaHeight = 50;
+        ImGui::BeginChild("Server Status", ImVec2 { 0, statusAreaHeight });
+        {
+            const char* text = hasServerConnection() ? "CONNECTED TO SERVER" : "NOT CONNECTED TO SERVER";
+            ImVec2 textSize = ImGui::CalcTextSize(text);
+            float windowW = ImGui::GetWindowWidth();
+            float windowH = ImGui::GetWindowHeight();
+            ImGui::SetCursorPosX(windowW / 2.f - textSize.x / 2.f);
+            ImGui::SetCursorPosY(windowH / 2.f - textSize.y / 2.f);
+            ImGui::Text(text);
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+
+        ImGui::Separator();
+
+        if (ImGui::CollapsingHeader("Recent Net Request Jobs")) {
+            ImGui::Indent();
+            uint32_t jobIndex = 0;
+            for (NetRequestJob job : m_recentJobs) {
+                ImGui::PushID(jobIndex);
+                std::string headerText = "Request #" + std::to_string(jobIndex) + " (Asset #" + std::to_string(job.assetIndex) + ")";
+                if (ImGui::CollapsingHeader(headerText.c_str())) {
+                    ImGui::Text("Asset Index: %d", job.assetIndex);
+                    ImGui::Text("Asset Type: %d", job.assetType);
+                    ImGui::Text("Server Address: %s", job.serverAddress.c_str());
+                }
+                ImGui::PopID();
+                jobIndex++;
+            }
+            ImGui::Unindent();
+        }
     }
     ImGui::End();
 }
@@ -79,7 +113,8 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
             h_core::Asset* newAsset = nullptr;
             CURLcode result;
             CALL_TYPED_FUNC_WITH_ASSET_ID(
-                job.assetType, h_core::RuntimeAssets::requestNetAssetNow, &newAsset, &result, job.serverAddress, job.assetIndex);
+                job.assetType, h_core::RuntimeAssets::requestNetAssetNow, &newAsset, &result, job.serverAddress,
+                job.assetIndex);
             SDL_Log("INFO: ASSETS: THREAD: completed net request for asset %d\n", job.assetIndex);
 
             // Apply to asset list
@@ -98,10 +133,10 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
         }
 
         // Update connection test
-        CURL* connect_test = curl_easy_init();
-        curl_easy_setopt(connect_test, CURLOPT_URL, context->pingServerAddress.c_str());
-        curl_easy_setopt(connect_test, CURLOPT_CONNECT_ONLY, 1L);
-        CURLcode result = curl_easy_perform(connect_test);
+        CURL* connectTest = curl_easy_init();
+        curl_easy_setopt(connectTest, CURLOPT_URL, context->pingServerAddress.c_str());
+        curl_easy_setopt(connectTest, CURLOPT_CONNECT_ONLY, 1L);
+        CURLcode result = curl_easy_perform(connectTest);
         if (result != CURLE_OK && result != CURLE_COULDNT_CONNECT) {
             SDL_Log("WARN: ASSETS: Ping attempt returned curl error code %d\n", result);
         }

@@ -11,6 +11,8 @@
 #include "core/assets.h"
 #include "core/netrequestthreadcontext.h"
 
+#define RUNTIMEASSETS_MAX_RECENT_JOBS 10
+
 namespace h_core {
 class RuntimeAssets : public Assets {
   public:
@@ -41,6 +43,7 @@ class RuntimeAssets : public Assets {
 
     std::string m_serverAddress {};
     std::thread m_netRequestThread {};
+    std::deque<h_core::NetRequestJob> m_recentJobs {};
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
 };
 }  // namespace h_core
@@ -49,9 +52,14 @@ template<typename AssetType>
 void h_core::RuntimeAssets::requestNetAsset(h_core::AssetIndex index) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
+    NetRequestJob job { m_serverAddress, index, AssetType::getTypeId() };
+
     m_netRequestThreadContext.jobQueueLock.lock();
-    { m_netRequestThreadContext.jobs.emplace_back(m_serverAddress, index, AssetType::getTypeId()); }
+    { m_netRequestThreadContext.jobs.push_back(job); }
     m_netRequestThreadContext.jobQueueLock.unlock();
+
+    m_recentJobs.push_back(job);
+    if (m_recentJobs.size() > RUNTIMEASSETS_MAX_RECENT_JOBS) m_recentJobs.pop_front();
 }
 
 template<typename AssetType>
