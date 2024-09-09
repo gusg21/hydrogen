@@ -5,12 +5,11 @@
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 #include "imgui_impl_sdl2.h"
+#include "yaml-cpp/yaml.h"
 
-#include "core/engine.h"
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/input/keyinputactionsource.h"
 #include "core/math/mat4x4.h"
-#include "core/systems/render/meshasset.h"
 
 uint32_t h_core::render::Renderer::loadShader(GLuint* out_shaderId, std::string filePath) {
     // Load in the code
@@ -72,8 +71,28 @@ uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shade
     return 0;
 }
 
+void h_core::render::Renderer::callback_setFov(const std::string& args, void* data) {
+    h_core::render::Renderer* self = (h_core::render::Renderer*) data;
+    SDL_Log(args.c_str());
+    return;
+    YAML::Node yaml;
+    try {
+        yaml = YAML::Load(args);
+    } catch (YAML::ParserException&) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Bad YAML");
+        return;
+    }
+    if (!yaml["fov"].IsDefined()) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Bad YAML");
+        return;
+    }
+    self->m_fovDegrees = yaml["fov"].as<float>(70.f);
+}
+
 uint32_t h_core::render::Renderer::init(h_core::RuntimeEngine* engine) {
     h_core::RuntimeSystem::init(engine);
+
+    engine->getConsole()->newCommand("setFov", h_core::render::Renderer::callback_setFov, this);
 
     ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ::glEnable(GL_DEPTH_TEST);

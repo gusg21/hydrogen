@@ -6,13 +6,16 @@
 #include "imgui.h"
 
 #include "core/input/dualkeyinputactionsource.h"
-#include "core/input/keyinputactionsource.h"
 #include "core/systems/gravity.h"
 #include "core/systems/render/gles3renderer.h"
 #include "core/systems/render/gl4renderer.h"
 #include "core/systems/script/scripting.h"
 
 void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
+    // set up console - happens really early to catch all the prints
+    m_console = new h_core::RuntimeConsole();
+    m_console->init();
+
     Engine::doInit(project);
 
     // set up systems
@@ -101,6 +104,7 @@ void h_core::RuntimeEngine::doGUI() {
     getInput()->doGUI();
     getScene()->doGUI(m_assets);
     m_assets->doGUI();
+    m_console->doGUI();
 }
 
 void h_core::RuntimeEngine::beginFrame() {
@@ -151,4 +155,8 @@ void h_core::RuntimeEngine::destroy() {
 
 h_core::RuntimeAssets* h_core::RuntimeEngine::getRuntimeAssets() {
     return m_assets;
+}
+
+h_core::RuntimeConsole* h_core::RuntimeEngine::getConsole() {
+    return m_console;
 }

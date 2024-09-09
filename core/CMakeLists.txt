@@ -61,7 +61,9 @@ add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
         include/core/assetindex.h
         include/core/component.h
         include/core/widgets.h
-        include/core/netrequestresult.h)
+        include/core/netrequestresult.h
+        include/core/runtimeconsole.h
+        src/runtimeconsole.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

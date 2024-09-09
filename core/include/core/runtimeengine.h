@@ -9,6 +9,7 @@
 #include "core/engine.h"
 #include "core/runtimeassets.h"
 #include "core/runtimesystems.h"
+#include "core/runtimeconsole.h"
 
 #define RUNTIMEENGINE_MAX_FPS_SAMPLES 600
 
@@ -18,6 +19,7 @@ class RuntimeEngine : public h_core::Engine {
     void destroy() override;
 
     h_core::RuntimeAssets* getRuntimeAssets();
+    h_core::RuntimeConsole* getConsole();
 
   protected:
     void doInit(const h_core::project::Project* project) override;
@@ -37,5 +39,6 @@ class RuntimeEngine : public h_core::Engine {
 
     h_core::RuntimeAssets* m_assets {};
     h_core::RuntimeSystems m_systems {};
+    h_core::RuntimeConsole* m_console {};
 };
 }  // namespace h_core

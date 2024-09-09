@@ -23,7 +23,6 @@
       <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="ContinuousBuild" />
       <config projectName="Hydrogen" targetName="Experimental" />
-      <config projectName="Hydrogen" targetName="HydrogenEditor" />
       <config projectName="Hydrogen" targetName="libcurl_object" />
       <config projectName="Hydrogen" targetName="ContinuousStart" />
       <config projectName="Hydrogen" targetName="Nightly" />
@@ -72,17 +71,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="runtime/base assets split">
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/editorengine.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/src/editorengine.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="added libcurl">
+      <change afterPath="$PROJECT_DIR$/core/include/core/runtimeconsole.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/src/runtimeconsole.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/project/project.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/project/project.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/project/project.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/project/project.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/editor/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeengine.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeengine.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/render/renderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/runtimeengine.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeengine.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/systems/render/renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/renderer.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,6 +92,7 @@
       <list>
         <option value="Python Script" />
         <option value="HTML File" />
+        <option value="CMakeLists.txt" />
       </list>
     </option>
   </component>
@@ -168,6 +166,7 @@
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "CMake Application.HydrogenEditor.executor": "Debug",
     "CMake Application.HydrogenRuntime.executor": "Run",
+    "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
     "Python.main.executor": "Run",
     "RunOnceActivity.RadMigrateCodeStyle": "true",
@@ -206,7 +205,7 @@
       <recent name="C:\Projects\hydrogen\core\include\core\input" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.HydrogenEditor">
+  <component name="RunManager" selected="CMake Application.HydrogenRuntime">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -318,11 +317,6 @@
       </method>
     </configuration>
     <configuration name="HydrogenCore_Shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_Shared" CONFIG_NAME="Debug-Visual Studio">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -507,7 +501,6 @@
       <item itemvalue="CMake Application.HydrogenCore_CopyShaders" />
       <item itemvalue="CMake Application.HydrogenCore_Shared" />
       <item itemvalue="CMake Application.HydrogenCore" />
-      <item itemvalue="CMake Application.HydrogenEditor" />
       <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
       <item itemvalue="CMake Application.HydrogenRuntime" />
       <item itemvalue="CMake Application.HydrogenServer_Wrapper" />
@@ -523,12 +516,12 @@
       <item itemvalue="CMake Application.NightlyUpdate" />
       <item itemvalue="CMake Application.Nightly" />
       <item itemvalue="CMake Application.SDL2-static" />
-      <item itemvalue="CMake Application.SDL2" />
       <item itemvalue="CMake Application.SDL2_test" />
       <item itemvalue="CMake Application.SDL2main" />
       <item itemvalue="CMake Application.angelscript" />
       <item itemvalue="CMake Application.glad" />
       <item itemvalue="CMake Application.imgui.cmake" />
+      <item itemvalue="CMake Application.SDL2" />
       <item itemvalue="CMake Application.libcurl_object" />
       <item itemvalue="CMake Application.libcurl_static" />
       <item itemvalue="CMake Application.sdl_headers_copy" />
@@ -561,11 +554,7 @@
       <workItem from="1725396846618" duration="5597000" />
       <workItem from="1725421405150" duration="23873000" />
       <workItem from="1725585006797" duration="1178000" />
-      <workItem from="1725591940685" duration="50899000" />
-      <workItem from="1725833077675" duration="4657000" />
-      <workItem from="1725837781277" duration="359000" />
-      <workItem from="1725838150822" duration="119000" />
-      <workItem from="1725838279939" duration="1192000" />
+      <workItem from="1725591940685" duration="53051000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -795,22 +784,6 @@
     <MESSAGE value="added libcurl" />
     <MESSAGE value="runtime/base assets split" />
     <option name="LAST_COMMIT_MESSAGE" value="runtime/base assets split" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/src/systems/render/gl4renderer.cc</url>
-          <line>40</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/src/project/project.cc</url>
-          <line>9</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
