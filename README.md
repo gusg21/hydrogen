@@ -22,6 +22,8 @@ A small experimental game engine by Xavier Olmstead (@XavOlmst) and Angus Gouche
 
 `runtime` - runtime for running projects (requires `core`)
 
+`server` - server for hosting assets (not multiplayer) (requires `core`)
+
 ### Code Style
 
 Code style is rigorously defined by the `.clang-format` file, use clang-format for formatting! It's built into VS, and all you need to do is download LLVM for VS Code.
