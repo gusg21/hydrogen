@@ -104,6 +104,7 @@ void h_core::RuntimeEngine::doGUI() {
     getInput()->doGUI();
     getScene()->doGUI(m_assets);
     m_assets->doGUI();
+    m_assets->registerCommands(m_console);
     m_console->doGUI();
 }
 

@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "SDL.h"
+#include "imgui.h"
 #include "yaml-cpp/yaml.h"
 
 #define RUNTIMECONSOLE_LOG_LENGTH 50
@@ -50,10 +51,13 @@ class RuntimeConsole {
 
   private:
     void showHelp();
+    static int consoleInputCallback(ImGuiInputTextCallbackData* data);
     static void logCallback(void* userdata, int category, SDL_LogPriority priority, const char* message);
 
     std::deque<std::string> m_log { RUNTIMECONSOLE_LOG_LENGTH, "" };
     char m_textEntry[RUNTIMECONSOLE_ENTRY_SIZE] = { 0 };
+    std::vector<std::string> m_history {};
+    int32_t m_historyPos = 0;
     bool m_logJustUpdated = false;
     CommandMap m_commands {};
 };

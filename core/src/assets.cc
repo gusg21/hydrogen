@@ -11,7 +11,7 @@ h_core::AssetHash h_core::Assets::getAssetHashFromString(const std::string& stri
 
 void h_core::Assets::loadFromProject(const h_core::project::Project* project) {
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        CALL_TYPED_FUNC_WITH_ASSET_ID(assetInfo.typeId, loadTyped, assetInfo);
+        CALL_TYPED_FUNC_WITH_ASSET_ID(assetInfo.typeId, loadAsset, assetInfo.index, assetInfo.assetPath);
     }
 }
 

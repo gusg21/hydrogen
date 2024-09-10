@@ -33,8 +33,59 @@ void h_core::RuntimeConsole::printToConsole(const std::string& message) {
     m_logJustUpdated = true;
 }
 
+int h_core::RuntimeConsole::consoleInputCallback(ImGuiInputTextCallbackData* data) {
+    h_core::RuntimeConsole* console = (h_core::RuntimeConsole*)data->UserData;
+    switch (data->EventFlag) {
+        case ImGuiInputTextFlags_CallbackCompletion: {
+            const char* wordEnd = data->Buf + data->CursorPos;
+            const char* wordStart = data->Buf;
+
+            std::string word { wordStart, wordEnd };
+
+            for (h_core::CommandMap::iterator iterator = console->m_commands.begin();
+                 iterator != console->m_commands.end(); iterator++) {
+                if (iterator->first.rfind(word, 0) == 0) {
+                    data->DeleteChars(0, word.size());
+                    data->InsertChars(data->CursorPos, iterator->first.c_str());
+                    data->InsertChars(data->CursorPos, " ");
+                }
+            }
+
+            break;
+        }
+        case ImGuiInputTextFlags_CallbackHistory:
+        {
+            // Example of HISTORY
+            const int prev_history_pos = console->m_historyPos;
+            if (data->EventKey == ImGuiKey_UpArrow)
+            {
+                if (console->m_historyPos == -1)
+                    console->m_historyPos = console->m_history.size() - 1;
+                else if (console->m_historyPos > 0)
+                    console->m_historyPos--;
+            }
+            else if (data->EventKey == ImGuiKey_DownArrow)
+            {
+                if (console->m_historyPos != -1)
+                    if (++console->m_historyPos >= console->m_history.size())
+                        console->m_historyPos = -1;
+            }
+
+            // A better implementation would preserve the data on the current input line along with cursor position.
+            if (prev_history_pos != console->m_historyPos)
+            {
+                std::string history_str = (console->m_historyPos >= 0) ? console->m_history[console->m_historyPos] : "";
+                data->DeleteChars(0, data->BufTextLen);
+                data->InsertChars(0, history_str.c_str());
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
 void h_core::RuntimeConsole::doGUI() {
-    if (ImGui::Begin("Runtime Console")) {
+    if (ImGui::Begin("Runtime Console", nullptr, ImGuiWindowFlags_NoNav)) {
         ImGui::BeginChild("Log", ImVec2 { 0, -30 });
         {
             for (const std::string& logItem : m_log) {
@@ -50,8 +101,14 @@ void h_core::RuntimeConsole::doGUI() {
         ImGui::EndChild();
         ImGui::Separator();
         ImGui::SetNextItemWidth(-2);
-        if (ImGui::InputText("##Input", m_textEntry, RUNTIMECONSOLE_ENTRY_SIZE, ImGuiInputTextFlags_EnterReturnsTrue)) {
+        if (ImGui::InputText(
+                "##Input", m_textEntry, RUNTIMECONSOLE_ENTRY_SIZE,
+                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion |
+                    ImGuiInputTextFlags_CallbackHistory,
+                consoleInputCallback, this)) {
             runCommand(m_textEntry);
+            m_historyPos = -1;
+            m_history.emplace_back(m_textEntry);
             memset(m_textEntry, 0, sizeof(char) * RUNTIMECONSOLE_ENTRY_SIZE);
         }
     }
