@@ -66,22 +66,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/include/core/physics/physics.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/include/core/physics/rigidbodyasset.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/include/core/physics/rigidbodycomp.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/physics/physics.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/physics/rigidbodyasset.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/src/physics/rigidbodycomp.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/hydrogen.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/hydrogen.iml" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="added libcurl">
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_6_2024_7_00_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_6_2024_7_00_PM__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_6_2024_7_10_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_6_2024_7_10_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/system.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/system.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/server/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/math/vector3.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/math/vector3.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/physics/physics.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/physics/physics.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/physics/rigidbodyasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/physics/rigidbodyasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/math/vector3.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/math/vector3.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/physics/physics.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/physics/physics.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/physics/rigidbodyasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/physics/rigidbodyasset.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,6 +90,9 @@
         <option value="HTML File" />
       </list>
     </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="broke-physics" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -112,6 +109,9 @@
     <scope name="Core Source" pattern="file:core/src//*" />
     <scope name="Core Headers" pattern="file:core/include//*" />
   </component>
+  <component name="OCResolveContextSettings">
+    <option name="configuration" value="0-Debug-HydrogenCore" />
+  </component>
   <component name="ProjectId" id="2lRXeQrlEOuhFzwP84z4XzhILwF" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -127,6 +127,7 @@
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -143,6 +144,11 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -344,11 +350,6 @@
       </method>
     </configuration>
     <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
