@@ -10,12 +10,13 @@
 #include "SDL.h"
 #include "yaml-cpp/yaml.h"
 
+#include "core/actorspecasset.h"
 #include "core/assetindex.h"
+#include "core/log.h"
 #include "core/project/projectassetentry.h"
 #include "core/scenespecasset.h"
-#include "core/systems/script/scriptasset.h"
-#include "core/actorspecasset.h"
 #include "core/systems/render/meshasset.h"
+#include "core/systems/script/scriptasset.h"
 
 #define TYPED_SWITCH_CASE(type, func, ...) \
     case type::getTypeId(): {              \
@@ -79,7 +80,7 @@ class Assets {
     h_core::AssetIndex loadAssetFromFile(AssetType* out_asset, std::string filePath);
 
     template<typename AssetType>
-    void loadTyped(h_core::project::ProjectAssetEntry assetInfo);
+    void loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile);
 
     h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex> m_assetIndexMap {};  // hash -> asset index
@@ -121,7 +122,7 @@ h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
         AssetType* asset = new AssetType();
         uint32_t result = loadAssetFromFile<AssetType>(asset, filePath);
         if (result != 0) {
-            ::SDL_Log("ERROR: Failed to load asset %s\n", filePath.c_str());
+            HYLOG_ERROR("ASSETS: Failed to load asset %s\n", filePath.c_str());
             return ASSET_INDEX_BAD;
         }
         else {
@@ -144,11 +145,11 @@ AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
 }
 
 template<typename AssetType>
-void h_core::Assets::loadTyped(h_core::project::ProjectAssetEntry assetInfo) {
+void h_core::Assets::loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
 
     // Load from file
     AssetType* asset = new AssetType();
-    loadAssetFromFile<AssetType>(asset, assetInfo.assetPath);
-    m_assets[assetInfo.index] = asset;
+    loadAssetFromFile<AssetType>(asset, assetFile);
+    m_assets[assetIndex] = asset;
 }

@@ -1,22 +1,23 @@
 #include "core/project/project.h"
 
 #include "core/input/inputactionsource.h"
+#include "core/log.h"
 
 uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath) {
-    ::SDL_Log("INFO: PROJECT: Loading from path %s\n", yamlPath.c_str());
-    ::SDL_Log("INFO: PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
+    HYLOG_INFO("PROJECT: Loading from path %s\n", yamlPath.c_str());
+    HYLOG_INFO("PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
 
     // Determine full path
     std::string projectYamlPath = assetsBasePath + yamlPath;
-    ::SDL_Log("INFO: PROJECT: Full Project YAML Path = %s\n", projectYamlPath.c_str());
+    HYLOG_INFO("PROJECT: Full Project YAML Path = %s\n", projectYamlPath.c_str());
 
     // Load Text from file
     const char* projectYamlText = static_cast<const char*>(SDL_LoadFile(projectYamlPath.c_str(), nullptr));
     if (projectYamlText == nullptr) {
-        ::SDL_Log("ERROR: PROJECT: Failed to load project from %s\n", projectYamlPath.c_str());
+        HYLOG_INFO("PROJECT: Failed to load project from %s\n", projectYamlPath.c_str());
         return 1; // TODO: Make into real error codes
     }
-    ::SDL_Log("INFO: PROJECT: YAML: %s\n", projectYamlText);
+    HYLOG_INFO("PROJECT: YAML: %s\n", projectYamlText);
 
     // Parse YAML
     YAML::Node projectYaml;
@@ -24,7 +25,7 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
     try {
         projectYaml = YAML::Load(projectYamlText);
     } catch (YAML::ParserException&) {
-        ::SDL_Log("ERROR: PROJECT: Failed to parse YAML from %s\n", projectYamlPath.c_str());
+        HYLOG_INFO("PROJECT: Failed to parse YAML from %s\n", projectYamlPath.c_str());
         return 1; // TODO: Make into real error codes
     }
 

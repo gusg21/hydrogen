@@ -10,6 +10,7 @@
 
 #include "core/assets.h"
 #include "core/netrequestthreadcontext.h"
+#include "core/runtimeconsole.h"
 
 #define RUNTIMEASSETS_MAX_RECENT_JOBS 10
 
@@ -19,6 +20,7 @@ class RuntimeAssets : public Assets {
     RuntimeAssets() = default;
 
     void init(const std::string& serverAddress);
+    void registerCommands(h_core::RuntimeConsole* console);
     void destroy();
     void doGUI();
 
@@ -33,13 +35,15 @@ class RuntimeAssets : public Assets {
 
     bool hasServerConnection();
 
+    template<typename AssetType>
+    void loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile, bool isRemote);
+
   private:
     template<typename AssetType>
     static void requestNetAssetNow(
         h_core::Asset** out_assetPtr, CURLcode* out_error, const std::string& serverAddress, h_core::AssetIndex index);
 
-    template<typename AssetType>
-    void loadTyped(h_core::project::ProjectAssetEntry assetInfo);
+    static uint32_t command_loadAsset(const std::string& arguments, void* data);
 
     std::string m_serverAddress {};
     std::thread m_netRequestThread {};
@@ -71,7 +75,7 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
     asset->fromPacked(buffer, byteCount);
     *(AssetType**)out_asset = asset;
 
-    SDL_Log("INFO: ASSETS: Net asset write %d bytes\n", byteCount);
+    HYLOG_DEBUG("ASSETS: Net asset write %d bytes\n", byteCount);
 
     return byteCount;
 }
@@ -83,30 +87,29 @@ void h_core::RuntimeAssets::requestNetAssetNow(
 
     CURL* netHandle = curl_easy_init();
     std::string url = serverAddress + std::string("asset/") + std::to_string(index);
-    SDL_Log("INFO: ASSETS: Requesting %s\n...", url.c_str());
+    HYLOG_INFO("ASSETS: Requesting %s...\n", url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
     curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, out_assetPtr);
     curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 0.5);
     CURLcode result = curl_easy_perform(netHandle);
-    if (result != CURLE_OK) { SDL_Log("WARN: ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result)); }
-    else { SDL_Log("WARN: ASSETS: Curled asset %d OK\n", index); }
+    if (result != CURLE_OK) { HYLOG_WARN("ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result)); }
+    else { HYLOG_INFO("ASSETS: Curled asset %d OK\n", index); }
     if (out_error != nullptr) *out_error = result;
 }
 
 template<typename AssetType>
-void h_core::RuntimeAssets::loadTyped(h_core::project::ProjectAssetEntry assetInfo) {
+void h_core::RuntimeAssets::loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile, bool isRemote) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
 
-    if (assetInfo.isRemote) {
+    if (isRemote) {
         // Load from server
-        SDL_Log("WARN: ASSETS: Can't load remote asset #%d without RuntimeAssets implementation\n", assetInfo.index);
-        requestNetAsset<AssetType>(assetInfo.index);
+        requestNetAsset<AssetType>(assetIndex);
     }
     else {
         // Load from file
         AssetType* asset = new AssetType();
-        loadAssetFromFile<AssetType>(asset, assetInfo.assetPath);
-        m_assets[assetInfo.index] = asset;
+        loadAssetFromFile<AssetType>(asset, assetFile);
+        m_assets[assetIndex] = asset;
     }
 }

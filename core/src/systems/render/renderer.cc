@@ -9,13 +9,14 @@
 
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/input/keyinputactionsource.h"
+#include "core/log.h"
 #include "core/math/mat4x4.h"
 
 uint32_t h_core::render::Renderer::loadShader(GLuint* out_shaderId, std::string filePath) {
     // Load in the code
     size_t shaderCodeLength;
     const char* shaderCodeRaw = (const char*)SDL_LoadFile(filePath.c_str(), &shaderCodeLength);
-    SDL_Log("INFO: SHADER: Code:\n%s\n", shaderCodeRaw);
+    HYLOG_DEBUG("RENDERER: Shader Code:\n%s\n", shaderCodeRaw);
     int shaderCodeLengthInt = shaderCodeLength;
     ::glShaderSource(*out_shaderId, 1, (const GLchar**)&shaderCodeRaw, &shaderCodeLengthInt);
 
@@ -26,14 +27,15 @@ uint32_t h_core::render::Renderer::loadShader(GLuint* out_shaderId, std::string 
     if (status == GL_FALSE) {
         char log[RENDERING_OPENGL_LOG_MAX_SIZE] = { 0 };
         ::glGetShaderInfoLog(*out_shaderId, RENDERING_OPENGL_LOG_MAX_SIZE, nullptr, log);
-        ::SDL_Log("ERROR: RENDERER: %s\n", log);
+        HYLOG_ERROR("RENDERER: %s\n", log);
         return RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE;
     }
 
     return 0;
 }
 
-uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath) {
+uint32_t h_core::render::Renderer::loadProgram(
+    h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath) {
     uint32_t result;
 
     out_shader->vertexShader = ::glCreateShader(GL_VERTEX_SHADER);
@@ -62,17 +64,15 @@ uint32_t h_core::render::Renderer::loadProgram(h_core::render::Shader* out_shade
         return RENDERING_LOAD_PROGRAM_FAIL_BAD_LINK;
     }
 
-#if HCORE_DEBUG
-    ::SDL_Log(
-        "DEBUG: RENDERER: Shaders (%s, %s) compiled + linked + loaded successfully\n", vertexPath.c_str(),
+    HYLOG_DEBUG(
+        "RENDERER: Shaders (%s, %s) compiled + linked + loaded successfully\n", vertexPath.c_str(),
         fragmentPath.c_str());
-#endif
 
     return 0;
 }
 
 uint32_t h_core::render::Renderer::callback_setFov(const std::string& args, void* data) {
-    h_core::render::Renderer* self = (h_core::render::Renderer*) data;
+    h_core::render::Renderer* self = (h_core::render::Renderer*)data;
     RUNTIMECONSOLE_PARSE_ARGS(args, yaml);
 
     if (!yaml.IsMap()) return 2;
@@ -84,7 +84,8 @@ uint32_t h_core::render::Renderer::callback_setFov(const std::string& args, void
 uint32_t h_core::render::Renderer::init(h_core::RuntimeEngine* engine) {
     h_core::RuntimeSystem::init(engine);
 
-    engine->getConsole()->newCommandWithHelp("setFov", h_core::render::Renderer::callback_setFov, this, "{ fov: [float] } set the renderer's FOV");
+    engine->getConsole()->newCommandWithHelp(
+        "setFov", h_core::render::Renderer::callback_setFov, this, "{ fov: [float] } set the renderer's FOV");
 
     ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ::glEnable(GL_DEPTH_TEST);
@@ -165,8 +166,7 @@ void h_core::render::Renderer::beginFrame() {
         forward = h_core::math::Vector3::normalize(forward);
         h_core::math::Vector3 right = h_core::math::Vector3::normalize(
             h_core::math::Vector3::cross(forward, h_core::math::Vector3 { 0.f, 1.f, 0.f }));
-        h_core::math::Vector3 up = h_core::math::Vector3::normalize(
-            h_core::math::Vector3::cross(right, forward));
+        h_core::math::Vector3 up = h_core::math::Vector3::normalize(h_core::math::Vector3::cross(right, forward));
         m_cameraDirection = forward;
 
         // Move along axes in cam orientation space

@@ -12,14 +12,14 @@ h_core::Assets* assets;
 extern "C" {
 
 WRAP_DECL void create_engine() {
-    SDL_Log("INFO: WRAP: Creating engine\n");
+    HYLOG_INFO("WRAP: Creating engine\n");
     assets = new h_core::Assets();
 }
 
 WRAP_DECL void load_project(const char* project_path, const char* assets_base_path) {
-    SDL_Log("INFO: WRAP: Loading project name @ %p\n", project_path);
-    SDL_Log("INFO: WRAP: Loading project %s\n", project_path);
-    SDL_Log("INFO: WRAP: Assets Base Dir %s\n", assets_base_path);
+    HYLOG_INFO("WRAP: Loading project name @ %p\n", project_path);
+    HYLOG_INFO("WRAP: Loading project %s\n", project_path);
+    HYLOG_INFO("WRAP: Assets Base Dir %s\n", assets_base_path);
     h_core::project::Project project {};
     project.loadFromFile(project_path, assets_base_path);
     assets->loadFromProject(&project);

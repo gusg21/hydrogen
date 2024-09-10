@@ -5,6 +5,7 @@
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
+#include "core/log.h"
 #include "core/systems/render/renderer.h"
 
 // TODO: move these godless monstrosities to a subf
@@ -31,7 +32,7 @@ static const uint16_t cubeTriList[] = {
 
 
 uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::Node yaml) {
-    ::SDL_Log("INFO: MESH: loading model from YAML spec...\n");
+    HYLOG_INFO("MESH: loading model from YAML spec...\n");
 
     // Parse YAML
     std::string gltfFilePath = yaml["gltf"].as<std::string>("");
@@ -40,7 +41,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::N
     m_isCube = yaml["primitive"].as<bool>(false);
 
     if (gltfFilePath.empty()) {
-        ::SDL_Log("ERROR: MODEL: no gltf key in model YAML\n");
+        HYLOG_ERROR("MODEL: no gltf key in model YAML\n");
         return MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH;
     }
 
@@ -62,12 +63,12 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::N
         success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, glbData, glbDataLength, gltfBasePath);
     }
 
-    if (!warningText.empty()) { ::SDL_Log("WARN: MODEL: %s\n", warningText.c_str()); }
+    if (!warningText.empty()) { HYLOG_WARN("MODEL: %s\n", warningText.c_str()); }
 
     if (!success) {
-        ::SDL_Log("ERROR: MODEL: %s\n", errorText.c_str());
-        ::SDL_Log(
-            "ERROR: MODEL: gltfFilePath = %s, gltfBasePath = %s, gltfBinaryMode = %s\n", gltfFilePath.c_str(),
+        HYLOG_ERROR("MODEL: %s\n", errorText.c_str());
+        HYLOG_ERROR(
+            "MODEL: gltfFilePath = %s, gltfBasePath = %s, gltfBinaryMode = %s\n", gltfFilePath.c_str(),
             gltfBasePath.c_str(), gltfBinaryMode ? "YES" : "NO");
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
@@ -138,16 +139,15 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, YAML::N
 uint32_t h_core::render::MeshAsset::precompile(h_core::RuntimeSystems* systems) {
     if (m_isCube) {
         // Just load cube
-        ::SDL_Log("DEBUG: MESH: Loading cube primitive mesh\n");
+        HYLOG_DEBUG("MESH: Loading cube primitive mesh\n");
         loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT, systems->renderer->isGles3());
 
         return 0;
     }
 
-    loadModel(
-        m_numVertices, m_vertices, m_numIndices, m_indices, m_meshIndexType, systems->renderer->isGles3());
+    loadModel(m_numVertices, m_vertices, m_numIndices, m_indices, m_meshIndexType, systems->renderer->isGles3());
 
-    ::SDL_Log("MESH: INFO: Loaded %zu vertices (%zu indices)\n", m_numVertices, m_numIndices);
+    HYLOG_INFO("MESH: Loaded %zu vertices (%zu indices)\n", m_numVertices, m_numIndices);
 
     return 0;
 }
@@ -161,7 +161,7 @@ void h_core::render::MeshAsset::loadModel(
         ::glBindVertexArray(m_vertexAttributesHandle);
     }
 
-    ::SDL_Log("DEBUG: MESH: using VAO id %d\n", m_vertexAttributesHandle);
+    HYLOG_DEBUG("MESH: using VAO id %d\n", m_vertexAttributesHandle);
 
     ::glGenBuffers(1, &m_vertexBufferHandle);
     ::glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferHandle);
@@ -208,7 +208,7 @@ void h_core::render::MeshAsset::loadModel(
                 indexTypeSize = sizeof(unsigned int);
                 break;
             default:
-                ::SDL_Log("Undefined mesh index type value!! What!!!\n");
+                HYLOG_ERROR("Undefined mesh index type value\n");
                 break;
         }
 
@@ -257,10 +257,11 @@ uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
 
 std::vector<char>* h_core::render::MeshAsset::toPacked() {
     std::vector<char>* bytes = new std::vector<char>();
-    bytes->reserve(m_numVertices + m_numIndices + 2); // Try to keep in sync with actual byte requirements
+    bytes->reserve(m_numVertices + m_numIndices + 2);  // Try to keep in sync with actual byte requirements
 
     bytes->insert(bytes->end(), (char*)&m_numVertices, (char*)&m_numVertices + sizeof(uint32_t));
-    bytes->insert(bytes->end(), (char*)m_vertices, (char*)(m_vertices) + (m_numVertices * sizeof(h_core::render::Vertex)));
+    bytes->insert(
+        bytes->end(), (char*)m_vertices, (char*)(m_vertices) + (m_numVertices * sizeof(h_core::render::Vertex)));
     bytes->insert(bytes->end(), (char*)&m_numIndices, (char*)&m_numIndices + sizeof(uint32_t));
     uint32_t indexSize = 1;
     switch (m_meshIndexType) {
@@ -282,22 +283,22 @@ std::vector<char>* h_core::render::MeshAsset::toPacked() {
 void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
     const char* bytes = (const char*)data;
 
-    SDL_Log("INFO: MESH: loading from packed (%zu bytes)\n", length);
-    SDL_Log("INFO: MESH: first byte %x\n", bytes[0]);
+    HYLOG_DEBUG("MESH: loading from packed (%zu bytes)\n", length);
+    HYLOG_DEBUG("MESH: first byte %x\n", bytes[0]);
 
     uint32_t numVertices = *(uint32_t*)(bytes + 0);
-    SDL_Log("INFO: MESH: # of vertices: %d\n", numVertices);
+    HYLOG_DEBUG("MESH: # of vertices: %d\n", numVertices);
 
     m_vertices = new h_core::render::Vertex[numVertices];
     memcpy(m_vertices, bytes + sizeof(uint32_t), numVertices * sizeof(h_core::render::Vertex));
 
     uint32_t numIndices = *(uint32_t*)(bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex));
-    SDL_Log("INFO: MESH: # of indices: %d\n", numIndices);
+    HYLOG_DEBUG("MESH: # of indices: %d\n", numIndices);
 
-    m_indices = new uint16_t[numIndices]; // TODO: use actual index type
-    memcpy(m_indices,
-           bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex) + sizeof(uint32_t),
-           numIndices * sizeof(uint16_t));
+    m_indices = new uint16_t[numIndices];  // TODO: use actual index type
+    memcpy(
+        m_indices, bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex) + sizeof(uint32_t),
+        numIndices * sizeof(uint16_t));
 
     m_numVertices = numVertices;
     m_numIndices = numIndices;

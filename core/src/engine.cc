@@ -86,7 +86,6 @@ void h_core::Engine::run() {
                     m_input->setMouseDelta(event.mouseDx, event.mouseDy);
                     break;
                 case ENGINE_EVENT_RESIZED:
-                    ::SDL_Log("INFO: ENGINE: Wow!\n");
                     m_windowWidth = event.newWindowWidth;
                     m_windowHeight = event.newWindowHeight;
                     break;

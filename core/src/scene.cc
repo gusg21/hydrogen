@@ -4,6 +4,7 @@
 #include "imgui.h"
 
 #include "core/actorspecasset.h"
+#include "core/log.h"
 #include "core/scene.h"
 #include "core/theming/guicolors.h"
 #include "core/widgets.h"
@@ -21,6 +22,11 @@ h_core::ActorId h_core::Scene::addActor(
     h_core::Assets* assets, h_core::AssetIndex actorSpecIndex, asIScriptContext* scriptingContext) {
     h_core::ActorSpecAsset* spec = assets->getAssetByIndex<h_core::ActorSpecAsset>(actorSpecIndex);
 
+    if (m_nextId >= SCENE_MAX_ACTORS) {
+        HYLOG_ERROR("SCENE: Too many actors!\n");
+        return UINT32_MAX;
+    }
+
     ActorId newId = m_nextId;
     masks[newId] = spec->mask;
     transforms[newId] = spec->transform;
@@ -29,12 +35,10 @@ h_core::ActorId h_core::Scene::addActor(
     meshes[newId].init(spec->meshIndex);
     scripts[newId].init(spec->scriptIndex, assets, scriptingContext, newId);
 
-    ::SDL_Log("INFO: SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
+    HYLOG_INFO("SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
 
     m_nextId++;
     m_numActors++;
-
-    if (m_nextId >= SCENE_MAX_ACTORS) { ::SDL_Log("ERROR: SCENE: Too many actors!\n"); }
 
     return newId;
 }

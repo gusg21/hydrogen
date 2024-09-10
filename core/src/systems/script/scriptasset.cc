@@ -3,6 +3,7 @@
 #include "SDL.h"
 
 #include "core/actor.h"
+#include "core/log.h"
 #include "core/runtimesystems.h"
 #include "core/systems/script/scripting.h"
 
@@ -30,8 +31,8 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML:
         else { name = yamlName; }
     }
 
-    ::SDL_Log("DEBUG: SCRIPT: chose name %s\n", name.c_str());
-    ::SDL_Log("DEBUG: SCRIPT: \n%s\n", code.c_str());
+    HYLOG_DEBUG("SCRIPT: chose name %s\n", name.c_str());
+    HYLOG_DEBUG("SCRIPT: \n%s\n", code.c_str());
 
     return 0;
 }
@@ -76,13 +77,13 @@ uint32_t h_core::script::ScriptAsset::compile(asIScriptModule* module) {
             typeConstructor = type->GetFactoryByDecl(typeConstructorDecl.c_str());
         }
         else {
-            ::SDL_Log("ERROR: SCRIPT: No defined types in module %s!\n", module->GetName());
+            HYLOG_ERROR("SCRIPT: No defined types in module %s!\n", module->GetName());
 
             return SCRIPT_COMPILE_FAIL_NO_DEFINED_TYPES;
         }
     }
     else {
-        ::SDL_Log("ERROR: SCRIPT: Failed to build module.\n");
+        HYLOG_ERROR("SCRIPT: Failed to build module.\n");
 
         return SCRIPT_COMPILE_FAIL_BAD_BUILD;
     }

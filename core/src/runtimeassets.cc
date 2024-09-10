@@ -6,6 +6,7 @@
 
 #include "imgui.h"
 
+#include "core/log.h"
 #include "core/project/project.h"
 #include "core/theming/guicolors.h"
 
@@ -17,6 +18,30 @@ void h_core::RuntimeAssets::init(const std::string& serverAddress) {
     m_netRequestThreadContext.pingServerAddress = serverAddress;
     m_netRequestThreadContext.netRequestThreadAlive = false;
     m_netRequestThread = std::thread { netRequestThreadFunction, &m_netRequestThreadContext };
+}
+
+uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, void* data) {
+    h_core::RuntimeAssets* assets = (h_core::RuntimeAssets*)data;
+    RUNTIMECONSOLE_PARSE_ARGS(arguments, yaml);
+
+    uint32_t assetType = yaml["type"].as<uint32_t>(UINT32_MAX);
+    uint32_t assetIndex = yaml["index"].as<uint32_t>(ASSET_INDEX_BAD);
+    std::string assetPath = yaml["path"].as<std::string>("");
+    bool isRemote = yaml["remote"].as<bool>(false);
+
+    if (assetType == UINT32_MAX) { return 2; }
+    if (assetIndex == ASSET_INDEX_BAD) { return 3; }
+    if (assetPath.empty() && !isRemote) { return 4; }
+
+    CALL_TYPED_FUNC_WITH_ASSET_ID(assetType, assets->loadAsset, assetIndex, assetPath, isRemote);
+
+    return 0;
+}
+
+void h_core::RuntimeAssets::registerCommands(h_core::RuntimeConsole* console) {
+    console->newCommandWithHelp(
+        "loadAsset", h_core::RuntimeAssets::command_loadAsset, this,
+        "{ type: int, index: int, path: string, remote: bool } load an asset of type 'type' into index 'index' from either path 'path' or from the server if 'remote'");
 }
 
 void h_core::RuntimeAssets::destroy() {
@@ -50,7 +75,8 @@ void h_core::RuntimeAssets::doGUI() {
             uint32_t jobIndex = 0;
             for (NetRequestJob job : m_recentJobs) {
                 ImGui::PushID(jobIndex);
-                std::string headerText = "Request #" + std::to_string(jobIndex) + " (Asset #" + std::to_string(job.assetIndex) + ")";
+                std::string headerText =
+                    "Request #" + std::to_string(jobIndex) + " (Asset #" + std::to_string(job.assetIndex) + ")";
                 if (ImGui::CollapsingHeader(headerText.c_str())) {
                     ImGui::Text("Asset Index: %d", job.assetIndex);
                     ImGui::Text("Asset Type: %d", job.assetType);
@@ -67,7 +93,8 @@ void h_core::RuntimeAssets::doGUI() {
 
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        CALL_TYPED_FUNC_WITH_ASSET_ID(assetInfo.typeId, RuntimeAssets::loadTyped, assetInfo);
+        CALL_TYPED_FUNC_WITH_ASSET_ID(
+            assetInfo.typeId, RuntimeAssets::loadAsset, assetInfo.index, assetInfo.assetPath, assetInfo.isRemote);
     }
 }
 
@@ -102,23 +129,23 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets(h_core::RuntimeSystems* 
 }
 
 void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadContext* context) {
-    SDL_Log("INFO: ASSETS: Net request thread running!\n");
+    HYLOG_INFO("ASSETS: Net request thread running!\n");
 
     while (!context->netRequestThreadAlive) {
         // Do jobs if needed
         if (!context->jobs.empty()) {
             // Request asset
             NetRequestJob job = context->jobs.front();
-            SDL_Log("INFO: ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);
+            HYLOG_INFO("ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);
             h_core::Asset* newAsset = nullptr;
             CURLcode result;
             CALL_TYPED_FUNC_WITH_ASSET_ID(
                 job.assetType, h_core::RuntimeAssets::requestNetAssetNow, &newAsset, &result, job.serverAddress,
                 job.assetIndex);
-            SDL_Log("INFO: ASSETS: THREAD: completed net request for asset %d\n", job.assetIndex);
+            HYLOG_INFO("ASSETS: THREAD: completed net request for asset %d\n", job.assetIndex);
 
             // Apply to asset list
-            SDL_Log("INFO: ASSETS: THREAD: awaiting asset list access... \n", job.assetIndex);
+            HYLOG_INFO("ASSETS: THREAD: awaiting asset list access... \n", job.assetIndex);
             context->resultQueueLock.lock();
             {
                 // Add result to the return list
@@ -126,7 +153,7 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
                 else { context->results.emplace_back(newAsset, job, true); }
             }
             context->resultQueueLock.unlock();
-            SDL_Log("INFO: ASSETS: THREAD: updated asset list \n", job.assetIndex);
+            HYLOG_INFO("ASSETS: THREAD: updated asset list \n", job.assetIndex);
 
             // remove job
             context->jobs.pop_front();
@@ -138,12 +165,12 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
         curl_easy_setopt(connectTest, CURLOPT_CONNECT_ONLY, 1L);
         CURLcode result = curl_easy_perform(connectTest);
         if (result != CURLE_OK && result != CURLE_COULDNT_CONNECT) {
-            SDL_Log("WARN: ASSETS: Ping attempt returned curl error code %d\n", result);
+            HYLOG_WARN("ASSETS: Ping attempt returned curl error code %d\n", result);
         }
         context->hasServerConnection = result == CURLE_OK;
     }
 
-    SDL_Log("INFO: ASSETS: Killing net request thread...\n");
+    HYLOG_INFO("ASSETS: Killing net request thread...\n");
 }
 
 bool h_core::RuntimeAssets::hasServerConnection() {

@@ -21,6 +21,15 @@ set(HydrogenCore_Sources
             src/scenespecasset.cc include/core/scenespecasset.h
             src/transform.cc include/core/transform.h
             src/window.cc include/core/window.h
+            include/core/netrequestthreadcontext.h
+            include/core/netrequestjob.h
+            include/core/assetindex.h
+            include/core/component.h
+            include/core/widgets.h
+            include/core/netrequestresult.h
+            include/core/runtimeconsole.h
+            src/runtimeconsole.cc
+            include/core/log.h
 
             # Project
             src/project/project.cc include/core/project/project.h
@@ -56,14 +65,7 @@ set(HydrogenCore_Sources
 )
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
-        include/core/netrequestthreadcontext.h
-        include/core/netrequestjob.h
-        include/core/assetindex.h
-        include/core/component.h
-        include/core/widgets.h
-        include/core/netrequestresult.h
-        include/core/runtimeconsole.h
-        src/runtimeconsole.cc)
+        )
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

@@ -3,6 +3,7 @@
 #include "scriptstdstring.h"
 
 #include "core/engine.h"
+#include "core/log.h"
 #include "core/math/math.h"
 #include "core/systems/script/scriptcomp.h"
 #include "core/transform.h"
@@ -10,25 +11,22 @@
 #define SCRIPTING_ANGELSCRIPT_VERSION 23700  // AngelScript v23.7.0
 
 void angelScriptMessageCallback(const asSMessageInfo* message, void* params) {
-    const char* messageType;
     switch (message->type) {
         case asMSGTYPE_ERROR:
-            messageType = "ERROR";
+            HYLOG_ERROR("SCRIPTING: %s:%d,%d\n%s\n", message->section, message->row, message->col, message->message);
             break;
         case asMSGTYPE_WARNING:
-            messageType = "WARN";
+            HYLOG_WARN("SCRIPTING: %s:%d,%d\n%s\n", message->section, message->row, message->col, message->message);
             break;
         case asMSGTYPE_INFORMATION:
-            messageType = "INFO";
+            HYLOG_INFO("SCRIPTING: %s:%d,%d\n%s\n", message->section, message->row, message->col, message->message);
             break;
 
         default:
-            messageType = "ERROR";
+            HYLOG_ERROR("SCRIPTING: %s:%d,%d\n%s\n", message->section, message->row, message->col, message->message);
             break;
     }
 
-    ::SDL_Log(
-        "%s: SCRIPTING: %s:%d,%d\n%s\n", messageType, message->section, message->row, message->col, message->message);
 }
 
 h_core::math::Vector3 newVector3(float x, float y, float z) {
@@ -36,7 +34,7 @@ h_core::math::Vector3 newVector3(float x, float y, float z) {
 }
 
 void angelScriptPrint(std::string& message) {
-    ::SDL_Log("INFO: SCRIPTING: %s\n", message.c_str());
+    HYLOG_INFO("SCRIPTING: %s\n", message.c_str());
 }
 
 std::string actorIdToString(h_core::ActorId id) {
