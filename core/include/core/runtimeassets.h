@@ -24,7 +24,7 @@ class RuntimeAssets : public Assets {
     void destroy();
     void doGUI();
 
-    void loadFromProject(const h_core::project::Project* project);
+    void loadFromProject(const h_core::project::Project* project) override;
     void precompile(h_core::RuntimeSystems* systems);
     void flushAndPrecompileNetAssets(h_core::RuntimeSystems* systems);
 
@@ -85,16 +85,20 @@ void h_core::RuntimeAssets::requestNetAssetNow(
     h_core::Asset** out_assetPtr, CURLcode* out_error, const std::string& serverAddress, h_core::AssetIndex index) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
-    CURL* netHandle = curl_easy_init();
     std::string url = serverAddress + std::string("asset/") + std::to_string(index);
     HYLOG_INFO("ASSETS: Requesting %s...\n", url.c_str());
+
+    CURL* netHandle = curl_easy_init();
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
     curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, out_assetPtr);
     curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 0.5);
+
     CURLcode result = curl_easy_perform(netHandle);
+
     if (result != CURLE_OK) { HYLOG_WARN("ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result)); }
     else { HYLOG_INFO("ASSETS: Curled asset %d OK\n", index); }
+
     if (out_error != nullptr) *out_error = result;
 }
 

@@ -51,7 +51,7 @@ class Assets {
   public:
     Assets() = default;
 
-    void loadFromProject(const h_core::project::Project* project);
+    virtual void loadFromProject(const h_core::project::Project* project);
 
     /// @brief convert the name of an asset to its hash
     /// @param string the string to convert (asset name)
