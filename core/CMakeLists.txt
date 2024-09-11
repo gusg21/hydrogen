@@ -105,8 +105,9 @@ add_subdirectory(external/curl)
 target_link_libraries(HydrogenCore PUBLIC libcurl)
 
 set_target_properties(libcurl_static PROPERTIES FOLDER "Vendored/libcurl")
-set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
-
+if (TARGET libcurl_object)
+ set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
+endif()
 # SDL
 #if (NOT ANDROID)
     set(SDL_STATIC ON)
