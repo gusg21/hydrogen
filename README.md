@@ -30,10 +30,7 @@ Code style is rigorously defined by the `.clang-format` file, use clang-format f
 
 ### Coding Guidelines
 
-* Return error values, don't throw exceptions
-  * 0 always means success, any other values (positive or negative) indicate failure. Check the header to see which constants represent which errors
-* Constructors should be minimal, especially if they can fail
-  * (Prefer `::init()` functions instead)
+See the guidelines [here](https://github.com/gusg21/hydrogen/wiki/Code-Guidelines).
 
 ### Naming
 
