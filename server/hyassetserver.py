@@ -34,11 +34,14 @@ def get_asset(asset_id: int):
         return flask.render_template("bad_asset_get.html", asset_id=asset_id), 404
 
     if corewrap.is_packed_asset_index_valid(asset_id):
+        print("Serving asset {}...".format(asset_id))
         if HyAssetServer.load_simulation_time > 0:
             print("Simulating heavy load...")
             time.sleep(HyAssetServer.load_simulation_time)
+        asset_bytes = corewrap.get_packed_asset_from_index(asset_id).to_bytes()
+        print(len(asset_bytes))
         return flask.Response(
-            corewrap.get_packed_asset_from_index(asset_id).to_bytes(), mimetype="bin/hya"
+            asset_bytes, mimetype="bin/hya"
         ), 200
     else:
         return flask.render_template("bad_asset_get.html", asset_id=asset_id), 404

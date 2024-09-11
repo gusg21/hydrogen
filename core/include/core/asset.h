@@ -18,6 +18,7 @@ class Asset {
     virtual uint32_t precompile(h_core::RuntimeSystems* systems);
     virtual std::vector<char>* toPacked();
     virtual void fromPacked(const void* packedData, size_t length);
+    virtual void doGUI();
 
     bool isRemote = false;
 

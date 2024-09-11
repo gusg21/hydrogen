@@ -7,7 +7,6 @@ c_str = ctypes.POINTER(ctypes.c_char)
 
 class PackedAsset:
     def __init__(self, packed_asset_pointer: ctypes.c_void_p):
-        print(f"Got packed asset @ {packed_asset_pointer}", flush=True)
         self.packed_asset_pointer = packed_asset_pointer
 
     def __del__(self):
