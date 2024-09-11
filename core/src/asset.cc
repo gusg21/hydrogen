@@ -1,6 +1,7 @@
 #include "core/asset.h"
 
 #include "core/log.h"
+#include "imgui.h"
 
 uint32_t h_core::Asset::initFromYaml(
     h_core::Assets* assets, YAML::Node yaml) {
@@ -22,4 +23,8 @@ std::vector<char>* h_core::Asset::toPacked() {
 
 void h_core::Asset::fromPacked(const void* packedData, size_t length) {
     HYLOG_WARN("ASSET: Undefined fromPacked method, not loading\n");
+}
+
+void h_core::Asset::doGUI() {
+    ImGui::Text("Asset::doGUI not implemented");
 }

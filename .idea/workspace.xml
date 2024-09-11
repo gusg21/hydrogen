@@ -68,12 +68,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="added libcurl">
-      <change beforePath="$PROJECT_DIR$/.idea/hydrogen.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/hydrogen.iml" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="asset tweaks, still no macos">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,6 +133,7 @@
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="structure.view.defaults.are.configured" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -693,7 +694,14 @@
       <option name="project" value="LOCAL" />
       <updated>1725837189628</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="asset tweaks, still no macos">
+      <created>1725983811521</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1725983811521</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -739,7 +747,8 @@
     <MESSAGE value="don't try to return bad assets" />
     <MESSAGE value="added libcurl" />
     <MESSAGE value="runtime/base assets split" />
-    <option name="LAST_COMMIT_MESSAGE" value="runtime/base assets split" />
+    <MESSAGE value="asset tweaks, still no macos" />
+    <option name="LAST_COMMIT_MESSAGE" value="asset tweaks, still no macos" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

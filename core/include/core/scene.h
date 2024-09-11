@@ -31,6 +31,8 @@ class Scene {
     h_core::render::MeshComp meshes[SCENE_MAX_ACTORS] = {};
     h_core::script::ScriptComp scripts[SCENE_MAX_ACTORS] = {};
 
+    std::unordered_map<uint32_t, h_core::Component*[SCENE_MAX_ACTORS]> blah {};
+
   private:
     ActorId m_nextId = 0;
     size_t m_numActors = 0;

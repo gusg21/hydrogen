@@ -257,12 +257,16 @@ uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
 
 std::vector<char>* h_core::render::MeshAsset::toPacked() {
     std::vector<char>* bytes = new std::vector<char>();
-    bytes->reserve(m_numVertices + m_numIndices + 2);  // Try to keep in sync with actual byte requirements
+    bytes->reserve(m_numVertices + m_numIndices + 3);  // Try to keep in sync with actual byte requirements
 
+    // # vertices
     bytes->insert(bytes->end(), (char*)&m_numVertices, (char*)&m_numVertices + sizeof(uint32_t));
+
+    // vertices
     bytes->insert(
         bytes->end(), (char*)m_vertices, (char*)(m_vertices) + (m_numVertices * sizeof(h_core::render::Vertex)));
-    bytes->insert(bytes->end(), (char*)&m_numIndices, (char*)&m_numIndices + sizeof(uint32_t));
+
+    // index size
     uint32_t indexSize = 1;
     switch (m_meshIndexType) {
         case MeshIndexType::BYTE:
@@ -275,6 +279,12 @@ std::vector<char>* h_core::render::MeshAsset::toPacked() {
             indexSize = 4;
             break;
     }
+    bytes->insert(bytes->end(), (char*)&indexSize, (char*)&indexSize + sizeof(uint32_t));
+
+    // # indices
+    bytes->insert(bytes->end(), (char*)&m_numIndices, (char*)&m_numIndices + sizeof(uint32_t));
+
+    // indices
     bytes->insert(bytes->end(), (char*)m_indices, (char*)(m_indices) + (m_numIndices * indexSize));
 
     return bytes;
@@ -282,27 +292,87 @@ std::vector<char>* h_core::render::MeshAsset::toPacked() {
 
 void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
     const char* bytes = (const char*)data;
+    const char* readHead = bytes;
 
     HYLOG_DEBUG("MESH: loading from packed (%zu bytes)\n", length);
-    HYLOG_DEBUG("MESH: first byte %x\n", bytes[0]);
+    HYLOG_DEBUG("MESH: first byte %x\n", readHead[0]);
 
-    uint32_t numVertices = *(uint32_t*)(bytes + 0);
+    // # vertices
+    uint32_t numVertices = *(uint32_t*)(readHead);
     HYLOG_DEBUG("MESH: # of vertices: %d\n", numVertices);
+    readHead += sizeof(uint32_t);
 
+    // vertices data
     m_vertices = new h_core::render::Vertex[numVertices];
-    memcpy(m_vertices, bytes + sizeof(uint32_t), numVertices * sizeof(h_core::render::Vertex));
+    memcpy(m_vertices, readHead, numVertices * sizeof(h_core::render::Vertex));
+    readHead += numVertices * sizeof(h_core::render::Vertex);
 
-    uint32_t numIndices = *(uint32_t*)(bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex));
+    // index type
+    uint32_t indexTypeSize = *(uint32_t*)(readHead);
+    switch (indexTypeSize) {
+        case 1:
+            m_meshIndexType = MeshIndexType::BYTE;
+            break;
+        case 2:
+            m_meshIndexType = MeshIndexType::SHORT;
+            break;
+        case 4:
+            m_meshIndexType = MeshIndexType::INT;
+            break;
+        default:
+            HYLOG_ERROR("MESH: Invalid packed mesh index type %d", indexTypeSize);
+            return;
+    }
+    readHead += sizeof(uint32_t);
+
+    // # indices
+    uint32_t numIndices = *(uint32_t*)(readHead);
     HYLOG_DEBUG("MESH: # of indices: %d\n", numIndices);
+    readHead += sizeof(uint32_t);
 
-    m_indices = new uint16_t[numIndices];  // TODO: use actual index type
-    memcpy(
-        m_indices, bytes + sizeof(uint32_t) + numVertices * sizeof(h_core::render::Vertex) + sizeof(uint32_t),
-        numIndices * sizeof(uint16_t));
+    // indices data
+    switch (m_meshIndexType) {
+        case MeshIndexType::BYTE:
+            m_indices = new uint8_t[numIndices];
+            break;
+        case MeshIndexType::SHORT:
+            m_indices = new uint16_t[numIndices];
+            break;
+        case MeshIndexType::INT:
+            m_indices = new uint32_t[numIndices];
+            break;
 
+    }
+    memcpy(m_indices, readHead, numIndices * indexTypeSize);
+    readHead += numIndices * indexTypeSize;
+
+    // Store data
     m_numVertices = numVertices;
     m_numIndices = numIndices;
-    m_meshIndexType = MeshIndexType::SHORT;
     m_primitiveMode = GL_TRIANGLES;
     m_isCube = false;
+}
+
+void h_core::render::MeshAsset::doGUI() {
+    Asset::doGUI();
+
+    ImGui::Text("Vertex Count: %d", m_numVertices);
+    ImGui::Text("Index Count: %d", m_numIndices);
+    const char* indexTypeName;
+    switch (m_meshIndexType) {
+        case MeshIndexType::BYTE:
+            indexTypeName = "BYTE";
+            break;
+        case MeshIndexType::SHORT:
+            indexTypeName = "SHORT";
+            break;
+        case MeshIndexType::INT:
+            indexTypeName = "INT";
+            break;
+    }
+    ImGui::Text("Index Type: %s", indexTypeName);
+    ImGui::Text("Is Cube?: %s", m_isCube ? "YES" : "NO");
+    ImGui::Text("IBO: %d", m_indexBufferHandle);
+    ImGui::Text("VBO: %d", m_vertexBufferHandle);
+    ImGui::Text("VAO: %d", m_vertexAttributesHandle);
 }
