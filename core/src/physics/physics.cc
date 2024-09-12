@@ -6,27 +6,34 @@
 #include "core/physics/rigidbodycomp.h"
 #include "core/transform.h"
 
-#define GRAVITATIONAL_CONSTANT 0.0000000000667
+#define GRAVITATIONAL_CONSTANT 0.0000000000667f
 
 uint32_t h_core::physics::Physics::init(h_core::Engine* engine) {
     return 0;
 }
+
 void h_core::physics::Physics::endFrame() {
     RigidbodyAsset* rb = rigidbodyComp->rigidbody;
     float deltaTime = engine->getDeltaSecs();
 
-    rb->acceleration = rb->accumulatedForce * rb->inverseMass;
+    rb->acceleration += rb->accumulatedForce * rb->inverseMass;
     rb->clearForces();
+
+    rb->acceleration += calculateGravity();
 
     rb->velocity += rb->acceleration * deltaTime;
     transform->position += rb->velocity * deltaTime;
 }
 void h_core::physics::Physics::draw() {
+    for(RigidbodyComp* rbc : allRigidbodies) { //make sure we don't have duplicates in the static list
+        if(rbc == rigidbodyComp) {
+            return;
+        }
+    }
+
     allRigidbodies.push_back(rigidbodyComp);
 }
-h_core::ComponentBitmask h_core::physics::Physics::getMask() const {
-    return TRANSFORM_COMPONENT_BITMASK | RIGIDBODY_COMPONENT_BITMASK;
-}
+
 h_core::math::Vector3 h_core::physics::Physics::calculateGravity() {
     h_core::math::Vector3 gravitationalForce = h_core::math::Vector3();
 

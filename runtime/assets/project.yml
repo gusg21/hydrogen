@@ -20,8 +20,8 @@ assets:
 #    path: "assets/test_model.yml"
   - index: 40
     type: 3
-#    path: "assets/test_model2.yml"
-    remote: true
+    path: "assets/test_model2.yml"
+#    remote: true
   - index: 7
     type: 0
     path: "assets/test_scene.yml"

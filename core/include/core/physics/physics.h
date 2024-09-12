@@ -4,8 +4,10 @@
 
 #pragma once
 
-#include "core/system.h"
 #include <vector>
+
+#include "core/runtimesystem.h"
+#include "rigidbodycomp.h"
 
 namespace h_core {
 
@@ -14,17 +16,20 @@ class Vector3;
 }
 
 namespace physics {
-class Physics : public System {
+class Physics : public RuntimeSystem {
   public:
-    uint32_t init(h_core::Engine* engine) override;
+    Physics() = default;
+
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void draw() override;
     void endFrame() override;
 
-    h_core::ComponentBitmask getMask() const override;
-
-    h_core::math::Vector3 calculateGravity();
+  protected:
+    HYSYSTEM(h_core::Transform::getMask() | h_core::physics::RigidbodyComp::getMask())
 
   private:
+    h_core::math::Vector3 calculateGravity();
+
     static std::vector<RigidbodyComp*> allRigidbodies;
 };
 }
