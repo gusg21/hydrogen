@@ -87,6 +87,34 @@ void h_core::RuntimeAssets::doGUI() {
             }
             ImGui::Unindent();
         }
+
+        if (ImGui::CollapsingHeader("Asset List")) {
+            ImGui::Indent();
+            uint32_t assetIndex = 0;
+            for (h_core::Asset* asset : m_assets) {
+                if (asset != nullptr) {
+                    std::string title = "Asset " + std::to_string(assetIndex);
+                    if (ImGui::CollapsingHeader(title.c_str())) {
+                        ImGui::Indent();
+                        asset->doGUI();
+                        ImGui::Separator();
+                        if (ImGui::Button("Calc Packed Size")) {
+                            std::vector<uint8_t>* packed = asset->toPacked();
+                            m_packedSizeMap[assetIndex] = packed->size();
+                            delete packed;
+                        }
+                        if (m_packedSizeMap.find(assetIndex) != m_packedSizeMap.end()) {
+                            ImGui::SameLine();
+                            ImGui::Text("Packed Size: %u", m_packedSizeMap[assetIndex]);
+                        }
+
+                        ImGui::Unindent();
+                    }
+                }
+                assetIndex++;
+            }
+            ImGui::Unindent();
+        }
     }
     ImGui::End();
 }
@@ -133,7 +161,7 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
 
     while (!context->netRequestThreadAlive) {
         // Do jobs if needed
-        if (!context->jobs.empty()) {
+        if (!context->jobs.empty() && context->hasServerConnection) {
             // Request asset
             NetRequestJob job = context->jobs.front();
             HYLOG_INFO("ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);

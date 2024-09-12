@@ -16,9 +16,9 @@ uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     return 0;
 }
 
-std::vector<char>* h_core::Asset::toPacked() {
+std::vector<uint8_t>* h_core::Asset::toPacked() {
     HYLOG_WARN("ASSET: Undefined toPacked method, returning empty\n");
-    return new std::vector<char>();
+    return new std::vector<uint8_t>();
 }
 
 void h_core::Asset::fromPacked(const void* packedData, size_t length) {

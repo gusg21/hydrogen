@@ -2,31 +2,32 @@ import ctypes
 import _ctypes
 
 core: ctypes.CDLL
-c_str = ctypes.POINTER(ctypes.c_char)
 
 
 class PackedAsset:
     def __init__(self, packed_asset_pointer: ctypes.c_void_p):
+        print("Created PackedAsset with data @ {}".format(packed_asset_pointer))
         self.packed_asset_pointer = packed_asset_pointer
 
     def __del__(self):
         print(f"Deleting packed asset @ {self.packed_asset_pointer}", flush=True)
         core.delete_packed_asset(self.packed_asset_pointer)
 
-    def __getitem__(self, item: int):
+    def __getitem__(self, item: int) -> ctypes.c_byte:
         return core.get_data_in_packed_asset(self.packed_asset_pointer, ctypes.c_uint32(item))
 
-    def __len__(self):
+    def __len__(self) -> int:
         return core.get_length_of_packed_asset(self.packed_asset_pointer)
 
-    def to_bytes(self) -> bytes:
-        data = bytes()
-        for i in range(len(self)):
-            data += self[i][0:1]
+    def to_bytearray(self) -> bytearray:
+        print("Converting PackedAsset @ {} to bytearray...".format(self.packed_asset_pointer))
+        length = len(self)
+        print("Byte length: {}".format(length))
+        data = bytearray(self)
         return data
 
     def __repr__(self):
-        return '[{}]'.format(', '.join("0x{0:x}".format(self[i][0]) for i in range(len(self))))
+        return '<PackedAsset @ {}>'.format(self.packed_asset_pointer)
 
 
 def load_core(dll_path: str) -> None:
@@ -52,8 +53,8 @@ def load_core(dll_path: str) -> None:
     core.get_packed_asset_from_index.argtypes = [ctypes.c_uint32]
     core.delete_packed_asset.restype = None
     core.delete_packed_asset.argtypes = [ctypes.c_void_p]
-    core.get_data_in_packed_asset.restype = ctypes.c_char
-    core.get_data_in_packed_asset.argtypes = [ctypes.c_void_p]
+    core.get_data_in_packed_asset.restype = ctypes.c_ubyte
+    core.get_data_in_packed_asset.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     core.get_length_of_packed_asset.restype = ctypes.c_size_t
     core.get_length_of_packed_asset.argtypes = [ctypes.c_void_p]
 
@@ -79,4 +80,5 @@ def is_packed_asset_index_valid(asset_index: int) -> bool:
 
 
 def get_packed_asset_from_index(asset_index: int) -> PackedAsset:
+    print("Getting packed asset for index {}".format(asset_index))
     return PackedAsset(core.get_packed_asset_from_index(asset_index))

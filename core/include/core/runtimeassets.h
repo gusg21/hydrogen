@@ -47,8 +47,10 @@ class RuntimeAssets : public Assets {
 
     std::string m_serverAddress {};
     std::thread m_netRequestThread {};
-    std::deque<h_core::NetRequestJob> m_recentJobs {};
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
+
+    std::deque<h_core::NetRequestJob> m_recentJobs {};
+    std::unordered_map<uint32_t, uint32_t> m_packedSizeMap {};
 };
 }  // namespace h_core
 
