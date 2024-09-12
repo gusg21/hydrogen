@@ -19,7 +19,9 @@ typedef uint32_t InputActionIndex;
 
 class Input {
   public:
-    void init(h_core::project::Project* project, h_core::Window* window);
+    Input() = default;
+
+    void init(const h_core::project::Project* project, h_core::Window* window);
     void doGUI();
     void updateInternals();
     void setMousePos(uint32_t x, uint32_t y);
@@ -45,7 +47,7 @@ class Input {
     bool mouseCaptured = false;
 
   private:
-    h_core::Window* m_window;
+    h_core::Window* m_window = nullptr;
 
     std::vector<h_core::input::InputAction*> m_actions {};
     std::unordered_map<uint32_t, h_core::input::InputActionIndex>

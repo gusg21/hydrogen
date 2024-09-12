@@ -1,13 +1,19 @@
-#include <stdio.h>
 #include <string>
 
-#include "core/window.h"
+#include "core/engine.h"
+#include "editor/editorengine.h"
 
-int main(char* argv, int argc) {
-//    h_core::Window* window = new h_core::Window();
-//    window->init("", 1600, 900, false);
+int main(int, char*[]) {
+    h_editor::EditorEngine* engine = new h_editor::EditorEngine();
 
-    SDL_Log("You built the editor, silly!\n");
+    h_core::project::Project project {};
+    project.loadFromFile("assets/project.yml", "");
+
+    const uint32_t engineInitResult = engine->init(&project);
+    if (engineInitResult != 0) { return static_cast<int>(engineInitResult); }
+
+    engine->run();
+    engine->destroy();
 
     return 0;
 }

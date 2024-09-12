@@ -10,7 +10,7 @@ namespace h_core {
 namespace render {
 class Gl4Renderer : public Renderer {
   public:
-    uint32_t init(h_core::Engine* engine) override;
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void beginFrame() override;
     void draw() override;
 

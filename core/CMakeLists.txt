@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
+
 # Core sources
 set(HydrogenCore_Sources 
 
@@ -11,14 +13,26 @@ set(HydrogenCore_Sources
             include/core/engineevents.h
             src/event.cc include/core/event.h
             src/eventqueue.cc include/core/eventqueue.h
-            src/project/project.cc include/core/project/project.h
+            src/runtimeassets.cc include/core/runtimeassets.h
             src/runtimeengine.cc include/core/runtimeengine.h
+            src/runtimesystem.cc include/core/runtimesystem.h
+            src/runtimesystems.cc include/core/runtimesystems.h
             src/scene.cc include/core/scene.h
-            src/system.cc include/core/system.h
-            src/systems.cc include/core/systems.h
             src/scenespecasset.cc include/core/scenespecasset.h
             src/transform.cc include/core/transform.h
             src/window.cc include/core/window.h
+            include/core/netrequestthreadcontext.h
+            include/core/netrequestjob.h
+            include/core/assetindex.h
+            include/core/component.h
+            include/core/widgets.h
+            include/core/netrequestresult.h
+            include/core/runtimeconsole.h
+            src/runtimeconsole.cc
+            include/core/log.h
+
+            # Project
+            src/project/project.cc include/core/project/project.h
 
             # Math
             src/math/mat4x4.cc include/core/math/mat4x4.h
@@ -50,10 +64,7 @@ set(HydrogenCore_Sources
             src/input/dualkeyinputactionsource.cc include/core/input/dualkeyinputactionsource.h
 )
 
-add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
-        include/core/netrequestthreadcontext.h
-        include/core/netrequestjob.h
-        include/core/assetindex.h include/core/physics/physics.h src/physics/physics.cc include/core/physics/rigidbodyasset.h include/core/physics/rigidbodycomp.h src/physics/rigidbodyasset.cc src/physics/rigidbodycomp.cc)
+add_library(HydrogenCore STATIC ${HydrogenCore_Sources})
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -92,6 +103,10 @@ set(CURL_DISABLE_INSTALL ON)
 add_subdirectory(external/curl)
 target_link_libraries(HydrogenCore PUBLIC libcurl)
 
+set_target_properties(libcurl_static PROPERTIES FOLDER "Vendored/libcurl")
+if (TARGET libcurl_object)
+ set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
+endif()
 # SDL
 #if (NOT ANDROID)
     set(SDL_STATIC ON)
@@ -199,27 +214,12 @@ set_target_properties(yaml-cpp PROPERTIES FOLDER "Vendored/yaml-cpp")
 set_target_properties(uninstall PROPERTIES FOLDER "Vendored/yaml-cpp/misc")
 
 # generated shader code
-function(HydrogenCore_CopyShaders folder)
-    if (NOT TARGET HydrogenCore_CopyShaders)
-        if (ANDROID)
-            set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
-    #        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
-    #        file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
-    #        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
-    #        file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
-            message(STATUS "(HydrogenCore_CopyShaders) ${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
-            add_custom_target(HydrogenCore_CopyShaders
-                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_SOURCE_DIR}/android/hydrogen/app/src/main/assets/hcore_assets
-            )
-        else()
-            add_custom_target(HydrogenCore_CopyShaders
-                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders hcore_assets
-            )
-        endif()
+function(HydrogenCore_CopyShaders target folder)
+    add_custom_target(HydrogenCore_CopyShaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/hcore_assets
+    )
 
-        add_dependencies(HydrogenCore HydrogenCore_CopyShaders)
-        add_dependencies(HydrogenCore_Shared HydrogenCore_CopyShaders)
-    endif()
+    add_dependencies(${target} HydrogenCore_CopyShaders)
 
     set_target_properties(HydrogenCore_CopyShaders PROPERTIES FOLDER "HyCoreSupport")
 endfunction()

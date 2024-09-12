@@ -67,7 +67,7 @@ If you notice any problems on your platform, please file an issue on the
 [GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
 Pull requests containing fixes are welcome!
 
-### Operating Systems
+### Operating RuntimeSystems
 
 *   Linux
 *   macOS
@@ -81,7 +81,7 @@ Pull requests containing fixes are welcome!
 
 **macOS users:** Xcode 9.3+ provides clang 5.0+.
 
-### Build Systems
+### Build RuntimeSystems
 
 *   [Bazel](https://bazel.build/)
 *   [CMake](https://cmake.org/)

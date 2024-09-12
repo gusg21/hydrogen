@@ -4,9 +4,11 @@
 #include "glad/glad.h"
 
 #include "core/engine.h"
-#include "core/systems/render/shader.h"
-#include "core/system.h"
 #include "core/input/input.h"
+#include "core/runtimesystem.h"
+#include "core/systems/render/meshasset.h"
+#include "core/systems/render/shader.h"
+#include "core/transform.h"
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
 #define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2
@@ -17,11 +19,11 @@
 
 namespace h_core {
 namespace render {
-class Renderer : public System {
+class Renderer : public RuntimeSystem {
   public:
     Renderer() = default;
 
-    uint32_t init(h_core::Engine* engine) override;
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void destroy() override;
     void doGUI() override;
     void beginFrame() override;
@@ -29,7 +31,6 @@ class Renderer : public System {
     void endFrame() override;
 
     [[nodiscard]] SDL_GLContext getGLContext() const;
-    [[nodiscard]] h_core::ComponentBitmask getMask() const override;
     [[nodiscard]] bool isGles3();
 
     static uint32_t loadShader(GLuint* out_shaderId, std::string filePath);
@@ -47,7 +48,11 @@ class Renderer : public System {
     float m_farZ = 100.f;
     bool m_ccw = true;
 
+    HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
+
   private:
+    static uint32_t callback_setFov(const std::string& args, void* data);
+
     std::string m_rendererName { "UNKNOWN" };
     bool m_isGles3 = false;
 

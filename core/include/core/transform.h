@@ -3,11 +3,10 @@
 #include "yaml-cpp/yaml.h"
 
 #include "core/math/math.h"
-
-#define TRANSFORM_COMPONENT_BITMASK (1 << 0)
+#include "core/component.h"
 
 namespace h_core {
-class Transform {
+class Transform : public Component {
   public:
     Transform() : position(0, 0, 0), rotation(0, 0, 0, 1), scale(1, 1, 1) {};
 
@@ -23,5 +22,7 @@ class Transform {
 
     /// @brief scale
     h_core::math::Vector3 scale;
+
+    HYCOMPONENT(0);
 };
 }  // namespace h_core

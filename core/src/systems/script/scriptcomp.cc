@@ -4,17 +4,18 @@
 #include "core/systems/script/scriptcomp.h"
 
 uint32_t h_core::script::ScriptComp::init(
-    h_core::script::ScriptAsset* asset, asIScriptContext* context,
+    h_core::AssetIndex asset, h_core::Assets* assets, asIScriptContext* context,
     h_core::ActorId id) {
     scriptAsset = asset;
-    instance = asset->constructInstance(context, id);
+    instance = assets->getAssetByIndex<h_core::script::ScriptAsset>(asset)->constructInstance(context, id);
+    this->assets = assets;
 
     return 0;
 }
 
 uint32_t h_core::script::ScriptComp::runMethodIfExists(
     asIScriptContext* context, const std::string& methodDecl) const {
-    asIScriptFunction* func = scriptAsset->type->GetMethodByDecl(methodDecl.c_str());
+    asIScriptFunction* func = assets->getAssetByIndex<h_core::script::ScriptAsset>(scriptAsset)->type->GetMethodByDecl(methodDecl.c_str());
 
     if (func != nullptr) {
         // TODO(optimization): `func` is rederived in runMethod()
@@ -26,7 +27,7 @@ uint32_t h_core::script::ScriptComp::runMethodIfExists(
 
 uint32_t h_core::script::ScriptComp::runMethod(
     asIScriptContext* context, const std::string& methodDecl) const {
-    asIScriptFunction* func = scriptAsset->type->GetMethodByDecl(methodDecl.c_str());
+    asIScriptFunction* func = assets->getAssetByIndex<h_core::script::ScriptAsset>(scriptAsset)->type->GetMethodByDecl(methodDecl.c_str());
 
     int result;
 

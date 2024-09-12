@@ -3,15 +3,19 @@
 //
 
 #pragma once
-#include "core/systems/render/meshasset.h"
+
+#include "core/assetindex.h"
+#include "core/component.h"
 
 namespace h_core {
 namespace render {
-class MeshComp {
+class MeshComp : public Component {
   public:
-    void init(h_core::render::MeshAsset* mesh);
+    void init(h_core::AssetIndex mesh);
 
-    h_core::render::MeshAsset* mesh;
+    h_core::AssetIndex mesh = ASSET_INDEX_BAD;
+
+    HYCOMPONENT(1);
 };
 }  // namespace render
 }  // namespace h_core

@@ -6,14 +6,17 @@
 #include "imgui.h"
 
 #include "core/input/dualkeyinputactionsource.h"
-#include "core/input/keyinputactionsource.h"
 #include "core/systems/gravity.h"
 #include "core/systems/render/gles3renderer.h"
 #include "core/systems/render/gl4renderer.h"
 #include "core/systems/script/scripting.h"
 
-void h_core::RuntimeEngine::doInit() {
-    Engine::doInit();
+void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
+    // set up console - happens really early to catch all the prints
+    m_console = new h_core::RuntimeConsole();
+    m_console->init();
+
+    Engine::doInit(project);
 
     // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
@@ -25,18 +28,18 @@ void h_core::RuntimeEngine::doInit() {
     }
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
-}
 
-void h_core::RuntimeEngine::doPostLoad() {
-    Engine::doPostLoad();
-
-    getAssets()->precompile(&m_systems);
+    // set up assets
+    m_assets = new h_core::RuntimeAssets();
+    m_assets->init("http://localhost:5000/"); // TODO: Local server. update with remote server
+    m_assets->loadFromProject(project);
+    m_assets->precompile(&m_systems);
 }
 
 void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
     // Prepare the actors for this scene
-    if (sceneSpecIndex != ASSETS_ASSET_INDEX_BAD) {
-        getScene()->addActorsFromSceneSpec(getAssets(), sceneSpecIndex, m_systems.scripting->getContext());
+    if (sceneSpecIndex != ASSET_INDEX_BAD) {
+        getScene()->addActorsFromSceneSpec(m_assets, sceneSpecIndex, m_systems.scripting->getContext());
     }
 
     // Prepare the systems for this scene
@@ -45,8 +48,6 @@ void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
 
 
 void h_core::RuntimeEngine::doGUI() {
-    Engine::doGUI();
-
     // Demo ImGui window
     if (m_showImGuiDemo) ImGui::ShowDemoWindow();
 
@@ -101,13 +102,18 @@ void h_core::RuntimeEngine::doGUI() {
 
     m_systems.doGUI();
     getInput()->doGUI();
-    getScene()->doGUI();
+    getScene()->doGUI(m_assets);
+    m_assets->doGUI();
+    m_assets->registerCommands(m_console);
+    m_console->doGUI();
 }
 
 void h_core::RuntimeEngine::beginFrame() {
     Engine::beginFrame();
 
-    m_systems.beginFrame();
+    doGUI();
+
+        m_systems.beginFrame();
 }
 
 void h_core::RuntimeEngine::doProcess() {
@@ -127,6 +133,10 @@ void h_core::RuntimeEngine::endFrame() {
 
     m_systems.endFrame();
 
+    // Flush newly loaded assets from the internal net requests thread to the main thread asset list
+    m_assets->flushAndPrecompileNetAssets(&m_systems);
+
+    // Calculate average FPS
     m_fpsSamples.push_back(getFPS());
     if (m_fpsSamples.size() > RUNTIMEENGINE_MAX_FPS_SAMPLES) { m_fpsSamples.pop_front(); }
     m_averageFPS = 0;
@@ -138,7 +148,16 @@ void h_core::RuntimeEngine::endFrame() {
 
 void h_core::RuntimeEngine::destroy() {
     m_systems.destroy();
+    m_assets->destroy();
 
     // THEN destroy the engine internals
     Engine::destroy();
+}
+
+h_core::RuntimeAssets* h_core::RuntimeEngine::getRuntimeAssets() {
+    return m_assets;
+}
+
+h_core::RuntimeConsole* h_core::RuntimeEngine::getConsole() {
+    return m_console;
 }

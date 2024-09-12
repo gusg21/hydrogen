@@ -1,16 +1,18 @@
 #pragma once
 
-#include "core/system.h"
+#include "core/runtimesystem.h"
+#include "core/transform.h"
 
 namespace h_core {
 namespace systems {
-class Gravity : public System {
+class Gravity : public RuntimeSystem {
   public:
     Gravity() = default;
 
-    uint32_t init(h_core::Engine* engine) override;
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void process() override;
-    [[nodiscard]] h_core::ComponentBitmask getMask() const override;
+
+    HYSYSTEM(h_core::Transform::getMask());
 };
 }  // namespace systems
 }  // namespace h_core

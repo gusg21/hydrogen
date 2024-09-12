@@ -2,15 +2,15 @@
 
 #include "angelscript.h"
 
-#include "core/math/math.h"
-#include "core/system.h"
+#include "core/runtimesystem.h"
+#include "core/systems/script/scriptcomp.h"
 
 namespace h_core {
 namespace script {
 
-class Scripting : public System {
+class Scripting : public RuntimeSystem {
   public:
-    uint32_t init(h_core::Engine* engine) override;
+    uint32_t init(h_core::RuntimeEngine* engine) override;
     void destroy() override;
     void initPerActor() override;
     void beginFrame() override;
@@ -18,12 +18,13 @@ class Scripting : public System {
     void draw() override;
     void endFrame() override;
 
-    [[nodiscard]] uint32_t getMask() const override;
     [[nodiscard]] asIScriptContext* getContext() const;
     [[nodiscard]] asIScriptModule* getModule() const;
 
     h_core::Transform getBoundTransform();
     void setBoundTransform(h_core::Transform newTrans);
+
+    HYSYSTEM(h_core::script::ScriptComp::getMask());
 
   private:
     asIScriptEngine* m_scriptEngine = nullptr;

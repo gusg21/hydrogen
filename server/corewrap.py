@@ -1,4 +1,5 @@
 import ctypes
+import _ctypes
 
 core: ctypes.CDLL
 c_str = ctypes.POINTER(ctypes.c_char)
@@ -6,7 +7,6 @@ c_str = ctypes.POINTER(ctypes.c_char)
 
 class PackedAsset:
     def __init__(self, packed_asset_pointer: ctypes.c_void_p):
-        print(f"Got packed asset @ {packed_asset_pointer}", flush=True)
         self.packed_asset_pointer = packed_asset_pointer
 
     def __del__(self):
@@ -32,7 +32,11 @@ class PackedAsset:
 def load_core(dll_path: str) -> None:
     global core
 
-    core = ctypes.cdll.LoadLibrary(dll_path)
+    if not dll_path:
+        raise TypeError("Invalid DLL path")
+
+    handle = _ctypes.LoadLibrary(dll_path)
+    core = ctypes.CDLL(dll_path, handle=handle) if handle != 0 else handle
 
     core.create_engine.restype = None
     core.create_engine.argtypes = []

@@ -3,6 +3,9 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="CMakeProjectFlavorService">
+    <option name="flavorId" value="CMakePlainProjectFlavor" />
+  </component>
   <component name="CMakeReloadState">
     <option name="reloaded" value="true" />
   </component>
@@ -11,14 +14,13 @@
       <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
       <config projectName="Hydrogen" targetName="angelscript" />
       <config projectName="Hydrogen" targetName="NightlyTest" />
-      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
       <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
+      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
       <config projectName="Hydrogen" targetName="ExperimentalTest" />
       <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="ContinuousBuild" />
       <config projectName="Hydrogen" targetName="Experimental" />
       <config projectName="Hydrogen" targetName="HydrogenEditor" />
-      <config projectName="Hydrogen" targetName="libcurl_object" />
       <config projectName="Hydrogen" targetName="ContinuousStart" />
       <config projectName="Hydrogen" targetName="Nightly" />
       <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
@@ -60,22 +62,18 @@
       <config projectName="Hydrogen" targetName="ExperimentalUpdate" />
     </generated>
   </component>
-  <component name="CMakeSettings">
+  <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+      <configuration PROFILE_NAME="Debug-Visual Studio" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="added libcurl">
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="asset tweaks, still no macos">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/math/vector3.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/math/vector3.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/physics/physics.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/physics/physics.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/physics/rigidbodyasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/physics/rigidbodyasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/math/vector3.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/math/vector3.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/physics/physics.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/physics/physics.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/physics/rigidbodyasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/physics/rigidbodyasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,11 +86,9 @@
       <list>
         <option value="Python Script" />
         <option value="HTML File" />
+        <option value="CMakeLists.txt" />
       </list>
     </option>
-  </component>
-  <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="broke-physics" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -102,6 +98,16 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/core/include/core/engine.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/netrequestthreadcontext.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/assets.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/input/input.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/runtimeengine.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/runtimeassets.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/systems/render/gles3renderer.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/editorengine.h" root0="SKIP_HIGHLIGHTING" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -109,11 +115,14 @@
     <scope name="Core Source" pattern="file:core/src//*" />
     <scope name="Core Headers" pattern="file:core/include//*" />
   </component>
-  <component name="OCResolveContextSettings">
-    <option name="configuration" value="0-Debug-HydrogenCore" />
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2024" />
+    <option name="minorVersion" value="2.1" />
+    <option name="productBranch" value="Classic" />
   </component>
   <component name="ProjectId" id="2lRXeQrlEOuhFzwP84z4XzhILwF" />
-  <component name="ProjectLevelVcsManager">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -123,11 +132,8 @@
   <component name="PropertiesComponent">
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
+    <property name="structure.view.defaults.are.configured" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -137,10 +143,11 @@
       <recent name="C:\Projects\hydrogen\runtime\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Projects\hydrogen\core\include\core" />
+      <recent name="C:\Users\angus.goucher\CLionProjects\hydrogen\editor\include\editor" />
       <recent name="C:\Projects\hydrogen\core\shaders\core" />
       <recent name="C:\Projects\hydrogen\core\src\project" />
       <recent name="C:\Projects\hydrogen\core\include\core\project" />
-      <recent name="C:\Projects\hydrogen\core\include\core\input" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
@@ -369,11 +376,6 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libcurl_object" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="libcurl_object" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="libcurl_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="libcurl_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -421,23 +423,6 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="CMake Application.HydrogenCore" />
-      <item itemvalue="CMake Application.HydrogenCore_AngelScriptExtensions" />
-      <item itemvalue="CMake Application.HydrogenCore_Shared" />
-      <item itemvalue="CMake Application.HydrogenCore_CopyShaders" />
-      <item itemvalue="CMake Application.angelscript" />
-      <item itemvalue="CMake Application.libcurl_object" />
-      <item itemvalue="CMake Application.libcurl_static" />
-      <item itemvalue="CMake Application.glad" />
-      <item itemvalue="CMake Application.imgui.cmake" />
-      <item itemvalue="CMake Application.SDL2" />
-      <item itemvalue="CMake Application.SDL2-static" />
-      <item itemvalue="CMake Application.SDL2_test" />
-      <item itemvalue="CMake Application.SDL2main" />
-      <item itemvalue="CMake Application.sdl_headers_copy" />
-      <item itemvalue="CMake Application.uninstall" />
-      <item itemvalue="CMake Application.tinygltf" />
-      <item itemvalue="CMake Application.Continuous" />
       <item itemvalue="CMake Application.ContinuousBuild" />
       <item itemvalue="CMake Application.ContinuousConfigure" />
       <item itemvalue="CMake Application.ContinuousCoverage" />
@@ -446,7 +431,7 @@
       <item itemvalue="CMake Application.ContinuousSubmit" />
       <item itemvalue="CMake Application.ContinuousTest" />
       <item itemvalue="CMake Application.ContinuousUpdate" />
-      <item itemvalue="CMake Application.Experimental" />
+      <item itemvalue="CMake Application.Continuous" />
       <item itemvalue="CMake Application.ExperimentalBuild" />
       <item itemvalue="CMake Application.ExperimentalConfigure" />
       <item itemvalue="CMake Application.ExperimentalCoverage" />
@@ -455,7 +440,16 @@
       <item itemvalue="CMake Application.ExperimentalSubmit" />
       <item itemvalue="CMake Application.ExperimentalTest" />
       <item itemvalue="CMake Application.ExperimentalUpdate" />
-      <item itemvalue="CMake Application.Nightly" />
+      <item itemvalue="CMake Application.Experimental" />
+      <item itemvalue="CMake Application.HydrogenCore_AngelScriptExtensions" />
+      <item itemvalue="CMake Application.HydrogenCore_CopyShaders" />
+      <item itemvalue="CMake Application.HydrogenEditor" />
+      <item itemvalue="CMake Application.HydrogenCore_Shared" />
+      <item itemvalue="CMake Application.HydrogenCore" />
+      <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
+      <item itemvalue="CMake Application.HydrogenRuntime" />
+      <item itemvalue="CMake Application.HydrogenServer_Wrapper" />
+      <item itemvalue="CMake Application.HydrogenServer" />
       <item itemvalue="CMake Application.NightlyBuild" />
       <item itemvalue="CMake Application.NightlyConfigure" />
       <item itemvalue="CMake Application.NightlyCoverage" />
@@ -465,12 +459,19 @@
       <item itemvalue="CMake Application.NightlySubmit" />
       <item itemvalue="CMake Application.NightlyTest" />
       <item itemvalue="CMake Application.NightlyUpdate" />
+      <item itemvalue="CMake Application.Nightly" />
+      <item itemvalue="CMake Application.SDL2-static" />
+      <item itemvalue="CMake Application.SDL2_test" />
+      <item itemvalue="CMake Application.SDL2main" />
+      <item itemvalue="CMake Application.angelscript" />
+      <item itemvalue="CMake Application.glad" />
+      <item itemvalue="CMake Application.imgui.cmake" />
+      <item itemvalue="CMake Application.SDL2" />
+      <item itemvalue="CMake Application.libcurl_static" />
+      <item itemvalue="CMake Application.sdl_headers_copy" />
+      <item itemvalue="CMake Application.tinygltf" />
+      <item itemvalue="CMake Application.uninstall" />
       <item itemvalue="CMake Application.yaml-cpp" />
-      <item itemvalue="CMake Application.HydrogenEditor" />
-      <item itemvalue="CMake Application.HydrogenRuntime" />
-      <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
-      <item itemvalue="CMake Application.HydrogenServer" />
-      <item itemvalue="CMake Application.HydrogenServer_Wrapper" />
       <item itemvalue="Python.main" />
     </list>
     <recent_temporary>
@@ -497,7 +498,9 @@
       <workItem from="1725396846618" duration="5597000" />
       <workItem from="1725421405150" duration="23873000" />
       <workItem from="1725585006797" duration="1178000" />
-      <workItem from="1725591940685" duration="30630000" />
+      <workItem from="1725591940685" duration="53051000" />
+      <workItem from="1725946168594" duration="2007000" />
+      <workItem from="1725948695615" duration="4497000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -683,7 +686,22 @@
       <option name="project" value="LOCAL" />
       <updated>1725643956868</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="runtime/base assets split">
+      <option name="closed" value="true" />
+      <created>1725837189628</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1725837189628</updated>
+    </task>
+    <task id="LOCAL-00025" summary="asset tweaks, still no macos">
+      <created>1725983811521</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1725983811521</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -728,28 +746,9 @@
     <MESSAGE value="server is serving packed assets" />
     <MESSAGE value="don't try to return bad assets" />
     <MESSAGE value="added libcurl" />
-    <option name="LAST_COMMIT_MESSAGE" value="added libcurl" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/include/core/assets.h</url>
-          <line>150</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/include/core/system.h</url>
-          <line>2</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-    <watches-manager>
-      <configuration name="CMakeRunConfiguration">
-        <watch expression="assets-&gt;m_assets[39]" />
-      </configuration>
-    </watches-manager>
+    <MESSAGE value="runtime/base assets split" />
+    <MESSAGE value="asset tweaks, still no macos" />
+    <option name="LAST_COMMIT_MESSAGE" value="asset tweaks, still no macos" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

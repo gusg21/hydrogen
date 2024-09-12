@@ -9,7 +9,7 @@
 #include "core/input/keyinputactionsource.h"
 #include "core/window.h"
 
-void h_core::input::Input::init(h_core::project::Project* project, h_core::Window* window) {
+void h_core::input::Input::init(const h_core::project::Project* project, h_core::Window* window) {
     m_window = window;
 
     m_currentKeys = SDL_GetKeyboardState(nullptr);

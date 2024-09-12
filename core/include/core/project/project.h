@@ -14,7 +14,7 @@ class Project {
   public:
     Project() noexcept = default;
 
-    void loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath);
+    uint32_t loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath);
 
     /// @brief the name of the project
     std::string name = "Unnamed Project";
@@ -24,7 +24,7 @@ class Project {
 
     h_core::math::Color clearColor {};
 
-    h_core::AssetIndex initialSceneSpec = ASSETS_ASSET_INDEX_BAD;
+    h_core::AssetIndex initialSceneSpec = ASSET_INDEX_BAD;
 
     std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
     std::vector<h_core::project::ProjectActionEntry> actions {};

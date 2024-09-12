@@ -26,7 +26,7 @@ class ScriptAsset : public Asset {
     uint32_t initFromYaml(
         h_core::Assets* assets,
         YAML::Node node) override;
-    uint32_t precompile(h_core::Systems* systems) override;
+    uint32_t precompile(h_core::RuntimeSystems* systems) override;
 
     void loadCode(asIScriptModule* module);
     uint32_t compile(asIScriptModule* module);
