@@ -41,6 +41,11 @@ set(HydrogenCore_Sources
             src/math/vector2.cc include/core/math/vector2.h
             src/math/vector3.cc include/core/math/vector3.h
 
+            # Physics
+            src/physics/physics.cc include/core/physics/physics.h
+            src/physics/rigidbodyasset.cc include/core/physics/rigidbodyasset.h
+            src/physics/rigidbodycomp.cc include/core/physics/rigidbodycomp.h
+
             # Systems
             src/systems/gravity.cc include/core/systems/gravity.h
             src/systems/render/meshasset.cc include/core/systems/render/meshasset.h

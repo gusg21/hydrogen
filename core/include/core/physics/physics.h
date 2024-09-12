@@ -6,10 +6,14 @@
 
 #include <vector>
 
+#include "core/engine.h"
+#include "core/runtimeengine.h"
 #include "core/runtimesystem.h"
-#include "rigidbodycomp.h"
+#include "core/transform.h"
+#include "core/physics/rigidbodycomp.h"
 
 namespace h_core {
+class RuntimeEngine;
 
 namespace math {
 class Vector3;
@@ -17,18 +21,18 @@ class Vector3;
 
 namespace physics {
 class Physics : public RuntimeSystem {
-  public:
+public:
     Physics() = default;
 
     uint32_t init(h_core::RuntimeEngine* engine) override;
     void draw() override;
     void endFrame() override;
 
-  protected:
-    HYSYSTEM(h_core::Transform::getMask() | h_core::physics::RigidbodyComp::getMask())
+protected:
+    HYSYSTEM(h_core::Transform::getMask() | h_core::physics::RigidbodyComp::getMask());
 
-  private:
-    h_core::math::Vector3 calculateGravity();
+private:
+    static h_core::math::Vector3 calculateGravity();
 
     static std::vector<RigidbodyComp*> allRigidbodies;
 };
