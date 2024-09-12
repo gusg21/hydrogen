@@ -3,13 +3,16 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="CMakePresetLoader"><![CDATA[{
+  "useNewFormat": true
+}]]></component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
   </component>
   <component name="CMakeReloadState">
     <option name="reloaded" value="true" />
   </component>
-  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+  <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
       <config projectName="Hydrogen" targetName="angelscript" />
@@ -20,7 +23,7 @@
       <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="ContinuousBuild" />
       <config projectName="Hydrogen" targetName="Experimental" />
-      <config projectName="Hydrogen" targetName="HydrogenEditor" />
+      <config projectName="Hydrogen" targetName="libcurl_object" />
       <config projectName="Hydrogen" targetName="ContinuousStart" />
       <config projectName="Hydrogen" targetName="Nightly" />
       <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
@@ -68,19 +71,61 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="asset tweaks, still no macos">
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] ALSO working on big asset streaming">
+      <change afterPath="$PROJECT_DIR$/runtime/assets/terrain/canyon1.glb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box.gltf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box0.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/AntiqueCamera.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/AntiqueCamera.gltf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_Roughness.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_Roughness.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/door/door.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/ducky/Duck.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.gltf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_OcclusionRoughMetal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_OcclusionRoughMetal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_Normal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/sofa/GlamVelvetSofa.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne.gltf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne_BaseColor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne_MetallicRoughness.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model2.yml" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model2.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/corewrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/corewrap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/hyassetserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/hyassetserver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/wrap/wrap.cc" beforeDir="false" afterPath="$PROJECT_DIR$/server/wrap/wrap.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug-Visual Studio" />
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -129,18 +174,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="cf.advertisement.text.overridden" value="true" />
-    <property name="cmake.loaded.for.project" value="true" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="structure.view.defaults.are.configured" value="true" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "CMake Application.HydrogenEditor.executor": "Debug",
+    "CMake Application.HydrogenRuntime.executor": "Run",
+    "CMake Debug.Hydrogen.executor": "Debug",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.advertisement.text.overridden": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "dev",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Projects/hydrogen/runtime/assets",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "two.files.diff.last.used.file": "C:/Projects/hydrogen/server/templates/status.html",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Projects\hydrogen\runtime\assets" />
       <recent name="C:\Projects\hydrogen\server\templates" />
       <recent name="C:\Projects\hydrogen\server" />
       <recent name="C:\Projects\hydrogen\core\shaders\es" />
-      <recent name="C:\Projects\hydrogen\runtime\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Projects\hydrogen\core\include\core" />
@@ -151,258 +220,259 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug">
+    <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousBuild" CONFIG_NAME="Debug">
+    <configuration name="ContinuousBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousBuild" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousConfigure" CONFIG_NAME="Debug">
+    <configuration name="ContinuousConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousConfigure" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousCoverage" CONFIG_NAME="Debug">
+    <configuration name="ContinuousCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousCoverage" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousMemCheck" CONFIG_NAME="Debug">
+    <configuration name="ContinuousMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousMemCheck" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousStart" CONFIG_NAME="Debug">
+    <configuration name="ContinuousStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousStart" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousSubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousSubmit" CONFIG_NAME="Debug">
+    <configuration name="ContinuousSubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousSubmit" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousTest" CONFIG_NAME="Debug">
+    <configuration name="ContinuousTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousTest" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ContinuousUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousUpdate" CONFIG_NAME="Debug">
+    <configuration name="ContinuousUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ContinuousUpdate" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Experimental" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Experimental" CONFIG_NAME="Debug">
+    <configuration name="Experimental" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Experimental" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalBuild" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalBuild" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalConfigure" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalConfigure" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalCoverage" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalCoverage" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalMemCheck" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalMemCheck" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalStart" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalStart" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalSubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalSubmit" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalSubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalSubmit" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalTest" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalTest" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ExperimentalUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalUpdate" CONFIG_NAME="Debug">
+    <configuration name="ExperimentalUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="ExperimentalUpdate" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenCore" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore" CONFIG_NAME="Debug">
+    <configuration name="HydrogenCore" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenCore_AngelScriptExtensions" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_AngelScriptExtensions" CONFIG_NAME="Debug">
+    <configuration name="HydrogenCore_AngelScriptExtensions" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_AngelScriptExtensions" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenCore_CopyShaders" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_CopyShaders" CONFIG_NAME="Debug">
+    <configuration name="HydrogenCore_CopyShaders" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_CopyShaders" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenCore_Shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_Shared" CONFIG_NAME="Debug">
+    <configuration name="HydrogenCore_Shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenCore_Shared" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
+    <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenRuntime" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenRuntime">
+    <configuration name="HydrogenRuntime" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenRuntime">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenRuntime_Assets" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime_Assets" CONFIG_NAME="Debug">
+    <configuration name="HydrogenRuntime_Assets" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime_Assets" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenServer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer" CONFIG_NAME="Debug">
+    <configuration name="HydrogenServer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenServer_Wrapper" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer_Wrapper" CONFIG_NAME="Debug">
+    <configuration name="HydrogenServer_Wrapper" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer_Wrapper" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Nightly" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Nightly" CONFIG_NAME="Debug">
+    <configuration name="Nightly" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Nightly" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyBuild" CONFIG_NAME="Debug">
+    <configuration name="NightlyBuild" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyBuild" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyConfigure" CONFIG_NAME="Debug">
+    <configuration name="NightlyConfigure" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyConfigure" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyCoverage" CONFIG_NAME="Debug">
+    <configuration name="NightlyCoverage" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyCoverage" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyMemCheck" CONFIG_NAME="Debug">
+    <configuration name="NightlyMemCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyMemCheck" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyMemoryCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyMemoryCheck" CONFIG_NAME="Debug">
+    <configuration name="NightlyMemoryCheck" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyMemoryCheck" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyStart" CONFIG_NAME="Debug">
+    <configuration name="NightlyStart" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyStart" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlySubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlySubmit" CONFIG_NAME="Debug">
+    <configuration name="NightlySubmit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlySubmit" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyTest" CONFIG_NAME="Debug">
+    <configuration name="NightlyTest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyTest" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NightlyUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyUpdate" CONFIG_NAME="Debug">
+    <configuration name="NightlyUpdate" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="NightlyUpdate" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2-static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2-static" CONFIG_NAME="Debug">
+    <configuration name="SDL2-static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2-static" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2" CONFIG_NAME="Debug">
+    <configuration name="SDL2" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2_test" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2_test" CONFIG_NAME="Debug">
+    <configuration name="SDL2_test" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2_test" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug">
+    <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="angelscript" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="angelscript" CONFIG_NAME="Debug">
+    <configuration name="angelscript" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="angelscript" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="glad" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="glad" CONFIG_NAME="Debug">
+    <configuration name="glad" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="glad" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="imgui.cmake" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="imgui.cmake" CONFIG_NAME="Debug">
+    <configuration name="imgui.cmake" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="imgui.cmake" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libcurl_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="libcurl_static" CONFIG_NAME="Debug">
+    <configuration name="libcurl_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="libcurl_static" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="sdl_headers_copy" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="sdl_headers_copy" CONFIG_NAME="Debug">
+    <configuration name="sdl_headers_copy" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="sdl_headers_copy" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="tinygltf" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="tinygltf" CONFIG_NAME="Debug">
+    <configuration name="tinygltf" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="tinygltf" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="uninstall" CONFIG_NAME="Debug">
+    <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="uninstall" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="yaml-cpp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="yaml-cpp" CONFIG_NAME="Debug">
+    <configuration name="yaml-cpp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="yaml-cpp" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="hydrogen" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -694,12 +764,13 @@
       <option name="project" value="LOCAL" />
       <updated>1725837189628</updated>
     </task>
-    <task id="LOCAL-00025" summary="asset tweaks, still no macos">
-      <created>1725983811521</created>
+    <task id="LOCAL-00025" summary="[nobuild] ALSO working on big asset streaming">
+      <option name="closed" value="true" />
+      <created>1726088129472</created>
       <option name="number" value="00025" />
       <option name="presentableId" value="LOCAL-00025" />
       <option name="project" value="LOCAL" />
-      <updated>1725983811521</updated>
+      <updated>1726088129472</updated>
     </task>
     <option name="localTasksCounter" value="26" />
     <servers />
@@ -711,17 +782,6 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="misc" />
@@ -747,8 +807,8 @@
     <MESSAGE value="don't try to return bad assets" />
     <MESSAGE value="added libcurl" />
     <MESSAGE value="runtime/base assets split" />
-    <MESSAGE value="asset tweaks, still no macos" />
-    <option name="LAST_COMMIT_MESSAGE" value="asset tweaks, still no macos" />
+    <MESSAGE value="[nobuild] ALSO working on big asset streaming" />
+    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] ALSO working on big asset streaming" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
