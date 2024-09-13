@@ -97,7 +97,7 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
         bytesVec->push_back(srcBytes[byteIndex]);
     }
 
-    HYLOG_DEBUG("ASSETS: Net asset write %d bytes\n", byteCount);
+    HYLOG_VERBOSE("ASSETS: Net asset write %d bytes\n", byteCount);
 
     return byteCount;
 }
@@ -129,7 +129,7 @@ void h_core::RuntimeAssets::requestNetAssetNow(
     if (result != CURLE_OK) {
         HYLOG_WARN("ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result));
     }
-    else { HYLOG_INFO("ASSETS: Curled asset %d OK\n", index); }
+    else { HYLOG_DEBUG("ASSETS: Curled asset %d OK\n", index); }
     if (out_error != nullptr) *out_error = result;
 
     // Create + load asset

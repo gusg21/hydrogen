@@ -2,9 +2,9 @@
 
 #include <fstream>
 
-#include "SDL2/SDL.h"
 #include "glad/glad.h"
 #include "imgui_impl_sdl2.h"
+#include "SDL2/SDL.h"
 #include "yaml-cpp/yaml.h"
 
 #include "core/input/dualkeyinputactionsource.h"
@@ -149,37 +149,38 @@ void h_core::render::Renderer::beginFrame() {
 
     // Camera controls
     if (m_flyCamEnabled) {
+        // Toggle mouse capture
+        if (engine->getInput()->getDigitalPressed(m_camGrabMouseInputIndex)) {
+            engine->getInput()->mouseCaptured = !engine->getInput()->mouseCaptured;
+        }
+
         // Mouse looking (if captured)
         if (engine->getInput()->mouseCaptured) {
             m_flyCamYaw += engine->getInput()->getMouseDeltaX() * m_flyCamSensitivity * engine->getDeltaSecs();
             m_flyCamPitch -= engine->getInput()->getMouseDeltaY() * m_flyCamSensitivity * engine->getDeltaSecs();
             m_flyCamPitch = MATH_CLAMP(m_flyCamPitch, -89.0f, 89.0f);
+
+            // Calculate camera orientation space
+            float yawRad = (m_flyCamYaw / 360.f) * MATH_TAU;
+            float pitchRad = (m_flyCamPitch / 360.f) * MATH_TAU;
+            h_core::math::Vector3 forward {};
+            forward.x = ::cosf(pitchRad) * ::sinf(yawRad);
+            forward.y = ::sinf(pitchRad);
+            forward.z = ::cosf(pitchRad) * -::cosf(yawRad);
+            forward = h_core::math::Vector3::normalize(forward);
+            h_core::math::Vector3 right = h_core::math::Vector3::normalize(
+                h_core::math::Vector3::cross(forward, h_core::math::Vector3 { 0.f, 1.f, 0.f }));
+            h_core::math::Vector3 up = h_core::math::Vector3::normalize(h_core::math::Vector3::cross(right, forward));
+            m_cameraDirection = forward;
+
+            // Move along axes in cam orientation space
+            float forwardAmount = engine->getInput()->getAnalogValue(m_camForwardInputIndex);
+            m_cameraPosition += forward * forwardAmount * engine->getDeltaSecs() * m_flyCamSpeed;
+
+            float rightAmount = engine->getInput()->getAnalogValue(m_camRightInputIndex);
+            m_cameraPosition += right * rightAmount * engine->getDeltaSecs() * m_flyCamSpeed;
         }
 
-        // Calculate camera orientation space
-        float yawRad = (m_flyCamYaw / 360.f) * MATH_TAU;
-        float pitchRad = (m_flyCamPitch / 360.f) * MATH_TAU;
-        h_core::math::Vector3 forward {};
-        forward.x = ::cosf(pitchRad) * ::sinf(yawRad);
-        forward.y = ::sinf(pitchRad);
-        forward.z = ::cosf(pitchRad) * -::cosf(yawRad);
-        forward = h_core::math::Vector3::normalize(forward);
-        h_core::math::Vector3 right = h_core::math::Vector3::normalize(
-            h_core::math::Vector3::cross(forward, h_core::math::Vector3 { 0.f, 1.f, 0.f }));
-        h_core::math::Vector3 up = h_core::math::Vector3::normalize(h_core::math::Vector3::cross(right, forward));
-        m_cameraDirection = forward;
-
-        // Move along axes in cam orientation space
-        float forwardAmount = engine->getInput()->getAnalogValue(m_camForwardInputIndex);
-        m_cameraPosition += forward * forwardAmount * engine->getDeltaSecs() * m_flyCamSpeed;
-
-        float rightAmount = engine->getInput()->getAnalogValue(m_camRightInputIndex);
-        m_cameraPosition += right * rightAmount * engine->getDeltaSecs() * m_flyCamSpeed;
-
-        // Toggle mouse capture
-        if (engine->getInput()->getDigitalPressed(m_camGrabMouseInputIndex)) {
-            engine->getInput()->mouseCaptured = !engine->getInput()->mouseCaptured;
-        }
     }
 }
 

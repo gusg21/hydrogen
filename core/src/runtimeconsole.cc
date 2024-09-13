@@ -9,7 +9,7 @@
 
 uint32_t callback_print(const std::string& arguments, void* data) {
     h_core::RuntimeConsole* self = (h_core::RuntimeConsole*)data;
-    self->printToConsole(arguments);
+    self->printToConsole(arguments, h_core::LogLevel::INFO);
     return 0;
 }
 
@@ -26,8 +26,16 @@ void h_core::RuntimeConsole::init() {
     newCommandWithHelp("clear", callback_clear, this, "[no args] clears the console");
 }
 
-void h_core::RuntimeConsole::printToConsole(const std::string& message) {
-    m_log.push_back(message);
+void h_core::RuntimeConsole::printToConsole(const std::string& message, LogLevel level) {
+    m_log.push_back({ message, h_core::math::Color { 1.0f, 1.0f, 1.0f, 1.0f }, level });
+    if (m_log.size() > RUNTIMECONSOLE_LOG_LENGTH) m_log.pop_front();
+
+    m_logJustUpdated = true;
+}
+
+void h_core::RuntimeConsole::printToConsoleColored(
+    const std::string& message, LogLevel level, h_core::math::Color color) {
+    m_log.push_back({ message, color, level });
     if (m_log.size() > RUNTIMECONSOLE_LOG_LENGTH) m_log.pop_front();
 
     m_logJustUpdated = true;
@@ -53,27 +61,22 @@ int h_core::RuntimeConsole::consoleInputCallback(ImGuiInputTextCallbackData* dat
 
             break;
         }
-        case ImGuiInputTextFlags_CallbackHistory:
-        {
+        case ImGuiInputTextFlags_CallbackHistory: {
             // Example of HISTORY
             const int prev_history_pos = console->m_historyPos;
-            if (data->EventKey == ImGuiKey_UpArrow)
-            {
+            if (data->EventKey == ImGuiKey_UpArrow) {
                 if (console->m_historyPos == -1)
                     console->m_historyPos = console->m_history.size() - 1;
                 else if (console->m_historyPos > 0)
                     console->m_historyPos--;
             }
-            else if (data->EventKey == ImGuiKey_DownArrow)
-            {
+            else if (data->EventKey == ImGuiKey_DownArrow) {
                 if (console->m_historyPos != -1)
-                    if (++console->m_historyPos >= console->m_history.size())
-                        console->m_historyPos = -1;
+                    if (++console->m_historyPos >= console->m_history.size()) console->m_historyPos = -1;
             }
 
             // A better implementation would preserve the data on the current input line along with cursor position.
-            if (prev_history_pos != console->m_historyPos)
-            {
+            if (prev_history_pos != console->m_historyPos) {
                 std::string history_str = (console->m_historyPos >= 0) ? console->m_history[console->m_historyPos] : "";
                 data->DeleteChars(0, data->BufTextLen);
                 data->InsertChars(0, history_str.c_str());
@@ -85,11 +88,65 @@ int h_core::RuntimeConsole::consoleInputCallback(ImGuiInputTextCallbackData* dat
 }
 
 void h_core::RuntimeConsole::doGUI() {
-    if (ImGui::Begin("Runtime Console", nullptr, ImGuiWindowFlags_NoNav)) {
+    if (ImGui::Begin("Runtime Console", nullptr, ImGuiWindowFlags_MenuBar)) {
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("Log Level")) {
+                if (ImGui::MenuItem("VERBOSE", nullptr, m_minimumLevel == LogLevel::VERBOSE)) {
+                    m_minimumLevel = LogLevel::VERBOSE;
+                }
+                if (ImGui::MenuItem("DEBUG", nullptr, m_minimumLevel == LogLevel::DEBUG)) {
+                    m_minimumLevel = LogLevel::DEBUG;
+                }
+                if (ImGui::MenuItem("INFO", nullptr, m_minimumLevel == LogLevel::INFO)) {
+                    m_minimumLevel = LogLevel::INFO;
+                }
+                if (ImGui::MenuItem("WARN", nullptr, m_minimumLevel == LogLevel::WARN)) {
+                    m_minimumLevel = LogLevel::WARN;
+                }
+                if (ImGui::MenuItem("ERROR", nullptr, m_minimumLevel == LogLevel::ERROR)) {
+                    m_minimumLevel = LogLevel::ERROR;
+                }
+                if (ImGui::MenuItem("CRITICAL", nullptr, m_minimumLevel == LogLevel::CRITICAL)) {
+                    m_minimumLevel = LogLevel::CRITICAL;
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
         ImGui::BeginChild("Log", ImVec2 { 0, -30 });
         {
-            for (const std::string& logItem : m_log) {
-                ImGui::TextWrapped("%s", logItem.c_str());
+            for (const RuntimeConsoleMessage& logItem : m_log) {
+                if (logItem.message.empty()) continue;
+
+                if (logItem.level >= m_minimumLevel) {
+                    const char* level;
+                    switch (logItem.level) {
+                        case LogLevel::VERBOSE:
+                            level = "VERBOSE: ";
+                            break;
+                        case LogLevel::DEBUG:
+                            level = "DEBUG: ";
+                            break;
+                        case LogLevel::INFO:
+                            level = "INFO: ";
+                            break;
+                        case LogLevel::WARN:
+                            level = "WARN: ";
+                            break;
+                        case LogLevel::ERROR:
+                            level = "ERROR: ";
+                            break;
+                        case LogLevel::CRITICAL:
+                            level = "CRITICAL: ";
+                            break;
+                    }
+
+                    ImGui::PushStyleColor(
+                        ImGuiCol_Text, ImVec4 { logItem.color.r, logItem.color.g, logItem.color.b, logItem.color.a });
+                    ImGui::TextWrapped("%s%s", level, logItem.message.c_str());
+                    ImGui::PopStyleColor();
+                }
             }
             ImGui::Spacing();
 
@@ -119,24 +176,38 @@ void h_core::RuntimeConsole::logCallback(void* userdata, int category, SDL_LogPr
     h_core::RuntimeConsole* self = (h_core::RuntimeConsole*)userdata;
 
     std::string fullMessage {};
+    h_core::math::Color color;
+    LogLevel level;
     switch (priority) {
         case SDL_LOG_PRIORITY_VERBOSE:
             fullMessage += "VERBOSE: ";
+            level = LogLevel::VERBOSE;
+            color = h_core::math::Color { 0.5608f, 0.0235f, 0.7412f, 1.0000f };
             break;
         case SDL_LOG_PRIORITY_DEBUG:
             fullMessage += "DEBUG: ";
+            level = LogLevel::DEBUG;
+            color = h_core::math::Color { 0.4353f, 0.4353f, 0.9843f, 1.0000f };
             break;
         case SDL_LOG_PRIORITY_INFO:
             fullMessage += "INFO: ";
+            level = LogLevel::INFO;
+            color = h_core::math::Color { 0.2392f, 0.9333f, 0.1569f, 1.0000f };
             break;
         case SDL_LOG_PRIORITY_WARN:
             fullMessage += "WARN: ";
+            level = LogLevel::WARN;
+            color = h_core::math::Color { 0.9882f, 0.8549f, 0.1059f, 1.0000f };
             break;
         case SDL_LOG_PRIORITY_ERROR:
             fullMessage += "ERROR: ";
+            level = LogLevel::ERROR;
+            color = h_core::math::Color { 0.9490f, 0.2196f, 0.1412f, 1.0000f };
             break;
         case SDL_LOG_PRIORITY_CRITICAL:
             fullMessage += "CRITICAL: ";
+            level = LogLevel::CRITICAL;
+            color = h_core::math::Color { 0.8275f, 0.0784f, 0.1922f, 1.0000f };
             break;
         case SDL_NUM_LOG_PRIORITIES:
             break;
@@ -144,7 +215,7 @@ void h_core::RuntimeConsole::logCallback(void* userdata, int category, SDL_LogPr
 
     fullMessage += message;
 
-    self->printToConsole(fullMessage);
+    self->printToConsoleColored(message, level, color);
     printf("%s\n", fullMessage.c_str());
 }
 
@@ -204,5 +275,5 @@ void h_core::RuntimeConsole::showHelp() {
 
 void h_core::RuntimeConsole::clearConsole() {
     m_log.clear();
-    m_log = std::deque<std::string> { RUNTIMECONSOLE_LOG_LENGTH, "" };
+    m_log = std::deque<RuntimeConsoleMessage> { RUNTIMECONSOLE_LOG_LENGTH };
 }

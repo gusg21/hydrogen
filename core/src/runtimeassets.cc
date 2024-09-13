@@ -12,6 +12,7 @@
 
 void h_core::RuntimeAssets::init(const std::string& serverAddress, h_core::RuntimeSystems* systems) {
     curl_global_init(CURL_GLOBAL_ALL);
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
     m_serverAddress = serverAddress;
 
@@ -162,23 +163,23 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
 }
 
 void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadContext* context) {
-    HYLOG_INFO("ASSETS: Net request thread running!\n");
+    HYLOG_DEBUG("ASSETS: Net request thread running!\n");
 
     while (!context->netRequestThreadAlive) {
         // Do jobs if needed
         if (!context->jobs.empty() && context->hasServerConnection) {
             // Request asset
             NetRequestJob job = context->jobs.front();
-            HYLOG_INFO("ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);
+            HYLOG_DEBUG("ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);
             h_core::Asset* newAsset = nullptr;
             CURLcode result;
             CALL_TYPED_FUNC_WITH_ASSET_ID(
                 job.assetType, h_core::RuntimeAssets::requestNetAssetNow, &newAsset, &result, job.serverAddress,
                 job.assetIndex);
-            HYLOG_INFO("ASSETS: THREAD: completed net request for asset %d\n", job.assetIndex);
+            HYLOG_DEBUG("ASSETS: THREAD: completed net request for asset %d\n", job.assetIndex);
 
             // Apply to asset list
-            HYLOG_INFO("ASSETS: THREAD: awaiting asset list access... \n", job.assetIndex);
+            HYLOG_DEBUG("ASSETS: THREAD: awaiting asset list access... \n");
             context->resultQueueLock.lock();
             {
                 // Add result to the return list
@@ -186,7 +187,7 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
                 else { context->results.emplace_back(newAsset, job, true); }
             }
             context->resultQueueLock.unlock();
-            HYLOG_INFO("ASSETS: THREAD: updated asset list \n", job.assetIndex);
+            HYLOG_DEBUG("ASSETS: THREAD: updated asset list \n");
 
             // remove job
             context->jobs.pop_front();
@@ -203,7 +204,7 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
         context->hasServerConnection = result == CURLE_OK;
     }
 
-    HYLOG_INFO("ASSETS: Killing net request thread...\n");
+    HYLOG_DEBUG("ASSETS: Killing net request thread...\n");
 }
 
 bool h_core::RuntimeAssets::hasServerConnection() {

@@ -57,7 +57,7 @@ class Renderer : public RuntimeSystem {
     bool m_isGles3 = false;
 
     // Flycam stuff
-    bool m_flyCamEnabled = false;
+    bool m_flyCamEnabled = true;
     float m_flyCamSpeed = 20.f;
     float m_flyCamSensitivity = MATH_PI * 100.f; // Using math constants provides an air of legitimacy
     float m_flyCamYaw = 0.f;
