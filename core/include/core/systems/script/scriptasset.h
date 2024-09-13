@@ -24,11 +24,10 @@ class ScriptAsset : public Asset {
     ScriptAsset() = default;
 
     uint32_t initFromYaml(
-        h_core::Assets* assets,
-        YAML::Node node) override;
+        h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
     uint32_t precompile(h_core::RuntimeSystems* systems) override;
 
-    void loadCode(asIScriptModule* module);
+    void loadCode(asIScriptModule* module) const;
     uint32_t compile(asIScriptModule* module);
     asIScriptObject* constructInstance(
         asIScriptContext* context, h_core::ActorId id) const;

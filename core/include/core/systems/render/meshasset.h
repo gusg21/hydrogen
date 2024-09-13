@@ -35,7 +35,7 @@ class MeshAsset : public Asset {
   public:
     MeshAsset() = default;
 
-    uint32_t initFromYaml(h_core::Assets* assets, YAML::Node node) override;
+    uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
     uint32_t precompile(h_core::RuntimeSystems* systems) override;
     std::vector<uint8_t>* toPacked() override;
     void fromPacked(const void* data, size_t length) override;

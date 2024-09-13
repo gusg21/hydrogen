@@ -1,13 +1,16 @@
 #include "core/asset.h"
 
+#include "core/assets.h"
 #include "core/log.h"
 #include "imgui.h"
 
 uint32_t h_core::Asset::initFromYaml(
-    h_core::Assets* assets, YAML::Node yaml) {
-    HYLOG_WARN("ASSET: Undefined initFromYaml method.\n");
+    h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
+//    HYLOG_WARN("ASSET: Undefined initFromYaml method.\n");
 
-    return 1;
+    this->desc = desc;
+
+    return 0;
 }
 uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     // A precompile() definition isn't necessary in all/many cases

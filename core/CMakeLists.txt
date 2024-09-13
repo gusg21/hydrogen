@@ -64,7 +64,8 @@ set(HydrogenCore_Sources
             src/input/dualkeyinputactionsource.cc include/core/input/dualkeyinputactionsource.h
 )
 
-add_library(HydrogenCore STATIC ${HydrogenCore_Sources})
+add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
+        include/core/assetdescription.h)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

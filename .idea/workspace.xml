@@ -3,9 +3,9 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="CMakePresetLoader"><![CDATA[{
-  "useNewFormat": true
-}]]></component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
   </component>
@@ -72,9 +72,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] ALSO working on big asset streaming">
+      <change afterPath="$PROJECT_DIR$/core/include/core/assetdescription.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/corewrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/corewrap.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/hyassetserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/hyassetserver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/actorspecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/actorspecasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/input/input.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/input/input.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/scenespecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scenespecasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/systems/script/scriptasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/script/scriptasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/assets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/assets.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/scenespecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/scenespecasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/systems/script/scriptasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/script/scriptasset.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +138,10 @@
     <option name="minorVersion" value="2.1" />
     <option name="productBranch" value="Classic" />
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 1
+}]]></component>
   <component name="ProjectId" id="2lRXeQrlEOuhFzwP84z4XzhILwF" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -176,11 +196,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -386,6 +401,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="angelscript" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="angelscript" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -527,6 +547,7 @@
       <workItem from="1725591940685" duration="53051000" />
       <workItem from="1725946168594" duration="2007000" />
       <workItem from="1725948695615" duration="4497000" />
+      <workItem from="1726254405865" duration="3459000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -765,6 +786,17 @@
     <MESSAGE value="runtime/base assets split" />
     <MESSAGE value="[nobuild] ALSO working on big asset streaming" />
     <option name="LAST_COMMIT_MESSAGE" value="[nobuild] ALSO working on big asset streaming" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/core/src/systems/script/scriptasset.cc</url>
+          <line>41</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

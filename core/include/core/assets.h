@@ -75,12 +75,11 @@ class Assets {
 
     uint32_t getAssetCount() const;
 
+    virtual void loadAsset(const AssetDescription& desc);
+
   protected:
     template<typename AssetType>
-    h_core::AssetIndex loadAssetFromFile(AssetType* out_asset, std::string filePath);
-
-    template<typename AssetType>
-    void loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile);
+    uint32_t loadAssetFromFile(h_core::Asset** out_asset, const h_core::AssetDescription& desc);
 
     h_core::Asset* m_assets[ASSETS_MAX_ASSET_COUNT] = {};
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex> m_assetIndexMap {};  // hash -> asset index
@@ -90,20 +89,22 @@ class Assets {
 }  // namespace h_core
 
 template<typename AssetType>
-uint32_t h_core::Assets::loadAssetFromFile(AssetType* out_asset, std::string filePath) {
+uint32_t h_core::Assets::loadAssetFromFile(h_core::Asset** out_asset, const h_core::AssetDescription& desc) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't load asset type that does not derive from Asset");
 
     // Load file
-    const char* fileText = (const char*)SDL_LoadFile(filePath.c_str(), nullptr);
+    const char* fileText = (const char*)SDL_LoadFile(desc.path.c_str(), nullptr);
 
     if (fileText == nullptr) {
-        HYLOG_DEBUG("ASSETS: Wrong file path %s", filePath.c_str());
+        HYLOG_DEBUG("ASSETS: Wrong file path %s", desc.path.c_str());
         return 1;  // TODO: Fix
     }
 
     // Parse YAML and load asset
     YAML::Node yaml = YAML::Load(fileText);
-    out_asset->initFromYaml(this, yaml);
+
+    (*out_asset) = new AssetType();
+    (*out_asset)->initFromYaml(this, desc, yaml);
 
     m_assetCount++;
 
@@ -147,14 +148,4 @@ AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
     if (index == ASSET_INDEX_BAD) return nullptr;
 
     return static_cast<AssetType*>(m_assets[index]);
-}
-
-template<typename AssetType>
-void h_core::Assets::loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile) {
-    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
-
-    // Load from file
-    AssetType* asset = new AssetType();
-    loadAssetFromFile<AssetType>(asset, assetFile);
-    m_assets[assetIndex] = asset;
 }

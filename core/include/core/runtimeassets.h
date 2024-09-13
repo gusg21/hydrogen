@@ -33,10 +33,10 @@ class RuntimeAssets : public Assets {
 
     static void netRequestThreadFunction(h_core::NetRequestThreadContext* context);
 
-    bool hasServerConnection();
+    bool hasServerConnection() const;
 
-    template<typename AssetType>
-    void loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile, bool isRemote);
+    void loadAsset(const AssetDescription& desc) override;
+    void queueLoadAsset(const AssetDescription& desc);
 
   private:
     template<typename AssetType>
@@ -50,6 +50,7 @@ class RuntimeAssets : public Assets {
     std::thread m_netRequestThread {};
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
 
+    std::deque<h_core::AssetDescription> m_queuedAssets {};
     std::deque<h_core::NetRequestJob> m_recentJobs {};
     std::unordered_map<uint32_t, uint32_t> m_packedSizeMap {};
 };
@@ -79,21 +80,20 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
     *(AssetType**)out_asset = asset;*/
 
     // Allocate more memory in vector
-    //size_t byteCount = pieceCount * pieceSize;
-    //std::vector<uint8_t>* bytesVec = (std::vector<uint8_t>*)out_bytes;
-    //bytesVec->reserve(bytesVec->size() + byteCount);
+    // size_t byteCount = pieceCount * pieceSize;
+    // std::vector<uint8_t>* bytesVec = (std::vector<uint8_t>*)out_bytes;
+    // bytesVec->reserve(bytesVec->size() + byteCount);
 
     //// Copy data into vec, assuring it's not empty
-    //if (bytesVec->empty()) { memcpy(bytesVec->data(), buffer, byteCount); }
-    //else { memcpy(&bytesVec->back(), buffer, byteCount); }
+    // if (bytesVec->empty()) { memcpy(bytesVec->data(), buffer, byteCount); }
+    // else { memcpy(&bytesVec->back(), buffer, byteCount); }
 
-    //bytesVec->resize(bytesVec->size() + byteCount);
+    // bytesVec->resize(bytesVec->size() + byteCount);
 
     size_t byteCount = pieceCount * pieceSize;
     std::vector<uint8_t>* bytesVec = (std::vector<uint8_t>*)out_bytes;
     uint8_t* srcBytes = (uint8_t*)buffer;
-    for (uint32_t byteIndex = 0; byteIndex < byteCount; byteIndex++)
-    {
+    for (uint32_t byteIndex = 0; byteIndex < byteCount; byteIndex++) {
         bytesVec->push_back(srcBytes[byteIndex]);
     }
 
@@ -138,20 +138,4 @@ void h_core::RuntimeAssets::requestNetAssetNow(
 
     // Output the asset pointer
     *out_assetPtr = asset;
-}
-
-template<typename AssetType>
-void h_core::RuntimeAssets::loadAsset(h_core::AssetIndex assetIndex, const std::string& assetFile, bool isRemote) {
-    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
-
-    if (isRemote) {
-        // Load from server
-        requestNetAsset<AssetType>(assetIndex);
-    }
-    else {
-        // Load from file
-        AssetType* asset = new AssetType();
-        loadAssetFromFile<AssetType>(asset, assetFile);
-        m_assets[assetIndex] = asset;
-    }
 }

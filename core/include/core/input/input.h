@@ -10,6 +10,7 @@
 #include "SDL.h"
 
 #include "core/input/inputaction.h"
+#include "core/math/vector2.h"
 #include "core/project/project.h"
 #include "core/window.h"
 

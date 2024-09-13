@@ -36,8 +36,8 @@ uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, 
     if (assetIndex == ASSET_INDEX_BAD) { return 3; }
     if (assetPath.empty() && !isRemote) { return 4; }
 
-    CALL_TYPED_FUNC_WITH_ASSET_ID(assetType, assets->loadAsset, assetIndex, assetPath, isRemote);
-    assets->m_assets[assetIndex]->precompile(assets->m_systems);
+    assets->queueLoadAsset(h_core::AssetDescription { assetIndex, assetType, assetPath, isRemote });
+//    assets->m_assets[assetIndex]->precompile(assets->m_systems);
 
     return 0;
 }
@@ -125,14 +125,12 @@ void h_core::RuntimeAssets::doGUI() {
 
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        CALL_TYPED_FUNC_WITH_ASSET_ID(
-            assetInfo.typeId, RuntimeAssets::loadAsset, assetInfo.index, assetInfo.assetPath, assetInfo.isRemote);
+        RuntimeAssets::loadAsset(
+            h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.isRemote });
     }
 }
 
 void h_core::RuntimeAssets::precompile() {
-    
-
     for (int assetIndex = 0; assetIndex < ASSETS_MAX_ASSET_COUNT; ++assetIndex) {
         h_core::Asset* asset = m_assets[assetIndex];
         if (asset != nullptr) { asset->precompile(m_systems); }
@@ -140,6 +138,28 @@ void h_core::RuntimeAssets::precompile() {
 }
 
 void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
+    // Load queued assets
+    while (!m_queuedAssets.empty()) {
+        h_core::AssetDescription desc = m_queuedAssets.front();
+
+        h_core::Asset* oldAsset = m_assets[desc.index];
+        loadAsset(desc);
+        if (!desc.remote) {
+            int precompileResult = m_assets[desc.index]->precompile(m_systems);
+            if (precompileResult == 0) {
+                delete oldAsset;
+            } else {
+                HYLOG_WARN("Failed to precompile queued asset %d (error code %d)", desc.index, precompileResult);
+
+                delete m_assets[desc.index];
+                m_assets[desc.index] = oldAsset;
+            }
+        }
+
+        m_queuedAssets.pop_front();
+    }
+
+    // Unload net assets
     m_netRequestThreadContext.resultQueueLock.lock();
 
     while (!m_netRequestThreadContext.results.empty()) {
@@ -148,10 +168,20 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
         if (result.success) {
             // Replace old asset
             if (m_assets[result.job.assetIndex] != nullptr) { delete m_assets[result.job.assetIndex]; }
-            m_assets[result.job.assetIndex] = result.newAsset;
-            result.newAsset->precompile(m_systems);
+            int precompileResult = result.newAsset->precompile(m_systems);
+
+            if (precompileResult == 0) {
+                m_assets[result.job.assetIndex] = result.newAsset;
+            } else {
+                HYLOG_WARN("Failed to precompile asset %d, re-requesting...", result.job.assetIndex);
+
+                // Re-queue new asset request
+                CALL_TYPED_FUNC_WITH_ASSET_ID(result.job.assetType, RuntimeAssets::requestNetAsset, result.job.assetIndex);
+            }
         }
         else {
+            HYLOG_WARN("Failed to request asset %d, re-requesting...", result.job.assetIndex);
+
             // Re-queue new asset request
             CALL_TYPED_FUNC_WITH_ASSET_ID(result.job.assetType, RuntimeAssets::requestNetAsset, result.job.assetIndex);
         }
@@ -207,6 +237,18 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
     HYLOG_DEBUG("ASSETS: Killing net request thread...\n");
 }
 
-bool h_core::RuntimeAssets::hasServerConnection() {
+bool h_core::RuntimeAssets::hasServerConnection() const {
     return m_netRequestThreadContext.hasServerConnection;
+}
+
+void h_core::RuntimeAssets::loadAsset(const AssetDescription& desc) {
+    if (desc.remote) {
+        // Load from server
+        CALL_TYPED_FUNC_WITH_ASSET_ID(desc.type, requestNetAsset, desc.index);
+    }
+    else { Assets::loadAsset(desc); }
+}
+
+void h_core::RuntimeAssets::queueLoadAsset(const h_core::AssetDescription& desc) {
+    m_queuedAssets.push_back(desc);
 }

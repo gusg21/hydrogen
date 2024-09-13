@@ -7,14 +7,16 @@
 #include "core/runtimesystems.h"
 #include "core/systems/script/scripting.h"
 
-uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML::Node node) {
-    std::string filePath = node["file"].as<std::string>("");
+uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(assets, desc, yaml);
 
-    std::string yamlName = node["name"].as<std::string>("UNNAMED_SCRIPT");
+    std::string filePath = yaml["file"].as<std::string>("");
+
+    std::string yamlName = yaml["name"].as<std::string>("UNNAMED_SCRIPT");
 
     if (filePath.empty()) {
         // Load script from text
-        code = node["code"].as<std::string>("");
+        code = yaml["code"].as<std::string>("");
         name = yamlName;
     }
     else {
@@ -40,7 +42,12 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, YAML:
 uint32_t h_core::script::ScriptAsset::precompile(h_core::RuntimeSystems* systems) {
     // Load + compile script
     loadCode(systems->scripting->getModule());
-    compile(systems->scripting->getModule());
+
+    // TODO: make each script comp have its own module so that we can hot-reload
+    uint32_t result = compile(systems->scripting->getModule());
+    if (result != 0) {
+        return 1;
+    }
 
     return 0;
 }
@@ -60,7 +67,7 @@ asIScriptObject* h_core::script::ScriptAsset::constructInstance(asIScriptContext
     return instance;
 }
 
-void h_core::script::ScriptAsset::loadCode(asIScriptModule* module) {
+void h_core::script::ScriptAsset::loadCode(asIScriptModule* module) const {
     module->AddScriptSection(name.c_str(), code.c_str());
 }
 
