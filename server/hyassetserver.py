@@ -38,7 +38,7 @@ def get_asset(asset_id: int):
         if HyAssetServer.load_simulation_time > 0:
             print("Simulating heavy load...")
             time.sleep(HyAssetServer.load_simulation_time)
-        asset_bytes = corewrap.get_packed_asset_from_index(asset_id).to_bytearray()
+        asset_bytes = bytes(corewrap.get_packed_asset_from_index(asset_id).to_bytearray())
         print(len(asset_bytes))
         return flask.Response(
             asset_bytes, mimetype="bin/hya"

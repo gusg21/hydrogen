@@ -13,8 +13,14 @@ class PackedAsset:
         print(f"Deleting packed asset @ {self.packed_asset_pointer}", flush=True)
         core.delete_packed_asset(self.packed_asset_pointer)
 
-    def __getitem__(self, item: int) -> ctypes.c_byte:
-        return core.get_data_in_packed_asset(self.packed_asset_pointer, ctypes.c_uint32(item))
+    def __iter__(self):
+        return (self[i] for i in range(len(self)))
+
+    def __getitem__(self, item: int) -> ctypes.c_byte | None:
+        if item < len(self):
+            return core.get_data_in_packed_asset(self.packed_asset_pointer, ctypes.c_uint32(item))
+        else:
+            return None
 
     def __len__(self) -> int:
         return core.get_length_of_packed_asset(self.packed_asset_pointer)

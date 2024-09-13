@@ -96,6 +96,11 @@ uint32_t h_core::Assets::loadAssetFromFile(AssetType* out_asset, std::string fil
     // Load file
     const char* fileText = (const char*)SDL_LoadFile(filePath.c_str(), nullptr);
 
+    if (fileText == nullptr) {
+        HYLOG_DEBUG("ASSETS: Wrong file path %s", filePath.c_str());
+        return 1;  // TODO: Fix
+    }
+
     // Parse YAML and load asset
     YAML::Node yaml = YAML::Load(fileText);
     out_asset->initFromYaml(this, yaml);

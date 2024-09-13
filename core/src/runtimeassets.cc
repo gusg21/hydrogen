@@ -10,7 +10,7 @@
 #include "core/project/project.h"
 #include "core/theming/guicolors.h"
 
-void h_core::RuntimeAssets::init(const std::string& serverAddress) {
+void h_core::RuntimeAssets::init(const std::string& serverAddress, h_core::RuntimeSystems* systems) {
     curl_global_init(CURL_GLOBAL_ALL);
 
     m_serverAddress = serverAddress;
@@ -18,6 +18,8 @@ void h_core::RuntimeAssets::init(const std::string& serverAddress) {
     m_netRequestThreadContext.pingServerAddress = serverAddress;
     m_netRequestThreadContext.netRequestThreadAlive = false;
     m_netRequestThread = std::thread { netRequestThreadFunction, &m_netRequestThreadContext };
+
+    m_systems = systems;
 }
 
 uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, void* data) {
@@ -25,7 +27,7 @@ uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, 
     RUNTIMECONSOLE_PARSE_ARGS(arguments, yaml);
 
     uint32_t assetType = yaml["type"].as<uint32_t>(UINT32_MAX);
-    uint32_t assetIndex = yaml["index"].as<uint32_t>(ASSET_INDEX_BAD);
+    h_core::AssetIndex assetIndex = yaml["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
     std::string assetPath = yaml["path"].as<std::string>("");
     bool isRemote = yaml["remote"].as<bool>(false);
 
@@ -34,6 +36,7 @@ uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, 
     if (assetPath.empty() && !isRemote) { return 4; }
 
     CALL_TYPED_FUNC_WITH_ASSET_ID(assetType, assets->loadAsset, assetIndex, assetPath, isRemote);
+    assets->m_assets[assetIndex]->precompile(assets->m_systems);
 
     return 0;
 }
@@ -126,14 +129,16 @@ void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* proj
     }
 }
 
-void h_core::RuntimeAssets::precompile(h_core::RuntimeSystems* systems) {
+void h_core::RuntimeAssets::precompile() {
+    
+
     for (int assetIndex = 0; assetIndex < ASSETS_MAX_ASSET_COUNT; ++assetIndex) {
         h_core::Asset* asset = m_assets[assetIndex];
-        if (asset != nullptr) { asset->precompile(systems); }
+        if (asset != nullptr) { asset->precompile(m_systems); }
     }
 }
 
-void h_core::RuntimeAssets::flushAndPrecompileNetAssets(h_core::RuntimeSystems* systems) {
+void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
     m_netRequestThreadContext.resultQueueLock.lock();
 
     while (!m_netRequestThreadContext.results.empty()) {
@@ -143,7 +148,7 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets(h_core::RuntimeSystems* 
             // Replace old asset
             if (m_assets[result.job.assetIndex] != nullptr) { delete m_assets[result.job.assetIndex]; }
             m_assets[result.job.assetIndex] = result.newAsset;
-            result.newAsset->precompile(systems);
+            result.newAsset->precompile(m_systems);
         }
         else {
             // Re-queue new asset request

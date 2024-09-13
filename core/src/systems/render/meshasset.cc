@@ -272,23 +272,33 @@ std::vector<uint8_t>* h_core::render::MeshAsset::toPacked() {
     }
 
     // Try to keep in sync with actual byte requirements
+    size_t byteLength =
+        sizeof(uint32_t) * 3 + sizeof(h_core::render::Vertex) * m_numVertices + indexSize * m_numIndices;
     std::vector<uint8_t>* bytes = new std::vector<uint8_t>();
+    bytes->resize(byteLength);
+    uint8_t* writeHead = bytes->data();
 
     // # vertices
-    bytes->insert(bytes->end(), (uint8_t*)&m_numVertices, (uint8_t*)&m_numVertices + sizeof(uint32_t));
+    memcpy(writeHead, (uint8_t*)&m_numVertices, sizeof(uint32_t));
+    writeHead += sizeof(uint32_t);
 
     // vertices
-    bytes->insert(
-        bytes->end(), (uint8_t*)m_vertices, (uint8_t*)(m_vertices) + (m_numVertices * sizeof(h_core::render::Vertex)));
+    memcpy(writeHead, (uint8_t*)m_vertices, sizeof(h_core::render::Vertex) * m_numVertices);
+    writeHead += sizeof(h_core::render::Vertex) * m_numVertices;
 
     // index size
-    bytes->insert(bytes->end(), (uint8_t*)&indexSize, (uint8_t*)&indexSize + sizeof(uint32_t));
+    memcpy(writeHead, (uint8_t*)&indexSize, sizeof(uint32_t));
+    writeHead += sizeof(uint32_t);
 
     // # indices
-    bytes->insert(bytes->end(), (uint8_t*)&m_numIndices, (uint8_t*)&m_numIndices + sizeof(uint32_t));
+    memcpy(writeHead, (uint8_t*)&m_numIndices, sizeof(uint32_t));
+    writeHead += sizeof(uint32_t);
 
     // indices
-    bytes->insert(bytes->end(), (uint8_t*)m_indices, (uint8_t*)(m_indices) + (m_numIndices * indexSize));
+    memcpy(writeHead, (uint8_t*)m_indices, indexSize * m_numIndices);
+    writeHead += indexSize * m_numIndices;
+
+    assert(writeHead - bytes->data() == byteLength);
 
     return bytes;
 }
@@ -307,7 +317,13 @@ void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
 
     // vertices data
     m_vertices = new h_core::render::Vertex[numVertices];
-    memcpy(m_vertices, readHead, numVertices * sizeof(h_core::render::Vertex));
+    h_core::render::Vertex* newVerts = (h_core::render::Vertex*)readHead;
+    for (uint32_t vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
+        m_vertices[vertexIndex] = newVerts[vertexIndex];
+    }
+    /*memcpy_s(
+        m_vertices, numVertices * sizeof(h_core::render::Vertex), ,
+        numVertices * sizeof(h_core::render::Vertex));*/
     readHead += numVertices * sizeof(h_core::render::Vertex);
 
     // index type
@@ -356,7 +372,7 @@ void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
 }
 
 void h_core::render::MeshAsset::doGUI() {
-//    Asset::doGUI();
+    //    Asset::doGUI();
 
     ImGui::Text("Vertex Count: %d", m_numVertices);
     ImGui::Text("Index Count: %d", m_numIndices);

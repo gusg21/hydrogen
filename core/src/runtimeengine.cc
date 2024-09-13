@@ -31,9 +31,9 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
 
     // set up assets
     m_assets = new h_core::RuntimeAssets();
-    m_assets->init("http://localhost:5000/"); // TODO: Local server. update with remote server
+    m_assets->init("http://localhost:5000/", &m_systems); // TODO: Local server. update with remote server
     m_assets->loadFromProject(project);
-    m_assets->precompile(&m_systems);
+    m_assets->precompile();
 }
 
 void h_core::RuntimeEngine::prepareScene(h_core::AssetIndex sceneSpecIndex) {
@@ -113,7 +113,7 @@ void h_core::RuntimeEngine::beginFrame() {
 
     doGUI();
 
-        m_systems.beginFrame();
+    m_systems.beginFrame();
 }
 
 void h_core::RuntimeEngine::doProcess() {
@@ -134,7 +134,7 @@ void h_core::RuntimeEngine::endFrame() {
     m_systems.endFrame();
 
     // Flush newly loaded assets from the internal net requests thread to the main thread asset list
-    m_assets->flushAndPrecompileNetAssets(&m_systems);
+    m_assets->flushAndPrecompileNetAssets();
 
     // Calculate average FPS
     m_fpsSamples.push_back(getFPS());

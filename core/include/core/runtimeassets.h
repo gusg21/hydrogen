@@ -19,14 +19,14 @@ class RuntimeAssets : public Assets {
   public:
     RuntimeAssets() = default;
 
-    void init(const std::string& serverAddress);
+    void init(const std::string& serverAddress, h_core::RuntimeSystems* systems);
     void registerCommands(h_core::RuntimeConsole* console);
     void destroy();
     void doGUI();
 
     void loadFromProject(const h_core::project::Project* project) override;
-    void precompile(h_core::RuntimeSystems* systems);
-    void flushAndPrecompileNetAssets(h_core::RuntimeSystems* systems);
+    void precompile();
+    void flushAndPrecompileNetAssets();
 
     template<typename AssetType>
     void requestNetAsset(h_core::AssetIndex index);
@@ -45,6 +45,7 @@ class RuntimeAssets : public Assets {
 
     static uint32_t command_loadAsset(const std::string& arguments, void* data);
 
+    h_core::RuntimeSystems* m_systems = nullptr;
     std::string m_serverAddress {};
     std::thread m_netRequestThread {};
     h_core::NetRequestThreadContext m_netRequestThreadContext {};
@@ -69,13 +70,32 @@ void h_core::RuntimeAssets::requestNetAsset(h_core::AssetIndex index) {
 }
 
 template<typename AssetType>
-size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* out_asset) {
+size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* out_bytes) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't netload asset type that does not inherit from Asset");
 
-    AssetType* asset = new AssetType();
+    /*AssetType* asset = new AssetType();
     size_t byteCount = pieceSize * pieceCount;
     asset->fromPacked(buffer, byteCount);
-    *(AssetType**)out_asset = asset;
+    *(AssetType**)out_asset = asset;*/
+
+    // Allocate more memory in vector
+    //size_t byteCount = pieceCount * pieceSize;
+    //std::vector<uint8_t>* bytesVec = (std::vector<uint8_t>*)out_bytes;
+    //bytesVec->reserve(bytesVec->size() + byteCount);
+
+    //// Copy data into vec, assuring it's not empty
+    //if (bytesVec->empty()) { memcpy(bytesVec->data(), buffer, byteCount); }
+    //else { memcpy(&bytesVec->back(), buffer, byteCount); }
+
+    //bytesVec->resize(bytesVec->size() + byteCount);
+
+    size_t byteCount = pieceCount * pieceSize;
+    std::vector<uint8_t>* bytesVec = (std::vector<uint8_t>*)out_bytes;
+    uint8_t* srcBytes = (uint8_t*)buffer;
+    for (uint32_t byteIndex = 0; byteIndex < byteCount; byteIndex++)
+    {
+        bytesVec->push_back(srcBytes[byteIndex]);
+    }
 
     HYLOG_DEBUG("ASSETS: Net asset write %d bytes\n", byteCount);
 
@@ -87,21 +107,37 @@ void h_core::RuntimeAssets::requestNetAssetNow(
     h_core::Asset** out_assetPtr, CURLcode* out_error, const std::string& serverAddress, h_core::AssetIndex index) {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't request non-asset type.");
 
+    // Determine URL
     std::string url = serverAddress + std::string("asset/") + std::to_string(index);
     HYLOG_INFO("ASSETS: Requesting %s...\n", url.c_str());
 
+    // Allocate bytes vector
+    std::vector<uint8_t> bytes {};
+
     CURL* netHandle = curl_easy_init();
+
+    // Setup the transfer
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
-    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, out_assetPtr);
+    curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, &bytes);
     curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 0.5);
 
+    // Do the transfer
     CURLcode result = curl_easy_perform(netHandle);
 
-    if (result != CURLE_OK) { HYLOG_WARN("ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result)); }
+    // Print status
+    if (result != CURLE_OK) {
+        HYLOG_WARN("ASSETS: Curl (asset %d) (error code %d): %s\n", index, result, curl_easy_strerror(result));
+    }
     else { HYLOG_INFO("ASSETS: Curled asset %d OK\n", index); }
-
     if (out_error != nullptr) *out_error = result;
+
+    // Create + load asset
+    AssetType* asset = new AssetType();
+    asset->fromPacked(bytes.data(), bytes.size());
+
+    // Output the asset pointer
+    *out_assetPtr = asset;
 }
 
 template<typename AssetType>

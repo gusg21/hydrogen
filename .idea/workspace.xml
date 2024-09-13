@@ -72,53 +72,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] ALSO working on big asset streaming">
-      <change afterPath="$PROJECT_DIR$/runtime/assets/terrain/canyon1.glb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box.gltf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/box/Box0.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/AntiqueCamera.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/AntiqueCamera.gltf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_camera_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/camera/camera_tripod_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/door/door.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/ducky/Duck.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.gltf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_OcclusionRoughMetal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_OcclusionRoughMetal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/sofa/GlamVelvetSofa.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne.gltf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne_BaseColor.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/suzanne/Suzanne_MetallicRoughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model2.yml" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model2.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/corewrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/corewrap.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/hyassetserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/hyassetserver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/wrap/wrap.cc" beforeDir="false" afterPath="$PROJECT_DIR$/server/wrap/wrap.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
