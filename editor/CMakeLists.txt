@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
 
 add_executable(HydrogenEditor src/main.cc
-        src/editorengine.cc)
+        src/editor.cc
+        include/editor/editor.h
+        include/editor/editorwindow.h
+        src/editorwindow.cc
+        include/editor/windows/meshimporter.h
+        src/windows/meshimporter.cc
+        include/editor/windows/projectexplorer.h
+        src/windows/projectexplorer.cc)
 
 target_include_directories(HydrogenEditor PUBLIC include)
 

@@ -5,7 +5,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "core/engineevents.h"
 #include "core/eventqueue.h"
 
 namespace h_core {

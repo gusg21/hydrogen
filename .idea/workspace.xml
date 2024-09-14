@@ -16,52 +16,51 @@
     <generated>
       <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
       <config projectName="Hydrogen" targetName="angelscript" />
-      <config projectName="Hydrogen" targetName="NightlyTest" />
-      <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
-      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
-      <config projectName="Hydrogen" targetName="ExperimentalTest" />
-      <config projectName="Hydrogen" targetName="SDL2main" />
-      <config projectName="Hydrogen" targetName="ContinuousBuild" />
-      <config projectName="Hydrogen" targetName="Experimental" />
-      <config projectName="Hydrogen" targetName="libcurl_object" />
-      <config projectName="Hydrogen" targetName="ContinuousStart" />
-      <config projectName="Hydrogen" targetName="Nightly" />
-      <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
-      <config projectName="Hydrogen" targetName="ExperimentalSubmit" />
-      <config projectName="Hydrogen" targetName="SDL2-static" />
-      <config projectName="Hydrogen" targetName="imgui.cmake" />
-      <config projectName="Hydrogen" targetName="ContinuousMemCheck" />
-      <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
-      <config projectName="Hydrogen" targetName="ExperimentalBuild" />
       <config projectName="Hydrogen" targetName="sdl_headers_copy" />
       <config projectName="Hydrogen" targetName="ContinuousSubmit" />
       <config projectName="Hydrogen" targetName="HydrogenServer_Wrapper" />
       <config projectName="Hydrogen" targetName="uninstall" />
       <config projectName="Hydrogen" targetName="libcurl_static" />
+      <config projectName="Hydrogen" targetName="NightlyTest" />
+      <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
+      <config projectName="Hydrogen" targetName="ContinuousCoverage" />
       <config projectName="Hydrogen" targetName="HydrogenCore" />
-      <config projectName="Hydrogen" targetName="HydrogenRuntime_Assets" />
       <config projectName="Hydrogen" targetName="ContinuousTest" />
       <config projectName="Hydrogen" targetName="ExperimentalConfigure" />
+      <config projectName="Hydrogen" targetName="ExperimentalTest" />
+      <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="NightlyMemoryCheck" />
       <config projectName="Hydrogen" targetName="ExperimentalStart" />
       <config projectName="Hydrogen" targetName="SDL2_test" />
       <config projectName="Hydrogen" targetName="NightlyMemCheck" />
       <config projectName="Hydrogen" targetName="NightlySubmit" />
+      <config projectName="Hydrogen" targetName="ContinuousBuild" />
+      <config projectName="Hydrogen" targetName="Experimental" />
       <config projectName="Hydrogen" targetName="yaml-cpp" />
       <config projectName="Hydrogen" targetName="NightlyBuild" />
+      <config projectName="Hydrogen" targetName="HydrogenEditor" />
       <config projectName="Hydrogen" targetName="ContinuousUpdate" />
-      <config projectName="Hydrogen" targetName="HydrogenRuntime" />
       <config projectName="Hydrogen" targetName="ContinuousConfigure" />
+      <config projectName="Hydrogen" targetName="libcurl_object" />
       <config projectName="Hydrogen" targetName="tinygltf" />
       <config projectName="Hydrogen" targetName="NightlyUpdate" />
+      <config projectName="Hydrogen" targetName="ContinuousStart" />
+      <config projectName="Hydrogen" targetName="Nightly" />
+      <config projectName="Hydrogen" targetName="ExperimentalMemCheck" />
       <config projectName="Hydrogen" targetName="NightlyConfigure" />
+      <config projectName="Hydrogen" targetName="ExperimentalSubmit" />
       <config projectName="Hydrogen" targetName="glad" />
       <config projectName="Hydrogen" targetName="HydrogenServer" />
+      <config projectName="Hydrogen" targetName="SDL2-static" />
       <config projectName="Hydrogen" targetName="SDL2" />
+      <config projectName="Hydrogen" targetName="imgui.cmake" />
       <config projectName="Hydrogen" targetName="Continuous" />
       <config projectName="Hydrogen" targetName="NightlyCoverage" />
       <config projectName="Hydrogen" targetName="ExperimentalCoverage" />
       <config projectName="Hydrogen" targetName="NightlyStart" />
+      <config projectName="Hydrogen" targetName="ContinuousMemCheck" />
+      <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
+      <config projectName="Hydrogen" targetName="ExperimentalBuild" />
       <config projectName="Hydrogen" targetName="ExperimentalUpdate" />
     </generated>
   </component>
@@ -72,25 +71,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] ALSO working on big asset streaming">
-      <change afterPath="$PROJECT_DIR$/core/include/core/assetdescription.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/include/editor/editorwindow.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/editor.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/editorwindow.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/actorspecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/actorspecasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/input/input.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/input/input.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/scenespecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scenespecasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/script/scriptasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/systems/script/scriptasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/assets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/assets.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/scenespecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/scenespecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/script/scriptasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/systems/script/scriptasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/theming/theming.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/theming/theming.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/window.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/window.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/engine.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/engine.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/window.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/window.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/editor/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/include/editor/editorengine.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/src/editorengine.cc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor.yml" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/assets/project.yml" beforeDir="false" afterPath="$PROJECT_DIR$/server/assets/project.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,14 +120,15 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/core/include/core/engine.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/core/include/core/netrequestthreadcontext.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/assets.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/engine.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/input/input.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/core/include/core/runtimeengine.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/netrequestthreadcontext.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/runtimeassets.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/runtimeengine.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/systems/render/gles3renderer.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/editor/include/editor/editorengine.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/editor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -138,10 +143,10 @@
     <option name="minorVersion" value="2.1" />
     <option name="productBranch" value="Classic" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 1
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="2lRXeQrlEOuhFzwP84z4XzhILwF" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -154,7 +159,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "CMake Application.HydrogenEditor.executor": "Debug",
+    "CMake Application.HydrogenEditor.executor": "Run",
     "CMake Application.HydrogenRuntime.executor": "Run",
     "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
@@ -164,6 +169,7 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.advertisement.text.has.clang-format": "true",
     "cf.advertisement.text.overridden": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
@@ -175,7 +181,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "settings.editor.selected.configurable": "editor.preferences.tabs",
     "two.files.diff.last.used.file": "C:/Projects/hydrogen/server/templates/status.html",
     "vue.rearranger.settings.migration": "true"
   }
@@ -188,14 +194,19 @@
       <recent name="C:\Projects\hydrogen\core\shaders\es" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\angus.goucher\Desktop\hydrogen\editor\include\editor\windows" />
       <recent name="C:\Projects\hydrogen\core\include\core" />
       <recent name="C:\Users\angus.goucher\CLionProjects\hydrogen\editor\include\editor" />
       <recent name="C:\Projects\hydrogen\core\shaders\core" />
       <recent name="C:\Projects\hydrogen\core\src\project" />
-      <recent name="C:\Projects\hydrogen\core\include\core\project" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.HydrogenRuntime">
+  <component name="RunManager" selected="CMake Application.HydrogenEditor">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -306,17 +317,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="HydrogenRuntime" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenRuntime">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="HydrogenRuntime_Assets" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime_Assets" CONFIG_NAME="Debug-Visual Studio">
+    <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$ProjectFileDir$/runtime/" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -397,11 +398,6 @@
       </method>
     </configuration>
     <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug-Visual Studio">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -492,8 +488,6 @@
       <item itemvalue="CMake Application.HydrogenEditor" />
       <item itemvalue="CMake Application.HydrogenCore_Shared" />
       <item itemvalue="CMake Application.HydrogenCore" />
-      <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
-      <item itemvalue="CMake Application.HydrogenRuntime" />
       <item itemvalue="CMake Application.HydrogenServer_Wrapper" />
       <item itemvalue="CMake Application.HydrogenServer" />
       <item itemvalue="CMake Application.NightlyBuild" />
@@ -548,6 +542,7 @@
       <workItem from="1725946168594" duration="2007000" />
       <workItem from="1725948695615" duration="4497000" />
       <workItem from="1726254405865" duration="3459000" />
+      <workItem from="1726262954787" duration="13482000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />

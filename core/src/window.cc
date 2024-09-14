@@ -1,10 +1,13 @@
 #include "core/window.h"
 
+#include <imgui_impl_opengl3.h>
+
 #include "SDL2/SDL.h"
 #include "imgui_impl_sdl2.h"
 
 #include "core/log.h"
 #include "core/systems/render/renderer.h"
+#include "core/engineevents.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval
 
@@ -14,7 +17,7 @@ uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height
     // Init SDL
     ::SDL_Init(SDL_INIT_EVERYTHING);
 
-//    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_);
+    //    ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_);
 #if __ANDROID__
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     ::SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -37,7 +40,7 @@ uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height
     m_glContext = ::SDL_GL_CreateContext(m_sdlWindow);
     if (m_glContext == nullptr) {
         HYLOG_ERROR("WINDOW: GL Context error: %s", SDL_GetError());
-        return 1; // TODO: Make actual error code
+        return 1;  // TODO: Make actual error code
     }
     ::SDL_GL_MakeCurrent(m_sdlWindow, m_glContext);
 
@@ -46,14 +49,23 @@ uint32_t h_core::Window::init(std::string title, uint32_t width, uint32_t height
     int gladInitResult = ::gladLoadGLLoader(::SDL_GL_GetProcAddress);
     if (gladInitResult == 0) {
         HYLOG_ERROR("WINDOW: Failed to init OpenGL context\n");
-        return 1; // TODO: Make actual error code
+        return 1;  // TODO: Make actual error code
     }
     const uint8_t* glVersionStr = ::glGetString(GL_VERSION);
-    if (glVersionStr == nullptr) { // TODO: does the above if block cover all cases?
+    if (glVersionStr == nullptr) {
+        // TODO: does the above if block cover all cases?
         HYLOG_ERROR("WINDOW: OpenGL version error: %u\n", glGetError());
-        return 1; // TODO: Make actual error code
+        return 1;  // TODO: Make actual error code
     }
     HYLOG_INFO("WINDOW: OpenGL version: %s\n", glVersionStr);
+
+    // ImGui setup
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+
+    ::ImGui_ImplOpenGL3_Init();
+    ::ImGui_ImplSDL2_InitForOpenGL(m_sdlWindow, m_glContext);
 
     // Set up resolution + backbuffer settings
     // Set up imgui

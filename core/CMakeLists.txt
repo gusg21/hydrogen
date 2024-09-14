@@ -201,6 +201,13 @@ target_link_libraries(HydrogenCore_Shared PUBLIC tinygltf)
 
 set_target_properties(tinygltf PROPERTIES FOLDER "Vendored/tinygltf")
 
+# shlwapi
+if (WIN32)
+    find_library(SHLWAPI Shlwapi.lib)
+    target_link_libraries(HydrogenCore PUBLIC SHLWAPI)
+    target_link_libraries(HydrogenCore_Shared PUBLIC SHLWAPI)
+endif()
+
 # yaml-cpp
 set(YAML_BUILD_SHARED_LIBS OFF)
 set(YAML_CPP_FORMAT_SOURCE OFF)

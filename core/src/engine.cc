@@ -2,13 +2,16 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NOEXCEPTION
-#include "tiny_gltf.h"
 
-#include "core/theming/theming.h"
+
+#include "tiny_gltf.h"
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
+
+#include "core/theming/theming.h"
+#include "core/engineevents.h"
 
 uint32_t h_core::Engine::init(const h_core::project::Project* project) {
     // Store the project
@@ -16,7 +19,7 @@ uint32_t h_core::Engine::init(const h_core::project::Project* project) {
 
     // Window initialization
     m_window = new h_core::Window();
-    std::string windowTitle = "hydrogen runtime - " + project->name;
+    std::string windowTitle = "hydrogen - " + project->name;
     uint32_t windowInitResult = m_window->init(windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
     m_windowWidth = project->windowWidth;
@@ -26,20 +29,14 @@ uint32_t h_core::Engine::init(const h_core::project::Project* project) {
     m_input = new h_core::input::Input();
     m_input->init(project, m_window);
 
-    // ImGui setup
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    // theme
+    h_core::theming::runtime();
 
-    ::ImGui_ImplOpenGL3_Init();
-    ::ImGui_ImplSDL2_InitForOpenGL(m_window->getSDLWindow(), m_window->getGLContext());
-    h_core::theming::cherry();
-
-//#if IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-//    SDL_Log("Using vertex array\n");
-//#else
-//    SDL_Log("NOT Using vertex array\n");
-//#endif
+    // #if IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
+    //     SDL_Log("Using vertex array\n");
+    // #else
+    //     SDL_Log("NOT Using vertex array\n");
+    // #endif
 
     doInit(project);
 
