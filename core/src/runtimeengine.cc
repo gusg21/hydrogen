@@ -6,6 +6,7 @@
 #include "imgui.h"
 
 #include "core/input/dualkeyinputactionsource.h"
+#include "core/physics/physics.h"
 #include "core/systems/gravity.h"
 #include "core/systems/render/gl4renderer.h"
 #include "core/systems/render/gles3renderer.h"
@@ -24,6 +25,7 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
     if (getWindow()->isGles3()) { m_systems.renderer = new h_core::render::Gles3Renderer(); }
     else { m_systems.renderer = new h_core::render::Gl4Renderer(); }
     m_systems.scripting = new h_core::script::Scripting();
+    m_systems.physics = new h_core::physics::Physics();
     m_systems.init(this);
 
     // set up assets
