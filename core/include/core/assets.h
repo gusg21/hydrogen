@@ -17,7 +17,6 @@
 #include "core/scenespecasset.h"
 #include "core/systems/render/meshasset.h"
 #include "core/systems/script/scriptasset.h"
-#include "core/physics/rigidbodyasset.h"
 
 #define TYPED_SWITCH_CASE(type, func, ...) \
     case type::getTypeId(): {              \
@@ -31,7 +30,6 @@
         TYPED_SWITCH_CASE(h_core::ActorSpecAsset, func, ##__VA_ARGS__);             \
         TYPED_SWITCH_CASE(h_core::script::ScriptAsset, func, ##__VA_ARGS__);        \
         TYPED_SWITCH_CASE(h_core::render::MeshAsset, func, ##__VA_ARGS__);          \
-        TYPED_SWITCH_CASE(h_core::physics::RigidbodyAsset, func, ##__VA_ARGS__);    \
     }
 
 #define ASSERT_TYPE_IS_ASSET_TYPE(type, error_msg) static_assert(std::is_base_of_v<h_core::Asset, type>, error_msg)

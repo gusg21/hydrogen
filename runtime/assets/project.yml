@@ -12,6 +12,9 @@ assets:
   - index: 1
     type: 1
     path: "assets/test_actor2.yml"
+  - index: 15
+    type: 1
+    path: "assets/test_actor3.yml"
   - index: 2
     type: 2
     path: "assets/test_script.yml"
@@ -28,9 +31,3 @@ assets:
   - index: 10
     type: 1
     path: "assets/test_actor.yml"
-  - index: 72
-    type: 4
-    path: "assets/test_rigidbody.yml"
-  - index: 73
-    type: 4
-    path: "assets/test_rigidbody2.yml"

@@ -27,7 +27,7 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
         scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
 
     if(yaml["rigidbody"].IsDefined())
-        rigidbodyIndex = yaml["rigidbody"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
+        rigidbody = new physics::Rigidbody(transform.position, 1000000);
 
     return 0;
 }

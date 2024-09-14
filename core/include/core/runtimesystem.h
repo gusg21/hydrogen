@@ -13,7 +13,7 @@ namespace render {
 class MeshComp;
 }
 namespace physics {
-class RigidbodyComp;
+class Rigidbody;
 }
 
 // class Model;
@@ -38,6 +38,6 @@ class RuntimeSystem {
     h_core::Transform* transform = nullptr;
     h_core::render::MeshComp* meshComp = nullptr;
     h_core::script::ScriptComp* script = nullptr;
-    h_core::physics::RigidbodyComp* rigidbodyComp = nullptr;
+    h_core::physics::Rigidbody* rigidbody = nullptr;
 };
 }  // namespace h_core

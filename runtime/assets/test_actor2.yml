@@ -18,4 +18,3 @@ model:
 script:
   index: 2
 rigidbody:
-  index: 72

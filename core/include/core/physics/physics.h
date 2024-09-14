@@ -10,7 +10,7 @@
 #include "core/runtimeengine.h"
 #include "core/runtimesystem.h"
 #include "core/transform.h"
-#include "core/physics/rigidbodycomp.h"
+#include "core/physics/rigidbody.h"
 
 namespace h_core {
 //class RuntimeEngine;
@@ -28,12 +28,12 @@ public:
     void draw() override;
     void endFrame() override;
 
-    HYSYSTEM(h_core::Transform::getMask() | h_core::physics::RigidbodyComp::getMask());
+    HYSYSTEM(h_core::Transform::getMask() | h_core::physics::Rigidbody::getMask());
 
 private:
-     h_core::math::Vector3 calculateGravity();
+     h_core::math::Vector3 calculateGravity(Rigidbody* rb);
 
-     std::vector<RigidbodyAsset*> allRigidbodies = {};
+     std::vector<Rigidbody*> allRigidbodies = {};
 };
 }
 }

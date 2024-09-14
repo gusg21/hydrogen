@@ -5,6 +5,7 @@
 #include "core/componentbitmask.h"
 #include "core/systems/script/scriptcomp.h"
 #include "core/transform.h"
+#include "core/physics/rigidbody.h"
 
 namespace h_core {
 class ActorSpecAsset : public Asset {
@@ -17,7 +18,7 @@ class ActorSpecAsset : public Asset {
     h_core::Transform transform;
     h_core::AssetIndex meshIndex;
     h_core::AssetIndex scriptIndex;
-    h_core::AssetIndex rigidbodyIndex;
+    h_core::physics::Rigidbody* rigidbody = nullptr;
 
     HYASSET(1);
 };

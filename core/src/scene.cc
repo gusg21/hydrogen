@@ -30,11 +30,11 @@ h_core::ActorId h_core::Scene::addActor(
     ActorId newId = m_nextId;
     masks[newId] = spec->mask;
     transforms[newId] = spec->transform;
+    rigidbodies[newId] = spec->rigidbody;
 
     // components
     meshes[newId].init(spec->meshIndex);
     scripts[newId].init(spec->scriptIndex, assets, scriptingContext, newId);
-    rigidbodies[newId].init(spec->rigidbodyIndex);
 
     HYLOG_INFO("SCENE: adding actor id %d, mask %d\n", newId, masks[newId]);
 
