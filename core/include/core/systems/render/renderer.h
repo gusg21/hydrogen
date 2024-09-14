@@ -36,6 +36,8 @@ class Renderer : public RuntimeSystem {
     static uint32_t loadShader(GLuint* out_shaderId, std::string filePath);
     static uint32_t loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath);
 
+    HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
+
   protected:
     void setRendererName(const std::string& name);
     void setIsGles3(bool isGles3);
@@ -47,8 +49,6 @@ class Renderer : public RuntimeSystem {
     float m_nearZ = 1.f;
     float m_farZ = 100.f;
     bool m_ccw = true;
-
-    HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
 
   private:
     static uint32_t callback_setFov(const std::string& args, void* data);

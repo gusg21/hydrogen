@@ -26,5 +26,8 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(
     if (yaml["script"].IsDefined())
         scriptIndex = yaml["script"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
 
+    if(yaml["rigidbody"].IsDefined())
+        rigidbodyIndex = yaml["rigidbody"]["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
+
     return 0;
 }

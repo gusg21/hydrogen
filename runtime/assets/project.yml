@@ -28,3 +28,9 @@ assets:
   - index: 10
     type: 1
     path: "assets/test_actor.yml"
+  - index: 72
+    type: 4
+    path: "assets/test_rigidbody.yml"
+  - index: 73
+    type: 4
+    path: "assets/test_rigidbody2.yml"

@@ -2,7 +2,6 @@
 
 #include "core/actor.h"
 #include "core/componentbitmask.h"
-#include "core/runtimeengine.h"
 
 #define HYSYSTEM(mask) [[nodiscard]] constexpr static h_core::ComponentBitmask getMask() { return mask; }
 

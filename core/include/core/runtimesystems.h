@@ -5,7 +5,6 @@
 #pragma once
 
 #include "core/actor.h"
-#include "physics/physics.h"
 
 #define SYSTEMS_SYSTEM_COUNT 4
 
@@ -21,6 +20,9 @@ class Renderer;
 }
 namespace script {
 class Scripting;
+}
+namespace physics {
+class Physics;
 }
 
 class RuntimeSystems {

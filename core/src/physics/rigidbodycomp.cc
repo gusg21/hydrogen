@@ -3,6 +3,8 @@
 //
 #include "core/physics/rigidbodycomp.h"
 
-void h_core::physics::RigidbodyComp::init(h_core::physics::RigidbodyAsset* rigidbody) {
+#include "core/assetindex.h"
+
+void h_core::physics::RigidbodyComp::init(h_core::AssetIndex rigidbody) {
     this->rigidbody = rigidbody;
 }

@@ -10,6 +10,7 @@
 #include "core/systems/render/gles3renderer.h"
 #include "core/systems/render/gl4renderer.h"
 #include "core/systems/script/scripting.h"
+#include "core/physics/physics.h"
 
 void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
     // set up console - happens really early to catch all the prints
@@ -27,6 +28,7 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
         m_systems.renderer = new h_core::render::Gl4Renderer();
     }
     m_systems.scripting = new h_core::script::Scripting();
+    m_systems.physics = new h_core::physics::Physics();
     m_systems.init(this);
 
     // set up assets

@@ -6,6 +6,7 @@
 #include "core/scenespecasset.h"
 #include "core/systems/render/meshcomp.h"
 #include "core/systems/script/scriptcomp.h"
+#include "physics/rigidbodycomp.h"
 #include "core/transform.h"
 
 #define SCENE_MAX_ACTORS 4096
@@ -30,6 +31,7 @@ class Scene {
     h_core::Transform transforms[SCENE_MAX_ACTORS] = {};
     h_core::render::MeshComp meshes[SCENE_MAX_ACTORS] = {};
     h_core::script::ScriptComp scripts[SCENE_MAX_ACTORS] = {};
+    h_core::physics::RigidbodyComp rigidbodies[SCENE_MAX_ACTORS] = {};
 
     std::unordered_map<uint32_t, h_core::Component*[SCENE_MAX_ACTORS]> blah {};
 

@@ -1,7 +1,7 @@
 mask: 15
 transform:
   position:
-    x: 0
+    x: 100
     y: 0
     z: 0 
   rotation:
@@ -17,3 +17,5 @@ model:
   index: 40
 script:
   index: 2
+rigidbody:
+  index: 72

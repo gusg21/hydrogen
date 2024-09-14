@@ -17,6 +17,7 @@ class ActorSpecAsset : public Asset {
     h_core::Transform transform;
     h_core::AssetIndex meshIndex;
     h_core::AssetIndex scriptIndex;
+    h_core::AssetIndex rigidbodyIndex;
 
     HYASSET(1);
 };

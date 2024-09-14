@@ -3,6 +3,8 @@
 //
 #include "core/physics/rigidbodyasset.h"
 
+#include <core/actor.h>
+
 uint32_t h_core::physics::RigidbodyAsset::initFromYaml(h_core::Assets* assets, YAML::Node node) {
     velocity = h_core::math::Vector3(0);
     acceleration = h_core::math::Vector3(0);

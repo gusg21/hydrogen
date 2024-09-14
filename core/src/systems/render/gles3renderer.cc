@@ -3,6 +3,7 @@
 //
 #include "core/systems/render/gles3renderer.h"
 #include "core/systems/render/meshasset.h"
+#include "core/runtimeengine.h"
 
 uint32_t h_core::render::Gles3Renderer::init(h_core::RuntimeEngine* engine) {
     Renderer::init(engine);
