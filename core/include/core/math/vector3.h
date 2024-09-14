@@ -21,6 +21,13 @@ struct Vector3 {
         return *this;
     }
 
+    constexpr Vector3& operator-=(const Vector3& other) {
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
+        return *this;
+    }
+
     static float dot(Vector3 lhs, Vector3 rhs);
     [[nodiscard]] float dot(Vector3 otherVector) const;
 
@@ -32,7 +39,11 @@ struct Vector3 {
     static Vector3 scale(Vector3 v, float scalar);
 
     static float getLength(Vector3 v);
+    [[nodiscard]] float getLength();
+    static float getSquaredLength(Vector3 v);
+    [[nodiscard]] float getSquaredLength();
     static Vector3 normalize(Vector3 v);
+    [[nodiscard]] Vector3 normalize();
 
     float x;
     float y;
@@ -50,5 +61,11 @@ inline h_core::math::Vector3 operator+(const h_core::math::Vector3& a, const h_c
 inline h_core::math::Vector3 operator*(const h_core::math::Vector3& a, float b) {
     h_core::math::Vector3 result = a;
     result *= b;
+    return result;
+}
+
+inline h_core::math::Vector3 operator-(const h_core::math::Vector3& a, const h_core::math::Vector3& b) {
+    h_core::math::Vector3 result = a;
+    result -= b;
     return result;
 }

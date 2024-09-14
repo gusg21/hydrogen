@@ -2,7 +2,6 @@
 
 #include "core/actor.h"
 #include "core/componentbitmask.h"
-#include "core/runtimeengine.h"
 
 #define HYSYSTEM(mask) [[nodiscard]] constexpr static h_core::ComponentBitmask getMask() { return mask; }
 
@@ -13,6 +12,10 @@ class ScriptComp;
 namespace render {
 class MeshComp;
 }
+namespace physics {
+class Rigidbody;
+}
+
 // class Model;
 class RuntimeEngine;
 class Transform;
@@ -35,5 +38,6 @@ class RuntimeSystem {
     h_core::Transform* transform = nullptr;
     h_core::render::MeshComp* meshComp = nullptr;
     h_core::script::ScriptComp* script = nullptr;
+    h_core::physics::Rigidbody* rigidbody = nullptr;
 };
 }  // namespace h_core

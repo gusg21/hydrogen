@@ -24,12 +24,12 @@
         break;                             \
     }
 
-#define CALL_TYPED_FUNC_WITH_ASSET_ID(id, func, ...)                         \
-    switch ((id)) {                                                          \
-        TYPED_SWITCH_CASE(h_core::SceneSpecAsset, func, ##__VA_ARGS__);      \
-        TYPED_SWITCH_CASE(h_core::ActorSpecAsset, func, ##__VA_ARGS__);      \
-        TYPED_SWITCH_CASE(h_core::script::ScriptAsset, func, ##__VA_ARGS__); \
-        TYPED_SWITCH_CASE(h_core::render::MeshAsset, func, ##__VA_ARGS__);   \
+#define CALL_TYPED_FUNC_WITH_ASSET_ID(id, func, ...)                                \
+    switch ((id)) {                                                                 \
+        TYPED_SWITCH_CASE(h_core::SceneSpecAsset, func, ##__VA_ARGS__);             \
+        TYPED_SWITCH_CASE(h_core::ActorSpecAsset, func, ##__VA_ARGS__);             \
+        TYPED_SWITCH_CASE(h_core::script::ScriptAsset, func, ##__VA_ARGS__);        \
+        TYPED_SWITCH_CASE(h_core::render::MeshAsset, func, ##__VA_ARGS__);          \
     }
 
 #define ASSERT_TYPE_IS_ASSET_TYPE(type, error_msg) static_assert(std::is_base_of_v<h_core::Asset, type>, error_msg)

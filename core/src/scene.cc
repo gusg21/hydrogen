@@ -30,6 +30,7 @@ h_core::ActorId h_core::Scene::addActor(
     ActorId newId = m_nextId;
     masks[newId] = spec->mask;
     transforms[newId] = spec->transform;
+    rigidbodies[newId] = spec->rigidbody;
 
     // components
     meshes[newId].init(spec->meshIndex);

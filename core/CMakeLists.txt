@@ -41,6 +41,10 @@ set(HydrogenCore_Sources
             src/math/vector2.cc include/core/math/vector2.h
             src/math/vector3.cc include/core/math/vector3.h
 
+            # Physics
+            src/physics/physics.cc include/core/physics/physics.h
+            src/physics/rigidbody.cc include/core/physics/rigidbody.h
+
             # Systems
             src/systems/gravity.cc include/core/systems/gravity.h
             src/systems/render/meshasset.cc include/core/systems/render/meshasset.h
@@ -65,7 +69,7 @@ set(HydrogenCore_Sources
 )
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
-        include/core/assetdescription.h)
+        src/runtimesystem.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
@@ -200,13 +204,6 @@ target_link_libraries(HydrogenCore PUBLIC tinygltf)
 target_link_libraries(HydrogenCore_Shared PUBLIC tinygltf)
 
 set_target_properties(tinygltf PROPERTIES FOLDER "Vendored/tinygltf")
-
-# shlwapi
-if (WIN32)
-    find_library(SHLWAPI Shlwapi.lib)
-    target_link_libraries(HydrogenCore PUBLIC SHLWAPI)
-    target_link_libraries(HydrogenCore_Shared PUBLIC SHLWAPI)
-endif()
 
 # yaml-cpp
 set(YAML_BUILD_SHARED_LIBS OFF)

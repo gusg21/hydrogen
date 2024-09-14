@@ -4,6 +4,7 @@
 
 #include "core/systems/render/gl4renderer.h"
 
+#include "core/runtimeengine.h"
 #include "core/systems/render/meshasset.h"
 
 uint32_t h_core::render::Gl4Renderer::init(h_core::RuntimeEngine* engine) {

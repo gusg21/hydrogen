@@ -10,6 +10,7 @@
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/input/keyinputactionsource.h"
 #include "core/log.h"
+#include "core/runtimeengine.h"
 #include "core/math/mat4x4.h"
 
 uint32_t h_core::render::Renderer::loadShader(GLuint* out_shaderId, std::string filePath) {

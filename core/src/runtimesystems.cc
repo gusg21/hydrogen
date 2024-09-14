@@ -52,6 +52,7 @@ void h_core::RuntimeSystems::updateSystemReferences(h_core::RuntimeSystem* syste
     system->transform = &scene->transforms[id];
     system->meshComp = &scene->meshes[id];
     system->script = &scene->scripts[id];
+    system->rigidbody = scene->rigidbodies[id];
 }
 
 void h_core::RuntimeSystems::prepareScene(h_core::Scene* scene) {

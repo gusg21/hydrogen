@@ -7,6 +7,8 @@
 
 #include "core/log.h"
 #include "core/systems/render/renderer.h"
+#include "core/runtimesystems.h"
+#include "imgui.h"
 
 // TODO: move these godless monstrosities to a subf
 

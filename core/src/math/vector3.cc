@@ -50,3 +50,15 @@ h_core::math::Vector3 h_core::math::Vector3::normalize(
 
     return h_core::math::Vector3(v.x / length, v.y / length, v.z / length);
 }
+float h_core::math::Vector3::getSquaredLength(h_core::math::Vector3 v) {
+    return v.x * v.x + v.y * v.y + v.z * v.z;
+}
+float h_core::math::Vector3::getSquaredLength() {
+    return getSquaredLength(*this);
+}
+float h_core::math::Vector3::getLength() {
+    return getLength(*this);
+}
+h_core::math::Vector3 h_core::math::Vector3::normalize() {
+    return normalize(*this);
+}
