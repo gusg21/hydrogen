@@ -37,7 +37,7 @@ uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, 
     if (assetPath.empty() && !isRemote) { return 4; }
 
     assets->queueLoadAsset(h_core::AssetDescription { assetIndex, assetType, assetPath, isRemote });
-//    assets->m_assets[assetIndex]->precompile(assets->m_systems);
+    //    assets->m_assets[assetIndex]->precompile(assets->m_systems);
 
     return 0;
 }
@@ -83,7 +83,7 @@ void h_core::RuntimeAssets::doGUI() {
                     "Request #" + std::to_string(jobIndex) + " (Asset #" + std::to_string(job.assetIndex) + ")";
                 if (ImGui::CollapsingHeader(headerText.c_str())) {
                     ImGui::Text("Asset Index: %d", job.assetIndex);
-                    ImGui::Text("Asset Type: %d", job.assetType);
+                    ImGui::Text("Asset Type: %s (%d)", getAssetTypeName(job.assetType), job.assetType);
                     ImGui::Text("Server Address: %s", job.serverAddress.c_str());
                 }
                 ImGui::PopID();
@@ -146,9 +146,8 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
         loadAsset(desc);
         if (!desc.remote) {
             int precompileResult = m_assets[desc.index]->precompile(m_systems);
-            if (precompileResult == 0) {
-                delete oldAsset;
-            } else {
+            if (precompileResult == 0) { delete oldAsset; }
+            else {
                 HYLOG_WARN("Failed to precompile queued asset %d (error code %d)", desc.index, precompileResult);
 
                 delete m_assets[desc.index];
@@ -170,13 +169,13 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
             if (m_assets[result.job.assetIndex] != nullptr) { delete m_assets[result.job.assetIndex]; }
             int precompileResult = result.newAsset->precompile(m_systems);
 
-            if (precompileResult == 0) {
-                m_assets[result.job.assetIndex] = result.newAsset;
-            } else {
+            if (precompileResult == 0) { m_assets[result.job.assetIndex] = result.newAsset; }
+            else {
                 HYLOG_WARN("Failed to precompile asset %d, re-requesting...", result.job.assetIndex);
 
                 // Re-queue new asset request
-                CALL_TYPED_FUNC_WITH_ASSET_ID(result.job.assetType, RuntimeAssets::requestNetAsset, result.job.assetIndex);
+                CALL_TYPED_FUNC_WITH_ASSET_ID(
+                    result.job.assetType, RuntimeAssets::requestNetAsset, result.job.assetIndex);
             }
         }
         else {

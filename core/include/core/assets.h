@@ -47,7 +47,8 @@ class Project;
 }
 
 // Base class for all sources of assets (packed/unpacked)
-class Assets {
+class Assets
+{
   public:
     Assets() = default;
 
@@ -76,6 +77,10 @@ class Assets {
     uint32_t getAssetCount() const;
 
     virtual void loadAsset(const AssetDescription& desc);
+
+    static uint32_t determineAssetTypeFromExtension(const std::string& extension);
+
+    static const char* getAssetTypeName(uint32_t assetType); 
 
   protected:
     template<typename AssetType>

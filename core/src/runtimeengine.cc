@@ -7,9 +7,10 @@
 
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/systems/gravity.h"
-#include "core/systems/render/gles3renderer.h"
 #include "core/systems/render/gl4renderer.h"
+#include "core/systems/render/gles3renderer.h"
 #include "core/systems/script/scripting.h"
+#include "core/theming/guicolors.h"
 
 void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
     // set up console - happens really early to catch all the prints
@@ -20,18 +21,14 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
 
     // set up systems
     m_systems.gravity = new h_core::systems::Gravity();
-    if (getWindow()->isGles3()) {
-        m_systems.renderer = new h_core::render::Gles3Renderer();
-    }
-    else {
-        m_systems.renderer = new h_core::render::Gl4Renderer();
-    }
+    if (getWindow()->isGles3()) { m_systems.renderer = new h_core::render::Gles3Renderer(); }
+    else { m_systems.renderer = new h_core::render::Gl4Renderer(); }
     m_systems.scripting = new h_core::script::Scripting();
     m_systems.init(this);
 
     // set up assets
     m_assets = new h_core::RuntimeAssets();
-    m_assets->init("http://localhost:5000/", &m_systems); // TODO: Local server. update with remote server
+    m_assets->init("http://localhost:5000/", &m_systems);  // TODO: Local server. update with remote server
     m_assets->loadFromProject(project);
     m_assets->precompile();
 }
@@ -75,11 +72,12 @@ void h_core::RuntimeEngine::doGUI() {
             ImGui::SeparatorText("Assets");
 
             ImGui::BeginTable(
-                "Project Info", 3, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
+                "Project Info", 4, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp);
             ImGui::TableSetupScrollFreeze(3, 1);
-            ImGui::TableSetupColumn("Index", 0, 20.f);
-            ImGui::TableSetupColumn("Type", 0, 20.f);
-            ImGui::TableSetupColumn("Path", 0, 200.f);
+            ImGui::TableSetupColumn("Index", 0, 30.f);
+            ImGui::TableSetupColumn("Type", 0, 30.f);
+            ImGui::TableSetupColumn("Path", 0, 150.f);
+            ImGui::TableSetupColumn("Remote", 0, 30);
             ImGui::TableHeadersRow();
 
             for (const h_core::project::ProjectAssetEntry& entry : getProject()->requiredAssets) {
@@ -89,6 +87,13 @@ void h_core::RuntimeEngine::doGUI() {
                 ImGui::Text("%u", entry.typeId);
                 ImGui::TableNextColumn();
                 ImGui::Text("%s", entry.assetPath.c_str());
+                ImGui::TableNextColumn();
+                if (entry.isRemote) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4 { 0, 0, 0, 1 });
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(IMGUI_COLOR_GOOD));
+                }
+                ImGui::Text(entry.isRemote ? "YES" : "NO");
+                if (entry.isRemote) { ImGui::PopStyleColor(); }
             }
             ImGui::EndTable();
         }

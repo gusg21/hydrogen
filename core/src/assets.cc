@@ -24,6 +24,29 @@ void h_core::Assets::loadAsset(const AssetDescription& desc) {
     m_assets[desc.index] = static_cast<h_core::Asset*>(asset);
 }
 
+uint32_t h_core::Assets::determineAssetTypeFromExtension(const std::string& extension) {
+    static const std::unordered_map<std::string, uint32_t> assetTypeLUT = {
+        { "hyactor", h_core::ActorSpecAsset::getTypeId() },
+        { "hymodel", h_core::render::MeshAsset::getTypeId() },
+        { "hyscript", h_core::script::ScriptAsset::getTypeId() },
+        { "hyscene", h_core::SceneSpecAsset::getTypeId() }
+    };
+
+    return assetTypeLUT.find(extension) == assetTypeLUT.end() ? UINT32_MAX : assetTypeLUT.at(extension);
+}
+
+const char* h_core::Assets::getAssetTypeName(uint32_t assetType) {
+    static const std::unordered_map<uint32_t, const char*> assetNameLUT = {
+        { h_core::ActorSpecAsset::getTypeId(), "Actor Spec" },
+        { h_core::render::MeshAsset::getTypeId(), "Mesh" },
+        { h_core::script::ScriptAsset::getTypeId(), "Script" },
+        { h_core::SceneSpecAsset::getTypeId(), "Scene Spec" }
+    };
+
+    return assetNameLUT.find(assetType) == assetNameLUT.end() ? "Unknown (Assets::getAssetTypeName)"
+                                                              : assetNameLUT.at(assetType);
+}
+
 uint32_t h_core::Assets::getAssetCount() const {
     return m_assetCount;
 }

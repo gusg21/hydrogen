@@ -5,8 +5,8 @@
 #include "editor/windows/projectexplorer.h"
 
 #include <SDL.h>
-#include <Windows.h>
 #include <Shlwapi.h>
+#include <Windows.h>
 #include <imgui.h>
 
 #include "core/log.h"
@@ -27,16 +27,21 @@ void h_editor::windows::ProjectExplorer::paintContent() {
     if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, -FLT_MIN))) {
         for (const ProjectExplorerFileEntry& file : files) {
             std::string entryText = file.name + (file.type == ProjectExplorerFileType::DIRECTORY ? "/" : "");
+            ImGui::PushStyleColor(
+                ImGuiCol_Text, file.type == ProjectExplorerFileType::DIRECTORY ? ImVec4 { 1.0f, 1.0f, 1.0f, 0.5f }
+                                                                               : ImVec4 { 1.0f, 1.0f, 1.0f, 1.0f });
             if (ImGui::Selectable(entryText.c_str(), m_currentSelection == file.name)) {
                 m_currentSelection = file.name;
             }
-            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && file.type == ProjectExplorerFileType::DIRECTORY) {
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) &&
+                file.type == ProjectExplorerFileType::DIRECTORY) {
                 m_browsingPath += file.name + "/";
                 m_browsingPath = canonicalizePath(m_browsingPath);
             }
+            ImGui::PopStyleColor();
         }
+        ImGui::EndListBox();
     }
-    ImGui::EndListBox();
     ImGui::PopID();
 }
 
