@@ -6,9 +6,9 @@
 #include "core/engine.h"
 #include "core/input/input.h"
 #include "core/runtimesystem.h"
-#include "core/systems/render/meshasset.h"
-#include "core/systems/render/shader.h"
 #include "core/transform.h"
+#include "meshasset.h"
+#include "shader.h"
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
 #define RENDERING_LOAD_SHADER_FAIL_BAD_FILE_STREAM     2

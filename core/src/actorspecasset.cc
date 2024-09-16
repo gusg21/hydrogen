@@ -1,8 +1,8 @@
 #include "core/actorspecasset.h"
 
 #include "core/log.h"
-#include "core/systems/render/meshasset.h"
-#include "core/systems/script/scriptasset.h"
+#include "core/render/meshasset.h"
+#include "core/script/scriptasset.h"
 
 uint32_t h_core::ActorSpecAsset::initFromYaml(
     h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {

@@ -1,11 +1,11 @@
-#include "core/systems/script/scriptasset.h"
+#include "core/script/scriptasset.h"
 
 #include "SDL.h"
 
-#include "core/actor.h"
+#include "core/actorid.h"
 #include "core/log.h"
 #include "core/runtimesystems.h"
-#include "core/systems/script/scripting.h"
+#include "core/script/scripting.h"
 
 uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
     h_core::Asset::initFromYaml(assets, desc, yaml);

@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "editor/editorwindow.h"
+#include "editor/asseteditorwindow.h"
 
 namespace h_editor {
 namespace windows {
-class MeshImporter : public EditorWindow {
+class MeshImporter : public h_editor::AssetEditorWindow {
   public:
-    MeshImporter() : EditorWindow("Mesh Importer") {}
+    explicit MeshImporter(h_editor::Editor* editor) : AssetEditorWindow(editor, "Mesh Importer") {}
 
-    void open(const std::string& meshFile);
+    void open(const std::string& meshFile) override;
     void paintContent() override;
 
   private:

@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "core/actor.h"
+#include "core/actorid.h"
 #include "core/asset.h"
 
 

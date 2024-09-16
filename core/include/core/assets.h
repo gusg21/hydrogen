@@ -15,8 +15,8 @@
 #include "core/log.h"
 #include "core/project/projectassetentry.h"
 #include "core/scenespecasset.h"
-#include "core/systems/render/meshasset.h"
-#include "core/systems/script/scriptasset.h"
+#include "core/render/meshasset.h"
+#include "core/script/scriptasset.h"
 
 #define TYPED_SWITCH_CASE(type, func, ...) \
     case type::getTypeId(): {              \
@@ -58,13 +58,6 @@ class Assets
     /// @param string the string to convert (asset name)
     /// @return the hash
     static AssetHash getAssetHashFromString(const std::string& string);
-
-    /// @brief loads or retrieves an asset index by its name.
-    /// @tparam AssetType the asset type to load (base class h_core::Asset)
-    /// @param filePath the path to load
-    /// @return the asset index (permanent)
-    template<typename AssetType>
-    h_core::AssetIndex getOrLoadAsset(std::string filePath);
 
     /// @brief Get an asset by its index. Note that this pointer is only valid
     /// until the assets are updated again; hold on to an AssetIndex instead.
@@ -114,36 +107,6 @@ uint32_t h_core::Assets::loadAssetFromFile(h_core::Asset** out_asset, const h_co
     m_assetCount++;
 
     return 0;
-}
-
-template<typename AssetType>
-h_core::AssetIndex h_core::Assets::getOrLoadAsset(std::string filePath) {
-    ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't load asset type that does not derive from Asset");
-
-    // TODO: This hashing piece to the loading can probably be removed
-    h_core::AssetHash hash = getAssetHashFromString(filePath);
-    if (m_assetIndexMap.count(hash) > 0) {
-        // Load existing asset
-        h_core::AssetIndex assetIndex = m_assetIndexMap[hash];
-        return assetIndex;
-    }
-    else {
-        // Load new asset
-        h_core::AssetIndex assetIndex = m_nextAssetIndex++;
-        AssetType* asset = new AssetType();
-        uint32_t result = loadAssetFromFile<AssetType>(asset, filePath);
-        if (result != 0) {
-            HYLOG_ERROR("ASSETS: Failed to load asset %s\n", filePath.c_str());
-            return ASSET_INDEX_BAD;
-        }
-        else {
-            m_assets[assetIndex] = asset;
-            m_assetIndexMap[hash] = assetIndex;
-            return assetIndex;
-        }
-    }
-
-    return ASSET_INDEX_BAD;
 }
 
 template<typename AssetType>

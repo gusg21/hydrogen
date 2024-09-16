@@ -19,6 +19,7 @@ class Editor {
     void run();
     void destroy();
 
+    void addNewWindow(h_editor::EditorWindow* window);
     void doGUI();
 
   private:

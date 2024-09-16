@@ -46,17 +46,17 @@ set(HydrogenCore_Sources
             src/physics/rigidbody.cc include/core/physics/rigidbody.h
 
             # Systems
-            src/systems/gravity.cc include/core/systems/gravity.h
-            src/systems/render/meshasset.cc include/core/systems/render/meshasset.h
-            src/systems/render/renderer.cc include/core/systems/render/renderer.h
-            src/systems/render/shader.cc include/core/systems/render/shader.h
-            include/core/systems/render/vertex.h
-            src/systems/script/scriptasset.cc include/core/systems/script/scriptasset.h
-            src/systems/script/scriptcomp.cc include/core/systems/script/scriptcomp.h
-            src/systems/script/scripting.cc include/core/systems/script/scripting.h
-            src/systems/render/meshcomp.cc include/core/systems/render/meshcomp.h
-            src/systems/render/gles3renderer.cc include/core/systems/render/gles3renderer.h
-            src/systems/render/gl4renderer.cc include/core/systems/render/gl4renderer.h
+            src/sprinkles/gravity.cc include/core/sprinkles/testsystem.h
+            src/render/meshasset.cc include/core/render/meshasset.h
+            src/render/renderer.cc include/core/render/renderer.h
+            src/render/shader.cc include/core/render/shader.h
+            include/core/render/vertex.h
+            src/script/scriptasset.cc include/core/script/scriptasset.h
+            src/script/scriptcomp.cc include/core/script/scriptcomp.h
+            src/script/scripting.cc include/core/script/scripting.h
+            src/render/meshcomp.cc include/core/render/meshcomp.h
+            src/render/gles3renderer.cc include/core/render/gles3renderer.h
+            src/render/gl4renderer.cc include/core/render/gl4renderer.h
             
             # Input
             include/core/input/inputactionsource.h
@@ -69,7 +69,8 @@ set(HydrogenCore_Sources
 )
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
-        src/runtimesystem.cc)
+        src/runtimesystem.cc
+        src/theming/theming.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

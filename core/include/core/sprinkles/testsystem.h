@@ -4,15 +4,15 @@
 #include "core/transform.h"
 
 namespace h_core {
-namespace systems {
-class Gravity : public RuntimeSystem {
+namespace sprinkles {
+class TestSystem : public RuntimeSystem {
   public:
-    Gravity() = default;
+    TestSystem() = default;
 
     uint32_t init(h_core::RuntimeEngine* engine) override;
     void process() override;
 
     HYSYSTEM(h_core::Transform::getMask());
 };
-}  // namespace systems
+}
 }  // namespace h_core

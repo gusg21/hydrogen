@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "core/actor.h"
+#include "core/actorid.h"
 
 #define SYSTEMS_SYSTEM_COUNT 4
 
@@ -12,8 +12,8 @@ namespace h_core {
 class RuntimeEngine;
 class Scene;
 class RuntimeSystem;
-namespace systems {
-class Gravity;
+namespace sprinkles {
+class TestSystem;
 }
 namespace render {
 class Renderer;
@@ -37,7 +37,7 @@ class RuntimeSystems {
     void drawScene(h_core::Scene* scene);
     void endFrame();
 
-    h_core::systems::Gravity* gravity = nullptr;
+    h_core::sprinkles::TestSystem* test = nullptr;
     h_core::render::Renderer* renderer = nullptr;
     h_core::script::Scripting* scripting = nullptr;
     h_core::physics::Physics* physics = nullptr;

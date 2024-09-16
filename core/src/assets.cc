@@ -3,7 +3,7 @@
 #include <string>
 
 #include "core/project/project.h"
-#include "core/systems/render/meshasset.h"
+#include "core/render/meshasset.h"
 
 h_core::AssetHash h_core::Assets::getAssetHashFromString(const std::string& string) {
     return std::hash<std::string>()(string);

@@ -7,10 +7,10 @@
 
 #include "core/input/dualkeyinputactionsource.h"
 #include "core/physics/physics.h"
-#include "core/systems/gravity.h"
-#include "core/systems/render/gl4renderer.h"
-#include "core/systems/render/gles3renderer.h"
-#include "core/systems/script/scripting.h"
+#include "core/render/gl4renderer.h"
+#include "core/render/gles3renderer.h"
+#include "core/script/scripting.h"
+#include "core/sprinkles/testsystem.h"
 #include "core/theming/guicolors.h"
 
 void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
@@ -21,7 +21,7 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
     Engine::doInit(project);
 
     // set up systems
-    m_systems.gravity = new h_core::systems::Gravity();
+    m_systems.test = new h_core::sprinkles::TestSystem();
     if (getWindow()->isGles3()) { m_systems.renderer = new h_core::render::Gles3Renderer(); }
     else { m_systems.renderer = new h_core::render::Gl4Renderer(); }
     m_systems.scripting = new h_core::script::Scripting();

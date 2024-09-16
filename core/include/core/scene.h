@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/actor.h"
+#include "core/actorid.h"
 #include "core/actorspecasset.h"
 #include "core/componentbitmask.h"
-#include "core/scenespecasset.h"
-#include "core/systems/render/meshcomp.h"
-#include "core/systems/script/scriptcomp.h"
 #include "core/physics/rigidbody.h"
+#include "core/scenespecasset.h"
+#include "core/render/meshcomp.h"
+#include "core/script/scriptcomp.h"
 #include "core/transform.h"
 
 #define SCENE_MAX_ACTORS 4096

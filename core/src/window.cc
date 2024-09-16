@@ -6,7 +6,7 @@
 #include "imgui_impl_sdl2.h"
 
 #include "core/log.h"
-#include "core/systems/render/renderer.h"
+#include "core/render/renderer.h"
 #include "core/engineevents.h"
 
 #define SDL_GL_SetShwapInterval SDL_GL_SetSwapInterval

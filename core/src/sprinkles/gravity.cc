@@ -1,4 +1,4 @@
-#include "core/systems/gravity.h"
+#include "core/sprinkles/testsystem.h"
 
 #include "stdio.h"
 
@@ -7,12 +7,12 @@
 // NOTE: This system is a dummy! Useful for reference and testing but probably
 // not in any other cases.
 
-uint32_t h_core::systems::Gravity::init(h_core::RuntimeEngine* engine) {
+uint32_t h_core::sprinkles::TestSystem::init(h_core::RuntimeEngine* engine) {
     h_core::RuntimeSystem::init(engine);
 
     return 0;
 }
 
-void h_core::systems::Gravity::process() {
+void h_core::sprinkles::TestSystem::process() {
 
 }

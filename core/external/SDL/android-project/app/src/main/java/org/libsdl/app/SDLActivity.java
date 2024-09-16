@@ -30,7 +30,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.Gravity;
+import android.view.TestSystem;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
@@ -1528,7 +1528,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         // create text
 
         TextView message = new TextView(this);
-        message.setGravity(Gravity.CENTER);
+        message.setGravity(TestSystem.CENTER);
         message.setText(args.getString("message"));
         if (textColor != Color.TRANSPARENT) {
             message.setTextColor(textColor);
@@ -1544,7 +1544,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         LinearLayout buttons = new LinearLayout(this);
         buttons.setOrientation(LinearLayout.HORIZONTAL);
-        buttons.setGravity(Gravity.CENTER);
+        buttons.setGravity(TestSystem.CENTER);
         for (int i = 0; i < buttonTexts.length; ++i) {
             Button button = new Button(this);
             final int id = buttonIds[i];

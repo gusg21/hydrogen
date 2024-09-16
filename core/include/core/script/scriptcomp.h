@@ -8,7 +8,7 @@
 #include "core/assetindex.h"
 #include "core/assets.h"
 #include "core/component.h"
-#include "core/systems/script/scriptasset.h"
+#include "scriptasset.h"
 
 namespace h_core {
 namespace script {

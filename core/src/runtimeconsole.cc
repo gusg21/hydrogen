@@ -258,6 +258,8 @@ uint32_t h_core::RuntimeConsole::runCommand(const std::string& command) {
         }
     }
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unknown command %s", firstWord.c_str());
+
+    return 0;
 }
 
 void h_core::RuntimeConsole::showHelp() {

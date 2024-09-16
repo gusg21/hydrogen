@@ -7,15 +7,23 @@
 #include <string>
 
 namespace h_editor {
+class Editor;
+
 class EditorWindow {
   public:
     EditorWindow() = delete;
-    explicit EditorWindow(const std::string& title) : m_title(title) {}
+    explicit EditorWindow(h_editor::Editor* editor, const std::string& title) : m_editor(editor), m_title(title) {}
 
     void doGUI();
     virtual void paintContent();
+    virtual void paintPopupsAndModals();
 
   protected:
+    h_editor::Editor* getEditor();
+
     std::string m_title { "Unknown Window" };
+
+  private:
+    h_editor::Editor* m_editor = nullptr;
 };
 }  // namespace h_editor

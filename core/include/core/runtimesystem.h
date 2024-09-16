@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/actor.h"
+#include "core/actorid.h"
 #include "core/componentbitmask.h"
 
 #define HYSYSTEM(mask) [[nodiscard]] constexpr static h_core::ComponentBitmask getMask() { return mask; }

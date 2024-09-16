@@ -1,11 +1,11 @@
-#include "core/systems/script/scripting.h"
+#include "core/script/scripting.h"
 
 #include "scriptstdstring.h"
 
 #include "core/engine.h"
 #include "core/log.h"
 #include "core/math/math.h"
-#include "core/systems/script/scriptcomp.h"
+#include "core/script/scriptcomp.h"
 #include "core/transform.h"
 
 #define SCRIPTING_ANGELSCRIPT_VERSION 23700  // AngelScript v23.7.0

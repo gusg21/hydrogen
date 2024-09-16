@@ -1,4 +1,4 @@
-#include "core/systems/render/meshasset.h"
+#include "core/render/meshasset.h"
 
 #include <string>
 
@@ -6,7 +6,7 @@
 #include "glad/glad.h"
 
 #include "core/log.h"
-#include "core/systems/render/renderer.h"
+#include "core/render/renderer.h"
 #include "core/runtimesystems.h"
 #include "imgui.h"
 

@@ -13,8 +13,18 @@ void h_editor::EditorWindow::doGUI() {
         paintContent();
     }
     ImGui::End();
+
+    paintPopupsAndModals();
 }
 
 void h_editor::EditorWindow::paintContent() {
     ImGui::TextColored(IMGUI_COLOR_WARN, "paintContent() not overridden!");
+}
+
+h_editor::Editor* h_editor::EditorWindow::getEditor() {
+    return m_editor;
+}
+
+void h_editor::EditorWindow::paintPopupsAndModals() {
+
 }

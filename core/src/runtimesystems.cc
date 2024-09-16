@@ -4,9 +4,7 @@
 
 #include "core/runtimesystems.h"
 #include "core/runtimesystem.h"
-#include "core/systems/gravity.h"
-#include "core/systems/render/renderer.h"
-#include "core/systems/script/scripting.h"
+#include "core/scene.h"
 
 // These macros are evil!
 #define FOR_EACH_SYSTEM_PER_ACTOR_IN_SCENE(functionName, ...)                           \

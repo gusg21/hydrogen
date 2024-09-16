@@ -4,36 +4,47 @@
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
 #include <vector>
 
-
 #include "editor/editorwindow.h"
+#include "editor/asseteditorwindow.h"
+#include "editor/asseteditorwindow.h"
+
+#define BROWSING_PATH_MAX_LENGTH 1024
 
 namespace h_editor {
+class Editor;
+
 namespace windows {
-enum class ProjectExplorerFileType {
-    FILE, DIRECTORY
-};
 
-struct ProjectExplorerFileEntry {
-    ProjectExplorerFileEntry(const std::string& name, ProjectExplorerFileType type) : name(name), type(type) {}
+typedef h_editor::AssetEditorWindow* (*AssetOpenerFunc)(h_editor::Editor* editor, const std::string& assetPath);
 
-    std::string name {};
-    ProjectExplorerFileType type = ProjectExplorerFileType::FILE;
+struct AssetOpener {
+  public:
+    AssetOpener() = default;
+    AssetOpener(const std::string& openButtonText, AssetOpenerFunc openFunc)
+        : openButtonText(openButtonText), openFunc(openFunc) {}
+
+    AssetOpenerFunc openFunc = nullptr;
+    std::string openButtonText { "Open Asset..." };
 };
 
 class ProjectExplorer : public h_editor::EditorWindow {
   public:
-    explicit ProjectExplorer(const std::string& projectBasePath);
+    explicit ProjectExplorer(h_editor::Editor* editor, const std::string& projectBasePath);
 
     void paintContent() override;
-    static std::vector<h_editor::windows::ProjectExplorerFileEntry> getFolderListing(const std::string& path);
-    static std::string canonicalizePath(const std::string& path);
+    void paintPopupsAndModals() override;
+    void registerNewAssetOpener(const std::string& extension, AssetOpener opener);
 
   private:
-    std::string m_projectPath {};
     std::string m_browsingPath {};
+    std::string m_projectPath {};
     std::string m_currentSelection {};
+
+    std::unordered_map<std::string, AssetOpener> m_assetOpenerLut {};
 };
 }  // namespace windows
 }  // namespace h_editor

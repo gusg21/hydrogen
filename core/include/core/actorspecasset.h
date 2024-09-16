@@ -2,7 +2,7 @@
 
 #include "core/asset.h"
 #include "core/componentbitmask.h"
-#include "core/systems/script/scriptcomp.h"
+#include "core/script/scriptcomp.h"
 #include "core/transform.h"
 #include "core/physics/rigidbody.h"
 

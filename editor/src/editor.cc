@@ -12,6 +12,7 @@
 #include "core/engineevents.h"
 #include "core/log.h"
 #include "core/theming/theming.h"
+#include "editor/asseteditorwindow.h"
 #include "editor/windows/meshimporter.h"
 #include "editor/windows/projectexplorer.h"
 
@@ -21,12 +22,24 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
 
     h_core::theming::editor();
 
-    h_editor::windows::ProjectExplorer* explorer = new h_editor::windows::ProjectExplorer(projectBasePath);
+    h_editor::windows::ProjectExplorer* explorer = new h_editor::windows::ProjectExplorer(this, projectBasePath);
     m_windows.push_back(explorer);
 
-    windows::MeshImporter* imp = new windows::MeshImporter();
-    imp->open("assets/camera/AntiqueCamera.gltf");
-    m_windows.push_back(imp);
+    explorer->registerNewAssetOpener(
+        "hymodel",
+        h_editor::windows::AssetOpener {
+            "Open Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
+                HYLOG_INFO("EXPLORER: Opening %s", assetPath.c_str());
+                // TODO: model viewer
+                return nullptr;
+            } });
+
+    explorer->registerNewAssetOpener(
+        "gltf",
+        h_editor::windows::AssetOpener {
+            "Import Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
+                return new h_editor::windows::MeshImporter(editor);
+            } });
 
     return 0;
 }
@@ -43,7 +56,8 @@ void h_editor::Editor::run() {
                     running = false;
                     break;
 
-                default: break;
+                default:
+                    break;
             }
         }
 
@@ -74,4 +88,8 @@ void h_editor::Editor::doGUI() {
     for (h_editor::EditorWindow* window : m_windows) {
         window->doGUI();
     }
+}
+
+void h_editor::Editor::addNewWindow(h_editor::EditorWindow* window) {
+    m_windows.push_back(window);
 }

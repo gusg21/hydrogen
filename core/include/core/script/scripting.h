@@ -3,7 +3,7 @@
 #include "angelscript.h"
 
 #include "core/runtimesystem.h"
-#include "core/systems/script/scriptcomp.h"
+#include "scriptcomp.h"
 
 namespace h_core {
 namespace script {
