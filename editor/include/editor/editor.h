@@ -20,6 +20,8 @@ class Editor {
     void destroy();
 
     void addNewWindow(h_editor::EditorWindow* window);
+    void closeWindow(h_editor::EditorWindow* window);
+    void openModal(const std::string& text);
     void doGUI();
 
   private:
@@ -27,5 +29,7 @@ class Editor {
     h_core::EventQueue m_events {};
 
     std::vector<h_editor::EditorWindow*> m_windows {};
+    bool m_modalOpen = false;
+    std::string m_modalText {};
 };
 }  // namespace h_editor

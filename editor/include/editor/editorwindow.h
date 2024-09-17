@@ -15,6 +15,7 @@ class EditorWindow {
     explicit EditorWindow(h_editor::Editor* editor, const std::string& title) : m_editor(editor), m_title(title) {}
 
     void doGUI();
+    void close();
     virtual void paintContent();
     virtual void paintPopupsAndModals();
 

@@ -83,7 +83,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 ImGui::TextDisabled("Directory selected");
             }
             else {
-                std::string extension = m_currentSelection.substr(m_currentSelection.find_last_of('.') + 1);
+                std::string extension = h_editor::platform::getFileExtension(m_currentSelection);
 
                 if (m_assetOpenerLut.find(extension) == m_assetOpenerLut.end()) {
                     ImGui::TextDisabled("No tool associated with extension %s", extension.c_str());
@@ -95,11 +95,11 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
                         AssetEditorWindow* window = opener.openFunc(getEditor(), fullPath);
                         if (window != nullptr) {
-                            window->open(fullPath);
                             getEditor()->addNewWindow(window);
+                            window->open(fullPath);
                         }
                         else {
-                            ImGui::OpenPopup("Tool Creation Error");
+                            getEditor()->openModal("Failed to create tool for specified asset.");
                         }
 
                         m_currentSelection.clear();
@@ -116,20 +116,25 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 }
 
 void h_editor::windows::ProjectExplorer::registerNewAssetOpener(
-    const std::string& extension, h_editor::windows::AssetOpener opener) {
+    const std::string& extension, const h_editor::windows::AssetOpener& opener) {
     m_assetOpenerLut[extension] = opener;
 }
 
 void h_editor::windows::ProjectExplorer::paintPopupsAndModals() {
-    // Popups and Modals
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("Tool Creation Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Failed to create tool for specified asset.");
-        if (ImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-        }
+//    if (m_openPopup) {
+//        ImGui::OpenPopup("Tool Creation Error");
+//        m_openPopup = false;
+//    }
+//
+//    // Popups and Modals
+//    if (ImGui::BeginPopupModal("Tool Creation Error")) {
+//        HYLOG_DEBUG("Tool Creation");
+//        ImGui::Text("Failed to create tool for specified asset.");
+//        if (ImGui::Button("OK")) {
+//            ImGui::CloseCurrentPopup();
+//        }
+//
+//        ImGui::EndPopup();
+//    }
 
-        ImGui::EndPopup();
-    }
 }

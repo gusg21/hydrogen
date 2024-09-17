@@ -47,69 +47,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="supported hot reloading">
-      <change afterPath="$PROJECT_DIR$/core/src/theming/theming.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/errors.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/platform/path.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_7_2024_4_19_PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_7_2024_4_19_PM__Changes_.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/include/editor/platform/environment.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/asseteditorwindow.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/editor/src/platform/win32/environment_win32.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/external/SDL/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/core/external/SDL/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/actor.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/actorid.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/actorspecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/actorspecasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/runtimesystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimesystem.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/runtimesystems.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimesystems.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scene.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/gravity.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/sprinkles/testsystem.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/gl4renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/gl4renderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/gles3renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/gles3renderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/meshasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/meshcomp.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/meshcomp.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/renderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/shader.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/render/vertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/vertex.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/script/scriptasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/script/scriptasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/script/scriptcomp.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/script/scriptcomp.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/systems/script/scripting.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/script/scripting.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/theming/theming.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/theming/theming.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/assets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/assets.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimeconsole.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeconsole.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimeengine.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeengine.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimesystems.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimesystems.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/gravity.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/sprinkles/gravity.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/gl4renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/gl4renderer.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/gles3renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/gles3renderer.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/meshasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/meshcomp.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/meshcomp.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/renderer.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/render/shader.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/shader.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/script/scriptasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/script/scriptasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/script/scriptcomp.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/script/scriptcomp.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/systems/script/scripting.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/script/scripting.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/window.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/window.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/editor/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/editor.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editor.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/editorwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editorwindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/include/editor/platform/path.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/platform/path.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/editor.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editor.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/editorwindow.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editorwindow.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/project.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor2.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor3.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model2.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_rigidbody.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_rigidbody2.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_scene.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_script.yml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -175,7 +129,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "CMake Application.HydrogenEditor.executor": "Run",
+    "CMake Application.HydrogenEditor.executor": "Debug",
     "CMake Application.HydrogenRuntime.executor": "Run",
     "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
@@ -197,7 +151,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.intentionPowerPack",
+    "settings.editor.selected.configurable": "editor.preferences.tabs",
     "structure.view.defaults.are.configured": "true",
     "two.files.diff.last.used.file": "C:/Projects/hydrogen/server/templates/status.html",
     "vue.rearranger.settings.migration": "true"
@@ -219,11 +173,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenEditor">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -295,6 +244,11 @@
       </method>
     </configuration>
     <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug-Visual Studio">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -417,7 +371,8 @@
       <workItem from="1726254405865" duration="3459000" />
       <workItem from="1726262954787" duration="13482000" />
       <workItem from="1726342159173" duration="36000" />
-      <workItem from="1726385455601" duration="15884000" />
+      <workItem from="1726385455601" duration="27437000" />
+      <workItem from="1726557201499" duration="544000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />

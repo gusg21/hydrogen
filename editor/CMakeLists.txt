@@ -12,6 +12,9 @@ add_executable(HydrogenEditor src/main.cc
         include/editor/platform/path.h
         include/editor/errors.h
         include/editor/asseteditorwindow.h
+        src/asseteditorwindow.cc
+        include/editor/platform/environment.h
+        src/platform/win32/environment_win32.cc
 )
 
 target_include_directories(HydrogenEditor PUBLIC include)

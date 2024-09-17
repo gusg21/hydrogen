@@ -4,6 +4,8 @@
 #include "editor/editor.h"
 
 int main(int argc, char* args[]) {
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+
     h_editor::Editor* editor = new h_editor::Editor();
 
     const char* basePath = "";

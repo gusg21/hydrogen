@@ -25,21 +25,23 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
     h_editor::windows::ProjectExplorer* explorer = new h_editor::windows::ProjectExplorer(this, projectBasePath);
     m_windows.push_back(explorer);
 
-    explorer->registerNewAssetOpener(
-        "hymodel",
-        h_editor::windows::AssetOpener {
-            "Open Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
-                HYLOG_INFO("EXPLORER: Opening %s", assetPath.c_str());
-                // TODO: model viewer
-                return nullptr;
-            } });
+//    explorer->registerNewAssetOpener(
+//        "hymodel",
+//        h_editor::windows::AssetOpener {
+//            "Open Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
+//                HYLOG_INFO("EXPLORER: Opening %s", assetPath.c_str());
+//                // TODO: model viewer
+//                return nullptr;
+//            } });
 
-    explorer->registerNewAssetOpener(
-        "gltf",
-        h_editor::windows::AssetOpener {
-            "Import Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
-                return new h_editor::windows::MeshImporter(editor);
-            } });
+    auto makeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
+        return new h_editor::windows::MeshImporter(editor);
+    };
+    h_editor::windows::AssetOpener meshImporterOpener = h_editor::windows::AssetOpener { "Import Model...", makeMeshImporter };
+
+    explorer->registerNewAssetOpener("gltf", meshImporterOpener);
+    explorer->registerNewAssetOpener("glb", meshImporterOpener);
+    explorer->registerNewAssetOpener("fbx", meshImporterOpener);
 
     return 0;
 }
@@ -86,10 +88,33 @@ void h_editor::Editor::doGUI() {
     ImGui::ShowDemoWindow();
 
     for (h_editor::EditorWindow* window : m_windows) {
-        window->doGUI();
+        window->doGUI(); // Borked :(
+    }
+
+    if (m_modalOpen) {
+        m_modalOpen = false;
+        ImGui::OpenPopup("Hydrogen Editor Modal");
+    }
+
+    if (ImGui::BeginPopupModal("Hydrogen Editor Modal", nullptr, ImGuiWindowFlags_NoMove)) {
+        ImGui::Text("%s", m_modalText.c_str());
+        if (ImGui::Button("OK")) {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
 }
 
 void h_editor::Editor::addNewWindow(h_editor::EditorWindow* window) {
     m_windows.push_back(window);
+}
+
+void h_editor::Editor::closeWindow(h_editor::EditorWindow* window) {
+    m_windows.erase(std::find(m_windows.begin(), m_windows.end(), window));
+}
+
+void h_editor::Editor::openModal(const std::string& text) {
+    m_modalOpen = true;
+    m_modalText = text;
 }

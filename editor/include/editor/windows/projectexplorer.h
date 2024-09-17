@@ -37,7 +37,7 @@ class ProjectExplorer : public h_editor::EditorWindow {
 
     void paintContent() override;
     void paintPopupsAndModals() override;
-    void registerNewAssetOpener(const std::string& extension, AssetOpener opener);
+    void registerNewAssetOpener(const std::string& extension, const h_editor::windows::AssetOpener& opener);
 
   private:
     std::string m_browsingPath {};
@@ -45,6 +45,7 @@ class ProjectExplorer : public h_editor::EditorWindow {
     std::string m_currentSelection {};
 
     std::unordered_map<std::string, AssetOpener> m_assetOpenerLut {};
+    bool m_openPopup = false;
 };
 }  // namespace windows
 }  // namespace h_editor

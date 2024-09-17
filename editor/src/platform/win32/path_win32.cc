@@ -48,3 +48,11 @@ h_editor::platform::FileType h_editor::platform::getFileType(const std::string& 
     return GetFileAttributesA(path.c_str()) & FILE_ATTRIBUTE_DIRECTORY ? h_editor::platform::FileType::DIRECTORY
                                                                        : h_editor::platform::FileType::FILE;
 }
+
+std::string h_editor::platform::getFileExtension(const std::string& path) {
+    return path.substr(path.find_last_of('.') + 1);
+}
+
+std::string h_editor::platform::getDirectoryFromPath(const std::string& path) {
+    return path.substr(0, path.find_last_of(getPathSeparator()) + 1);
+}
