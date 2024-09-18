@@ -70,7 +70,9 @@ set(HydrogenCore_Sources
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
         src/runtimesystem.cc
-        src/theming/theming.cc)
+        src/theming/theming.cc
+        include/core/render/texture.h
+        src/render/texture.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
