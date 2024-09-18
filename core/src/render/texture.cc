@@ -20,7 +20,7 @@ static uint32_t getTextureFormat(int32_t componentNumber) {
 }
 
 
-uint32_t render::Texture::loadTexture(
+uint32_t h_core::render::Texture::loadTexture(uint32_t& out_texture,
     std::string filePath, GLint wrapMode, GLint minFilter, GLint magFilter, bool mipmap) {
     stbi_set_flip_vertically_on_load(true);
 
@@ -30,7 +30,7 @@ uint32_t render::Texture::loadTexture(
     if (data == nullptr) {
         HYLOG_ERROR("RENDERING: TEXTURE: failed to load texture from %s", filePath);
         stbi_image_free(data);
-        return 1; //TODO: write error message for this
+        return TEXTURE_FAILED_TO_LOAD; //TODO: write error message for this
     }
 
     uint32_t texture;
@@ -53,9 +53,9 @@ uint32_t render::Texture::loadTexture(
 
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(data);
-    return texture;
+    out_texture = texture;
 }
 
-uint32_t render::Texture::loadTexture(std::string filePath) {
-    loadTexture(filePath, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, true);
+uint32_t h_core::render::Texture::loadTexture(uint32_t& out_texture, std::string filePath) {
+    loadTexture(out_texture, filePath, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, true);
 }

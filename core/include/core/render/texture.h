@@ -10,14 +10,18 @@
 #include <cstdint>
 #include <string>
 
+#define TEXTURE_FAILED_TO_LOAD 1
+
+namespace h_core {
 namespace render {
 class Texture {
 public:
     Texture() = default;
 
-    uint32_t loadTexture(std::string filePath, GLint wrapMode, GLint minFilter, GLint magFilter, bool mipmap);
-    uint32_t loadTexture(std::string filePath);
+    static uint32_t loadTexture(uint32_t& out_texture, std::string filePath, GLint wrapMode, GLint minFilter, GLint magFilter, bool mipmap);
+    static uint32_t loadTexture(uint32_t& out_texture, std::string filePath);
 
 private:
 };
+}
 }

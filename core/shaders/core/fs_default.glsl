@@ -2,7 +2,10 @@
 
 in vec3 frag_worldPosition;
 in vec3 frag_worldNormal;
+in vec2 frag_texCoord;
 in vec4 frag_color;
+
+uniform sampler2D uni_mainTex;
 
 layout (location = 0) out vec4 out_fragColor;
 
@@ -15,6 +18,9 @@ void main()
 	
 	vec4 ambient = ambientAmount * ambientColor;
 	vec4 diffuse = diffuseAmount * sunColor * clamp(dot(frag_worldNormal, normalize(vec3(1, 1, 0))), 0, 1);
-	
-	out_fragColor = ambient + diffuse;
+
+	//we might want to rework this to allow multiple textures per mesh
+	vec4 objColor = texture(uni_mainTex, frag_texCoord).rgba; //rbga for clarity (not needed)
+
+	out_fragColor = objColor * (ambient + diffuse);
 }

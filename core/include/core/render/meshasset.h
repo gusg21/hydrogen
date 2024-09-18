@@ -57,6 +57,7 @@ class MeshAsset : public Asset {
 
   private:
     tinygltf::Model m_model {};
+    uint32_t m_texture = 0;
     GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;

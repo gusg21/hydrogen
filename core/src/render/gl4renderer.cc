@@ -52,6 +52,8 @@ void h_core::render::Gl4Renderer::draw() {
         case h_core::render::MeshIndexType::INT:
             glElementType = GL_UNSIGNED_INT;
             break;
+        default:
+            glElementType = GL_UNSIGNED_INT; //clion was giving a warning about glElementType, it was annoying. I wrote a useless default
     }
 
     ::glBindVertexArray(mesh->getVertexAttributesHandle());

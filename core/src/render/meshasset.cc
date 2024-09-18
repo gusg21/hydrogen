@@ -7,7 +7,9 @@
 
 #include "core/log.h"
 #include "core/render/renderer.h"
+#include "core/render/texture.h"
 #include "core/runtimesystems.h"
+#include "core/render/texture.h"
 #include "imgui.h"
 
 // TODO: move these godless monstrosities to a subf
@@ -136,6 +138,8 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h
     }
 
     m_indices = m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset;
+
+    h_core::render::Texture::loadTexture(m_texture, "testFilePath"); //TODO: get a texture to load
 
     return 0;
 }
