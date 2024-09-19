@@ -45,6 +45,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h
     std::string gltfBasePath = yaml["gltf_base_path"].as<std::string>("");
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
     m_isCube = yaml["primitive"].as<bool>(false);
+    std::string baseTexturePath = yaml["texture"]["base"].as<std::string>("");
 
     if (gltfFilePath.empty()) {
         HYLOG_ERROR("MODEL: no gltf key in model YAML\n");
@@ -139,7 +140,19 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h
 
     m_indices = m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset;
 
-    h_core::render::Texture::loadTexture(m_texture, "testFilePath"); //TODO: get a texture to load
+    // TODO: load texture data from glb or gltf file, if specified
+    if(primitiveInfo.material != -1) {
+        tinygltf::Material material = m_model.materials[primitiveInfo.material];
+        tinygltf::Texture texture = m_model.textures.front();
+
+    }
+
+    if(!baseTexturePath.empty()) {
+        h_core::render::Texture::loadTexture(m_texture, gltfBasePath + baseTexturePath);  // TODO: get a texture to load
+    }
+    else if(gltfBinaryMode) {
+
+    }
 
     return 0;
 }
@@ -261,6 +274,9 @@ h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() cons
 
 uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
+}
+uint32_t h_core::render::MeshAsset::getTexture() const {
+    return m_texture;
 }
 
 std::vector<uint8_t>* h_core::render::MeshAsset::toPacked() {

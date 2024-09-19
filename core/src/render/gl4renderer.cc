@@ -40,6 +40,8 @@ void h_core::render::Gl4Renderer::draw() {
     if (mesh == nullptr) return;
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
+    glBindTextureUnit(0, mesh->getTexture());
+    m_shader.setInt("uni_mainTex", 0);
 
     GLenum glElementType;
     switch (mesh->getMeshIndexType()) {

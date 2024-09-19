@@ -1,2 +1,4 @@
 gltf: assets/camera/AntiqueCamera.gltf
 gltf_base_path: assets/camera/
+texture:
+    base: camera_camera_BaseColor.png

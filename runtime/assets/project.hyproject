@@ -11,23 +11,23 @@ input_actions:
 assets:
   - index: 1
     type: 1
-    path: "assets/test_actor2.yml"
+    path: "assets/test_actor2.hyactor"
   - index: 15
     type: 1
-    path: "assets/test_actor3.yml"
+    path: "assets/test_actor3.hyactor"
   - index: 2
     type: 2
-    path: "assets/test_script.yml"
+    path: "assets/test_script.hyscript"
 #  - index: 3
 #    type: 3
-#    path: "assets/test_model.yml"
+#    path: "assets/test_model.hymodel"
   - index: 40
     type: 3
-    path: "assets/test_model2.yml"
+    path: "assets/test_model2.hymodel"
 #    remote: true
   - index: 7
     type: 0
-    path: "assets/test_scene.yml"
+    path: "assets/test_scene.hyscene"
   - index: 10
     type: 1
-    path: "assets/test_actor.yml"
+    path: "assets/test_actor.hyactor"

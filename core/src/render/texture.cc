@@ -57,5 +57,5 @@ uint32_t h_core::render::Texture::loadTexture(uint32_t& out_texture,
 }
 
 uint32_t h_core::render::Texture::loadTexture(uint32_t& out_texture, std::string filePath) {
-    loadTexture(out_texture, filePath, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, true);
+    return loadTexture(out_texture, filePath, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, true);
 }

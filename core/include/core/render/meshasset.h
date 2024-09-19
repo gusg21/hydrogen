@@ -52,6 +52,7 @@ class MeshAsset : public Asset {
     [[nodiscard]] size_t getNumIndices() const;
     [[nodiscard]] MeshIndexType getMeshIndexType() const;
     [[nodiscard]] uint32_t getPrimitiveMode() const;
+    [[nodiscard]] uint32_t getTexture() const;
 
     HYASSET(3);
 

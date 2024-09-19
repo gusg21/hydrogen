@@ -125,7 +125,7 @@ void h_core::RuntimeAssets::doGUI() {
 
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        RuntimeAssets::loadAsset(
+         RuntimeAssets::loadAsset(
             h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.isRemote });
     }
 }

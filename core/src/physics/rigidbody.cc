@@ -5,7 +5,8 @@
 
 void h_core::physics::Rigidbody::initFromYaml(YAML::Node yaml) {
     //TODO: read data from yaml file
-    mass = 10000;
+
+    mass = yaml["rigidbody"]["mass"].as<uint32_t>(1);
     inverseMass = 1.f / mass;
 }
 

@@ -18,3 +18,4 @@ model:
 script:
   index: 2
 rigidbody:
+  mass: 100000

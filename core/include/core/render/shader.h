@@ -15,6 +15,7 @@ struct Shader {
 
     void use();
     void setMat4(const std::string& name, h_core::math::Mat4x4 matrix);
+    void setInt(const std::string& name, int32_t value);
 };
 }  // namespace render
 }  // namespace h_core
