@@ -48,28 +48,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="beginnings of texture work">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_12_2024_12_28_AM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_12_2024_12_28_AM__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/hydrogen.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/include/core/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/meshasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/render/shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/shader.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/physics/rigidbody.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/physics/rigidbody.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/render/gl4renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/gl4renderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/texture.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/meshasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/render/shader.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/shader.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/render/texture.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/texture.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/project.hyproject" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/project.hyproject" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor.hyactor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor2.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor2.hyactor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor3.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor3.hyactor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model.hymodel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model2.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model2.hymodel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_rigidbody.hybody" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_rigidbody2.hybody" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/runtime/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/src/main.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/assets/project.yml" beforeDir="false" afterPath="$PROJECT_DIR$/server/assets/project.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -811,7 +796,7 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "CMake Application.HydrogenEditor.executor": "Debug",
-    "CMake Application.HydrogenRuntime.executor": "Debug",
+    "CMake Application.HydrogenRuntime.executor": "Run",
     "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
     "Python.main.executor": "Run",
@@ -854,11 +839,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -940,6 +920,11 @@
       </method>
     </configuration>
     <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug-Visual Studio">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>

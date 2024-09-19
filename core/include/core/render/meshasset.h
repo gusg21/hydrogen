@@ -6,6 +6,7 @@
 #include "core/asset.h"
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
+#include "core/render/texture.h"
 
 #define MODEL_INIT_FAIL_BAD_GLTF_FILE_PATH      1
 #define MODEL_INIT_FAIL_BAD_GLTF                2
@@ -58,7 +59,10 @@ class MeshAsset : public Asset {
 
   private:
     tinygltf::Model m_model {};
-    uint32_t m_texture = 0;
+    bool m_isCube = false;
+
+    h_core::render::Texture m_texture {};
+
     GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
@@ -66,7 +70,7 @@ class MeshAsset : public Asset {
     void* m_indices = nullptr;
     h_core::render::MeshIndexType m_meshIndexType = h_core::render::MeshIndexType::BYTE;
     uint32_t m_primitiveMode = 4;
-    bool m_isCube = false;
+
 };
 }  // namespace render
 }  // namespace h_core

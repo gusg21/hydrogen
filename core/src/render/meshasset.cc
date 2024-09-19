@@ -9,10 +9,30 @@
 #include "core/render/renderer.h"
 #include "core/render/texture.h"
 #include "core/runtimesystems.h"
-#include "core/render/texture.h"
 #include "imgui.h"
 
-// TODO: move these godless monstrosities to a subf
+#define GL_WRAP_MODE_TO_WRAP_MODE(glWrap, mode)                       \
+    h_core::render::WrapMode mode = h_core::render::WrapMode::REPEAT; \
+    switch (wrap) {                                                   \
+        case GL_REPEAT:                                               \
+            mode = h_core::render::WrapMode::REPEAT;                  \
+            break;                                                    \
+        case GL_MIRRORED_REPEAT:                                      \
+            mode = h_core::render::WrapMode::MIRRORED_REPEAT;         \
+            break;                                                    \
+        case GL_CLAMP_TO_EDGE:                                        \
+            mode = h_core::render::WrapMode::CLAMP_TO_EDGE;           \
+            break;                                                    \
+        case GL_CLAMP_TO_BORDER:                                      \
+            mode = h_core::render::WrapMode::CLAMP_TO_BORDER;         \
+            break;                                                    \
+                                                                      \
+        default:                                                      \
+            mode = h_core::render::WrapMode::REPEAT;                  \
+            break;                                                    \
+    }
+
+// TODO: move these godless monstrosities to a subfolder
 
 static h_core::render::Vertex cubeVertices[] = {
     { h_core::math::Vector3(-1.0f, 1.0f, 1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
@@ -24,6 +44,7 @@ static h_core::render::Vertex cubeVertices[] = {
     { h_core::math::Vector3(-1.0f, -1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
     { h_core::math::Vector3(1.0f, -1.0f, -1.0f), h_core::math::Vector3(0), h_core::math::Vector2(0) },
 };
+
 static const uint16_t cubeTriList[] = {
     0, 1, 2,           // 0
     1, 3, 2, 4, 6, 5,  // 2
@@ -35,7 +56,8 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
+uint32_t h_core::render::MeshAsset::initFromYaml(
+    h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
     h_core::Asset::initFromYaml(assets, desc, yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");
@@ -141,20 +163,26 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h
     m_indices = m_model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset;
 
     // TODO: load texture data from glb or gltf file, if specified
-    if(primitiveInfo.material != -1) {
+    if (primitiveInfo.material != -1) {
         tinygltf::Material material = m_model.materials[primitiveInfo.material];
+        HYLOG_INFO("MESH: Loading material %s", material.name.c_str());
         tinygltf::Texture texture = m_model.textures.front();
+        HYLOG_INFO("MESH: Loading texture %s ?", texture.name.c_str());
+
+        tinygltf::Sampler sampler = m_model.samplers[texture.sampler];
+        tinygltf::Image image = m_model.images[texture.source];
 
 
-
+        m_texture.init(image.image, image.width, image.height, image.component, sampler.magFilter)
     }
 
-    if(!baseTexturePath.empty()) {
-        h_core::render::Texture::loadTexture(m_texture, gltfBasePath + baseTexturePath);  // TODO: get a texture to load
-    }
-    else if(gltfBinaryMode) {
-
-    }
+    // if(!baseTexturePath.empty()) {
+    //     h_core::render::Texture::loadTexture(m_texture, gltfBasePath + baseTexturePath);  // TODO: get a texture to
+    //     load
+    // }
+    // else if(gltfBinaryMode) {
+    //
+    // }
 
     return 0;
 }
