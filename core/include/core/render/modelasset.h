@@ -36,11 +36,11 @@ class Mesh {
   public:
     Mesh() = default;
 
-    void load(uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,
-        MeshIndexType type, bool useGles3);
+    void load(bool useGles3);
 
     h_core::render::Texture texture;
 
+    std::string name {};
     GLuint vertexBufferHandle = 0, vertexAttributesHandle = 0, indexBufferHandle = 0;
     uint32_t numVertices = 0;
     uint32_t numIndices = 0;

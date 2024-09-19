@@ -1,5 +1,7 @@
 #include "core/render/modelasset.h"
 
+#include <core/theming/guicolors.h>
+
 #include <string>
 
 #include "SDL2/SDL.h"
@@ -59,9 +61,11 @@ static const uint16_t cubeTriList[] = {
 };
 
 uint32_t h_core::render::ModelAsset::loadMesh(Mesh* out_mesh, const tinygltf::Node& node) {
+
     tinygltf::Mesh mesh = m_model.meshes[node.mesh];
     tinygltf::Primitive primitiveInfo = mesh.primitives.front();
     out_mesh->primitiveMode = primitiveInfo.mode;
+    out_mesh->name = mesh.name;
 
     // pos attribute
     uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
@@ -121,7 +125,7 @@ uint32_t h_core::render::ModelAsset::loadMesh(Mesh* out_mesh, const tinygltf::No
     if (primitiveInfo.material != -1) {
         tinygltf::Material material = m_model.materials[primitiveInfo.material];
         HYLOG_INFO("MESH: Loading material %s", material.name.c_str());
-        if(material.pbrMetallicRoughness.baseColorTexture.index != -1) {
+        if (material.pbrMetallicRoughness.baseColorTexture.index != -1) {
             tinygltf::Texture texture = m_model.textures[material.pbrMetallicRoughness.baseColorTexture.index];
             HYLOG_INFO("MESH: Loading texture %s ?", texture.name.c_str());
 
@@ -153,7 +157,7 @@ uint32_t h_core::render::ModelAsset::initFromYaml(
     std::string gltfBasePath = yaml["gltf_base_path"].as<std::string>("");
     bool gltfBinaryMode = yaml["gltf_binary"].as<bool>(false);
     m_isCube = yaml["primitive"].as<bool>(false);
-    //std::string baseTexturePath = yaml["texture"]["base"].as<std::string>("");
+    // std::string baseTexturePath = yaml["texture"]["base"].as<std::string>("");
 
     if (gltfFilePath.empty()) {
         HYLOG_ERROR("MODEL: no gltf key in model YAML\n");
@@ -188,10 +192,12 @@ uint32_t h_core::render::ModelAsset::initFromYaml(
         return MODEL_INIT_FAIL_BAD_GLTF;
     }
 
-    for(uint32_t nodeIndex = 0; nodeIndex < m_model.nodes.size(); nodeIndex++) {
-        if(m_model.nodes[nodeIndex].mesh == -1) break;
-        m_meshes.emplace_back();
-        loadMesh(&m_meshes[nodeIndex], m_model.nodes[nodeIndex]);
+    for (uint32_t nodeIndex = 0; nodeIndex < m_model.nodes.size(); nodeIndex++) {
+        if (m_model.nodes[nodeIndex].mesh == -1) continue;
+
+        Mesh mesh;
+        loadMesh(&mesh, m_model.nodes[nodeIndex]);
+        m_meshes.push_back(mesh);
     }
 
     return 0;
@@ -201,22 +207,25 @@ uint32_t h_core::render::ModelAsset::precompile(h_core::RuntimeSystems* systems)
     if (m_isCube) {
         // Just load cube
         HYLOG_DEBUG("MESH: Loading cube primitive mesh\n");
-        //loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT, systems->renderer->isGles3());
+        // loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT,
+        // systems->renderer->isGles3());
 
         return 0;
     }
 
-    for(uint32_t meshIndex = 0; meshIndex < getMeshCount(); meshIndex++) {
-        m_meshes[meshIndex].load(m_meshes[meshIndex].numVertices, m_meshes[meshIndex].vertices, m_meshes[meshIndex].numIndices, m_meshes[meshIndex].indices, m_meshes[meshIndex].meshIndexType, systems->renderer->isGles3());
-        HYLOG_INFO("MESH: Loaded %zu vertices (%zu indices)\n", m_meshes[meshIndex].numVertices, m_meshes[meshIndex].numIndices);
+    for (uint32_t meshIndex = 0; meshIndex < getMeshCount(); meshIndex++) {
+        m_meshes[meshIndex].load(systems->renderer->isGles3());
+
+        HYLOG_INFO(
+            "MESH: Loaded %zu vertices (%zu indices)\n", m_meshes[meshIndex].numVertices,
+            m_meshes[meshIndex].numIndices);
     }
 
     return 0;
 }
 
-void h_core::render::Mesh::load(
-    uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer, uint32_t inidicesCount,
-    const void* indexBuffer, MeshIndexType indexType, bool useGles3) {
+
+void h_core::render::Mesh::load(bool useGles3) {
     // Generate buffers and load attributes
     if (!useGles3) {
         ::glGenVertexArrays(1, &vertexAttributesHandle);
@@ -251,36 +260,31 @@ void h_core::render::Mesh::load(
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle);
 
     // Mark buffers for static drawing (not updated)
-    if (vertexBufferCount > 0) {
-        ::glBufferData(
-            GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * vertexBufferCount, vertexBuffer, GL_STATIC_DRAW);
+    if (numVertices > 0) {
+        ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * numVertices, vertices, GL_STATIC_DRAW);
     }
 
-    if (inidicesCount > 0) {
+    if (numIndices > 0) {
         // Determine index type size
         size_t indexTypeSize = 0;
-        switch (indexType) {
+        switch (meshIndexType) {
             case MeshIndexType::BYTE:
-                indexTypeSize = sizeof(unsigned char);
+                indexTypeSize = sizeof(uint8_t);
                 break;
             case MeshIndexType::SHORT:
-                indexTypeSize = sizeof(unsigned short);
+                indexTypeSize = sizeof(uint16_t);
                 break;
             case MeshIndexType::INT:
-                indexTypeSize = sizeof(unsigned int);
+                indexTypeSize = sizeof(uint32_t);
                 break;
             default:
                 HYLOG_ERROR("Undefined mesh index type value\n");
+                indexTypeSize = sizeof(uint16_t);
                 break;
         }
 
-        ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * inidicesCount, indexBuffer, GL_STATIC_DRAW);
+        ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * numIndices, indices, GL_STATIC_DRAW);
     }
-
-    // Store buffer sizes
-    numVertices = vertexBufferCount;
-    numIndices = inidicesCount;
-    meshIndexType = indexType;
 
     // Clean up
     if (!useGles3) { ::glBindVertexArray(0); }
@@ -415,23 +419,32 @@ void h_core::render::ModelAsset::fromPacked(const void* data, size_t length) {
 void h_core::render::ModelAsset::doGUI() {
     //    Asset::doGUI();
 
-    /*ImGui::Text("Vertex Count: %d", m_numVertices);
-    ImGui::Text("Index Count: %d", m_numIndices);
-    const char* indexTypeName;
-    switch (m_meshIndexType) {
-        case MeshIndexType::BYTE:
-            indexTypeName = "BYTE";
-            break;
-        case MeshIndexType::SHORT:
-            indexTypeName = "SHORT";
-            break;
-        case MeshIndexType::INT:
-            indexTypeName = "INT";
-            break;
+    for (Mesh mesh : m_meshes) {
+        ImGui::TextColored(IMGUI_COLOR_GOOD, "Name: %s", mesh.name.c_str());
+        ImGui::Text("Vertex Count: %d", mesh.numVertices);
+        ImGui::Text("Index Count: %d", mesh.numIndices);
+        const char* indexTypeName;
+        switch (mesh.meshIndexType) {
+            case MeshIndexType::BYTE:
+                indexTypeName = "BYTE";
+                break;
+            case MeshIndexType::SHORT:
+                indexTypeName = "SHORT";
+                break;
+            case MeshIndexType::INT:
+                indexTypeName = "INT";
+                break;
+            default:
+                indexTypeName = "WHAT";
+                break;
+        }
+        ImGui::Text("Index Type: %s", indexTypeName);
+        ImGui::Text("Is Cube?: %s", m_isCube ? "YES" : "NO");
+        ImGui::Text("IBO: %d", mesh.indexBufferHandle);
+        ImGui::Text("VBO: %d", mesh.vertexBufferHandle);
+        ImGui::Text("VAO: %d", mesh.vertexAttributesHandle);
+        ImGui::Text("Primitive Mode: %d", mesh.primitiveMode);
+
+        ImGui::Separator();
     }
-    ImGui::Text("Index Type: %s", indexTypeName);
-    ImGui::Text("Is Cube?: %s", m_isCube ? "YES" : "NO");
-    ImGui::Text("IBO: %d", m_indexBufferHandle);
-    ImGui::Text("VBO: %d", m_vertexBufferHandle);
-    ImGui::Text("VAO: %d", m_vertexAttributesHandle);*/
 }
