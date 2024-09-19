@@ -145,6 +145,8 @@ uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h
         tinygltf::Material material = m_model.materials[primitiveInfo.material];
         tinygltf::Texture texture = m_model.textures.front();
 
+
+
     }
 
     if(!baseTexturePath.empty()) {

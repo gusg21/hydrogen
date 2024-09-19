@@ -22,5 +22,5 @@ void main()
 	//we might want to rework this to allow multiple textures per mesh
 	vec4 objColor = texture(uni_mainTex, frag_texCoord).rgba; //rbga for clarity (not needed)
 
-	out_fragColor = objColor * (ambient + diffuse);
+	out_fragColor = objColor;// * (ambient + diffuse);
 }
