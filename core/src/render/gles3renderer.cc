@@ -2,7 +2,7 @@
 // Created by Angus Goucher on 9/4/2024.
 //
 #include "core/render/gles3renderer.h"
-#include "core/render/meshasset.h"
+#include "core/render/modelasset.h"
 #include "core/runtimeengine.h"
 
 uint32_t h_core::render::Gles3Renderer::init(h_core::RuntimeEngine* engine) {
@@ -34,13 +34,13 @@ void h_core::render::Gles3Renderer::beginFrame() {
 void h_core::render::Gles3Renderer::draw() {
     Renderer::draw();
 
-    h_core::render::MeshAsset* mesh = engine->getRuntimeAssets()->getAssetByIndex<h_core::render::MeshAsset>(meshComp->mesh);
-    if (mesh == nullptr) return;
+    /*h_core::render::ModelAsset* model = engine->getRuntimeAssets()->getAssetByIndex<h_core::render::ModelAsset>(meshComp->model);
+    if (model == nullptr) return;
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
 
     GLenum glElementType;
-    switch (mesh->getMeshIndexType()) {
+    switch (model->getMeshIndexType()) {
         case h_core::render::MeshIndexType::BYTE:
             glElementType = GL_UNSIGNED_BYTE;
             break;
@@ -53,5 +53,5 @@ void h_core::render::Gles3Renderer::draw() {
     }
 
 //    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
-    ::glDrawElements(mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType, nullptr);
+    ::glDrawElements(model->getPrimitiveMode(), model->getNumIndices(), glElementType, nullptr);*/
 }

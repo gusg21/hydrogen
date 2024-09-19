@@ -1,7 +1,7 @@
 #include "core/actorspecasset.h"
 
 #include "core/log.h"
-#include "core/render/meshasset.h"
+#include "core/render/modelasset.h"
 #include "core/script/scriptasset.h"
 
 uint32_t h_core::ActorSpecAsset::initFromYaml(

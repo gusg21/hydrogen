@@ -14,7 +14,7 @@ transform:
     y: 1
     z: 1
 model:
-  index: 40
+  index: 3
 script:
   index: 2
 rigidbody:

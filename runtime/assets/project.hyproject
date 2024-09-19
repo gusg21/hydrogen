@@ -18,9 +18,9 @@ assets:
   - index: 2
     type: 2
     path: "assets/test_script.hyscript"
-#  - index: 3
-#    type: 3
-#    path: "assets/test_model.hymodel"
+  - index: 3
+    type: 3
+    path: "assets/test_model.hymodel"
   - index: 40
     type: 3
     path: "assets/test_model2.hymodel"

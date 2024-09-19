@@ -47,16 +47,17 @@ set(HydrogenCore_Sources
 
             # Systems
             src/sprinkles/gravity.cc include/core/sprinkles/testsystem.h
-            src/render/meshasset.cc include/core/render/meshasset.h
+        src/render/modelasset.cc include/core/render/modelasset.h
             src/render/renderer.cc include/core/render/renderer.h
             src/render/shader.cc include/core/render/shader.h
             include/core/render/vertex.h
             src/script/scriptasset.cc include/core/script/scriptasset.h
             src/script/scriptcomp.cc include/core/script/scriptcomp.h
             src/script/scripting.cc include/core/script/scripting.h
-            src/render/meshcomp.cc include/core/render/meshcomp.h
+        src/render/modelcomp.cc include/core/render/modelcomp.h
             src/render/gles3renderer.cc include/core/render/gles3renderer.h
             src/render/gl4renderer.cc include/core/render/gl4renderer.h
+            src/render/texture.cc include/core/render/texture.h
             
             # Input
             include/core/input/inputactionsource.h

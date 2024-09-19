@@ -15,7 +15,7 @@
 #include "core/log.h"
 #include "core/project/projectassetentry.h"
 #include "core/scenespecasset.h"
-#include "core/render/meshasset.h"
+#include "core/render/modelasset.h"
 #include "core/script/scriptasset.h"
 
 #define TYPED_SWITCH_CASE(type, func, ...) \
@@ -29,7 +29,7 @@
         TYPED_SWITCH_CASE(h_core::SceneSpecAsset, func, ##__VA_ARGS__);             \
         TYPED_SWITCH_CASE(h_core::ActorSpecAsset, func, ##__VA_ARGS__);             \
         TYPED_SWITCH_CASE(h_core::script::ScriptAsset, func, ##__VA_ARGS__);        \
-        TYPED_SWITCH_CASE(h_core::render::MeshAsset, func, ##__VA_ARGS__);          \
+        TYPED_SWITCH_CASE(h_core::render::ModelAsset, func, ##__VA_ARGS__);          \
     }
 
 #define ASSERT_TYPE_IS_ASSET_TYPE(type, error_msg) static_assert(std::is_base_of_v<h_core::Asset, type>, error_msg)

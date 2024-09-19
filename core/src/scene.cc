@@ -62,19 +62,19 @@ void h_core::Scene::doGUI(h_core::Assets* assets) {
                         ImGui::DragFloat3("Scale", &transforms[id].scale.x);
                         ImGui::Unindent();
                     }
-                    if (masks[id] & h_core::render::MeshComp::getMask()) {
+                    if (masks[id] & h_core::render::ModelComp::getMask()) {
                         if (ImGui::CollapsingHeader("Mesh")) {
-                            h_core::render::MeshAsset* mesh =
-                                assets->getAssetByIndex<h_core::render::MeshAsset>(meshes[id].mesh);
+                            h_core::render::ModelAsset* mesh =
+                                assets->getAssetByIndex<h_core::render::ModelAsset>(meshes[id].model);
 
                             ImGui::Indent();
-                            ImGui::Text("Mesh Asset: %d", meshes[id].mesh);
+                            ImGui::Text("Mesh Asset: %d", meshes[id].model);
 
-                            if (mesh != nullptr) {
+                            /*if (mesh != nullptr) {
                                 ImGui::Text("Vertex Count: %zu", mesh->getNumVertices());
                                 ImGui::Text("Index Count: %zu", mesh->getNumIndices());
                             }
-                            else { ImGui::TextColored(IMGUI_COLOR_WARN, "Mesh Asset not loaded"); }
+                            else { ImGui::TextColored(IMGUI_COLOR_WARN, "Mesh Asset not loaded"); }*/
 
                             ImGui::Unindent();
                         }

@@ -5,7 +5,7 @@
 #include "core/componentbitmask.h"
 #include "core/physics/rigidbody.h"
 #include "core/scenespecasset.h"
-#include "core/render/meshcomp.h"
+#include "core/render/modelcomp.h"
 #include "core/script/scriptcomp.h"
 #include "core/transform.h"
 
@@ -29,7 +29,7 @@ class Scene {
 
     h_core::ComponentBitmask masks[SCENE_MAX_ACTORS] = {};
     h_core::Transform transforms[SCENE_MAX_ACTORS] = {};
-    h_core::render::MeshComp meshes[SCENE_MAX_ACTORS] = {};
+    h_core::render::ModelComp meshes[SCENE_MAX_ACTORS] = {};
     h_core::script::ScriptComp scripts[SCENE_MAX_ACTORS] = {};
     h_core::physics::Rigidbody* rigidbodies[SCENE_MAX_ACTORS] = {};
 

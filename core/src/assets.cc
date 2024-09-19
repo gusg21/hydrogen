@@ -3,7 +3,7 @@
 #include <string>
 
 #include "core/project/project.h"
-#include "core/render/meshasset.h"
+#include "core/render/modelasset.h"
 
 h_core::AssetHash h_core::Assets::getAssetHashFromString(const std::string& string) {
     return std::hash<std::string>()(string);
@@ -27,7 +27,7 @@ void h_core::Assets::loadAsset(const AssetDescription& desc) {
 uint32_t h_core::Assets::determineAssetTypeFromExtension(const std::string& extension) {
     static const std::unordered_map<std::string, uint32_t> assetTypeLUT = {
         { "hyactor", h_core::ActorSpecAsset::getTypeId() },
-        { "hymodel", h_core::render::MeshAsset::getTypeId() },
+        { "hymodel", h_core::render::ModelAsset::getTypeId() },
         { "hyscript", h_core::script::ScriptAsset::getTypeId() },
         { "hyscene", h_core::SceneSpecAsset::getTypeId() }
     };
@@ -38,7 +38,7 @@ uint32_t h_core::Assets::determineAssetTypeFromExtension(const std::string& exte
 const char* h_core::Assets::getAssetTypeName(uint32_t assetType) {
     static const std::unordered_map<uint32_t, const char*> assetNameLUT = {
         { h_core::ActorSpecAsset::getTypeId(), "Actor Spec" },
-        { h_core::render::MeshAsset::getTypeId(), "Mesh" },
+        { h_core::render::ModelAsset::getTypeId(), "Mesh" },
         { h_core::script::ScriptAsset::getTypeId(), "Script" },
         { h_core::SceneSpecAsset::getTypeId(), "Scene Spec" }
     };

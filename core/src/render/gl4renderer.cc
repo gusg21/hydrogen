@@ -5,7 +5,7 @@
 #include "core/render/gl4renderer.h"
 
 #include "core/runtimeengine.h"
-#include "core/render/meshasset.h"
+#include "core/render/modelasset.h"
 
 uint32_t h_core::render::Gl4Renderer::init(h_core::RuntimeEngine* engine) {
     Renderer::init(engine);
@@ -36,28 +36,34 @@ void h_core::render::Gl4Renderer::beginFrame() {
 void h_core::render::Gl4Renderer::draw() {
     Renderer::draw();
 
-    h_core::render::MeshAsset* mesh = engine->getRuntimeAssets()->getAssetByIndex<h_core::render::MeshAsset>(meshComp->mesh);
-    if (mesh == nullptr) return;
+    h_core::render::ModelAsset* model = engine->getRuntimeAssets()->getAssetByIndex<h_core::render::ModelAsset>(meshComp->model);
+    if (model == nullptr) return;
 
     m_shader.setMat4("uni_modelMatrix", transform->getMatrix());
-    glBindTextureUnit(0, mesh->getTexture());
-    m_shader.setInt("uni_mainTex", 0);
 
-    GLenum glElementType;
-    switch (mesh->getMeshIndexType()) {
-        case h_core::render::MeshIndexType::BYTE:
-            glElementType = GL_UNSIGNED_BYTE;
+    h_core::render::Mesh* meshes = model->getMeshes();
+    for(uint32_t meshIndex = 0; meshIndex < model->getMeshCount(); meshIndex++) {
+
+        glBindTextureUnit(0, meshes[meshIndex].texture.textureId);
+        m_shader.setInt("uni_texture0", 0);
+
+        GLenum glElementType;
+        switch (meshes[meshIndex].meshIndexType) {
+            case h_core::render::MeshIndexType::BYTE:
+                glElementType = GL_UNSIGNED_BYTE;
             break;
-        case h_core::render::MeshIndexType::SHORT:
-            glElementType = GL_UNSIGNED_SHORT;
+            case h_core::render::MeshIndexType::SHORT:
+                glElementType = GL_UNSIGNED_SHORT;
             break;
-        case h_core::render::MeshIndexType::INT:
-            glElementType = GL_UNSIGNED_INT;
+            case h_core::render::MeshIndexType::INT:
+                glElementType = GL_UNSIGNED_INT;
             break;
-        default:
-            glElementType = GL_UNSIGNED_INT; //clion was giving a warning about glElementType, it was annoying. I wrote a useless default
+            default:
+                glElementType = GL_UNSIGNED_INT; //clion was giving a warning about glElementType, it was annoying. I wrote a useless default
+        }
+
+        ::glBindVertexArray(meshes[meshIndex].vertexAttributesHandle);
+        ::glDrawElements(meshes[meshIndex].primitiveMode, meshes[meshIndex].numIndices, glElementType, nullptr);
     }
 
-    ::glBindVertexArray(mesh->getVertexAttributesHandle());
-    ::glDrawElements(mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType, nullptr);
 }

@@ -1,4 +1,2 @@
-gltf: assets/camera/AntiqueCamera.gltf
-gltf_base_path: assets/camera/
-texture:
-    base: camera_camera_BaseColor.png
+gltf: assets/terrain/canyon1.glb
+gltf_binary: true

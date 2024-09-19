@@ -10,7 +10,7 @@ namespace script {
 class ScriptComp;
 }
 namespace render {
-class MeshComp;
+class ModelComp;
 }
 namespace physics {
 class Rigidbody;
@@ -36,7 +36,7 @@ class RuntimeSystem {
     h_core::ActorId actorId = 0;
     h_core::RuntimeEngine* engine = nullptr;
     h_core::Transform* transform = nullptr;
-    h_core::render::MeshComp* meshComp = nullptr;
+    h_core::render::ModelComp* meshComp = nullptr;
     h_core::script::ScriptComp* script = nullptr;
     h_core::physics::Rigidbody* rigidbody = nullptr;
 };

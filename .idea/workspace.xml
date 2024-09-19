@@ -48,13 +48,49 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="beginnings of texture work">
-      <change beforePath="$PROJECT_DIR$/.idea/hydrogen.iml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/hydrogen.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet.gltf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_BaseColor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_Normal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_OcclusionRoughMetal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_BaseColor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_Normal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_OcclusionRoughMetal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_BaseColor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_Normal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_BaseColor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_Normal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_Normal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/runtime/assets/sofa/GlamVelvetSofa.glb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/meshasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/render/texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/texture.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/meshasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/render/texture.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/texture.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/src/main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/core/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/meshasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/modelasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/meshcomp.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/modelcomp.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/renderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/runtimesystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimesystem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scene.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/shaders/core/fs_default.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/core/shaders/core/fs_default.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/assets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/assets.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/gl4renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/gl4renderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/gles3renderer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/gles3renderer.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/modelasset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/meshcomp.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/modelcomp.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/scene.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/scene.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/project.hyproject" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/project.hyproject" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor.hyactor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor2.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor2.hyactor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_actor3.hyactor" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_actor3.hyactor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model.hymodel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/test_model2.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_model2.hymodel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/assets/test_model2.yml" beforeDir="false" afterPath="$PROJECT_DIR$/server/assets/test_model2.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -623,143 +659,11 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/assets.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/engine.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/input/input.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/netrequestthreadcontext.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/core/include/core/render/modelasset.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/runtimeassets.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/runtimeengine.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/editor/include/editor/editor.h" root0="FORCE_HIGHLIGHTING" />
@@ -796,7 +700,7 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "CMake Application.HydrogenEditor.executor": "Debug",
-    "CMake Application.HydrogenRuntime.executor": "Run",
+    "CMake Application.HydrogenRuntime.executor": "Debug",
     "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
     "Python.main.executor": "Run",
@@ -811,13 +715,13 @@
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "textures",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Projects/hydrogen/runtime/assets",
+    "last_opened_file_path": "C:/Users/xavier.olmstead/CLionProjects/hydrogen/runtime/assets",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
+    "settings.editor.selected.configurable": "editor.preferences.tabs",
     "structure.view.defaults.are.configured": "true",
     "two.files.diff.last.used.file": "C:/Projects/hydrogen/server/templates/status.html",
     "vue.rearranger.settings.migration": "true"
@@ -825,6 +729,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\xavier.olmstead\CLionProjects\hydrogen\runtime\assets" />
       <recent name="C:\Projects\hydrogen\runtime\assets" />
       <recent name="C:\Projects\hydrogen\server\templates" />
       <recent name="C:\Projects\hydrogen\server" />
@@ -839,6 +744,11 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -920,11 +830,6 @@
       </method>
     </configuration>
     <configuration name="SDL2main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2main" CONFIG_NAME="Debug-Visual Studio">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -1304,14 +1209,13 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/src/physics/rigidbody.cc</url>
-          <line>8</line>
-          <option name="timeStamp" value="16" />
+          <url>file://$PROJECT_DIR$/core/src/render/modelasset.cc</url>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/core/src/actorspecasset.cc</url>
-          <line>32</line>
-          <option name="timeStamp" value="17" />
+          <url>file://$PROJECT_DIR$/core/src/render/modelasset.cc</url>
+          <line>61</line>
+          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

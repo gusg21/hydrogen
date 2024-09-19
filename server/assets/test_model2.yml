@@ -1,2 +1,4 @@
-gltf: assets/terrain/canyon1.glb
-gltf_binary: true
+#gltf: assets/terrain/canyon1.glb
+#gltf_binary: true
+gltf: assets/camera/AntiqueCamera.gltf
+gltf_base_path: assets/camera/

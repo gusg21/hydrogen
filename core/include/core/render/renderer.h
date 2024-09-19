@@ -7,7 +7,6 @@
 #include "core/input/input.h"
 #include "core/runtimesystem.h"
 #include "core/transform.h"
-#include "meshasset.h"
 #include "shader.h"
 
 #define RENDERING_LOAD_SHADER_FAIL_BAD_SHADER_COMPILE  1
@@ -36,7 +35,7 @@ class Renderer : public RuntimeSystem {
     static uint32_t loadShader(GLuint* out_shaderId, std::string filePath);
     static uint32_t loadProgram(h_core::render::Shader* out_shader, std::string vertexPath, std::string fragmentPath);
 
-    HYSYSTEM(h_core::Transform::getMask() | h_core::render::MeshComp::getMask());
+    HYSYSTEM(h_core::Transform::getMask() | h_core::render::ModelComp::getMask());
 
   protected:
     void setRendererName(const std::string& name);
