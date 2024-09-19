@@ -33,7 +33,8 @@ static const uint16_t cubeTriList[] = {
 };
 
 
-uint32_t h_core::render::MeshAsset::initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
+uint32_t h_core::render::MeshAsset::initFromYaml(
+    h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
     h_core::Asset::initFromYaml(assets, desc, yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");

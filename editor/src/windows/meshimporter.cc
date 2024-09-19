@@ -71,4 +71,20 @@ void h_editor::windows::MeshImporter::openGltf(bool binary) {
 
 void h_editor::windows::MeshImporter::import() {
     HYLOG_DEBUG("Importing!");
+
+    if (!m_needsFbx2Gltf) {
+        std::string gltfFile = m_meshFile;
+    } else {
+
+    }
+
+    // Create YAML
+    YAML::Node yaml {};
+    yaml["gltf"] = gltfFile;
+
+    // Create YAML file
+    std::string outputYamlFile = m_outputPathEntry;
+    SDL_RWFromFile(outputYamlFile.c_str(), "w+");
 }
+
+void h_editor::windows::MeshImporter::callFbx2Gltf(const std::string& fbxFile) {}

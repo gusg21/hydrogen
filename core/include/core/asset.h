@@ -19,9 +19,10 @@ class Asset {
     Asset& operator=(const h_core::Asset& asset) = delete;
 
     virtual uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& node);
-    virtual uint32_t precompile(h_core::RuntimeSystems* systems);
     virtual std::vector<uint8_t>* toPacked();
     virtual void fromPacked(const void* packedData, size_t length);
+
+    virtual uint32_t precompile(h_core::RuntimeSystems* systems);
     virtual void doGUI();
 
     h_core::AssetDescription desc {};

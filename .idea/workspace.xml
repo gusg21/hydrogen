@@ -46,24 +46,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="supported hot reloading">
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/platform/environment.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/src/asseteditorwindow.cc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/src/platform/win32/environment_win32.cc" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="added a whole bunch of tree models">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/editor/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/meshasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/meshasset.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/editor.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/editorwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editorwindow.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/platform/path.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/platform/path.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/editor.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editor.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/editorwindow.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editorwindow.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/main.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +120,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "CMake Application.HydrogenEditor.executor": "Debug",
+    "CMake Application.HydrogenEditor.executor": "Run",
     "CMake Application.HydrogenRuntime.executor": "Run",
     "CMake Debug.Hydrogen.executor": "Debug",
     "DefaultHtmlFileTemplate": "HTML File",
@@ -372,7 +363,7 @@
       <workItem from="1726262954787" duration="13482000" />
       <workItem from="1726342159173" duration="36000" />
       <workItem from="1726385455601" duration="27437000" />
-      <workItem from="1726557201499" duration="544000" />
+      <workItem from="1726557201499" duration="14989000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -574,7 +565,23 @@
       <option name="project" value="LOCAL" />
       <updated>1726088129472</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="editor work (mesh importing)">
+      <option name="closed" value="true" />
+      <created>1726557780434</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1726557780434</updated>
+    </task>
+    <task id="LOCAL-00027" summary="added a whole bunch of tree models">
+      <option name="closed" value="true" />
+      <created>1726557861065</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1726557861065</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -586,7 +593,6 @@
     <isAutomaticReloadCMake value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="misc" />
     <MESSAGE value="fixed asset loading systems" />
     <MESSAGE value="working on autobuild" />
     <MESSAGE value="fixed --target parameter" />
@@ -610,7 +616,9 @@
     <MESSAGE value="added libcurl" />
     <MESSAGE value="runtime/base assets split" />
     <MESSAGE value="[nobuild] ALSO working on big asset streaming" />
-    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] ALSO working on big asset streaming" />
+    <MESSAGE value="editor work (mesh importing)" />
+    <MESSAGE value="added a whole bunch of tree models" />
+    <option name="LAST_COMMIT_MESSAGE" value="added a whole bunch of tree models" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
