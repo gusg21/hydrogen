@@ -1,0 +1,32 @@
+initial_scene_spec: 7
+name: "Hello World"
+input_actions:
+  - name: fire
+    sources:
+      - key: 4
+  - name: move_x
+    sources:
+      - positive_key: 79
+        negative_key: 80
+assets:
+  - index: 1
+    type: 1
+    path: "assets/test_actor2.yml"
+  - index: 2
+    type: 2
+    path: "assets/test_script.yml"
+  - index: 40
+    type: 3
+    path: "assets/test_model.yml"
+  - index: 7
+    type: 0
+    path: "assets/test_scene.yml"
+  - index: 10
+    type: 1
+    path: "assets/test_actor.yml"
+  - index: 100
+    type: 3
+    path: "assets/helmet.hymodel"
+  # - index: 3
+  #   type: 3
+  #   path: "assets/test_model.yml"

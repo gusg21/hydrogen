@@ -96,6 +96,10 @@ void h_core::render::Texture::addToPacked(uint8_t* _writeHead) {
     memcpy(writeHead, (uint8_t*)&m_wrapV, sizeof(uint32_t) * 1);
     writeHead += sizeof(uint32_t) * 1;
 
+    // data size
+    memcpy(writeHead, (uint8_t*)m_dataSize, sizeof(size_t) * 1);
+    writeHead += sizeof(size_t) * 1;
+
     // data
     memcpy(writeHead, (uint8_t*)m_data, sizeof(uint8_t) * m_dataSize);
     writeHead += sizeof(uint8_t) * m_dataSize;
@@ -133,10 +137,19 @@ void h_core::render::Texture::readFromPacked(const uint8_t* _readHead) {
     // wrap V
     m_wrapV = *(WrapMode*)readHead;
     readHead += sizeof(WrapMode);
+
+    // data size
+    m_dataSize = *(size_t*)readHead;
+    readHead += sizeof(size_t);
+
+    // data
+    memcpy(m_data, readHead, m_dataSize);
+    readHead += m_dataSize;
+
 }
 
 size_t h_core::render::Texture::getPackedSize() const {
-    return sizeof(uint32_t) * 7 + m_width * m_height * m_componentCount;
+    return sizeof(uint32_t) * 7 + sizeof(size_t) * 1 + m_width * m_height * m_componentCount;
 }
 
 void h_core::render::Texture::precompile() {
