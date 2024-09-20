@@ -5,9 +5,10 @@ core: ctypes.CDLL
 
 
 class PackedAsset:
-    def __init__(self, packed_asset_pointer: ctypes.c_void_p):
+    def __init__(self, packed_asset_pointer: ctypes.c_void_p, asset_index: int):
         print("Created PackedAsset with data @ {}".format(packed_asset_pointer))
         self.packed_asset_pointer = packed_asset_pointer
+        self.asset_index = asset_index
 
     def __del__(self):
         print(f"Deleting packed asset @ {self.packed_asset_pointer}", flush=True)
@@ -23,7 +24,7 @@ class PackedAsset:
             return None
 
     def __len__(self) -> int:
-        return core.get_length_of_packed_asset(self.packed_asset_pointer)
+        return core.get_length_of_packed_asset(self.asset_index)
 
     def to_bytearray(self) -> bytearray:
         print("Converting PackedAsset @ {} to bytearray...".format(self.packed_asset_pointer))
@@ -62,7 +63,7 @@ def load_core(dll_path: str) -> None:
     core.get_data_in_packed_asset.restype = ctypes.c_ubyte
     core.get_data_in_packed_asset.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     core.get_length_of_packed_asset.restype = ctypes.c_size_t
-    core.get_length_of_packed_asset.argtypes = [ctypes.c_void_p]
+    core.get_length_of_packed_asset.argtypes = [ctypes.c_uint32]
 
 
 def create_engine() -> None:
@@ -87,4 +88,4 @@ def is_packed_asset_index_valid(asset_index: int) -> bool:
 
 def get_packed_asset_from_index(asset_index: int) -> PackedAsset:
     print("Getting packed asset for index {}".format(asset_index))
-    return PackedAsset(core.get_packed_asset_from_index(asset_index))
+    return PackedAsset(core.get_packed_asset_from_index(asset_index), asset_index)

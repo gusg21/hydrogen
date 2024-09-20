@@ -33,10 +33,12 @@ WRAP_DECL uint32_t get_max_asset_count() {
     return ASSETS_MAX_ASSET_COUNT;
 }
 
-WRAP_DECL std::vector<uint8_t>* get_packed_asset_from_index(uint32_t asset_index) {
+WRAP_DECL uint8_t* get_packed_asset_from_index(uint32_t asset_index) {
     h_core::Asset* asset = assets->getAssetByIndex<h_core::Asset>(asset_index);
     HYLOG_DEBUG("WRAP: Got asset pointer for index %d", asset_index);
-    return asset->toPacked();
+    uint8_t* packed = new uint8_t[asset->getPackedSize()];
+    asset->toPacked(packed);
+    return packed;
 }
 
 WRAP_DECL bool is_packed_asset_index_valid(uint32_t asset_index) {
@@ -44,16 +46,16 @@ WRAP_DECL bool is_packed_asset_index_valid(uint32_t asset_index) {
     return asset != nullptr;
 }
 
-WRAP_DECL void delete_packed_asset(std::vector<uint8_t>* packed_asset) {
+WRAP_DECL void delete_packed_asset(uint8_t* packed_asset) {
     delete packed_asset;
 }
 
-WRAP_DECL uint8_t get_data_in_packed_asset(std::vector<uint8_t>* packed_asset, uint32_t index) {
-    return (*packed_asset)[index];
+WRAP_DECL uint8_t get_data_in_packed_asset(uint8_t* packed_asset, uint32_t index) {
+    return packed_asset[index];
 }
 
-WRAP_DECL size_t get_length_of_packed_asset(std::vector<uint8_t>* packed_asset) {
-    return packed_asset->size();
+WRAP_DECL size_t get_length_of_packed_asset(uint32_t asset_index) {
+    return assets->getAssetByIndex<h_core::Asset>(asset_index)->getPackedSize();
 }
 
 }

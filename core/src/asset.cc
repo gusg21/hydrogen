@@ -19,13 +19,16 @@ uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     return 0;
 }
 
-std::vector<uint8_t>* h_core::Asset::toPacked() {
-    HYLOG_WARN("ASSET: Undefined toPacked method, returning empty\n");
-    return new std::vector<uint8_t>();
+size_t h_core::Asset::getPackedSize() {
+    return 0;
 }
 
-void h_core::Asset::fromPacked(const void* packedData, size_t length) {
-    HYLOG_WARN("ASSET: Undefined fromPacked method, not loading\n");
+void h_core::Asset::toPacked(uint8_t* _writeHead) {
+    HYLOG_WARN("ASSET: Undefined toPacked method, not writing\n");
+}
+
+void h_core::Asset::fromPacked(const uint8_t* _readHead) {
+    HYLOG_WARN("ASSET: Undefined fromPacked method, not reading\n");
 }
 
 void h_core::Asset::doGUI() {

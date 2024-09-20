@@ -19,7 +19,7 @@ void main()
 {
 	float ambientAmount = 0.3f;
 	float diffuseAmount = 0.7f;
-	vec4 ambientColor = vec4(1, 0, 0, 1);
+	vec4 ambientColor = vec4(1, 1, 0.9, 1);
 	vec4 sunColor = vec4(1, 0.8, 0.7, 1);
 	
 	vec4 ambient = ambientAmount * ambientColor;
@@ -36,5 +36,5 @@ void main()
 
 	vec4 objColor = mix(objColor0, objColor1, objColor0.a); //assuming we get alpha from tex0
 
-	out_fragColor = objColor;// * (ambient + diffuse);
+	out_fragColor = objColor * (ambient + diffuse);
 }

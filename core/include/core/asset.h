@@ -20,8 +20,9 @@ class Asset {
 
     virtual uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& node);
     virtual uint32_t precompile(h_core::RuntimeSystems* systems);
-    virtual std::vector<uint8_t>* toPacked();
-    virtual void fromPacked(const void* packedData, size_t length);
+    virtual size_t getPackedSize();
+    virtual void toPacked(uint8_t* _writeHead);
+    virtual void fromPacked(const uint8_t* _readHead);
     virtual void doGUI();
 
     h_core::AssetDescription desc {};

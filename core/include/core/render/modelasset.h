@@ -36,7 +36,11 @@ class Mesh {
   public:
     Mesh() = default;
 
-    void load(bool useGles3);
+    uint32_t initFromNode(const tinygltf::Model& model, const tinygltf::Node& node);
+    void precompile(bool useGles3);
+    size_t getPackedSize() const;
+    void addToPacked(uint8_t* _writeHead);
+    void readFromPacked(const uint8_t* _readHead);
 
     h_core::render::Texture texture;
 
@@ -47,7 +51,7 @@ class Mesh {
     h_core::render::Vertex* vertices = nullptr;
     void* indices = nullptr;
     h_core::render::MeshIndexType meshIndexType = h_core::render::MeshIndexType::BYTE;
-    uint32_t primitiveMode = 4;
+    uint32_t primitiveMode = GL_TRIANGLES;
 };
 
 class ModelAsset : public Asset {
@@ -56,11 +60,11 @@ class ModelAsset : public Asset {
 
     uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
     uint32_t precompile(h_core::RuntimeSystems* systems) override;
-    std::vector<uint8_t>* toPacked() override;
-    void fromPacked(const void* data, size_t length) override;
+    size_t getPackedSize() override;
+    void toPacked(uint8_t* _writeHead) override;
+    void fromPacked(const uint8_t* _readHead) override;
     void doGUI() override;
 
-    uint32_t loadMesh(Mesh* out_mesh, const tinygltf::Node& node);
     /*void loadModel(
         uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,
         MeshIndexType type, bool useGles3);

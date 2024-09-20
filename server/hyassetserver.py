@@ -10,7 +10,7 @@ class HyAssetServer():
     app = flask.Flask("server")
     load_simulation_time = 0
 
-    def __init__(self, dll_path: str, project_path: str = "assets/project.yml", load_simulation_time: float = 0):
+    def __init__(self, dll_path: str, project_path: str = "assets/project.hyproject", load_simulation_time: float = 0):
         HyAssetServer.load_simulation_time = load_simulation_time
 
         corewrap.load_core(dll_path)

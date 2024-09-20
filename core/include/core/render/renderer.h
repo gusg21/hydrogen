@@ -45,7 +45,7 @@ class Renderer : public RuntimeSystem {
     h_core::math::Vector3 m_cameraDirection { 1.f, 0.f, 0.f };
 
     float m_fovDegrees = 70.f;
-    float m_nearZ = 1.f;
+    float m_nearZ = 0.05f;
     float m_farZ = 100.f;
     bool m_ccw = true;
 

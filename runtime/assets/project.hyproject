@@ -9,21 +9,21 @@ input_actions:
       - positive_key: 79
         negative_key: 80
 assets:
-  - index: 1
-    type: 1
-    path: "assets/test_actor2.hyactor"
-  - index: 15
-    type: 1
-    path: "assets/test_actor3.hyactor"
+  # - index: 1
+  #   type: 1
+  #   path: "assets/test_actor2.hyactor"
+  # - index: 15
+  #   type: 1
+  #   path: "assets/test_actor3.hyactor"
   - index: 2
     type: 2
     path: "assets/test_script.hyscript"
-  - index: 3
-    type: 3
-    path: "assets/test_model.hymodel"
-  - index: 40
-    type: 3
-    path: "assets/test_model2.hymodel"
+  # - index: 3
+  #   type: 3
+  #   path: "assets/test_model.hymodel"
+  # - index: 40
+  #   type: 3
+  #   path: "assets/test_model2.hymodel"
 #    remote: true
   - index: 7
     type: 0
@@ -31,3 +31,6 @@ assets:
   - index: 10
     type: 1
     path: "assets/test_actor.hyactor"
+  - index: 100
+    type: 3
+    remote: true

@@ -4,6 +4,7 @@
 #include "core/render/texture.h"
 
 #include <stb_image.h>
+#include <cassert>
 
 #include "core/log.h"
 
@@ -47,24 +48,113 @@
 
 
 void h_core::render::Texture::init(
-    const std::vector<unsigned char>& data, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter,
-    Filter minFilter, WrapMode wrapU, WrapMode wrapV) {
+    uint8_t* data, size_t dataSize, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter, Filter minFilter,
+    WrapMode wrapU, WrapMode wrapV) {
+    this->m_data = data;
+    this->m_dataSize = dataSize;
+    this->m_width = width;
+    this->m_height = height;
+    this->m_componentCount = componentCount;
+    this->m_magFilter = magFilter;
+    this->m_minFilter = minFilter;
+    this->m_wrapU = wrapU;
+    this->m_wrapV = wrapV;
+}
 
+void h_core::render::Texture::addToPacked(uint8_t* _writeHead) {
+    size_t byteLength = getPackedSize();
+
+    // Make sure we have space
+    uint8_t* writeHead = _writeHead;
+    uint8_t* originalHead = _writeHead;
+
+    // width
+    memcpy(writeHead, (uint8_t*)&m_width, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // height
+    memcpy(writeHead, (uint8_t*)&m_height, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // comp ct
+    memcpy(writeHead, (uint8_t*)&m_componentCount, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // mag filter
+    memcpy(writeHead, (uint8_t*)&m_magFilter, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // min filter
+    memcpy(writeHead, (uint8_t*)&m_minFilter, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // wrap U
+    memcpy(writeHead, (uint8_t*)&m_wrapU, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // wrap V
+    memcpy(writeHead, (uint8_t*)&m_wrapV, sizeof(uint32_t) * 1);
+    writeHead += sizeof(uint32_t) * 1;
+
+    // data
+    memcpy(writeHead, (uint8_t*)m_data, sizeof(uint8_t) * m_dataSize);
+    writeHead += sizeof(uint8_t) * m_dataSize;
+
+    assert(writeHead - originalHead == byteLength);
+}
+
+void h_core::render::Texture::readFromPacked(const uint8_t* _readHead) {
+    const uint8_t* readHead = _readHead;
+
+    // width
+    m_width = *(uint32_t*)readHead;
+    readHead += sizeof(uint32_t);
+
+    // height
+    m_height = *(uint32_t*)readHead;
+    readHead += sizeof(uint32_t);
+
+    // comp ct
+    m_componentCount = *(uint32_t*)readHead;
+    readHead += sizeof(uint32_t);
+
+    // mag filter
+    m_magFilter = *(Filter*)readHead;
+    readHead += sizeof(Filter);
+
+    // min filter
+    m_minFilter = *(Filter*)readHead;
+    readHead += sizeof(Filter);
+
+    // wrap U
+    m_wrapU = *(WrapMode*)readHead;
+    readHead += sizeof(WrapMode);
+
+    // wrap V
+    m_wrapV = *(WrapMode*)readHead;
+    readHead += sizeof(WrapMode);
+}
+
+size_t h_core::render::Texture::getPackedSize() const {
+    return sizeof(uint32_t) * 7 + m_width * m_height * m_componentCount;
+}
+
+void h_core::render::Texture::precompile() {
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    COMPONENT_COUNT_TO_FORMAT(componentCount, format);
+    COMPONENT_COUNT_TO_FORMAT(m_componentCount, format);
     glTexImage2D(
-        GL_TEXTURE_2D, 0, static_cast<GLint>(format), static_cast<int32_t>(width), static_cast<int32_t>(height), 0,
-        format, GL_UNSIGNED_BYTE, data.data());
+        GL_TEXTURE_2D, 0, static_cast<GLint>(format), static_cast<int32_t>(m_width), static_cast<int32_t>(m_height), 0,
+        format, GL_UNSIGNED_BYTE, m_data);
 
-    WRAP_MODE_TO_GL_WRAP_MODE(wrapU, wrapModeU);
-    WRAP_MODE_TO_GL_WRAP_MODE(wrapV, wrapModeV);
+    WRAP_MODE_TO_GL_WRAP_MODE(m_wrapU, wrapModeU);
+    WRAP_MODE_TO_GL_WRAP_MODE(m_wrapV, wrapModeV);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapModeU);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapModeV);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter == Filter::LINEAR ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter == Filter::LINEAR ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_minFilter == Filter::LINEAR ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_magFilter == Filter::LINEAR ? GL_LINEAR : GL_NEAREST);
 
     // Black border by default
     float borderColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -75,42 +165,4 @@ void h_core::render::Texture::init(
 
     // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-uint32_t h_core::render::Texture::loadTexture(
-    uint32_t& out_texture, std::string filePath, GLint wrapMode, GLint minFilter, GLint magFilter, bool mipmap) {
-    stbi_set_flip_vertically_on_load(true);
-
-    int32_t width, height, numComponents;
-    unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &numComponents, 0);
-
-    if (data == nullptr) {
-        HYLOG_ERROR("RENDERING: TEXTURE: failed to load texture from %s", filePath);
-        stbi_image_free(data);
-        return TEXTURE_FAILED_TO_LOAD;  // TODO: write error message for this
-    }
-
-    uint32_t texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    COMPONENT_COUNT_TO_FORMAT(numComponents, format);
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(format), width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-
-    // Black border by default
-    float borderColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    if (mipmap) { glGenerateMipmap(GL_TEXTURE_2D); }
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    stbi_image_free(data);
-    out_texture = texture;
-}
-
-uint32_t h_core::render::Texture::loadTexture(uint32_t& out_texture, std::string filePath) {
-    return loadTexture(out_texture, filePath, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, true);
 }

@@ -100,18 +100,11 @@ void h_core::RuntimeAssets::doGUI() {
                     std::string title = "Asset " + std::to_string(assetIndex);
                     if (ImGui::CollapsingHeader(title.c_str())) {
                         ImGui::Indent();
-                        asset->doGUI();
-                        ImGui::Separator();
-                        if (ImGui::Button("Calc Packed Size")) {
-                            std::vector<uint8_t>* packed = asset->toPacked();
-                            m_packedSizeMap[assetIndex] = packed->size();
-                            delete packed;
+                        {
+                            asset->doGUI();
+                            ImGui::Separator();
+                            ImGui::Text("Packed Size: %zu", asset->getPackedSize());
                         }
-                        if (m_packedSizeMap.find(assetIndex) != m_packedSizeMap.end()) {
-                            ImGui::SameLine();
-                            ImGui::Text("Packed Size: %u", m_packedSizeMap[assetIndex]);
-                        }
-
                         ImGui::Unindent();
                     }
                 }

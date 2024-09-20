@@ -134,7 +134,7 @@ void h_core::RuntimeAssets::requestNetAssetNow(
 
     // Create + load asset
     AssetType* asset = new AssetType();
-    asset->fromPacked(bytes.data(), bytes.size());
+    asset->fromPacked(bytes.data());
 
     // Output the asset pointer
     *out_assetPtr = asset;
