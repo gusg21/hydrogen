@@ -101,9 +101,13 @@ void h_core::RuntimeAssets::doGUI() {
                     if (ImGui::CollapsingHeader(title.c_str())) {
                         ImGui::Indent();
                         {
-                            asset->doGUI();
-                            ImGui::Separator();
                             ImGui::Text("Packed Size: %zu", asset->getPackedSize());
+                            if (ImGui::Button("Pack")) {
+                                uint8_t* packed = new uint8_t [asset->getPackedSize()];
+                                asset->toPacked(packed);
+                            }
+                            ImGui::Separator();
+                            asset->doGUI();
                         }
                         ImGui::Unindent();
                     }

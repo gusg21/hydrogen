@@ -31,6 +31,10 @@ assets:
   - index: 10
     type: 1
     path: "assets/test_actor.hyactor"
+  # - index: 99
+  #   type: 3
+  #   path: "assets/helmet.hymodel"
   - index: 100
     type: 3
+    # path: "assets/helmet.hymodel"
     remote: true

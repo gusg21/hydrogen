@@ -2,6 +2,7 @@ import os
 import time
 
 import flask
+import timeit
 
 import corewrap
 
@@ -38,8 +39,12 @@ def get_asset(asset_id: int):
         if HyAssetServer.load_simulation_time > 0:
             print("Simulating heavy load...")
             time.sleep(HyAssetServer.load_simulation_time)
+
+        start = timeit.default_timer()
         asset_bytes = bytes(corewrap.get_packed_asset_from_index(asset_id).to_bytearray())
         print(len(asset_bytes))
+        print("> byte conversion took {}s".format(timeit.default_timer() - start))
+
         return flask.Response(
             asset_bytes, mimetype="bin/hya"
         ), 200

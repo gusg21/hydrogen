@@ -31,6 +31,7 @@ class PackedAsset:
         length = len(self)
         print("Byte length: {}".format(length))
         data = bytearray(self)
+        print("Done conversion")
         return data
 
     def __repr__(self):

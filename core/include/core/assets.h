@@ -113,7 +113,9 @@ template<typename AssetType>
 AssetType* h_core::Assets::getAssetByIndex(h_core::AssetIndex index) const {
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't get asset type that does not derive from Asset");
 
-    if (index == ASSET_INDEX_BAD) return nullptr;
+    // Input validation
+    if (index >= ASSETS_MAX_ASSET_COUNT) return nullptr;
+    // NOTE: index >= 0 because of uint32_t
 
     return static_cast<AssetType*>(m_assets[index]);
 }

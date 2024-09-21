@@ -48,9 +48,10 @@
 
 
 void h_core::render::Texture::init(
-    uint8_t* data, size_t dataSize, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter, Filter minFilter,
+    const uint8_t* data, size_t dataSize, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter, Filter minFilter,
     WrapMode wrapU, WrapMode wrapV) {
-    this->m_data = data;
+    this->m_data = new uint8_t[dataSize];
+    memcpy(m_data, data, dataSize);
     this->m_dataSize = dataSize;
     this->m_width = width;
     this->m_height = height;
@@ -62,9 +63,6 @@ void h_core::render::Texture::init(
 }
 
 void h_core::render::Texture::addToPacked(uint8_t* _writeHead) {
-    size_t byteLength = getPackedSize();
-
-    // Make sure we have space
     uint8_t* writeHead = _writeHead;
     uint8_t* originalHead = _writeHead;
 
@@ -81,30 +79,30 @@ void h_core::render::Texture::addToPacked(uint8_t* _writeHead) {
     writeHead += sizeof(uint32_t) * 1;
 
     // mag filter
-    memcpy(writeHead, (uint8_t*)&m_magFilter, sizeof(uint32_t) * 1);
-    writeHead += sizeof(uint32_t) * 1;
+    memcpy(writeHead, (uint8_t*)&m_magFilter, sizeof(Filter) * 1);
+    writeHead += sizeof(Filter) * 1;
 
     // min filter
-    memcpy(writeHead, (uint8_t*)&m_minFilter, sizeof(uint32_t) * 1);
-    writeHead += sizeof(uint32_t) * 1;
+    memcpy(writeHead, (uint8_t*)&m_minFilter, sizeof(Filter) * 1);
+    writeHead += sizeof(Filter) * 1;
 
     // wrap U
-    memcpy(writeHead, (uint8_t*)&m_wrapU, sizeof(uint32_t) * 1);
-    writeHead += sizeof(uint32_t) * 1;
+    memcpy(writeHead, (uint8_t*)&m_wrapU, sizeof(WrapMode) * 1);
+    writeHead += sizeof(WrapMode) * 1;
 
     // wrap V
-    memcpy(writeHead, (uint8_t*)&m_wrapV, sizeof(uint32_t) * 1);
-    writeHead += sizeof(uint32_t) * 1;
+    memcpy(writeHead, (uint8_t*)&m_wrapV, sizeof(WrapMode) * 1);
+    writeHead += sizeof(WrapMode) * 1;
 
     // data size
-    memcpy(writeHead, (uint8_t*)m_dataSize, sizeof(size_t) * 1);
+    memcpy(writeHead, (uint8_t*)&m_dataSize, sizeof(size_t) * 1);
     writeHead += sizeof(size_t) * 1;
 
     // data
-    memcpy(writeHead, (uint8_t*)m_data, sizeof(uint8_t) * m_dataSize);
-    writeHead += sizeof(uint8_t) * m_dataSize;
+    memcpy_s(writeHead, m_dataSize, m_data, m_dataSize);
+    writeHead += m_dataSize;
 
-    assert(writeHead - originalHead == byteLength);
+    assert(writeHead - originalHead == getPackedSize());
 }
 
 void h_core::render::Texture::readFromPacked(const uint8_t* _readHead) {
@@ -143,13 +141,16 @@ void h_core::render::Texture::readFromPacked(const uint8_t* _readHead) {
     readHead += sizeof(size_t);
 
     // data
+    delete m_data;
+    m_data = new uint8_t[m_dataSize];
     memcpy(m_data, readHead, m_dataSize);
-    readHead += m_dataSize;
+    readHead += sizeof(uint8_t) * m_dataSize;
 
 }
 
 size_t h_core::render::Texture::getPackedSize() const {
-    return sizeof(uint32_t) * 7 + sizeof(size_t) * 1 + m_width * m_height * m_componentCount;
+    return sizeof(uint32_t) * 3 + sizeof(Filter) * 2 + sizeof(WrapMode) * 2 + sizeof(size_t) * 1 +
+           sizeof(uint8_t) * m_dataSize;
 }
 
 void h_core::render::Texture::precompile() {

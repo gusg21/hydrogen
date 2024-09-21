@@ -26,7 +26,7 @@ class Texture {
     uint32_t textureId = UINT32_MAX;
 
     void init(
-        uint8_t* data, size_t dataSize, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter, Filter minFilter,
+        const uint8_t* data, size_t dataSize, uint32_t width, uint32_t height, uint32_t componentCount, Filter magFilter, Filter minFilter,
         WrapMode wrapU, WrapMode wrapV);
     void precompile();
     [[nodiscard]] size_t getPackedSize() const;

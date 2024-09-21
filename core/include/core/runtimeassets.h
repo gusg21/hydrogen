@@ -97,7 +97,7 @@ size_t netAssetWrite(void* buffer, size_t pieceSize, size_t pieceCount, void* ou
         bytesVec->push_back(srcBytes[byteIndex]);
     }
 
-    HYLOG_VERBOSE("ASSETS: Net asset write %d bytes\n", byteCount);
+//    HYLOG_VERBOSE("ASSETS: Net asset write %d bytes\n", byteCount);
 
     return byteCount;
 }

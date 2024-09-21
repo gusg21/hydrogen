@@ -17,13 +17,10 @@
       <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
       <config projectName="Hydrogen" targetName="angelscript" />
       <config projectName="Hydrogen" targetName="sdl_headers_copy" />
-      <config projectName="Hydrogen" targetName="HydrogenServer_Wrapper" />
       <config projectName="Hydrogen" targetName="uninstall" />
       <config projectName="Hydrogen" targetName="libcurl_static" />
       <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
       <config projectName="Hydrogen" targetName="HydrogenCore" />
-      <config projectName="Hydrogen" targetName="yaml-cpp-read" />
-      <config projectName="Hydrogen" targetName="yaml-cpp-sandbox" />
       <config projectName="Hydrogen" targetName="HydrogenRuntime_Assets" />
       <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="NightlyMemoryCheck" />
@@ -33,12 +30,12 @@
       <config projectName="Hydrogen" targetName="HydrogenRuntime" />
       <config projectName="Hydrogen" targetName="libcurl_object" />
       <config projectName="Hydrogen" targetName="tinygltf" />
-      <config projectName="Hydrogen" targetName="loader_example" />
+      <config projectName="Hydrogen" targetName="HydrogenServer_Assets" />
       <config projectName="Hydrogen" targetName="Nightly" />
       <config projectName="Hydrogen" targetName="glad" />
-      <config projectName="Hydrogen" targetName="yaml-cpp-parse" />
       <config projectName="Hydrogen" targetName="HydrogenServer" />
       <config projectName="Hydrogen" targetName="SDL2-static" />
+      <config projectName="Hydrogen" targetName="SDL2" />
       <config projectName="Hydrogen" targetName="imgui.cmake" />
       <config projectName="Hydrogen" targetName="Continuous" />
       <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
@@ -50,9 +47,42 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] textures working, model packing bad">
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] still broken but a little fixed ?">
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/httplib.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/meson.build" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/meson_options.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/external/httplib/split.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/main.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_13_2024_10_50_PM_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_13_2024_10_50_PM__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/modelasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/modelasset.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/render/texture.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/texture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/include/core/runtimeassets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/runtimeassets.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/render/modelasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/modelasset.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/render/texture.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/texture.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/runtimeassets.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/runtimeassets.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/assets/project.hyproject" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/project.hyproject" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/.vscode/launch.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/server/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/assets/helmet.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/server/assets/helmet.hymodel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/corewrap.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/hyassetserver.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/templates/404.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/templates/bad_asset_get.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/templates/status.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/wrap/wrap.cc" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -657,38 +687,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;CMake Application.HydrogenEditor.executor&quot;: &quot;Debug&quot;,
-    &quot;CMake Application.HydrogenRuntime.executor&quot;: &quot;Run&quot;,
-    &quot;CMake Debug.Hydrogen.executor&quot;: &quot;Debug&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.advertisement.text.has.clang-format&quot;: &quot;true&quot;,
-    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;textures&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/xavier.olmstead/CLionProjects/hydrogen/runtime/assets&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
-    &quot;two.files.diff.last.used.file&quot;: &quot;C:/Projects/hydrogen/server/templates/status.html&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "CMake Application.HydrogenEditor.executor": "Debug",
+    "CMake Application.HydrogenRuntime.executor": "Run",
+    "CMake Application.HydrogenServer.executor": "Debug",
+    "CMake Debug.Hydrogen.executor": "Debug",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.advertisement.text.has.clang-format": "true",
+    "cf.advertisement.text.overridden": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "textures",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/xavier.olmstead/CLionProjects/hydrogen/runtime/assets",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.tabs",
+    "structure.view.defaults.are.configured": "true",
+    "two.files.diff.last.used.file": "C:/Projects/hydrogen/server/templates/status.html",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\xavier.olmstead\CLionProjects\hydrogen\runtime\assets" />
@@ -698,14 +729,23 @@
       <recent name="C:\Projects\hydrogen\core\shaders\es" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Projects\hydrogen\server\external\httplib" />
       <recent name="C:\Users\xavier.olmstead\CLionProjects\hydrogen\core\include\core\render" />
       <recent name="C:\Projects\hydrogen\editor\include\editor" />
       <recent name="C:\Projects\hydrogen\editor\src\platform\win32" />
       <recent name="C:\Projects\hydrogen\editor\include\editor\platform" />
-      <recent name="C:\Projects\hydrogen\core\src" />
+    </key>
+    <key name="CidrLocalAttachDebugger.recentlyUsed">
+      <recent name="com.jetbrains.cidr.cpp.execution.debugger.backend.CLionLLDBDriverConfiguration" />
+      <recent name="com.jetbrains.cidr.cpp.execution.debugger.backend.CLionGDBDriverConfiguration:C:\Program Files\JetBrains\CLion 2024.1.1\bin\gdb\win\x64\bin\gdb.exe" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.HydrogenRuntime">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Continuous" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="Continuous" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -751,12 +791,12 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenServer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer" CONFIG_NAME="Debug-Visual Studio">
+    <configuration name="HydrogenServer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenServer">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HydrogenServer_Wrapper" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer_Wrapper" CONFIG_NAME="Debug-Visual Studio">
+    <configuration name="HydrogenServer_Assets" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenServer_Assets" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -772,6 +812,11 @@
       </method>
     </configuration>
     <configuration name="SDL2-static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2-static" CONFIG_NAME="Debug-Visual Studio">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SDL2" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="SDL2" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -806,11 +851,6 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="loader_example" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="loader_example" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="loader_example">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="sdl_headers_copy" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="sdl_headers_copy" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -822,21 +862,6 @@
       </method>
     </configuration>
     <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="uninstall" CONFIG_NAME="Debug-Visual Studio">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="yaml-cpp-parse" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="yaml-cpp-parse" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="yaml-cpp-parse">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="yaml-cpp-read" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="yaml-cpp-read" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="yaml-cpp-read">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="yaml-cpp-sandbox" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="yaml-cpp-sandbox" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="yaml-cpp-sandbox">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -876,8 +901,6 @@
       <item itemvalue="CMake Application.HydrogenEditor" />
       <item itemvalue="CMake Application.HydrogenCore_Shared" />
       <item itemvalue="CMake Application.HydrogenCore" />
-      <item itemvalue="CMake Application.HydrogenServer_Wrapper" />
-      <item itemvalue="CMake Application.HydrogenServer" />
       <item itemvalue="CMake Application.NightlyMemoryCheck" />
       <item itemvalue="CMake Application.Nightly" />
       <item itemvalue="CMake Application.SDL2-static" />
@@ -886,17 +909,16 @@
       <item itemvalue="CMake Application.angelscript" />
       <item itemvalue="CMake Application.glad" />
       <item itemvalue="CMake Application.imgui.cmake" />
+      <item itemvalue="CMake Application.SDL2" />
       <item itemvalue="CMake Application.libcurl_static" />
       <item itemvalue="CMake Application.sdl_headers_copy" />
       <item itemvalue="CMake Application.tinygltf" />
       <item itemvalue="CMake Application.uninstall" />
-      <item itemvalue="CMake Application.loader_example" />
       <item itemvalue="CMake Application.yaml-cpp" />
-      <item itemvalue="CMake Application.yaml-cpp-parse" />
-      <item itemvalue="CMake Application.yaml-cpp-read" />
-      <item itemvalue="CMake Application.yaml-cpp-sandbox" />
       <item itemvalue="CMake Application.HydrogenRuntime" />
       <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
+      <item itemvalue="CMake Application.HydrogenServer" />
+      <item itemvalue="CMake Application.HydrogenServer_Assets" />
       <item itemvalue="Python.main" />
     </list>
     <recent_temporary>
@@ -932,7 +954,8 @@
       <workItem from="1726385455601" duration="27437000" />
       <workItem from="1726557201499" duration="544000" />
       <workItem from="1726666418181" duration="3753000" />
-      <workItem from="1726819312918" duration="1657000" />
+      <workItem from="1726819312918" duration="11318000" />
+      <workItem from="1726944508837" duration="8745000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -1150,7 +1173,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726844906451</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="[nobuild] still broken but a little fixed ?">
+      <option name="closed" value="true" />
+      <created>1726845748764</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1726845748764</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1162,7 +1193,6 @@
     <isAutomaticReloadCMake value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed asset loading systems" />
     <MESSAGE value="working on autobuild" />
     <MESSAGE value="fixed --target parameter" />
     <MESSAGE value="added artifacts to autobuild" />
@@ -1187,7 +1217,8 @@
     <MESSAGE value="[nobuild] ALSO working on big asset streaming" />
     <MESSAGE value="beginnings of texture work" />
     <MESSAGE value="[nobuild] textures working, model packing bad" />
-    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] textures working, model packing bad" />
+    <MESSAGE value="[nobuild] still broken but a little fixed ?" />
+    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] still broken but a little fixed ?" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1198,8 +1229,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/core/src/render/modelasset.cc</url>
-          <line>63</line>
-          <option name="timeStamp" value="30" />
+          <line>478</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

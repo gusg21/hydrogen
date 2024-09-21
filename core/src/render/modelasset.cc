@@ -245,8 +245,6 @@ void h_core::render::Mesh::precompile(bool useGles3) {
 
 
 void h_core::render::Mesh::addToPacked(uint8_t* _writeHead) {
-    size_t byteLength = getPackedSize();
-
     uint32_t indexSize = 1;
     switch (meshIndexType) {
         case MeshIndexType::BYTE:
@@ -264,11 +262,11 @@ void h_core::render::Mesh::addToPacked(uint8_t* _writeHead) {
     uint8_t* originalHead = _writeHead;
 
     // # vertices
-    memcpy(writeHead, (uint8_t*)&vertices, sizeof(uint32_t) * 1);
+    memcpy(writeHead, (uint8_t*)&numVertices, sizeof(uint32_t) * 1);
     writeHead += sizeof(uint32_t) * 1;
 
     // vertices
-    memcpy(writeHead, (uint8_t*)vertices, sizeof(h_core::render::Vertex) * numVertices);
+    memcpy(writeHead, vertices, sizeof(h_core::render::Vertex) * numVertices);
     writeHead += sizeof(h_core::render::Vertex) * numVertices;
 
     // index size
@@ -280,14 +278,14 @@ void h_core::render::Mesh::addToPacked(uint8_t* _writeHead) {
     writeHead += sizeof(uint32_t) * 1;
 
     // indices
-    memcpy(writeHead, (uint8_t*)indices, indexSize * numIndices);
+    memcpy(writeHead, indices, indexSize * numIndices);
     writeHead += indexSize * numIndices;
 
     // texture
     texture.addToPacked(writeHead);
     writeHead += texture.getPackedSize();
 
-    assert(writeHead - originalHead == byteLength);
+    assert(writeHead - originalHead == getPackedSize());
 }
 
 size_t h_core::render::Mesh::getPackedSize() const {
@@ -305,9 +303,8 @@ size_t h_core::render::Mesh::getPackedSize() const {
             break;
     }
 
-    size_t byteLength = sizeof(uint32_t) * 3 + sizeof(h_core::render::Vertex) * numVertices + indexSize * numIndices;
-
-    byteLength += texture.getPackedSize();
+    size_t byteLength = sizeof(uint32_t) * 3 + sizeof(h_core::render::Vertex) * numVertices + indexSize * numIndices +
+                        texture.getPackedSize();
 
     return byteLength;
 }
@@ -330,8 +327,7 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
         vertices[vertexIndex] = newVerts[vertexIndex];
     }
     memcpy_s(
-        vertices, numVertices * sizeof(h_core::render::Vertex), readHead,
-        numVertices * sizeof(h_core::render::Vertex));
+        vertices, numVertices * sizeof(h_core::render::Vertex), readHead, numVertices * sizeof(h_core::render::Vertex));
     readHead += numVertices * sizeof(h_core::render::Vertex);
 
     // index type
@@ -377,7 +373,7 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     readHead += texture.getPackedSize();
 
     // Store data
-    primitiveMode = GL_TRIANGLES; // TODO
+    primitiveMode = GL_TRIANGLES;  // TODO
 }
 
 
@@ -467,7 +463,7 @@ uint32_t h_core::render::ModelAsset::getMeshCount() {
     return m_meshes.size();
 }
 
-size_t h_core::render::ModelAsset::getPackedSize() {
+size_t h_core::render::ModelAsset::getPackedSize() const {
     size_t size = 0;
 
     size += sizeof(uint32_t);
@@ -505,6 +501,8 @@ void h_core::render::ModelAsset::fromPacked(const uint8_t* _readHead) {
     uint32_t meshCount = *(uint32_t*)readHead;
     readHead += sizeof(uint32_t);
 
+    HYLOG_DEBUG("MODEL: Got %d meshes", meshCount);
+
     for (uint32_t meshIndex = 0; meshIndex < meshCount; meshIndex++) {
         Mesh mesh {};
         mesh.readFromPacked(readHead);
@@ -516,9 +514,12 @@ void h_core::render::ModelAsset::fromPacked(const uint8_t* _readHead) {
 void h_core::render::ModelAsset::doGUI() {
     //    Asset::doGUI();
 
+    uint32_t totalVertices = 0;
+
     for (Mesh mesh : m_meshes) {
         ImGui::TextColored(IMGUI_COLOR_GOOD, "Name: %s", mesh.name.c_str());
         ImGui::Text("Vertex Count: %d", mesh.numVertices);
+        totalVertices += mesh.numVertices;
         ImGui::Text("Index Count: %d", mesh.numIndices);
         const char* indexTypeName;
         switch (mesh.meshIndexType) {
@@ -544,5 +545,7 @@ void h_core::render::ModelAsset::doGUI() {
 
         ImGui::Separator();
     }
-}
 
+    ImGui::Text("Total Verts: %d", totalVertices);
+    ImGui::Text("Total Meshes: %d", getMeshCount());
+}

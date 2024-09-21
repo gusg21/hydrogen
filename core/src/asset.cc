@@ -6,7 +6,7 @@
 
 uint32_t h_core::Asset::initFromYaml(
     h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
-//    HYLOG_WARN("ASSET: Undefined initFromYaml method.\n");
+    //    HYLOG_WARN("ASSET: Undefined initFromYaml method.\n");
 
     this->desc = desc;
 
@@ -19,7 +19,7 @@ uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     return 0;
 }
 
-size_t h_core::Asset::getPackedSize() {
+size_t h_core::Asset::getPackedSize() const {
     return 0;
 }
 

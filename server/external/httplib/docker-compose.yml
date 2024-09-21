@@ -1,0 +1,7 @@
+services:
+  http:
+    build: ../../../../../Users/Angus Goucher/AppData/Local/Temp/Rar$DRa43956.28076/cpp-httplib-0.18.0
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/html:/html
