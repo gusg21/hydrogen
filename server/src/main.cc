@@ -2,12 +2,20 @@
 // Created by Angus Goucher on 9/21/2024.
 //
 
+#include <cstdlib>
+#include <cstdio>
+
 #include "core/asset.h"
 #include "core/assets.h"
 #include "core/project/project.h"
 #include "httplib.h"
 
 int main(int argc, char* args[]) {
+    if (argc < 3) {
+        printf("Not enough arguments!\n");
+        return 1;
+    }
+
     SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
     // Load assets
@@ -55,8 +63,8 @@ int main(int argc, char* args[]) {
     });
 
     // Listen
-    const char* host = "localhost";
-    uint32_t port = 5000;
+    const char* host = args[1];
+    uint32_t port = std::atoi(args[2]);
     HYLOG_INFO("SERVER: Listening on %s:%d...", host, port);
     svr.listen(host, port);
 
