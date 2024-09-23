@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef HYCORE_HEADLESS
+
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
@@ -70,3 +72,5 @@ class Renderer : public RuntimeSystem {
 };
 }  // namespace systems
 }  // namespace h_core
+
+#endif

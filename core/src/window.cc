@@ -1,3 +1,5 @@
+#ifndef HYCORE_HEADLESS
+
 #include "core/window.h"
 
 #include <imgui_impl_opengl3.h>
@@ -154,3 +156,5 @@ SDL_GLContext h_core::Window::getGLContext() const {
 bool h_core::Window::isGles3() const {
     return false;
 }
+
+#endif

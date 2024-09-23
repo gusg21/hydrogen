@@ -1,6 +1,5 @@
 #pragma once
 
-#include "glad/glad.h"
 #include "tiny_gltf.h"
 
 #include "core/asset.h"
@@ -31,6 +30,8 @@ struct Vertex {
 
 enum class MeshIndexType { BYTE, SHORT, INT };
 
+enum class MeshPrimitiveMode { TRIANGLES = 4 };
+
 class MeshAsset : public Asset {
   public:
     MeshAsset() = default;
@@ -45,25 +46,26 @@ class MeshAsset : public Asset {
         uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,
         MeshIndexType type, bool useGles3);
 
-    [[nodiscard]] GLuint getVertexBufferHandle() const;
-    [[nodiscard]] GLuint getIndexBufferHandle() const;
-    [[nodiscard]] GLuint getVertexAttributesHandle() const;
+    [[nodiscard]] uint32_t getVertexBufferHandle() const;
+    [[nodiscard]] uint32_t getIndexBufferHandle() const;
+    [[nodiscard]] uint32_t getVertexAttributesHandle() const;
     [[nodiscard]] size_t getNumVertices() const;
     [[nodiscard]] size_t getNumIndices() const;
     [[nodiscard]] MeshIndexType getMeshIndexType() const;
-    [[nodiscard]] uint32_t getPrimitiveMode() const;
+    [[nodiscard]] MeshPrimitiveMode getPrimitiveMode() const;
 
     HYASSET(3);
 
   private:
     tinygltf::Model m_model {};
-    GLuint m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
+    // TODO: Abstract these handles away from OpenGL Land
+    uint32_t m_vertexBufferHandle = 0, m_vertexAttributesHandle = 0, m_indexBufferHandle = 0;
     uint32_t m_numVertices = 0;
     uint32_t m_numIndices = 0;
     h_core::render::Vertex* m_vertices = nullptr;
     void* m_indices = nullptr;
     h_core::render::MeshIndexType m_meshIndexType = h_core::render::MeshIndexType::BYTE;
-    uint32_t m_primitiveMode = 4;
+    MeshPrimitiveMode m_primitiveMode = MeshPrimitiveMode::TRIANGLES;
     bool m_isCube = false;
 };
 }  // namespace render

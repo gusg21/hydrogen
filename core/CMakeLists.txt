@@ -75,8 +75,8 @@ add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
         src/theming/theming.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (HYCORE_HEADLESS)
-    target_compile_definitions(HydrogenCore PUBLIC HYCORE_HEADLESS)
-    target_compile_definitions(HydrogenCore_Shared PUBLIC HYCORE_HEADLESS)
+    target_compile_definitions(HydrogenCore PUBLIC HYCORE_HEADLESS=1)
+    target_compile_definitions(HydrogenCore_Shared PUBLIC HYCORE_HEADLESS=1)
 endif ()
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS

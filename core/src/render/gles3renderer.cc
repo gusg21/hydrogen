@@ -1,6 +1,8 @@
 //
 // Created by Angus Goucher on 9/4/2024.
 //
+#ifndef HYCORE_HEADLESS
+
 #include "core/render/gles3renderer.h"
 #include "core/render/meshasset.h"
 #include "core/runtimeengine.h"
@@ -55,3 +57,5 @@ void h_core::render::Gles3Renderer::draw() {
 //    ::glBindVertexArray(meshComp->mesh->getVertexAttributesHandle());
     ::glDrawElements(mesh->getPrimitiveMode(), mesh->getNumIndices(), glElementType, nullptr);
 }
+
+#endif

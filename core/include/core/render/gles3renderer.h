@@ -2,6 +2,8 @@
 // Created by Angus Goucher on 9/4/2024.
 //
 
+#ifndef HYCORE_HEADLESS
+
 #pragma once
 
 #include "renderer.h"
@@ -19,3 +21,5 @@ class Gles3Renderer : public h_core::render::Renderer {
 };
 }
 }
+
+#endif

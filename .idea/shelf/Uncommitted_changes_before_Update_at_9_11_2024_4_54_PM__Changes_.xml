@@ -3,362 +3,220 @@
   <option name="DESCRIPTION" value="Uncommitted changes before Update at 9/11/2024 4:54 PM [Changes]" />
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/AntiqueCamera.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/suzanne/Suzanne_MetallicRoughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/box/Box.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_tripod_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_camera_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_tripod_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_camera_Roughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/door/door.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/suzanne/Suzanne_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LensesMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/ducky/Duck.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_tripod_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/box/Box0.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/suzanne/Suzanne_MetallicRoughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_tripod_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/AntiqueCamera.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/AntiqueCamera.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/suzanne/Suzanne.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/box/Box.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
-    <option name="BEFORE_PATH" />
     <option name="AFTER_PATH" value="runtime/assets/terrain/canyon1.glb" />
     <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM_[Changes]/canyon1.glb" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_tripod_Roughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/suzanne/Suzanne.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/door/door.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/suzanne/Suzanne.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/suzanne/Suzanne_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/suzanne/Suzanne.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/sofa/GlamVelvetSofa.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_camera_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_GlassPlasticMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/sofa/GlamVelvetSofa.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_camera_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_RubberWoodMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/AntiqueCamera.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LensesMat_OcclusionRoughMetal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/camera/camera_camera_Roughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/box/Box.gltf" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/box/Box0.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_tripod_Roughness.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet_Materials_LeatherPartsMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_MetalPartsMat_Normal.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/helmet/FlightHelmet.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
-    <option name="BEFORE_PATH" />
     <option name="AFTER_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/terrain/canyon1.glb" />
     <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_11_2024_4_54_PM_[Changes]/canyon11.glb" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/helmet/FlightHelmet_Materials_LensesMat_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/ducky/Duck.glb" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="runtime/assets/camera/camera_camera_BaseColor.png" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
   <binary>
     <option name="BEFORE_PATH" value="android/hydrogen/app/jni.bak/hydrogen/runtime/assets/box/Box.bin" />
-    <option name="AFTER_PATH" />
-    <option name="SHELVED_PATH" />
   </binary>
 </changelist>

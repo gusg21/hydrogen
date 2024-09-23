@@ -3,7 +3,9 @@
 #include <string>
 
 #include "SDL2/SDL.h"
+#ifndef HYCORE_HEADLESS
 #include "glad/glad.h"
+#endif
 
 #include "core/log.h"
 #include "core/render/renderer.h"
@@ -82,7 +84,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
     tinygltf::Node node = m_model.nodes.front();
     tinygltf::Mesh mesh = m_model.meshes[node.mesh];
     tinygltf::Primitive primitiveInfo = mesh.primitives.front();
-    m_primitiveMode = primitiveInfo.mode;
+    m_primitiveMode = static_cast<MeshPrimitiveMode>(primitiveInfo.mode);
 
     // pos attribute
     uint32_t posAccessorIndex = primitiveInfo.attributes["POSITION"];
@@ -142,6 +144,7 @@ uint32_t h_core::render::MeshAsset::initFromYaml(
 }
 
 uint32_t h_core::render::MeshAsset::precompile(h_core::RuntimeSystems* systems) {
+#ifndef HYCORE_HEADLESS
     if (m_isCube) {
         // Just load cube
         HYLOG_DEBUG("MESH: Loading cube primitive mesh\n");
@@ -153,6 +156,9 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::RuntimeSystems* systems) 
     loadModel(m_numVertices, m_vertices, m_numIndices, m_indices, m_meshIndexType, systems->renderer->isGles3());
 
     HYLOG_INFO("MESH: Loaded %zu vertices (%zu indices)\n", m_numVertices, m_numIndices);
+#else
+    HYLOG_INFO("MESH: Can't precompile (compiled headless.)");
+#endif
 
     return 0;
 }
@@ -160,6 +166,7 @@ uint32_t h_core::render::MeshAsset::precompile(h_core::RuntimeSystems* systems) 
 void h_core::render::MeshAsset::loadModel(
     uint32_t vertexBufferCount, const h_core::render::Vertex* vertexBuffer, uint32_t inidicesCount,
     const void* indexBuffer, MeshIndexType indexType, bool useGles3) {
+#ifndef HYCORE_HEADLESS
     // Generate buffers and load attributes
     if (!useGles3) {
         ::glGenVertexArrays(1, &m_vertexAttributesHandle);
@@ -229,18 +236,20 @@ void h_core::render::MeshAsset::loadModel(
     if (!useGles3) { ::glBindVertexArray(0); }
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+#endif
 }
 
 
-GLuint h_core::render::MeshAsset::getIndexBufferHandle() const {
+uint32_t h_core::render::MeshAsset::getIndexBufferHandle() const {
     return m_indexBufferHandle;
 }
 
-GLuint h_core::render::MeshAsset::getVertexAttributesHandle() const {
+uint32_t h_core::render::MeshAsset::getVertexAttributesHandle() const {
     return m_vertexAttributesHandle;
 }
 
-GLuint h_core::render::MeshAsset::getVertexBufferHandle() const {
+uint32_t h_core::render::MeshAsset::getVertexBufferHandle() const {
     return m_vertexBufferHandle;
 }
 
@@ -256,7 +265,7 @@ h_core::render::MeshIndexType h_core::render::MeshAsset::getMeshIndexType() cons
     return m_meshIndexType;
 }
 
-uint32_t h_core::render::MeshAsset::getPrimitiveMode() const {
+h_core::render::MeshPrimitiveMode h_core::render::MeshAsset::getPrimitiveMode() const {
     return m_primitiveMode;
 }
 
@@ -372,7 +381,7 @@ void h_core::render::MeshAsset::fromPacked(const void* data, size_t length) {
     // Store data
     m_numVertices = numVertices;
     m_numIndices = numIndices;
-    m_primitiveMode = GL_TRIANGLES;
+    m_primitiveMode = MeshPrimitiveMode::TRIANGLES;
     m_isCube = false;
 }
 

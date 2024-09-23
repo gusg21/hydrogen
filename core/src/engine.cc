@@ -3,7 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYGLTF_NOEXCEPTION
 
-
 #include "tiny_gltf.h"
 
 #include "imgui.h"
@@ -16,18 +15,23 @@
 uint32_t h_core::Engine::init(const h_core::project::Project* project) {
     // Store the project
     m_project = project;
+    m_windowWidth = project->windowWidth;
+    m_windowHeight = project->windowHeight;
+
+#ifndef HYCORE_HEADLESS
+    // TODO: Bundle both the window and the input subsystems into a "Viewport"
 
     // Window initialization
     m_window = new h_core::Window();
     std::string windowTitle = "hydrogen - " + project->name;
     uint32_t windowInitResult = m_window->init(windowTitle, project->windowWidth, project->windowHeight, false);
     if (windowInitResult != 0) { return ENGINE_INIT_FAIL_BAD_WINDOW_INIT; }
-    m_windowWidth = project->windowWidth;
-    m_windowHeight = project->windowHeight;
+
 
     // Input initialization
     m_input = new h_core::input::Input();
     m_input->init(project, m_window);
+#endif
 
     // theme
     h_core::theming::runtime();
@@ -46,12 +50,18 @@ uint32_t h_core::Engine::init(const h_core::project::Project* project) {
 }
 
 void h_core::Engine::destroy() {
+#ifndef HYCORE_HEADLESS
     ::ImGui_ImplOpenGL3_Shutdown();
     ::ImGui_ImplSDL2_Shutdown();
+#endif
     ImGui::DestroyContext();
 
+#ifndef HYCORE_HEADLESS
     m_window->destroy();
     delete m_window;
+#endif
+
+    // TODO: Finish cleanup
 
     // (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 }
@@ -67,10 +77,12 @@ void h_core::Engine::run() {
     std::chrono::time_point frameBeginTime = std::chrono::high_resolution_clock::now();
     bool engineRunning = true;
     while (engineRunning) {
+#ifndef HYCORE_HEADLESS
         m_window->postEventsToQueue(&m_events);
 
         // Reset delta
         m_input->setMouseDelta(0, 0);
+#endif
 
         for (uint32_t eventIndex = 0; eventIndex < m_events.getSize(); eventIndex++) {
             h_core::Event event = m_events.getHeadPointer()[eventIndex];
@@ -92,8 +104,10 @@ void h_core::Engine::run() {
         }
 
         // Begin ImGui Frame
+#ifndef HYCORE_HEADLESS
         ::ImGui_ImplOpenGL3_NewFrame();
         ::ImGui_ImplSDL2_NewFrame();
+#endif
         ImGui::NewFrame();
 
         // Make the game happen!
@@ -112,16 +126,22 @@ void h_core::Engine::run() {
 
         // Send ImGui draw data
         ImGui::Render();
+#ifndef HYCORE_HEADLESS
         ::ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 
+#ifndef HYCORE_HEADLESS
         // Update the window
         m_window->swap();
+#endif
 
         // Clear the queue
         m_events.clear();
 
+#ifndef HYCORE_HEADLESS
         // Swap the input buffers
         m_input->updateInternals();
+#endif
 
         // Update delta
         m_deltaNanosecs = std::chrono::duration_cast<std::chrono::nanoseconds>(
