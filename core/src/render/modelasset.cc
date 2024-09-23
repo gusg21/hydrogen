@@ -509,6 +509,7 @@ void h_core::render::ModelAsset::toPacked(uint8_t* _writeHead) {
 
 void h_core::render::ModelAsset::fromPacked(const uint8_t* _readHead) {
     const uint8_t* readHead = _readHead;
+    if(readHead == nullptr) return;
 
     uint32_t meshCount = *(uint32_t*)readHead;
     readHead += sizeof(uint32_t);

@@ -1,6 +1,6 @@
 initial_scene_spec: 7
 name: "Hello World"
-asset_server_address: 165.227.87.44:5000
+asset_server_address: 165.227.87.44:5000/
 input_actions:
   - name: fire
     sources:
