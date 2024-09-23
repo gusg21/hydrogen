@@ -3,8 +3,8 @@
 //
 #include "core/render/texture.h"
 
-#include <stb_image.h>
 #include <cassert>
+#include <string.h>
 
 #include "core/log.h"
 
@@ -154,6 +154,7 @@ size_t h_core::render::Texture::getPackedSize() const {
 }
 
 void h_core::render::Texture::precompile() {
+#ifndef HYCORE_HEADLESS
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -179,4 +180,7 @@ void h_core::render::Texture::precompile() {
 
     // Unbind
     glBindTexture(GL_TEXTURE_2D, 0);
+#else
+    HYLOG_INFO("TEXTURE: Can't precompile (headless)");
+#endif
 }

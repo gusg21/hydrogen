@@ -5,11 +5,7 @@
 //
 #pragma once
 
-#include <glad/glad.h>
-
 #include <cstdint>
-#include <string>
-#include <vector>
 
 #define TEXTURE_FAILED_TO_LOAD 1
 
@@ -23,6 +19,7 @@ class Texture {
   public:
     Texture() = default;
 
+    // TODO: Abstract this handle away from OpenGL land
     uint32_t textureId = UINT32_MAX;
 
     void init(

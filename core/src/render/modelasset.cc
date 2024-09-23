@@ -5,7 +5,9 @@
 #include <string>
 
 #include "SDL2/SDL.h"
+#ifndef HYCORE_HEADLESS
 #include "glad/glad.h"
+#endif
 
 #include "core/log.h"
 #include "core/render/renderer.h"
@@ -16,18 +18,18 @@
 #define GL_WRAP_MODE_TO_WRAP_MODE(glWrap, mode)                       \
     h_core::render::WrapMode mode = h_core::render::WrapMode::REPEAT; \
     switch (glWrap) {                                                 \
-        case GL_REPEAT:                                               \
+        case TINYGLTF_TEXTURE_WRAP_REPEAT:                            \
             mode = h_core::render::WrapMode::REPEAT;                  \
             break;                                                    \
-        case GL_MIRRORED_REPEAT:                                      \
+        case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:                   \
             mode = h_core::render::WrapMode::MIRRORED_REPEAT;         \
             break;                                                    \
-        case GL_CLAMP_TO_EDGE:                                        \
+        case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:                     \
             mode = h_core::render::WrapMode::CLAMP_TO_EDGE;           \
             break;                                                    \
-        case GL_CLAMP_TO_BORDER:                                      \
-            mode = h_core::render::WrapMode::CLAMP_TO_BORDER;         \
-            break;                                                    \
+            /*case GL_CLAMP_TO_BORDER:*/                              \
+            /*    mode = h_core::render::WrapMode::CLAMP_TO_BORDER;*/ \
+            /*    break;*/                                            \
                                                                       \
         default:                                                      \
             mode = h_core::render::WrapMode::REPEAT;                  \
@@ -67,7 +69,7 @@ uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const 
         HYLOG_WARN("MESH: More than one primitive per mesh? Unhandled.");
         return 1;
     }
-    primitiveMode = primitiveInfo.mode;
+    primitiveMode = static_cast<MeshPrimitiveMode>(primitiveInfo.mode);
     name = mesh.name;
 
     // pos attribute
@@ -162,8 +164,10 @@ uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const 
 
             texture.init(
                 image.image.data(), image.image.size(), image.width, image.height, image.component,
-                sampler.magFilter == GL_NEAREST ? h_core::render::Filter::NEAREST : h_core::render::Filter::LINEAR,
-                sampler.minFilter == GL_NEAREST ? h_core::render::Filter::NEAREST : h_core::render::Filter::LINEAR,
+                sampler.magFilter == TINYGLTF_TEXTURE_FILTER_NEAREST ? h_core::render::Filter::NEAREST
+                                                                     : h_core::render::Filter::LINEAR,
+                sampler.minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST ? h_core::render::Filter::NEAREST
+                                                                     : h_core::render::Filter::LINEAR,
                 wrapU, wrapV);
         }
     }
@@ -172,6 +176,7 @@ uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const 
 }
 
 void h_core::render::Mesh::precompile(bool useGles3) {
+#ifndef HYCORE_HEADLESS
     // Generate buffers and load attributes
     if (!useGles3) {
         ::glGenVertexArrays(1, &vertexAttributesHandle);
@@ -241,6 +246,9 @@ void h_core::render::Mesh::precompile(bool useGles3) {
 
     // Precompile our texture
     texture.precompile();
+#else
+    HYLOG_INFO("MESH: Can't precompile (headless)");
+#endif
 }
 
 
@@ -373,7 +381,7 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     readHead += texture.getPackedSize();
 
     // Store data
-    primitiveMode = GL_TRIANGLES;  // TODO
+    primitiveMode = MeshPrimitiveMode::TRIANGLES;  // TODO: make dynamic
 }
 
 
@@ -435,9 +443,10 @@ uint32_t h_core::render::ModelAsset::initFromYaml(
 }
 
 uint32_t h_core::render::ModelAsset::precompile(h_core::RuntimeSystems* systems) {
+#ifndef HYCORE_HEADLESS
     if (m_isCube) {
         // Just load cube
-        HYLOG_DEBUG("MESH: Loading cube primitive mesh\n");
+        HYLOG_ERROR("MODEL: primitive cube no longer supported\n");
         // loadModel(8, cubeVertices, 36, cubeTriList, h_core::render::MeshIndexType::SHORT,
         // systems->renderer->isGles3());
 
@@ -451,6 +460,9 @@ uint32_t h_core::render::ModelAsset::precompile(h_core::RuntimeSystems* systems)
             "MESH: Loaded %zu vertices (%zu indices)\n", m_meshes[meshIndex].numVertices,
             m_meshes[meshIndex].numIndices);
     }
+#else
+    HYLOG_INFO("MODEL: Can't precompile (headless)");
+#endif
 
     return 0;
 }

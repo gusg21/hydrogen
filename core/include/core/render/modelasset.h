@@ -33,27 +33,26 @@ enum class MeshIndexType { BYTE, SHORT, INT };
 
 enum class MeshPrimitiveMode { TRIANGLES = 4 };
 
-class MeshAsset : public Asset {
 class Mesh {
   public:
     Mesh() = default;
 
     uint32_t initFromNode(const tinygltf::Model& model, const tinygltf::Node& node);
     void precompile(bool useGles3);
-    size_t getPackedSize() const;
+    [[nodiscard]] size_t getPackedSize() const;
     void addToPacked(uint8_t* _writeHead);
     void readFromPacked(const uint8_t* _readHead);
 
     h_core::render::Texture texture;
 
     std::string name {};
-    GLuint vertexBufferHandle = 0, vertexAttributesHandle = 0, indexBufferHandle = 0;
+    uint32_t vertexBufferHandle = 0, vertexAttributesHandle = 0, indexBufferHandle = 0;
     uint32_t numVertices = 0;
     uint32_t numIndices = 0;
     h_core::render::Vertex* vertices = nullptr;
     void* indices = nullptr;
     h_core::render::MeshIndexType meshIndexType = h_core::render::MeshIndexType::BYTE;
-    uint32_t primitiveMode = GL_TRIANGLES;
+    MeshPrimitiveMode primitiveMode = MeshPrimitiveMode::TRIANGLES;
 };
 
 class ModelAsset : public Asset {
