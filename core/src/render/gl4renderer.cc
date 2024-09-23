@@ -65,7 +65,8 @@ void h_core::render::Gl4Renderer::draw() {
         }
 
         ::glBindVertexArray(meshes[meshIndex].vertexAttributesHandle);
-        ::glDrawElements(meshes[meshIndex].primitiveMode, meshes[meshIndex].numIndices, glElementType, nullptr);
+        ::glDrawElements(
+            static_cast<GLenum>(meshes[meshIndex].primitiveMode), meshes[meshIndex].numIndices, glElementType, nullptr);
     }
 
 }

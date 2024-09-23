@@ -32,6 +32,7 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
     // Load data
     name = projectYaml["name"].as<std::string>("Unnamed Project");
     initialSceneSpec = projectYaml["initial_scene_spec"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
+    assetServerAddress = projectYaml["asset_server_address"].as<std::string>("");
 
     // Load assets
     for (YAML::Node assetInfo : projectYaml["assets"]) {

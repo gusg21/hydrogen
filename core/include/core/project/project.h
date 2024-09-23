@@ -26,6 +26,8 @@ class Project {
 
     h_core::AssetIndex initialSceneSpec = ASSET_INDEX_BAD;
 
+    std::string assetServerAddress {};
+
     std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
     std::vector<h_core::project::ProjectActionEntry> actions {};
 };

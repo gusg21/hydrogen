@@ -32,7 +32,7 @@ void h_core::RuntimeEngine::doInit(const h_core::project::Project* project) {
 
     // set up assets
     m_assets = new h_core::RuntimeAssets();
-    m_assets->init("http://localhost:5000/", &m_systems);  // TODO: Local server. update with remote server
+    m_assets->init(project->assetServerAddress, &m_systems);  // TODO: Local server. update with remote server
     m_assets->loadFromProject(project);
     m_assets->precompile();
 }

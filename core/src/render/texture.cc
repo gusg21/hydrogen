@@ -6,6 +6,10 @@
 #include <cassert>
 #include <string.h>
 
+#ifndef HYCORE_HEADLESS
+#include <glad/glad.h>
+#endif
+
 #include "core/log.h"
 
 #define WRAP_MODE_TO_GL_WRAP_MODE(wrap, glWrap) \
