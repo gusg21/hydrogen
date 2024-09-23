@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #define TEXTURE_FAILED_TO_LOAD 1
 
