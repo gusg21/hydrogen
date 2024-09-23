@@ -99,7 +99,7 @@ void h_core::render::Texture::addToPacked(uint8_t* _writeHead) {
     writeHead += sizeof(size_t) * 1;
 
     // data
-    memcpy_s(writeHead, m_dataSize, m_data, m_dataSize);
+    memcpy(writeHead, m_data, m_dataSize);
     writeHead += m_dataSize;
 
     assert(writeHead - originalHead == getPackedSize());

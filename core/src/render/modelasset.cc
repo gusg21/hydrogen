@@ -145,7 +145,7 @@ uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const 
     const void* indicesSrc =
         model.buffers[indexBufferView.buffer].data.data() + indexBufferView.byteOffset + indexBufferAccessor.byteOffset;
     indices = new char[numIndices * meshIndexTypeSize];
-    memcpy_s(indices, numIndices * meshIndexTypeSize, indicesSrc, numIndices * meshIndexTypeSize);
+    memcpy(indices, indicesSrc, numIndices * meshIndexTypeSize);
 
 
     // TODO: load texture data from glb or gltf file, if specified
@@ -334,8 +334,8 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     for (uint32_t vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
         vertices[vertexIndex] = newVerts[vertexIndex];
     }
-    memcpy_s(
-        vertices, numVertices * sizeof(h_core::render::Vertex), readHead, numVertices * sizeof(h_core::render::Vertex));
+    memcpy(
+        vertices, readHead, numVertices * sizeof(h_core::render::Vertex));
     readHead += numVertices * sizeof(h_core::render::Vertex);
 
     // index type
