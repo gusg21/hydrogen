@@ -4,6 +4,8 @@
 
 #pragma once
 
+#ifndef HYCORE_HEADLESS
+
 #include "renderer.h"
 
 namespace h_core {
@@ -18,5 +20,7 @@ class Gl4Renderer : public Renderer {
     h_core::render::Shader m_shader {};
 };
 
-}
-}
+}  // namespace render
+}  // namespace h_core
+
+#endif

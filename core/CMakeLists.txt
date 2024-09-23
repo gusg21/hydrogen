@@ -1,72 +1,73 @@
 cmake_minimum_required(VERSION 3.21)
 
+option(HYCORE_HEADLESS "disable the renderer and window creation" OFF)
+
 set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 # Core sources
-set(HydrogenCore_Sources 
+set(HydrogenCore_Sources
 
-            # Core
-            src/actorspecasset.cc include/core/actorspecasset.h
-            src/asset.cc include/core/asset.h
-            src/assets.cc include/core/assets.h
-            src/engine.cc include/core/engine.h
-            include/core/engineevents.h
-            src/event.cc include/core/event.h
-            src/eventqueue.cc include/core/eventqueue.h
-            src/runtimeassets.cc include/core/runtimeassets.h
-            src/runtimeengine.cc include/core/runtimeengine.h
-            src/runtimesystem.cc include/core/runtimesystem.h
-            src/runtimesystems.cc include/core/runtimesystems.h
-            src/scene.cc include/core/scene.h
-            src/scenespecasset.cc include/core/scenespecasset.h
-            src/transform.cc include/core/transform.h
-            src/window.cc include/core/window.h
-            include/core/netrequestthreadcontext.h
-            include/core/netrequestjob.h
-            include/core/assetindex.h
-            include/core/component.h
-            include/core/widgets.h
-            include/core/netrequestresult.h
-            include/core/runtimeconsole.h
-            src/runtimeconsole.cc
-            include/core/log.h
+        # Core
+        src/actorspecasset.cc include/core/actorspecasset.h
+        src/asset.cc include/core/asset.h
+        src/assets.cc include/core/assets.h
+        src/engine.cc include/core/engine.h
+        include/core/engineevents.h
+        src/event.cc include/core/event.h
+        src/eventqueue.cc include/core/eventqueue.h
+        src/runtimeassets.cc include/core/runtimeassets.h
+        src/runtimeengine.cc include/core/runtimeengine.h
+        src/runtimesystem.cc include/core/runtimesystem.h
+        src/runtimesystems.cc include/core/runtimesystems.h
+        src/scene.cc include/core/scene.h
+        src/scenespecasset.cc include/core/scenespecasset.h
+        src/transform.cc include/core/transform.h
+        src/window.cc include/core/window.h
+        include/core/netrequestthreadcontext.h
+        include/core/netrequestjob.h
+        include/core/assetindex.h
+        include/core/component.h
+        include/core/widgets.h
+        include/core/netrequestresult.h
+        include/core/runtimeconsole.h
+        src/runtimeconsole.cc
+        include/core/log.h
 
-            # Project
-            src/project/project.cc include/core/project/project.h
+        # Project
+        src/project/project.cc include/core/project/project.h
 
-            # Math
-            src/math/mat4x4.cc include/core/math/mat4x4.h
-            include/core/math/math.h
-            src/math/quaternion.cc include/core/math/quaternion.h
-            src/math/vector2.cc include/core/math/vector2.h
-            src/math/vector3.cc include/core/math/vector3.h
+        # Math
+        src/math/mat4x4.cc include/core/math/mat4x4.h
+        include/core/math/math.h
+        src/math/quaternion.cc include/core/math/quaternion.h
+        src/math/vector2.cc include/core/math/vector2.h
+        src/math/vector3.cc include/core/math/vector3.h
 
-            # Physics
-            src/physics/physics.cc include/core/physics/physics.h
-            src/physics/rigidbody.cc include/core/physics/rigidbody.h
+        # Physics
+        src/physics/physics.cc include/core/physics/physics.h
+        src/physics/rigidbody.cc include/core/physics/rigidbody.h
 
-            # Systems
-            src/sprinkles/gravity.cc include/core/sprinkles/testsystem.h
-        src/render/modelasset.cc include/core/render/modelasset.h
-            src/render/renderer.cc include/core/render/renderer.h
-            src/render/shader.cc include/core/render/shader.h
-            include/core/render/vertex.h
-            src/script/scriptasset.cc include/core/script/scriptasset.h
-            src/script/scriptcomp.cc include/core/script/scriptcomp.h
-            src/script/scripting.cc include/core/script/scripting.h
-        src/render/modelcomp.cc include/core/render/modelcomp.h
-            src/render/gles3renderer.cc include/core/render/gles3renderer.h
-            src/render/gl4renderer.cc include/core/render/gl4renderer.h
-            src/render/texture.cc include/core/render/texture.h
-            
-            # Input
-            include/core/input/inputactionsource.h
-            include/core/input/keyinputactionsource.h
-            src/input/input.cc include/core/input/input.h
-            src/input/keyinputactionsource.cc 
-            include/core/project/projectactionentry.h
-            src/input/inputaction.cc include/core/input/inputaction.h
-            src/input/dualkeyinputactionsource.cc include/core/input/dualkeyinputactionsource.h
+        # Systems
+        src/sprinkles/gravity.cc include/core/sprinkles/testsystem.h
+        src/render/meshasset.cc include/core/render/meshasset.h
+        src/render/renderer.cc include/core/render/renderer.h
+        src/render/shader.cc include/core/render/shader.h
+        include/core/render/vertex.h
+        src/script/scriptasset.cc include/core/script/scriptasset.h
+        src/script/scriptcomp.cc include/core/script/scriptcomp.h
+        src/script/scripting.cc include/core/script/scripting.h
+        src/render/meshcomp.cc include/core/render/meshcomp.h
+        src/render/gles3renderer.cc include/core/render/gles3renderer.h
+        src/render/gl4renderer.cc include/core/render/gl4renderer.h
+
+        # Input
+        include/core/input/inputactionsource.h
+        include/core/input/keyinputactionsource.h
+        src/input/input.cc include/core/input/input.h
+        src/input/keyinputactionsource.cc
+        include/core/project/projectactionentry.h
+        src/input/inputaction.cc include/core/input/inputaction.h
+        src/input/dualkeyinputactionsource.cc include/core/input/dualkeyinputactionsource.h
 )
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
@@ -76,9 +77,13 @@ add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
         src/render/texture.cc
 )
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
+if (HYCORE_HEADLESS)
+    target_compile_definitions(HydrogenCore PUBLIC HYCORE_HEADLESS=1)
+    target_compile_definitions(HydrogenCore_Shared PUBLIC HYCORE_HEADLESS=1)
+endif ()
 if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS
-        "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:library")
+            "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:library")
 endif ()
 target_compile_definitions(HydrogenCore PRIVATE "HCORE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 target_compile_definitions(HydrogenCore_Shared PRIVATE "HCORE_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
@@ -90,11 +95,11 @@ target_include_directories(HydrogenCore_Shared PUBLIC include)
 # AngelScript
 add_subdirectory(external/angelscriptsdk/angelscript/projects/cmake)
 add_library(HydrogenCore_AngelScriptExtensions STATIC
-            external/angelscriptsdk/add_on/scriptstdstring/scriptstdstring.cpp
-            )
+        external/angelscriptsdk/add_on/scriptstdstring/scriptstdstring.cpp
+)
 target_include_directories(HydrogenCore_AngelScriptExtensions PUBLIC
-                           external/angelscriptsdk/add_on/scriptstdstring/
-                           )
+        external/angelscriptsdk/add_on/scriptstdstring/
+)
 target_link_libraries(HydrogenCore_AngelScriptExtensions PUBLIC angelscript)
 
 target_link_libraries(HydrogenCore PUBLIC HydrogenCore_AngelScriptExtensions)
@@ -115,11 +120,11 @@ target_link_libraries(HydrogenCore PUBLIC libcurl)
 
 set_target_properties(libcurl_static PROPERTIES FOLDER "Vendored/libcurl")
 if (TARGET libcurl_object)
- set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
-endif()
+    set_target_properties(libcurl_object PROPERTIES FOLDER "Vendored/libcurl")
+endif ()
 # SDL
 #if (NOT ANDROID)
-    set(SDL_STATIC ON)
+set(SDL_STATIC ON)
 #else ()
 #    set(SDL_STATIC OFF)
 #endif ()
@@ -135,14 +140,9 @@ if (TARGET SDL2::SDL2-static)
     target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-static)
     target_link_libraries(HydrogenCore_Shared PUBLIC SDL2::SDL2-static)
     set_target_properties(SDL2-static PROPERTIES FOLDER "Vendored/SDL")
-endif()
-if (TARGET SDL2::SDL2-shared)
-    message(STATUS "(HydrogenCore) Using SDL2 shared")
-    target_link_libraries(HydrogenCore PUBLIC SDL2::SDL2-shared)
-    target_link_libraries(HydrogenCore_Shared PUBLIC SDL2::SDL2-shared)
-    set_target_properties(SDL2 PROPERTIES FOLDER "Vendored/SDL")
-endif()
+endif ()
 if (TARGET SDL2::SDL2main)
+    message(STATUS "(HydrogenCore) Using SDL2 main")
     target_link_libraries(HydrogenCore PRIVATE SDL2::SDL2main)
     target_link_libraries(HydrogenCore_Shared PRIVATE SDL2::SDL2main)
     set_target_properties(SDL2main PROPERTIES FOLDER "Vendored/SDL")
@@ -154,30 +154,27 @@ if (TARGET SDL2)
     set_target_properties(SDL2 PROPERTIES FOLDER "Vendored/SDL") # see above comment
 endif ()
 
-# OpenGL
-if (DEFINED ANDROID)
-    target_link_libraries(HydrogenCore PUBLIC GLESv3 ${log-lib})
-    target_link_libraries(HydrogenCore_Shared PUBLIC GLESv3 ${log-lib})
-else ()
+if (NOT HYCORE_HEADLESS)
+    # OpenGL
     find_package(OpenGL REQUIRED)
     target_link_libraries(HydrogenCore PUBLIC ${OPENGL_LIBRARIES})
     target_link_libraries(HydrogenCore_Shared PUBLIC ${OPENGL_LIBRARIES})
+#    set_target_properties(${OPENGL_LIBRARIES} PROPERTIES FOLDER "Vendored/GL")
+
+    # GLM
+    #set(GLM_BUILD_TESTS OFF)
+    #set(BUILD_SHARED_LIBS OFF)
+    #add_subdirectory(external/glm)
+    #target_link_libraries(HydrogenCore PUBLIC glm::glm)
+    #set_target_properties(glm PROPERTIES FOLDER "Vendored/GLM")
+
+    # GLAD
+    add_subdirectory(external/glad)
+
+    target_link_libraries(HydrogenCore PUBLIC glad)
+    target_link_libraries(HydrogenCore_Shared PUBLIC glad)
+    set_target_properties(glad PROPERTIES FOLDER "Vendored/glad")
 endif ()
-
-# GLM
-#set(GLM_BUILD_TESTS OFF)
-#set(BUILD_SHARED_LIBS OFF)
-#add_subdirectory(external/glm)
-#target_link_libraries(HydrogenCore PUBLIC glm::glm)
-#set_target_properties(glm PROPERTIES FOLDER "Vendored/GLM")
-
-# GLAD
-add_subdirectory(external/glad)
-
-target_link_libraries(HydrogenCore PUBLIC glad)
-target_link_libraries(HydrogenCore_Shared PUBLIC glad)
-
-set_target_properties(glad PROPERTIES FOLDER "Vendored/glad")
 
 # ImGui integrations
 add_subdirectory(external/imgui.cmake EXCLUDE_FROM_ALL)
@@ -189,13 +186,13 @@ target_include_directories(HydrogenCore_Shared PRIVATE external/sdl-imgui)
 target_include_directories(HydrogenCore_Shared PRIVATE external/opengl-imgui)
 
 target_sources(HydrogenCore PRIVATE
-               external/sdl-imgui/imgui_impl_sdl2.cpp
-               external/opengl-imgui/imgui_impl_opengl3.cpp
-               )
+        external/sdl-imgui/imgui_impl_sdl2.cpp
+        external/opengl-imgui/imgui_impl_opengl3.cpp
+)
 target_sources(HydrogenCore_Shared PRIVATE
-               external/sdl-imgui/imgui_impl_sdl2.cpp
-               external/opengl-imgui/imgui_impl_opengl3.cpp
-               )
+        external/sdl-imgui/imgui_impl_sdl2.cpp
+        external/opengl-imgui/imgui_impl_opengl3.cpp
+)
 
 set_target_properties(imgui.cmake PROPERTIES FOLDER "Vendored/imgui")
 
@@ -226,7 +223,7 @@ set_target_properties(uninstall PROPERTIES FOLDER "Vendored/yaml-cpp/misc")
 # generated shader code
 function(HydrogenCore_CopyShaders target folder)
     add_custom_target(HydrogenCore_CopyShaders
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/hcore_assets
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/hcore_assets
     )
 
     add_dependencies(${target} HydrogenCore_CopyShaders)

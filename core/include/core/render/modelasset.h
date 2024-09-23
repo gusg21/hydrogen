@@ -1,6 +1,5 @@
 #pragma once
 
-#include "glad/glad.h"
 #include "tiny_gltf.h"
 
 #include "core/asset.h"
@@ -32,6 +31,9 @@ struct Vertex {
 
 enum class MeshIndexType { BYTE, SHORT, INT };
 
+enum class MeshPrimitiveMode { TRIANGLES = 4 };
+
+class MeshAsset : public Asset {
 class Mesh {
   public:
     Mesh() = default;
@@ -69,12 +71,16 @@ class ModelAsset : public Asset {
         uint32_t vertexCount, const Vertex* vertexBuffer, uint32_t inidicesCount, const void* indexBuffer,
         MeshIndexType type, bool useGles3);
 
+    [[nodiscard]] uint32_t getVertexBufferHandle() const;
+    [[nodiscard]] uint32_t getIndexBufferHandle() const;
+    [[nodiscard]] uint32_t getVertexAttributesHandle() const;
     /*[[nodiscard]] GLuint getVertexBufferHandle() const;
     [[nodiscard]] GLuint getIndexBufferHandle() const;
     [[nodiscard]] GLuint getVertexAttributesHandle() const;
     [[nodiscard]] size_t getNumVertices() const;
     [[nodiscard]] size_t getNumIndices() const;
     [[nodiscard]] MeshIndexType getMeshIndexType() const;
+    [[nodiscard]] MeshPrimitiveMode getPrimitiveMode() const;
     [[nodiscard]] uint32_t getPrimitiveMode() const;*/
 
     h_core::render::Mesh* getMeshes();

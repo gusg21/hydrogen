@@ -10,12 +10,10 @@
 #include "editor/editor.h"
 
 void h_editor::EditorWindow::doGUI() {
-    ImGui::PushID(this);
-    if (ImGui::Begin(m_title.c_str())) {
+    if (ImGui::Begin((m_title + "##" + std::to_string((uintptr_t)this)).c_str())) {
         paintContent();
     }
     ImGui::End();
-    ImGui::PopID();
 
     paintPopupsAndModals();
 }

@@ -29,6 +29,8 @@ class Editor {
     h_core::EventQueue m_events {};
 
     std::vector<h_editor::EditorWindow*> m_windows {};
+    std::vector<h_editor::EditorWindow*> m_windowsToClose {};
+    std::vector<h_editor::EditorWindow*> m_windowsToAdd {};
     bool m_modalOpen = false;
     std::string m_modalText {};
 };

@@ -87,9 +87,20 @@ void h_editor::Editor::destroy() {}
 void h_editor::Editor::doGUI() {
     ImGui::ShowDemoWindow();
 
+
     for (h_editor::EditorWindow* window : m_windows) {
         window->doGUI(); // Borked :(
     }
+
+    for (h_editor::EditorWindow* window : m_windowsToClose) {
+        m_windows.erase(std::find(m_windows.begin(), m_windows.end(), window));
+    }
+    m_windowsToClose.clear();
+
+    for (h_editor::EditorWindow* window : m_windowsToAdd) {
+        m_windows.push_back(window);
+    }
+    m_windowsToAdd.clear();
 
     if (m_modalOpen) {
         m_modalOpen = false;
@@ -107,11 +118,11 @@ void h_editor::Editor::doGUI() {
 }
 
 void h_editor::Editor::addNewWindow(h_editor::EditorWindow* window) {
-    m_windows.push_back(window);
+    m_windowsToAdd.push_back(window);
 }
 
 void h_editor::Editor::closeWindow(h_editor::EditorWindow* window) {
-    m_windows.erase(std::find(m_windows.begin(), m_windows.end(), window));
+    m_windowsToClose.push_back(window);
 }
 
 void h_editor::Editor::openModal(const std::string& text) {

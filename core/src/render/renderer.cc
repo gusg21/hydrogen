@@ -1,3 +1,5 @@
+#ifndef HYCORE_HEADLESS
+
 #include "core/render/renderer.h"
 
 #include <fstream>
@@ -206,3 +208,5 @@ void h_core::render::Renderer::setIsGles3(bool isGles3) {
 bool h_core::render::Renderer::isGles3() {
     return m_isGles3;
 }
+
+#endif

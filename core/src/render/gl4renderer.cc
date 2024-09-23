@@ -2,6 +2,8 @@
 // Created by Angus Goucher on 9/4/2024.
 //
 
+#ifndef HYCORE_HEADLESS
+
 #include "core/render/gl4renderer.h"
 
 #include "core/runtimeengine.h"
@@ -67,3 +69,5 @@ void h_core::render::Gl4Renderer::draw() {
     }
 
 }
+
+#endif
