@@ -2,6 +2,8 @@
 // Created by Angus Goucher on 9/15/2024.
 //
 
+#include <algorithm>
+
 #include "editor/platform/path.h"
 
 #include "Shlwapi.h"
@@ -37,7 +39,13 @@ std::string h_editor::platform::canonicalizePath(const std::string& path) {
     std::string path2 = path;
     if (path2.back() != getPathSeparator()) { path2 += getPathSeparator(); }
     PathCanonicalizeA(outPath, path2.c_str());
-    return std::string { outPath };
+    std::string canon { outPath };
+
+    if (canon.size() == 1 && canon[0] == getPathSeparator()) { // Don't end up with "/"
+        return "";
+    } else {
+        return canon;
+    }
 }
 
 constexpr char h_editor::platform::getPathSeparator() {
@@ -67,8 +75,12 @@ std::string h_editor::platform::getBaseFromPath(const std::string& path) {
 
 std::string h_editor::platform::getJustFile(const std::string& path) {
     auto lastSlashIter = path.find_last_of(getPathSeparator());
-    if (lastSlashIter == std::string::npos) {
-        return path;
-    }
+    if (lastSlashIter == std::string::npos) { return path; }
     return path.substr(lastSlashIter);
+}
+
+std::string h_editor::platform::platformPathSepsToProjectPathSeps(const std::string& path) {
+    std::string newPath = path;
+    std::replace(newPath.begin(), newPath.end(), getPathSeparator(), '/');
+    return newPath;
 }

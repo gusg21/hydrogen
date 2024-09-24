@@ -20,7 +20,7 @@
 h_editor::windows::ProjectExplorer::ProjectExplorer(h_editor::Editor* editor, const std::string& projectBasePath)
     : h_editor::EditorWindow(editor, "Project Explorer") {
     m_projectPath = projectBasePath;
-    m_browsingPath = h_editor::platform::getPathSeparator();
+    m_browsingPath = "";
     HYLOG_INFO("PROJECT EXPLORER: Project base path is %s", m_projectPath.c_str());
 }
 
@@ -132,9 +132,8 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
                                         if (ImGui::IsKeyDown(ImGuiKey_ModShift)) {
                                             ImGui::OpenPopup("Add Asset Details");
-                                        } else {
-                                            doAddAsset();
                                         }
+                                        else { doAddAsset(); }
                                     }
                                 }
                             }
@@ -179,7 +178,10 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                             ImGui::InputInt("Index", (int*)&m_addIndexEntry);
                             ImGui::Checkbox("Remote", &m_addRemoteEntry);
 
-                            if (ImGui::Button("Add")) { doAddAsset(); ImGui::CloseCurrentPopup(); }
+                            if (ImGui::Button("Add")) {
+                                doAddAsset();
+                                ImGui::CloseCurrentPopup();
+                            }
                             ImGui::SameLine();
                             if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
 
@@ -309,18 +311,23 @@ void h_editor::windows::ProjectExplorer::paintContent() {
         ImGui::Separator();
 
         if (ImGui::BeginTable(
-                "Projct Asset List", 4,
-                ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY)) {
-            ImGui::TableSetupColumn("Path", 0, 5);
+                "Projct Asset List", 5,
+                ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
+                    ImGuiTableFlags_ScrollY)) {
+            ImGui::TableSetupColumn("", 0, 1);
+            ImGui::TableSetupColumn("Path", 0, 6);
             ImGui::TableSetupColumn("Type", 0, 2);
             ImGui::TableSetupColumn("Index", 0, 2);
             ImGui::TableSetupColumn("Remote", 0, 1);
-            ImGui::TableSetupScrollFreeze(4, 1);
+            ImGui::TableSetupScrollFreeze(5, 1);
 
             ImGui::TableHeadersRow();
 
             for (h_core::project::ProjectAssetEntry& projectAsset : project->requiredAssets) {
                 ImGui::TableNextRow();
+
+                ImGui::TableNextColumn();
+                { ImGui::Button("Remove", ImVec2 { -0.1f, 20.f }); }
 
                 ImGui::TableNextColumn();
                 {
@@ -396,7 +403,8 @@ void h_editor::windows::ProjectExplorer::setAddAssetDefaults(const std::string& 
 void h_editor::windows::ProjectExplorer::doAddAsset() {
     if (m_addTypeEntry != UINT32_MAX) {
         getEditor()->getProject()->requiredAssets.emplace_back(
-        m_addIndexEntry, m_addTypeEntry, m_addAssetPathEntry, m_addRemoteEntry);
+            m_addIndexEntry, m_addTypeEntry, h_editor::platform::platformPathSepsToProjectPathSeps(m_addAssetPathEntry),
+            m_addRemoteEntry);
     }
 }
 
