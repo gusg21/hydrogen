@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "core/actorspecasset.h"
 #include "core/scenespecasset.h"
 #include "editor/asseteditorwindow.h"
 
@@ -17,11 +18,17 @@ public:
     explicit SceneEditor(h_editor::Editor* editor) : AssetEditorWindow(editor, "Scene Editor") {}
 
     void open(const std::string& assetPath) override;
+    void close();
     void paintContent() override;
+    void addActor(h_core::ActorSpecAsset actorSpec);
+    void saveToYaml();
+
+    static SceneEditor* instance;
 
 private:
     YAML::Node m_sceneSpecYaml {};
     h_core::SceneSpecAsset spec {};
+    std::vector<h_core::ActorSpecAsset> actorSpecs {};
 };
 
 }

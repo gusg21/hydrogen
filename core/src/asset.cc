@@ -11,6 +11,9 @@ uint32_t h_core::Asset::initFromYaml(const YAML::Node& yaml) {
 
     return 0;
 }
+void h_core::Asset::saveToYaml(YAML::Node yaml) {
+
+}
 
 uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
     // A precompile() definition isn't necessary in all/many cases

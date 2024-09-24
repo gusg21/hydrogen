@@ -16,6 +16,7 @@
 #include "editor/editor.h"
 #include "editor/errors.h"
 #include "editor/platform/path.h"
+#include "editor/windows/sceneeditor.h"
 
 h_editor::windows::ProjectExplorer::ProjectExplorer(h_editor::Editor* editor, const std::string& projectBasePath)
     : h_editor::EditorWindow(editor, "Project Explorer") {
@@ -169,6 +170,15 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                                 m_currentSelection.clear();
                             }
                             ImGui::PopStyleColor();
+
+                            ImGuiDragDropFlags dragDropFlags = 0;
+                            dragDropFlags |= ImGuiDragDropFlags_AcceptPeekOnly;
+
+                            if(ImGui::BeginDragDropSource()) {
+                                ImGui::SetDragDropPayload("Actor", &entry, sizeof(entry));
+                                ImGui::Text(entry.name.c_str());
+                                ImGui::EndDragDropSource();
+                            }
                         }
 
                         // Add Asset Popup
@@ -304,6 +314,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
     }
     ImGui::EndChild();
 
+
     ImGui::SeparatorText("Project View");
     if (ImGui::BeginChild("Project Explorer", ImVec2 {}, ImGuiChildFlags_Border)) {
         ImGui::Text("Asset Count: %d", project->requiredAssets.size());
@@ -311,7 +322,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
         ImGui::Separator();
 
         if (ImGui::BeginTable(
-                "Projct Asset List", 5,
+                "Projct Asset List", 6,
                 ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
                     ImGuiTableFlags_ScrollY)) {
             ImGui::TableSetupColumn("", 0, 1);
@@ -319,7 +330,8 @@ void h_editor::windows::ProjectExplorer::paintContent() {
             ImGui::TableSetupColumn("Type", 0, 2);
             ImGui::TableSetupColumn("Index", 0, 2);
             ImGui::TableSetupColumn("Remote", 0, 1);
-            ImGui::TableSetupScrollFreeze(5, 1);
+            ImGui::TableSetupColumn("Add Actor", 0, 2);
+            ImGui::TableSetupScrollFreeze(6, 1);
 
             ImGui::TableHeadersRow();
 
@@ -359,10 +371,20 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 }
                 ImGui::TableNextColumn();
                 { ImGui::Checkbox(("##remote" + std::to_string(projectAsset.index)).c_str(), &projectAsset.isRemote); }
+
+                ImGui::TableNextColumn();
+                {
+                    ImGui::BeginDisabled(SceneEditor::instance == nullptr || projectAsset.typeId != h_core::ActorSpecAsset::getTypeId());
+                    ImGui::Button("Add to Scene");
+                    ImGui::EndDisabled();
+                }
+
             }
 
             ImGui::EndTable();
         }
+
+
 
         // uint32_t itemWidth = 70.f;
         // uint32_t width = ImGui::GetContentRegionAvail().x;

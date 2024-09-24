@@ -15,6 +15,21 @@ void h_core::Transform::initFromYaml(YAML::Node yaml) {
     scale.z = yaml["scale"]["z"].as<float>();
 }
 
+void h_core::Transform::saveToYaml(YAML::Node yaml) {
+    yaml["position"]["x"] = position.x;
+    yaml["position"]["y"] = position.y;
+    yaml["position"]["z"] = position.z;
+
+    yaml["rotation"]["x"] = rotation.x;
+    yaml["rotation"]["y"] = rotation.y;
+    yaml["rotation"]["z"] = rotation.z;
+    yaml["rotation"]["w"] = rotation.w;
+
+    yaml["scale"]["x"] = scale.x;
+    yaml["scale"]["y"] = scale.y;
+    yaml["scale"]["z"] = scale.z;
+}
+
 h_core::math::Mat4x4 h_core::Transform::getMatrix() const {
     return h_core::math::Mat4x4::createTransformMatrix(
         position, rotation, scale);

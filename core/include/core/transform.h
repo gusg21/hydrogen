@@ -12,6 +12,7 @@ class Transform : public Component {
 
     // Populate data from a YAML node
     void initFromYaml(YAML::Node yaml);
+    void saveToYaml(YAML::Node yaml);
     [[nodiscard]] h_core::math::Mat4x4 getMatrix() const;
 
     /// @brief position
