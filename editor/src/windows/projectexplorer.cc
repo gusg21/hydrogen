@@ -75,18 +75,18 @@ void h_editor::windows::ProjectExplorer::paintContent() {
         std::string fullPath = m_projectPath + m_browsingPath + m_currentSelection;
         if (m_currentSelection.empty()) {
             // Nothing to do anything with
-            ImGui::TextDisabled("Nothing selected");
+            ImGui::TextWrapped("Nothing selected");
         }
         else {
             if (h_editor::platform::getFileType(fullPath) == platform::FileType::DIRECTORY) {
                 // Can't do anything with a directory
-                ImGui::TextDisabled("Directory selected");
+                ImGui::TextWrapped("Directory selected");
             }
             else {
                 std::string extension = h_editor::platform::getFileExtension(m_currentSelection);
 
                 if (m_assetOpenerLut.find(extension) == m_assetOpenerLut.end()) {
-                    ImGui::TextDisabled("No tool associated with extension %s", extension.c_str());
+                    ImGui::TextWrapped("No tool associated with extension %s", extension.c_str());
                 }
                 else {
                     AssetOpener opener = m_assetOpenerLut[extension];
