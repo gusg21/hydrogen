@@ -56,3 +56,7 @@ std::string h_editor::platform::getFileExtension(const std::string& path) {
 std::string h_editor::platform::getDirectoryFromPath(const std::string& path) {
     return path.substr(0, path.find_last_of(getPathSeparator()) + 1);
 }
+
+std::string h_editor::platform::getBaseFromPath(const std::string& path) {
+    return path.substr(0, path.find_last_of('.'));
+}

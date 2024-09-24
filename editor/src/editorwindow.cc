@@ -10,7 +10,8 @@
 #include "editor/editor.h"
 
 void h_editor::EditorWindow::doGUI() {
-    if (ImGui::Begin((m_title + "##" + std::to_string((uintptr_t)this)).c_str())) {
+    ImGui::SetNextWindowSize(ImVec2 {400, 300}, ImGuiCond_Appearing);
+    if (ImGui::Begin((m_title + "##" + std::to_string(reinterpret_cast<uintptr_t>(this))).c_str())) {
         paintContent();
     }
     ImGui::End();

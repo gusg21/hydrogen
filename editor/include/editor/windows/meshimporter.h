@@ -21,7 +21,8 @@ class MeshImporter : public h_editor::AssetEditorWindow {
   private:
     void openFbx();
     void openGltf(bool binary);
-    void callFbx2Gltf(const std::string& fbxFile);
+
+    std::string getGlbPath();
 
     std::string m_meshFile {};
     char m_fbx2gltfEntry[MESHIMPORTER_ENTRY_LENGTH] = {};

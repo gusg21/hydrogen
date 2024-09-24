@@ -6,10 +6,11 @@
 
 #include <imgui.h>
 
-#include "editor/platform/path.h"
-#include "editor/platform/environment.h"
-#include "editor/editor.h"
 #include "core/log.h"
+#include "editor/editor.h"
+#include "editor/platform/environment.h"
+#include "editor/platform/invoke.h"
+#include "editor/platform/path.h"
 
 void h_editor::windows::MeshImporter::open(const std::string& meshFile) {
     this->m_meshFile = meshFile;
@@ -25,13 +26,10 @@ void h_editor::windows::MeshImporter::open(const std::string& meshFile) {
 
     memcpy_s(m_outputPathEntry, MESHIMPORTER_ENTRY_LENGTH, directory.c_str(), directory.size());
 
-    if (extension == "fbx") {
-        openFbx();
-    } else if (extension == "glb") {
-        openGltf(true);
-    } else if (extension == "gltf") {
-        openGltf(false);
-    } else {
+    if (extension == "fbx") { openFbx(); }
+    else if (extension == "glb") { openGltf(true); }
+    else if (extension == "gltf") { openGltf(false); }
+    else {
         // Unknown file type
         getEditor()->openModal("Unknown model file type " + extension);
         close();
@@ -42,6 +40,7 @@ void h_editor::windows::MeshImporter::paintContent() {
     // EditorWindow::paintContent();
 
     ImGui::Text("Importing %s", m_meshFile.c_str());
+    if (m_needsFbx2Gltf) ImGui::TextDisabled("Computed GLB path: %s", getGlbPath().c_str());
 
     ImGui::Separator();
 
@@ -50,9 +49,12 @@ void h_editor::windows::MeshImporter::paintContent() {
         ImGui::TextDisabled("Hint: Set the environment variable FBX2GLTF to populate the above automatically.");
     }
 
-    if (m_needsBasePath) {
-        ImGui::InputText("Model Base Directory", m_basePathEntry, MESHIMPORTER_ENTRY_LENGTH);
-    }
+    if (m_needsBasePath) { ImGui::InputText("Model Base Directory", m_basePathEntry, MESHIMPORTER_ENTRY_LENGTH); }
+
+    ImGui::BeginDisabled();
+    bool always = true;
+    ImGui::Checkbox("Output Binary (.glb)", &always);
+    ImGui::EndDisabled();
 
     ImGui::InputText("Output File", m_outputPathEntry, MESHIMPORTER_ENTRY_LENGTH);
 
@@ -66,25 +68,51 @@ void h_editor::windows::MeshImporter::openFbx() {
 }
 
 void h_editor::windows::MeshImporter::openGltf(bool binary) {
-    m_needsBasePath = binary;
+    m_needsBasePath = !binary;
+}
+
+std::string h_editor::windows::MeshImporter::getGlbPath() {
+    return getEditor()->getProjectBasePath() + h_editor::platform::getBaseFromPath(m_meshFile) + ".glb";
 }
 
 void h_editor::windows::MeshImporter::import() {
     HYLOG_DEBUG("Importing!");
 
-    if (!m_needsFbx2Gltf) {
-        std::string gltfFile = m_meshFile;
-    } else {
+    // Convert to gltf/glb
+    std::string gltfFile;
+    if (m_needsFbx2Gltf) {
+        // Call FBX2GLTF
+        std::string args = "--binary --input \"" + getEditor()->getProjectBasePath() + m_meshFile + "\" --output \"" + getGlbPath() + "\"";
+        char* argsCStr = static_cast<char*>(calloc(args.size() + 1, sizeof(char)));
+        memcpy(argsCStr, args.c_str(), args.size());
 
+        uint32_t result = h_editor::platform::invokeBlocking(m_fbx2gltfEntry, argsCStr);
+        if (result != 0) {
+            getEditor()->openModal("Failed to call FBX2GLTF, error code: " + std::to_string(result));
+            return;
+        }
+
+        gltfFile = getGlbPath();
+
+        delete argsCStr;
     }
+    else { gltfFile = m_meshFile; }
+
+    // Convert to HYMODEL
 
     // Create YAML
     YAML::Node yaml {};
     yaml["gltf"] = gltfFile;
+    if (m_needsBasePath) {
+        yaml["gltf_base_path"] = h_editor::platform::getBaseFromPath(m_meshFile);
+    } else {
+        yaml["gltf_binary"] = true;
+    }
 
     // Create YAML file
-    std::string outputYamlFile = m_outputPathEntry;
-    SDL_RWFromFile(outputYamlFile.c_str(), "w+");
+    std::string outputYamlPath = m_outputPathEntry;
+    SDL_RWops* yamlFile = SDL_RWFromFile((getEditor()->getProjectBasePath() + outputYamlPath).c_str(), "w+");
+    std::string outputYaml = YAML::Dump(yaml);
+    yamlFile->write(yamlFile, outputYaml.c_str(), sizeof(char), outputYaml.size());
+    SDL_RWclose(yamlFile);
 }
-
-void h_editor::windows::MeshImporter::callFbx2Gltf(const std::string& fbxFile) {}

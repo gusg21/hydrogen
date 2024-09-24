@@ -18,7 +18,7 @@
 h_editor::windows::ProjectExplorer::ProjectExplorer(h_editor::Editor* editor, const std::string& projectBasePath)
     : h_editor::EditorWindow(editor, "Project Explorer") {
     m_projectPath = projectBasePath;
-    m_browsingPath = h_editor::platform::canonicalizePath(projectBasePath);
+    m_browsingPath = "";
     HYLOG_INFO("PROJECT EXPLORER: Project base path is %s", m_projectPath.c_str());
 }
 
@@ -29,10 +29,10 @@ void h_editor::windows::ProjectExplorer::paintContent() {
         ImGui::InputText("Path", &m_browsingPath);
 
         ImGui::SameLine();
-        if (ImGui::Button("Home")) { m_browsingPath = m_projectPath; }
+        if (ImGui::Button("Home")) { m_browsingPath = ""; }
 
         std::vector<h_editor::platform::FileEntry> files {};
-        uint32_t folderListingResult = h_editor::platform::getFolderListing(&files, m_browsingPath);
+        uint32_t folderListingResult = h_editor::platform::getFolderListing(&files, m_projectPath + m_browsingPath);
         ImGui::PushID(6);
         if (ImGui::BeginListBox("", ImVec2(-FLT_MIN, -FLT_MIN))) {
             if (folderListingResult == 0) {
@@ -72,7 +72,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
     ImGui::SameLine();
     if (ImGui::BeginChild("File Controls", ImVec2 { -0.1f, -0.1f })) {
-        std::string fullPath = m_browsingPath + m_currentSelection;
+        std::string fullPath = m_projectPath + m_browsingPath + m_currentSelection;
         if (m_currentSelection.empty()) {
             // Nothing to do anything with
             ImGui::TextDisabled("Nothing selected");
@@ -96,7 +96,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                         AssetEditorWindow* window = opener.openFunc(getEditor(), fullPath);
                         if (window != nullptr) {
                             getEditor()->addNewWindow(window);
-                            window->open(fullPath);
+                            window->open(m_browsingPath + m_currentSelection);
                         }
                         else {
                             getEditor()->openModal("Failed to create tool for specified asset.");
