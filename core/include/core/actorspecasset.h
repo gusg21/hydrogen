@@ -11,8 +11,7 @@ class Assets;
 
 class ActorSpecAsset : public Asset {
   public:
-    uint32_t initFromYaml(
-        h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
+    uint32_t initFromYaml(const YAML::Node& yaml) override;
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;

@@ -26,6 +26,7 @@ FileType getFileType(const std::string& path);
 std::string getFileExtension(const std::string& path);
 std::string getDirectoryFromPath(const std::string& path);
 std::string getBaseFromPath(const std::string& path);
+std::string getJustFile(const std::string& path);
 
 }  // namespace platform
 }  // namespace h_editor

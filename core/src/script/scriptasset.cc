@@ -7,8 +7,8 @@
 #include "core/runtimesystems.h"
 #include "core/script/scripting.h"
 
-uint32_t h_core::script::ScriptAsset::initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(assets, desc, yaml);
+uint32_t h_core::script::ScriptAsset::initFromYaml(const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(yaml);
 
     std::string filePath = yaml["file"].as<std::string>("");
 

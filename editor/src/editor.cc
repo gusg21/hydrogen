@@ -15,11 +15,13 @@
 #include "editor/asseteditorwindow.h"
 #include "editor/windows/meshimporter.h"
 #include "editor/windows/projectexplorer.h"
+#include "editor/windows/sceneeditor.h"
 
 uint32_t h_editor::Editor::init(const h_core::project::Project& project, const std::string& projectBasePath) {
     m_window = new h_core::Window();
     m_window->init("hydrogen editor - " + project.name, 1600, 900, true);
 
+    m_project = project;
     m_projectBasePath = projectBasePath;
 
     h_core::theming::editor();
@@ -27,7 +29,7 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
     h_editor::windows::ProjectExplorer* explorer = new h_editor::windows::ProjectExplorer(this, projectBasePath);
     m_windows.push_back(explorer);
 
-    auto makeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
+    auto makeMeshImporter = [](h_editor::Editor* editor) -> AssetEditorWindow* {
         return new h_editor::windows::MeshImporter(editor);
     };
     auto batchMakeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> void {
@@ -41,6 +43,12 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
     explorer->registerNewAssetOpener("gltf", meshImporterOpener);
     explorer->registerNewAssetOpener("glb", meshImporterOpener);
     explorer->registerNewAssetOpener("fbx", meshImporterOpener);
+
+    auto openNewSceneEditor = [](h_editor::Editor* editor) -> AssetEditorWindow* {
+        return new h_editor::windows::SceneEditor(editor);
+    };
+    h_editor::windows::AssetOpener sceneSpecOpener = h_editor::windows::AssetOpener { "Open Scene...", openNewSceneEditor, nullptr };
+    explorer->registerNewAssetOpener("hyscene", sceneSpecOpener);
 
     return 0;
 }
@@ -85,6 +93,10 @@ void h_editor::Editor::destroy() {}
 
 std::string h_editor::Editor::getProjectBasePath() {
     return m_projectBasePath;
+}
+
+h_core::project::Project* h_editor::Editor::getProject() {
+    return &m_project;
 }
 
 void h_editor::Editor::doGUI() {

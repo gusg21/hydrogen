@@ -19,7 +19,7 @@ class Editor;
 
 namespace windows {
 
-typedef h_editor::AssetEditorWindow* (*AssetOpenerFunc)(h_editor::Editor* editor, const std::string& assetPath);
+typedef h_editor::AssetEditorWindow* (*AssetOpenerFunc)(h_editor::Editor* editor);
 typedef void (*AssetBatchOpenerFunc)(h_editor::Editor* editor, const std::string& assetPath);
 
 struct AssetOpener {
@@ -46,8 +46,15 @@ class ProjectExplorer : public h_editor::EditorWindow {
     std::vector<h_editor::platform::FileEntry> m_currentSelection {};
     std::string m_selectByEntry {};
 
+    void setAddAssetDefaults(const std::string& path);
+    void doAddAsset();
+
+    std::string m_addAssetPathEntry {};
+    uint32_t m_addIndexEntry = 0;
+    uint32_t m_addTypeEntry = 0;
+    bool m_addRemoteEntry = false;
+
     std::unordered_map<std::string, AssetOpener> m_assetOpenerLut {};
-    bool m_openPopup = false;
 };
 }  // namespace windows
 }  // namespace h_editor

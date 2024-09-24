@@ -4,9 +4,8 @@
 #include "core/render/modelasset.h"
 #include "core/script/scriptasset.h"
 
-uint32_t h_core::ActorSpecAsset::initFromYaml(
-    h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(assets, desc, yaml);
+uint32_t h_core::ActorSpecAsset::initFromYaml(const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(yaml);
 
     // TODO: Error handling
 

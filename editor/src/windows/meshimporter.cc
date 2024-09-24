@@ -77,7 +77,7 @@ void h_editor::windows::MeshImporter::openGltf(bool binary) {
 }
 
 std::string h_editor::windows::MeshImporter::getGlbPath() {
-    return getEditor()->getProjectBasePath() + h_editor::platform::getBaseFromPath(m_meshFile) + ".glb";
+    return h_editor::platform::getBaseFromPath(m_meshFile) + ".glb";
 }
 
 void h_editor::windows::MeshImporter::import() {
@@ -87,7 +87,7 @@ void h_editor::windows::MeshImporter::import() {
     std::string gltfFile;
     if (m_needsFbx2Gltf) {
         // Call FBX2GLTF
-        std::string args = "--binary --input \"" + getEditor()->getProjectBasePath() + m_meshFile + "\" --output \"" + getGlbPath() + "\"";
+        std::string args = "--binary --input \"" + getEditor()->getProjectBasePath() + m_meshFile + "\" --output \"" + getEditor()->getProjectBasePath() + getGlbPath() + "\"";
         char* argsCStr = static_cast<char*>(calloc(args.size() + 1, sizeof(char)));
         memcpy(argsCStr, args.c_str(), args.size());
 

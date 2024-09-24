@@ -13,7 +13,7 @@ class AssetEditorWindow : public h_editor::EditorWindow {
     explicit AssetEditorWindow(h_editor::Editor* editor, const std::string& title) : h_editor::EditorWindow(editor, title) {}
 
     virtual void open(const std::string& assetPath) = 0;
-    virtual void import() = 0;
+    virtual void import() {};
 
     void doImportAndCloseButtons();
 };

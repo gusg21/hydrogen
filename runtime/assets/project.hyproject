@@ -12,30 +12,30 @@ input_actions:
 assets:
   # - index: 1
   #   type: 1
-  #   path: "assets/test_actor2.hyactor"
+  #   path: "test_actor2.hyactor"
   # - index: 15
   #   type: 1
-  #   path: "assets/test_actor3.hyactor"
+  #   path: "test_actor3.hyactor"
   - index: 2
     type: 2
-    path: "assets/test_script.hyscript"
+    path: "test_script.hyscript"
   # - index: 3
   #   type: 3
-  #   path: "assets/test_model.hymodel"
+  #   path: "test_model.hymodel"
   # - index: 40
   #   type: 3
-  #   path: "assets/test_model2.hymodel"
+  #   path: "test_model2.hymodel"
 #    remote: true
   - index: 7
     type: 0
-    path: "assets/test_scene.hyscene"
+    path: "test_scene.hyscene"
   - index: 10
     type: 1
-    path: "assets/test_actor.hyactor"
+    path: "test_actor.hyactor"
   # - index: 99
   #   type: 3
-  #   path: "assets/helmet.hymodel"
+  #   path: "helmet.hymodel"
   - index: 100
     type: 3
-    # path: "assets/helmet.hymodel"
+    # path: "helmet.hymodel"
     remote: true

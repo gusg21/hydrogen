@@ -16,7 +16,7 @@ int main(int argc, char* args[]) {
     }
 
     h_core::project::Project project {};
-    project.loadFromFile("project.yml", basePath);
+    project.loadFromFile("project.hyproject", basePath);
     const uint32_t editorInitResult = editor->init(project, basePath);
     if (editorInitResult != 0) { return static_cast<int>(editorInitResult); }
 

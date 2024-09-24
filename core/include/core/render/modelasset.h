@@ -59,7 +59,7 @@ class ModelAsset : public Asset {
   public:
     ModelAsset() = default;
 
-    uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
+    uint32_t initFromYaml(const YAML::Node& node) override;
     uint32_t precompile(h_core::RuntimeSystems* systems) override;
     [[nodiscard]] size_t getPackedSize() const override;
     void toPacked(uint8_t* _writeHead) override;

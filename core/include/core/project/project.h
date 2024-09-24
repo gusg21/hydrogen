@@ -30,6 +30,11 @@ class Project {
 
     std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
     std::vector<h_core::project::ProjectActionEntry> actions {};
+
+    // Helpers
+    bool hasAssetPath(const std::string& assetPath) const;
+    h_core::AssetIndex getOpenIndex() const;
+    void removeByPath(const std::string& assetPath);
 };
 }
 }  // namespace h_core

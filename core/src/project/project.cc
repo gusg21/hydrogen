@@ -15,7 +15,7 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
     const char* projectYamlText = static_cast<const char*>(SDL_LoadFile(projectYamlPath.c_str(), nullptr));
     if (projectYamlText == nullptr) {
         HYLOG_INFO("PROJECT: Failed to load project from %s\n", projectYamlPath.c_str());
-        return 1; // TODO: Make into real error codes
+        return 1;  // TODO: Make into real error codes
     }
     HYLOG_INFO("PROJECT: YAML: %s\n", projectYamlText);
 
@@ -26,7 +26,7 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
         projectYaml = YAML::Load(projectYamlText);
     } catch (YAML::ParserException&) {
         HYLOG_INFO("PROJECT: Failed to parse YAML from %s\n", projectYamlPath.c_str());
-        return 1; // TODO: Make into real error codes
+        return 1;  // TODO: Make into real error codes
     }
 
     // Load data
@@ -66,4 +66,35 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
     }
 
     return 0;
+}
+
+bool h_core::project::Project::hasAssetPath(const std::string& assetPath) const {
+    for (const ProjectAssetEntry& entry : requiredAssets) {
+        if (entry.assetPath == assetPath) { return true; }
+    }
+    return false;
+}
+
+h_core::AssetIndex h_core::project::Project::getOpenIndex() const {
+    for (AssetIndex index = 0; index < UINT32_MAX; index++) {
+        bool indexOccupied = false;
+        for (const ProjectAssetEntry& entry : requiredAssets) {
+            if (entry.index == index) { indexOccupied = true; }
+        }
+        if (!indexOccupied) { return index; }
+    }
+    return ASSET_INDEX_BAD;
+}
+
+void h_core::project::Project::removeByPath(const std::string& assetPath) {
+    auto found = requiredAssets.end();
+    for (auto entryIter = requiredAssets.begin(); entryIter < requiredAssets.end(); ++entryIter) {
+        if (entryIter->assetPath == assetPath) {
+            found = entryIter;
+            break;
+        }
+    }
+    if (found != requiredAssets.end()) {
+        requiredAssets.erase(found);
+    }
 }

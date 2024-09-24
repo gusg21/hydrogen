@@ -1,2 +1,2 @@
-gltf: assets/helmet/FlightHelmet.gltf
-gltf_base_path: assets/helmet
+gltf: helmet/FlightHelmet.gltf
+gltf_base_path: helmet

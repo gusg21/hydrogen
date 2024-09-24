@@ -23,6 +23,7 @@ class Editor {
     void destroy();
 
     std::string getProjectBasePath();
+    h_core::project::Project* getProject();
 
     void addNewWindow(h_editor::EditorWindow* window);
     void closeWindow(h_editor::EditorWindow* window);
@@ -30,6 +31,9 @@ class Editor {
     void doGUI();
 
   private:
+    std::string m_projectBasePath {};
+    h_core::project::Project m_project {};
+
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
 
@@ -38,6 +42,5 @@ class Editor {
     std::vector<h_editor::EditorWindow*> m_windowsToAdd {};
     bool m_modalOpen = false;
     std::string m_modalText {};
-    std::string m_projectBasePath {};
 };
 }  // namespace h_editor

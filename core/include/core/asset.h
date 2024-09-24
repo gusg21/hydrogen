@@ -18,14 +18,14 @@ class Asset {
     Asset(const h_core::Asset& asset) = delete;
     Asset& operator=(const h_core::Asset& asset) = delete;
 
-    virtual uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& node);
+    virtual uint32_t initFromYaml(const YAML::Node& node);
     virtual uint32_t precompile(h_core::RuntimeSystems* systems);
     [[nodiscard]] virtual size_t getPackedSize() const;
     virtual void toPacked(uint8_t* _writeHead);
     virtual void fromPacked(const uint8_t* _readHead);
     virtual void doGUI();
 
-    h_core::AssetDescription desc {};
+    // h_core::AssetDescription desc {};
 
     HYASSET(UINT32_MAX);
 };

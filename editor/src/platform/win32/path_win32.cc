@@ -64,3 +64,11 @@ std::string h_editor::platform::getDirectoryFromPath(const std::string& path) {
 std::string h_editor::platform::getBaseFromPath(const std::string& path) {
     return path.substr(0, path.find_last_of('.'));
 }
+
+std::string h_editor::platform::getJustFile(const std::string& path) {
+    auto lastSlashIter = path.find_last_of(getPathSeparator());
+    if (lastSlashIter == std::string::npos) {
+        return path;
+    }
+    return path.substr(lastSlashIter);
+}

@@ -385,9 +385,8 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
 }
 
 
-uint32_t h_core::render::ModelAsset::initFromYaml(
-    h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(assets, desc, yaml);
+uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");
 
