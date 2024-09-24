@@ -26,8 +26,7 @@ h_editor::windows::ProjectExplorer::ProjectExplorer(h_editor::Editor* editor, co
 void h_editor::windows::ProjectExplorer::paintContent() {
     // EditorWindow::paintContent();
 
-    if (ImGui::BeginChild("Explorer", ImVec2 { -150, -0.1f })) {
-
+    if (ImGui::BeginChild("Explorer", ImVec2 { -150, -0.1f }, ImGuiChildFlags_ResizeX)) {
         // Path Input
         ImGui::InputText("Path", &m_browsingPath);
         ImGui::SameLine();
@@ -56,75 +55,77 @@ void h_editor::windows::ProjectExplorer::paintContent() {
             try {
                 regex = std::regex { m_selectByEntry };
                 regexOk = true;
-            }
-            catch (const std::regex_error& e) {
-                regexOk = false;
-            }
+            } catch (const std::regex_error& e) { regexOk = false; }
 
             if (regexOk) {
-                for (h_editor::platform::FileEntry entry : files) {
+                for (const h_editor::platform::FileEntry& entry : files) {
                     std::smatch m;
                     if (entry.type == platform::FileType::FILE) {
-                        if (std::regex_match(entry.name, m, regex)) {
-                            m_currentSelection.push_back(entry.name);
-                        }
+                        if (std::regex_match(entry.name, m, regex)) { m_currentSelection.push_back(entry); }
                     }
                 }
-            } else {
+            }
+            else {
+                // ReSharper disable once CppDFAUnreachableCode
+                // Code's reachable, not sure why CLion thinks it isn't.
                 ImGui::SameLine();
                 ImGui::TextColored(IMGUI_COLOR_WARN, "Bad Regex");
             }
 
-            if (ImGui::Button("Select")) {
-                ImGui::CloseCurrentPopup();
-            }
+            if (ImGui::Button("Select")) { ImGui::CloseCurrentPopup(); }
             ImGui::SameLine();
-            if (ImGui::Button("Close")) {
-                ImGui::CloseCurrentPopup();
-            }
+            if (ImGui::Button("Close")) { ImGui::CloseCurrentPopup(); }
 
             ImGui::EndPopup();
         }
 
         ImGui::SameLine();
         if (ImGui::Button("Select All")) {
-            for (h_editor::platform::FileEntry entry : files) {
-                if (entry.type == platform::FileType::FILE) {
-                    m_currentSelection.push_back(entry.name);
-                }
+            for (const h_editor::platform::FileEntry& entry : files) {
+                if (entry.type == platform::FileType::FILE) { m_currentSelection.push_back(entry); }
             }
         }
 
         ImGui::SameLine();
-        if (ImGui::Button("Select None")) {
-            m_currentSelection.clear();
-        }
+        if (ImGui::Button("Select None")) { m_currentSelection.clear(); }
 
         // File listing
         if (ImGui::BeginListBox("File Listing", ImVec2(-FLT_MIN, -FLT_MIN))) {
             if (folderListingResult == 0) {
                 if (files.empty()) { ImGui::TextDisabled("Empty Directory"); }
                 else {
-                    for (const h_editor::platform::FileEntry& file : files) {
-                        std::string entryText = file.name;
-                        if (file.type == h_editor::platform::FileType::DIRECTORY) {
+                    for (const h_editor::platform::FileEntry& entry : files) {
+                        std::string entryText = entry.name;
+                        if (entry.type == h_editor::platform::FileType::DIRECTORY) {
                             entryText += h_editor::platform::getPathSeparator();
                         }
                         ImGui::PushStyleColor(
-                            ImGuiCol_Text, file.type == h_editor::platform::FileType::DIRECTORY
+                            ImGuiCol_Text, entry.type == h_editor::platform::FileType::DIRECTORY
                                                ? ImVec4 { 1.0f, 1.0f, 1.0f, 0.5f }
                                                : ImVec4 { 1.0f, 1.0f, 1.0f, 1.0f });
 
-                        auto fileIter = std::find(m_currentSelection.begin(), m_currentSelection.end(), file.name);
-                        bool fileSelected = fileIter != m_currentSelection.end();
-                        if (ImGui::Selectable(entryText.c_str(), fileSelected)) {
-                            if (fileSelected) { m_currentSelection.erase(fileIter); }
-                            else { m_currentSelection.push_back(file.name); }
+                        uint32_t selectedFileIndex = -1;
+                        for (uint32_t fileIndex = 0; fileIndex < m_currentSelection.size(); fileIndex++) {
+                            if (m_currentSelection[fileIndex].name == entry.name) {
+                                selectedFileIndex = fileIndex;
+                            }
+                        }
+                        if (ImGui::Selectable(entryText.c_str(), selectedFileIndex != -1)) {
+                            if (ImGui::IsKeyDown(ImGuiKey_ModShift)) {
+                                if (selectedFileIndex != -1) {
+                                    m_currentSelection.erase(m_currentSelection.begin() + selectedFileIndex);
+                                }
+                                else { m_currentSelection.push_back(entry); }
+                            }
+                            else {
+                                m_currentSelection.clear();
+                                m_currentSelection.push_back(entry);
+                            }
                         }
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) &&
-                            file.type == h_editor::platform::FileType::DIRECTORY) {
+                            entry.type == h_editor::platform::FileType::DIRECTORY) {
                             // Navigate to directory
-                            m_browsingPath += file.name + h_editor::platform::getPathSeparator();
+                            m_browsingPath += entry.name + h_editor::platform::getPathSeparator();
                             m_browsingPath = h_editor::platform::canonicalizePath(m_browsingPath);
                             m_currentSelection.clear();
                         }
@@ -149,37 +150,78 @@ void h_editor::windows::ProjectExplorer::paintContent() {
             ImGui::TextWrapped("Nothing selected");
         }
         else {
-            for (const std::string& selection : m_currentSelection) {
-                // Individual file options
-                std::string fullPath = m_projectPath + m_browsingPath + selection;
+            std::string selectionCommonExtension {};
+            bool hasCommonExtension = false;
+            for (const platform::FileEntry& selection : m_currentSelection) {
+                // Determine if all selected items have the same extension
+                std::string extension = h_editor::platform::getFileExtension(selection.name);
+                if (selection.type == platform::FileType::FILE) {
+                    if (extension != selectionCommonExtension && !selectionCommonExtension.empty()) {
+                        hasCommonExtension = false;
+                    }
+                    else if (selectionCommonExtension.empty()) {
+                        selectionCommonExtension = extension;
+                        hasCommonExtension = true;
+                    }
+                    else if (extension == selectionCommonExtension) {  // not needed, for clarity
+                        hasCommonExtension = true;
+                    }
+                }
 
-                ImGui::SeparatorText(selection.c_str());
+                // Individual file options
+                std::string fullPath = m_projectPath + m_browsingPath + selection.name;
+
+                ImGui::SeparatorText(selection.name.c_str());
 
                 if (h_editor::platform::getFileType(fullPath) == platform::FileType::DIRECTORY) {
                     // Can't do anything with a directory
                     ImGui::TextWrapped("Directory selected");
                 }
                 else {
-                    // Show file options based off extension
-                    std::string extension = h_editor::platform::getFileExtension(selection);
-
                     if (m_assetOpenerLut.find(extension) == m_assetOpenerLut.end()) {
                         ImGui::TextWrapped("No tool associated with extension %s", extension.c_str());
                     }
                     else {
+                        // File open button
                         AssetOpener opener = m_assetOpenerLut[extension];
-                        if (ImGui::Button(opener.openButtonText.c_str())) {
-                            HYLOG_INFO("PROJECT EXPLORER: Calling opener...");
+                        if (opener.openFunc != nullptr) {
+                            if (ImGui::Button(opener.openButtonText.c_str())) {
+                                HYLOG_INFO("PROJECT EXPLORER: Calling opener...");
 
-                            AssetEditorWindow* window = opener.openFunc(getEditor(), fullPath);
-                            if (window != nullptr) {
-                                getEditor()->addNewWindow(window);
-                                window->open(m_browsingPath + selection);
+                                AssetEditorWindow* window = opener.openFunc(getEditor(), fullPath);
+                                if (window != nullptr) {
+                                    getEditor()->addNewWindow(window);
+                                    window->open(m_browsingPath + selection.name);
+                                }
+                                else { getEditor()->openModal("Failed to create tool for specified asset."); }
                             }
-                            else { getEditor()->openModal("Failed to create tool for specified asset."); }
                         }
                     }
                 }
+            }
+
+            if (hasCommonExtension) {
+                ImGui::Indent();
+                if (ImGui::BeginChild("Batch File Controls", ImVec2 {-0.1f, 100.f}, ImGuiChildFlags_Border)) {
+                    ImGui::SeparatorText("Batch");
+
+                    for (const std::pair<std::string, h_editor::windows::AssetOpener> opener : m_assetOpenerLut) {
+                        if (opener.first == selectionCommonExtension) {
+                            if (opener.second.batchOpenFunc != nullptr) {
+                                // Batch open button
+                                if (ImGui::Button(opener.second.openButtonText.c_str())) {
+                                    for (const platform::FileEntry& path : m_currentSelection) {
+                                        if (path.type == platform::FileType::FILE) {
+                                            opener.second.batchOpenFunc(getEditor(), m_browsingPath + path.name);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ImGui::EndChild();
+                ImGui::Unindent();
             }
         }
     }

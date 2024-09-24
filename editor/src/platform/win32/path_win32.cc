@@ -50,7 +50,11 @@ h_editor::platform::FileType h_editor::platform::getFileType(const std::string& 
 }
 
 std::string h_editor::platform::getFileExtension(const std::string& path) {
-    return path.substr(path.find_last_of('.') + 1);
+    auto dotIter = path.find_last_of('.');
+    if (dotIter == std::string::npos) {
+        return std::string {};
+    }
+    return path.substr(dotIter + 1);
 }
 
 std::string h_editor::platform::getDirectoryFromPath(const std::string& path) {

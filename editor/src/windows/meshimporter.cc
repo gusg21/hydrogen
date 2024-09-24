@@ -16,7 +16,7 @@ void h_editor::windows::MeshImporter::open(const std::string& meshFile) {
     this->m_meshFile = meshFile;
 
     std::string extension = h_editor::platform::getFileExtension(meshFile);
-    std::string directory = h_editor::platform::getDirectoryFromPath(meshFile);
+    std::string outputDefault = h_editor::platform::getBaseFromPath(meshFile) + ".hymodel";
 
     std::string fbx2GltfPath = h_editor::platform::getEnvironmentVar("FBX2GLTF");
     HYLOG_DEBUG("FBX2GLTF: %s", fbx2GltfPath.c_str());
@@ -24,7 +24,7 @@ void h_editor::windows::MeshImporter::open(const std::string& meshFile) {
         memcpy_s(m_fbx2gltfEntry, MESHIMPORTER_ENTRY_LENGTH, fbx2GltfPath.c_str(), fbx2GltfPath.size());
     }
 
-    memcpy_s(m_outputPathEntry, MESHIMPORTER_ENTRY_LENGTH, directory.c_str(), directory.size());
+    memcpy_s(m_outputPathEntry, MESHIMPORTER_ENTRY_LENGTH, outputDefault.c_str(), outputDefault.size());
 
     if (extension == "fbx") { openFbx(); }
     else if (extension == "glb") { openGltf(true); }

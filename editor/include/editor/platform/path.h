@@ -12,6 +12,7 @@ namespace platform {
 enum class FileType { FILE, DIRECTORY };
 
 struct FileEntry {
+    FileEntry() = default;
     FileEntry(const std::string& name, FileType type) : name(name), type(type) {}
 
     std::string name {};

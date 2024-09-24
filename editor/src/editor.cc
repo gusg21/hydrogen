@@ -30,7 +30,13 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
     auto makeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
         return new h_editor::windows::MeshImporter(editor);
     };
-    h_editor::windows::AssetOpener meshImporterOpener = h_editor::windows::AssetOpener { "Import Model...", makeMeshImporter };
+    auto batchMakeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> void {
+        h_editor::windows::MeshImporter* imp = new h_editor::windows::MeshImporter(editor);
+        HYLOG_INFO("BATCH MESH: Opening and importing %s", assetPath.c_str());
+        imp->openAndImportDefault(assetPath);
+        delete imp;
+    };
+    h_editor::windows::AssetOpener meshImporterOpener = h_editor::windows::AssetOpener { "Import Model...", makeMeshImporter, batchMakeMeshImporter };
 
     explorer->registerNewAssetOpener("gltf", meshImporterOpener);
     explorer->registerNewAssetOpener("glb", meshImporterOpener);
@@ -90,7 +96,10 @@ void h_editor::Editor::doGUI() {
     }
 
     for (h_editor::EditorWindow* window : m_windowsToClose) {
-        m_windows.erase(std::find(m_windows.begin(), m_windows.end(), window));
+        std::vector<h_editor::EditorWindow*>::iterator windowIter = std::find(m_windows.begin(), m_windows.end(), window);
+        if (windowIter != m_windows.end()) {
+            m_windows.erase(windowIter);
+        }
     }
     m_windowsToClose.clear();
 
