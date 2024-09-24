@@ -19,6 +19,8 @@ class Editor {
     void run();
     void destroy();
 
+    std::string getProjectBasePath();
+
     void addNewWindow(h_editor::EditorWindow* window);
     void closeWindow(h_editor::EditorWindow* window);
     void openModal(const std::string& text);
@@ -33,5 +35,6 @@ class Editor {
     std::vector<h_editor::EditorWindow*> m_windowsToAdd {};
     bool m_modalOpen = false;
     std::string m_modalText {};
+    std::string m_projectBasePath {};
 };
 }  // namespace h_editor

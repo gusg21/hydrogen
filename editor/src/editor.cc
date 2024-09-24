@@ -20,19 +20,12 @@ uint32_t h_editor::Editor::init(const h_core::project::Project& project, const s
     m_window = new h_core::Window();
     m_window->init("hydrogen editor - " + project.name, 1600, 900, true);
 
+    m_projectBasePath = projectBasePath;
+
     h_core::theming::editor();
 
     h_editor::windows::ProjectExplorer* explorer = new h_editor::windows::ProjectExplorer(this, projectBasePath);
     m_windows.push_back(explorer);
-
-//    explorer->registerNewAssetOpener(
-//        "hymodel",
-//        h_editor::windows::AssetOpener {
-//            "Open Model...", [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
-//                HYLOG_INFO("EXPLORER: Opening %s", assetPath.c_str());
-//                // TODO: model viewer
-//                return nullptr;
-//            } });
 
     auto makeMeshImporter = [](h_editor::Editor* editor, const std::string& assetPath) -> AssetEditorWindow* {
         return new h_editor::windows::MeshImporter(editor);
@@ -83,6 +76,10 @@ void h_editor::Editor::run() {
 }
 
 void h_editor::Editor::destroy() {}
+
+std::string h_editor::Editor::getProjectBasePath() {
+    return m_projectBasePath;
+}
 
 void h_editor::Editor::doGUI() {
     ImGui::ShowDemoWindow();
