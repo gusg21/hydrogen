@@ -76,7 +76,9 @@ set(HydrogenCore_Sources
 
 add_library(HydrogenCore STATIC ${HydrogenCore_Sources}
         include/core/physics/raycast.h
-        src/physics/raycast.cc)
+        src/physics/raycast.cc
+        include/core/yamloverrides.h
+        src/yamloverrides.cc)
 add_library(HydrogenCore_Shared SHARED ${HydrogenCore_Sources})
 if (HYCORE_HEADLESS)
     target_compile_definitions(HydrogenCore PUBLIC HYCORE_HEADLESS=1)

@@ -6,6 +6,7 @@
 
 #include "core/asset.h"
 #include "core/assetindex.h"
+#include "core/yamloverrides.h"
 
 #define SCENESPEC_INIT_FAIL_MISSING_ACTOR_SPEC_PATH 1
 
@@ -17,6 +18,7 @@ class SceneSpecAsset : public Asset {
     uint32_t initFromYaml(h_core::Assets* assets, const h_core::AssetDescription& desc, const YAML::Node& yaml) override;
 
     std::vector<h_core::AssetIndex> actorSpecIndices {};
+    YamlOverride yamlOverride;
 
     HYASSET(0);
 };
