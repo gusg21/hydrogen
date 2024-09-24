@@ -18,6 +18,9 @@ class MeshImporter : public h_editor::AssetEditorWindow {
     void import() override;
     void paintContent() override;
 
+    void openAndImportDefault(const std::string& meshFile);
+    void openAndImportToPath(const std::string& meshFile, const std::string& outputAssetFile);
+
   private:
     void openFbx();
     void openGltf(bool binary);
@@ -27,7 +30,6 @@ class MeshImporter : public h_editor::AssetEditorWindow {
     std::string m_meshFile {};
     char m_fbx2gltfEntry[MESHIMPORTER_ENTRY_LENGTH] = {};
     bool m_needsFbx2Gltf = false;
-    char m_basePathEntry[MESHIMPORTER_ENTRY_LENGTH] = {};
     bool m_needsBasePath = false;
     char m_outputPathEntry[MESHIMPORTER_ENTRY_LENGTH] = {};
 };

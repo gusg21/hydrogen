@@ -10,6 +10,9 @@
 #include "core/window.h"
 #include "editorwindow.h"
 
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+
 namespace h_editor {
 class Editor {
   public:

@@ -49,7 +49,12 @@ void h_editor::windows::MeshImporter::paintContent() {
         ImGui::TextDisabled("Hint: Set the environment variable FBX2GLTF to populate the above automatically.");
     }
 
-    if (m_needsBasePath) { ImGui::InputText("Model Base Directory", m_basePathEntry, MESHIMPORTER_ENTRY_LENGTH); }
+    if (m_needsBasePath) {
+        ImGui::BeginDisabled();
+        std::string basePath = h_editor::platform::getBaseFromPath(m_meshFile) + '\\';
+        ImGui::InputText("Model Base Directory", const_cast<char*>(basePath.c_str()), MESHIMPORTER_ENTRY_LENGTH);
+        ImGui::EndDisabled();
+    }
 
     ImGui::BeginDisabled();
     bool always = true;
@@ -104,7 +109,7 @@ void h_editor::windows::MeshImporter::import() {
     YAML::Node yaml {};
     yaml["gltf"] = gltfFile;
     if (m_needsBasePath) {
-        yaml["gltf_base_path"] = h_editor::platform::getBaseFromPath(m_meshFile);
+        yaml["gltf_base_path"] = h_editor::platform::getBaseFromPath(m_meshFile) + '\\';
     } else {
         yaml["gltf_binary"] = true;
     }
@@ -115,4 +120,19 @@ void h_editor::windows::MeshImporter::import() {
     std::string outputYaml = YAML::Dump(yaml);
     yamlFile->write(yamlFile, outputYaml.c_str(), sizeof(char), outputYaml.size());
     SDL_RWclose(yamlFile);
+}
+
+void h_editor::windows::MeshImporter::openAndImportDefault(const std::string& meshFile) {
+    open(meshFile);
+    import();
+    close();
+}
+
+void h_editor::windows::MeshImporter::openAndImportToPath(
+    const std::string& meshFile, const std::string& outputAssetFile) {
+    open(meshFile);
+    // Set the output path
+    memcpy(m_outputPathEntry, outputAssetFile.c_str(), MIN(outputAssetFile.size(), MESHIMPORTER_ENTRY_LENGTH));
+    import();
+    close();
 }

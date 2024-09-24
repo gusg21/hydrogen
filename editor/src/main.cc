@@ -11,10 +11,12 @@ int main(int argc, char* args[]) {
     const char* basePath = "";
     if (argc >= 2) {
         basePath = args[1];
+    } else {
+        basePath = SDL_GetBasePath();
     }
 
     h_core::project::Project project {};
-    project.loadFromFile("assets/project.yml", basePath);
+    project.loadFromFile("project.yml", basePath);
     const uint32_t editorInitResult = editor->init(project, basePath);
     if (editorInitResult != 0) { return static_cast<int>(editorInitResult); }
 

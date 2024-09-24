@@ -42,7 +42,8 @@ class ProjectExplorer : public h_editor::EditorWindow {
   private:
     std::string m_browsingPath {};
     std::string m_projectPath {};
-    std::string m_currentSelection {};
+    std::vector<std::string> m_currentSelection {};
+    std::string m_selectByEntry {};
 
     std::unordered_map<std::string, AssetOpener> m_assetOpenerLut {};
     bool m_openPopup = false;
