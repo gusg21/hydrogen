@@ -11,8 +11,8 @@ class Transform : public Component {
     Transform() : position(0, 0, 0), rotation(0, 0, 0, 1), scale(1, 1, 1) {};
 
     // Populate data from a YAML node
-    void initFromYaml(YAML::Node yaml);
-    void saveToYaml(YAML::Node yaml);
+    void initFromYaml(const YAML::Node& yaml);
+    [[nodiscard]] YAML::Node saveToYaml() const;
     [[nodiscard]] h_core::math::Mat4x4 getMatrix() const;
 
     /// @brief position

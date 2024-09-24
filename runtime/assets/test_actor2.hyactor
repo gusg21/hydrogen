@@ -3,7 +3,7 @@ transform:
   position:
     x: 30
     y: 0
-    z: 0 
+    z: -138
   rotation:
     x: 0
     y: 0
@@ -15,7 +15,5 @@ transform:
     z: 1
 model:
   index: 3
-script:
-  index: 2
-rigidbody:
-  mass: 10000
+scripts:
+  index: 0

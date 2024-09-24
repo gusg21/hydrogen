@@ -170,15 +170,6 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                                 m_currentSelection.clear();
                             }
                             ImGui::PopStyleColor();
-
-                            ImGuiDragDropFlags dragDropFlags = 0;
-                            dragDropFlags |= ImGuiDragDropFlags_AcceptPeekOnly;
-
-                            if(ImGui::BeginDragDropSource()) {
-                                ImGui::SetDragDropPayload("Actor", &entry, sizeof(entry));
-                                ImGui::Text(entry.name.c_str());
-                                ImGui::EndDragDropSource();
-                            }
                         }
 
                         // Add Asset Popup
@@ -322,16 +313,15 @@ void h_editor::windows::ProjectExplorer::paintContent() {
         ImGui::Separator();
 
         if (ImGui::BeginTable(
-                "Projct Asset List", 6,
+                "Projct Asset List", 5,
                 ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
                     ImGuiTableFlags_ScrollY)) {
-            ImGui::TableSetupColumn("", 0, 1);
+            ImGui::TableSetupColumn("Controls", 0, 1);
             ImGui::TableSetupColumn("Path", 0, 6);
             ImGui::TableSetupColumn("Type", 0, 2);
             ImGui::TableSetupColumn("Index", 0, 2);
             ImGui::TableSetupColumn("Remote", 0, 1);
-            ImGui::TableSetupColumn("Add Actor", 0, 2);
-            ImGui::TableSetupScrollFreeze(6, 1);
+            ImGui::TableSetupScrollFreeze(5, 1);
 
             ImGui::TableHeadersRow();
 
@@ -339,7 +329,23 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                { ImGui::Button("Remove", ImVec2 { -0.1f, 20.f }); }
+                {
+                    if (ImGui::Button(("Remove##" + std::to_string(projectAsset.index)).c_str(), ImVec2 { -0.1f, 20.f })) {
+                        project->removeByPath(projectAsset.assetPath);
+                    }
+
+                    ImGui::BeginDisabled(SceneEditor::instance == nullptr || projectAsset.typeId != h_core::ActorSpecAsset::getTypeId());
+                    if (ImGui::Button(
+                            ("Scene Add##" + std::to_string(projectAsset.index)).c_str(), ImVec2 { -0.1f, 20.f })) {
+                        void* actorYamlText =
+                            SDL_LoadFile((getEditor()->getProjectBasePath() + projectAsset.assetPath).c_str(), nullptr);
+                        YAML::Node actorYaml = YAML::Load(static_cast<char*>(actorYamlText));
+                        SDL_free(actorYamlText);
+
+                        SceneEditor::instance->addActor(actorYaml ,projectAsset.index);
+                    }
+                    ImGui::EndDisabled();
+                } // TODO: finish
 
                 ImGui::TableNextColumn();
                 {
@@ -371,13 +377,6 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 }
                 ImGui::TableNextColumn();
                 { ImGui::Checkbox(("##remote" + std::to_string(projectAsset.index)).c_str(), &projectAsset.isRemote); }
-
-                ImGui::TableNextColumn();
-                {
-                    ImGui::BeginDisabled(SceneEditor::instance == nullptr || projectAsset.typeId != h_core::ActorSpecAsset::getTypeId());
-                    ImGui::Button("Add to Scene");
-                    ImGui::EndDisabled();
-                }
 
             }
 

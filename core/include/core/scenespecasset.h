@@ -15,6 +15,7 @@ class Assets;
 class SceneSpecAsset : public Asset {
   public:
     uint32_t initFromYaml(const YAML::Node& yaml) override;
+    void saveToYaml(YAML::Node& yaml) override;
 
     std::vector<h_core::AssetIndex> actorSpecIndices {};
 

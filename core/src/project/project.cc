@@ -75,6 +75,14 @@ bool h_core::project::Project::hasAssetPath(const std::string& assetPath) const 
     return false;
 }
 
+std::string h_core::project::Project::getPathByIndex(AssetIndex index) const {
+    for (const ProjectAssetEntry& entry : requiredAssets) {
+        if (entry.index == index) { return entry.assetPath; }
+    }
+
+    return "";
+}
+
 h_core::AssetIndex h_core::project::Project::getOpenIndex() const {
     for (AssetIndex index = 0; index < UINT32_MAX; index++) {
         bool indexOccupied = false;

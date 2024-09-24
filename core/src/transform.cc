@@ -1,6 +1,6 @@
 #include "core/transform.h"
 
-void h_core::Transform::initFromYaml(YAML::Node yaml) {
+void h_core::Transform::initFromYaml(const YAML::Node& yaml) {
     position.x = yaml["position"]["x"].as<float>();
     position.y = yaml["position"]["y"].as<float>();
     position.z = yaml["position"]["z"].as<float>();
@@ -15,7 +15,9 @@ void h_core::Transform::initFromYaml(YAML::Node yaml) {
     scale.z = yaml["scale"]["z"].as<float>();
 }
 
-void h_core::Transform::saveToYaml(YAML::Node yaml) {
+YAML::Node h_core::Transform::saveToYaml() const {
+    YAML::Node yaml;
+
     yaml["position"]["x"] = position.x;
     yaml["position"]["y"] = position.y;
     yaml["position"]["z"] = position.z;
@@ -28,6 +30,8 @@ void h_core::Transform::saveToYaml(YAML::Node yaml) {
     yaml["scale"]["x"] = scale.x;
     yaml["scale"]["y"] = scale.y;
     yaml["scale"]["z"] = scale.z;
+
+    return yaml;
 }
 
 h_core::math::Mat4x4 h_core::Transform::getMatrix() const {

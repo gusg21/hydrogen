@@ -11,7 +11,7 @@
 
 void h_editor::EditorWindow::doGUI() {
     ImGui::SetNextWindowSize(ImVec2 {900, 700}, ImGuiCond_Appearing);
-    if (ImGui::Begin((m_title + "##" + std::to_string(reinterpret_cast<uintptr_t>(this))).c_str())) {
+    if (ImGui::Begin((m_title + "##" + std::to_string(reinterpret_cast<uintptr_t>(this))).c_str(), nullptr, ImGuiWindowFlags_MenuBar)) {
         paintContent();
     }
     ImGui::End();

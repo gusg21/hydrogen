@@ -1,9 +1,9 @@
 mask: 15
 transform:
   position:
-    x: 35
+    x: 147
     y: -10
-    z: 0 
+    z: 0
   rotation:
     x: 0
     y: 0
@@ -15,7 +15,5 @@ transform:
     z: 1
 model:
   index: 3
-script:
-  index: 2
-rigidbody:
-  mass: 100
+scripts:
+  index: 0

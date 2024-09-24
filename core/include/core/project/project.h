@@ -33,6 +33,7 @@ class Project {
 
     // Helpers
     bool hasAssetPath(const std::string& assetPath) const;
+    std::string getPathByIndex(AssetIndex index) const;
     h_core::AssetIndex getOpenIndex() const;
     void removeByPath(const std::string& assetPath);
 };

@@ -29,18 +29,16 @@ uint32_t h_core::ActorSpecAsset::initFromYaml(const YAML::Node& yaml) {
     }
     return 0;
 }
-void h_core::ActorSpecAsset::saveToYaml(YAML::Node yaml) {
-
+void h_core::ActorSpecAsset::saveToYaml(YAML::Node& yaml) {
     // Create YAML
-    YAML::Node yaml {};
     yaml["mask"] = mask;
-    transform.saveToYaml(yaml["transform"]);
+    yaml["transform"] = transform.saveToYaml();
 
     if(meshIndex != ASSET_INDEX_BAD) {
-
+        yaml["model"]["index"] = meshIndex;
     }
 
     if(scriptIndex != ASSET_INDEX_BAD) {
-
+        yaml["scripts"]["index"] = scriptIndex;
     }
 }

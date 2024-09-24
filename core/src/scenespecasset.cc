@@ -20,17 +20,28 @@ uint32_t h_core::SceneSpecAsset::initFromYaml(const YAML::Node& yaml) {
 
         actorSpecIndices.push_back(actorSpecIndex);
 
-        //okay, so here's the deal. I'm not sure why having a lot of actors is bad, they are already referencing the expensive stuff
-        //like scripts and models, otherwise they need transform data, which should be unique to every actor, I really think just
-        //saving a lot of actors to our scene yaml makes more sense (especially if we keep transform data in our actor yaml)
+        // okay, so here's the deal. I'm not sure why having a lot of actors is bad, they are already referencing the
+        // expensive stuff like scripts and models, otherwise they need transform data, which should be unique to every
+        // actor, I really think just saving a lot of actors to our scene yaml makes more sense (especially if we keep
+        // transform data in our actor yaml)
 
-        if(actorSpecYaml["overrides"].IsDefined()) {
+        if (actorSpecYaml["overrides"].IsDefined()) {
             YAML::Node transformYaml = actorSpecYaml["overrides"]["transform"];
-            //TODO: apply transformYAML to actor for updated info, not sure where to apply rn
+            // TODO: apply transformYAML to actor for updated info, not sure where to apply rn
 
             int test = transformYaml["position"]["x"].as<int>(0);
         }
     }
 
     return 0;
+}
+
+void h_core::SceneSpecAsset::saveToYaml(YAML::Node& yaml) {
+    yaml["actors"] = std::vector<YAML::Node>();
+
+    for(AssetIndex actorSpecIndex : actorSpecIndices) {
+        YAML::Node actorSpec {};
+        actorSpec["index"] = actorSpecIndex;
+        yaml["actors"].push_back(actorSpec);
+    }
 }

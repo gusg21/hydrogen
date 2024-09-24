@@ -11,8 +11,8 @@ uint32_t h_core::Asset::initFromYaml(const YAML::Node& yaml) {
 
     return 0;
 }
-void h_core::Asset::saveToYaml(YAML::Node yaml) {
-
+void h_core::Asset::saveToYaml(YAML::Node& yaml) {
+    HYLOG_WARN("ASSET: Undefined saveToYaml method, not saving\n");
 }
 
 uint32_t h_core::Asset::precompile(h_core::RuntimeSystems* systems) {
