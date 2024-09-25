@@ -63,6 +63,7 @@
 // };
 
 void h_core::render::Vertex::setUpVertexAttributes() {
+    #ifndef HYCORE_HEADLESS
     ::glVertexAttribPointer(
         0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, position));
@@ -77,6 +78,7 @@ void h_core::render::Vertex::setUpVertexAttributes() {
         2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, texCoord));
     ::glEnableVertexAttribArray(2);
+    #endif
 }
 
 uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const tinygltf::Node& node) {
