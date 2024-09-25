@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_BINARY_DIR}>)
+
 add_executable(HydrogenEditor src/main.cc
         src/editor.cc
         include/editor/editor.h
@@ -19,6 +21,8 @@ add_executable(HydrogenEditor src/main.cc
         src/platform/win32/invoke_win32.cc
         include/editor/windows/sceneeditor.h
         src/windows/sceneeditor.cc
+        include/editor/visuals/scenespecrenderer.h
+        src/visuals/scenespecrenderer.cc
 )
 
 target_include_directories(HydrogenEditor PUBLIC include)
@@ -35,3 +39,8 @@ target_link_libraries(HydrogenEditor PUBLIC HydrogenCore)
 
 HydrogenCore_SetupMain(HydrogenEditor)
 HydrogenCore_CopyShaders(HydrogenEditor ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(HydrogenEditor_Shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/heditor
+)
+add_dependencies(HydrogenEditor HydrogenEditor_Shaders)

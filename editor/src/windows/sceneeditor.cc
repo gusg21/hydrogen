@@ -20,6 +20,8 @@ void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
 
     instance = this;
     m_assetPath = assetPath;
+    m_renderer = new visuals::SceneSpecRenderer();
+    m_renderer->init(getEditor());
 
     void* yamlText = SDL_LoadFile((getEditor()->getProjectBasePath() + assetPath).c_str(), nullptr);
     m_sceneSpecYaml = YAML::Load(static_cast<char*>(yamlText));
@@ -67,13 +69,22 @@ void h_editor::windows::SceneEditor::paintContent() {
     }
 
     // Hacky solution, currently just for testing
-    for (uint32_t specIndex = 0; specIndex < m_actorSpecs.size(); specIndex++) {
-        ImGui::PushID(static_cast<int>(m_actorSpecs[specIndex].index));
-        ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
-        ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
-        ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
-        ImGui::PopID();
+    if (ImGui::BeginChild("Scene Text Editor")) {
+        for (uint32_t specIndex = 0; specIndex < m_actorSpecs.size(); specIndex++) {
+            ImGui::PushID(static_cast<int>(m_actorSpecs[specIndex].index));
+            ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
+            ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
+            ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
+            ImGui::PopID();
+        }
     }
+    ImGui::EndChild();
+
+    if (ImGui::BeginChild("Scene Viewport")) {
+        m_renderer->render();
+        ImGui::Image(m_renderer->getTexture(), ImVec2 { 800, 600 }, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    }
+    ImGui::EndChild();
 
     /*// TODO: only accept if the object is a hyactor (or our other defined stuffs for putting into the scene)
     // TODO: figure out why it isn't getting the drop target, different windows?

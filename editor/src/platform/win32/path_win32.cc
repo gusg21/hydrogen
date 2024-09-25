@@ -11,8 +11,8 @@
 
 #define PLATFORM_WIN32_MAX_PATH_LENGTH 1024
 
-uint32_t h_editor::platform::getFolderListing(std::vector<h_editor::platform::FileEntry>* out_entries,
-    const std::string& path) {
+uint32_t h_editor::platform::getFolderListing(
+    std::vector<h_editor::platform::FileEntry>* out_entries, const std::string& path) {
     if (path.empty()) return ERROR_PATH_INVALID;
 
     std::string fixedPath = path;
@@ -41,11 +41,10 @@ std::string h_editor::platform::canonicalizePath(const std::string& path) {
     PathCanonicalizeA(outPath, path2.c_str());
     std::string canon { outPath };
 
-    if (canon.size() == 1 && canon[0] == getPathSeparator()) { // Don't end up with "/"
+    if (canon.size() == 1 && canon[0] == getPathSeparator()) {  // Don't end up with "/"
         return "";
-    } else {
-        return canon;
     }
+    else { return canon; }
 }
 
 constexpr char h_editor::platform::getPathSeparator() {
@@ -59,9 +58,7 @@ h_editor::platform::FileType h_editor::platform::getFileType(const std::string& 
 
 std::string h_editor::platform::getFileExtension(const std::string& path) {
     auto dotIter = path.find_last_of('.');
-    if (dotIter == std::string::npos) {
-        return std::string {};
-    }
+    if (dotIter == std::string::npos) { return std::string {}; }
     return path.substr(dotIter + 1);
 }
 

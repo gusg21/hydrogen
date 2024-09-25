@@ -7,6 +7,7 @@
 #include "core/actorspecasset.h"
 #include "core/scenespecasset.h"
 #include "editor/asseteditorwindow.h"
+#include "editor/visuals/scenespecrenderer.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -34,6 +35,7 @@ public:
     static SceneEditor* instance;
 
 private:
+    h_editor::visuals::SceneSpecRenderer* m_renderer = nullptr;
     YAML::Node m_sceneSpecYaml {};
     h_core::SceneSpecAsset m_spec {};
     std::vector<EditorActorSpec> m_actorSpecs {};

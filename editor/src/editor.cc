@@ -76,7 +76,8 @@ void h_editor::Editor::run() {
 
         doGUI();
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        ::glClearColor(0.f, 0.f, 0.f, 1.0f);
+        ::glClear(GL_COLOR_BUFFER_BIT);
 
         ImGui::Render();
         ::ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
