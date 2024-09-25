@@ -12,6 +12,13 @@
 #include "core/scenespecasset.h"
 #include "editor/editor.h"
 
+#define SCENEEDITOR_WIDTH 800
+#define SCENEEDITOR_HEIGHT 600
+
+namespace h_editor::windows {
+class SceneEditor;
+}
+
 namespace h_editor {
 namespace visuals {
 
@@ -28,8 +35,12 @@ class SceneSpecRenderer {
     SceneSpecRenderer() = default;
 
     void init(h_editor::Editor* editor);
-    void render();
+    void render(h_editor::windows::SceneEditor* scene);
     ImTextureID getTexture();
+
+    h_core::math::Vector3 cameraPosition { -1.f, 0.f, 0.f };
+    h_core::math::Vector3 cameraDirection { 1.f, 0.f, 0.f };
+    float fovY = 80.f;
 
   private:
     ImTextureID texture = nullptr;
@@ -38,9 +49,6 @@ class SceneSpecRenderer {
     uint32_t m_fbo = 0;
     uint32_t m_fbTex = 0;
     h_core::render::Shader m_shader {};
-    h_core::math::Vector3 m_cameraPosition { -1.f, 0.f, 0.f };
-    h_core::math::Vector3 m_cameraDirection { 1.f, 0.f, 0.f };
-    h_core::math::Quaternion m_triangleRotation {};
 };
 
 }  // namespace visuals
