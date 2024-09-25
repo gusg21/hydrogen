@@ -38,7 +38,7 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
     for (YAML::Node assetInfo : projectYaml["assets"]) {
         requiredAssets.emplace_back(
             assetInfo["index"].as<uint32_t>(0), assetInfo["type"].as<uint32_t>(0),
-            assetInfo["path"].as<std::string>(""), assetInfo["remote"].as<bool>(false));
+            assetInfo["path"].as<std::string>(""), static_cast<AssetRemoteMode>(assetInfo["remote"].as<uint8_t>(0)));
     }
 
     // Load input actions
@@ -64,6 +64,9 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
 
         actions.emplace_back(entry);
     }
+
+    baseProjectPath = assetsBasePath;
+
 
     return 0;
 }

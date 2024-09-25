@@ -6,9 +6,12 @@
 
 #include <stdint.h>
 
+#include "core/asset.h"
+#include "log.h"
+
 namespace h_core {
 namespace widgets {
-void bitField(const char* label, uint32_t* bits) {
+/*void bitField(const char* label, uint32_t* bits) {
 //    bool bitOn[32];
 //    uint32_t newBits = *bits;
 //    if (ImGui::CollapsingHeader(label)) {
@@ -25,6 +28,18 @@ void bitField(const char* label, uint32_t* bits) {
 //    }
 
 //    *bits = newBits;
+}*/
+
+static void doAssetRemoteModeGui(AssetRemoteMode* mode) {
+    if(mode == nullptr) {
+        HYLOG_ERROR("REMOTE ASSET: no data for gui remote dropdown");
+        return;
+    }
+    ImGui::PushID(mode);
+    const char* remoteModeLabels[] = { "Local", "Immediate Remote", "Remote on Request"};
+    ImGui::ListBox("Remote Mode", reinterpret_cast<int*>(mode), remoteModeLabels, IM_ARRAYSIZE(remoteModeLabels));
+    ImGui::PopID();
 }
+
 }  // namespace widgets
 }  // namespace h_core

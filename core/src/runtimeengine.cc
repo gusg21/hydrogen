@@ -3,6 +3,7 @@
 //
 
 #include "core/runtimeengine.h"
+#include "core/widgets.h"
 #include "imgui.h"
 
 #include "core/input/dualkeyinputactionsource.h"
@@ -92,12 +93,11 @@ void h_core::RuntimeEngine::doGUI() {
                 ImGui::TableNextColumn();
                 ImGui::Text("%s", entry.assetPath.c_str());
                 ImGui::TableNextColumn();
-                if (entry.isRemote) {
+                if (entry.remoteMode == AssetRemoteMode::REMOTE_IMMEDIATE) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4 { 0, 0, 0, 1 });
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(IMGUI_COLOR_GOOD));
                 }
-                ImGui::Text(entry.isRemote ? "YES" : "NO");
-                if (entry.isRemote) { ImGui::PopStyleColor(); }
+                if (entry.remoteMode == AssetRemoteMode::REMOTE_IMMEDIATE) { ImGui::PopStyleColor(); }
             }
             ImGui::EndTable();
         }
@@ -169,4 +169,8 @@ h_core::RuntimeAssets* h_core::RuntimeEngine::getRuntimeAssets() {
 
 h_core::RuntimeConsole* h_core::RuntimeEngine::getConsole() {
     return m_console;
+}
+
+h_core::RuntimeSystems* h_core::RuntimeEngine::getSystems() {
+    return &m_systems;
 }

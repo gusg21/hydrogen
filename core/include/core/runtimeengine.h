@@ -20,6 +20,7 @@ class RuntimeEngine : public h_core::Engine {
 
     h_core::RuntimeAssets* getRuntimeAssets();
     h_core::RuntimeConsole* getConsole();
+    h_core::RuntimeSystems* getSystems();
 
   protected:
     void doInit(const h_core::project::Project* project) override;

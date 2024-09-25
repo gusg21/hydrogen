@@ -10,13 +10,13 @@
 namespace h_core {
 namespace project {
 struct ProjectAssetEntry {
-    ProjectAssetEntry(uint32_t index, uint32_t typeId, const std::string& assetPath, bool isRemote)
-        : index(index), typeId(typeId), assetPath(assetPath), isRemote(isRemote) {}
+    ProjectAssetEntry(uint32_t index, uint32_t typeId, const std::string& assetPath, AssetRemoteMode isRemote)
+        : index(index), typeId(typeId), assetPath(assetPath), remoteMode(isRemote) {}
 
     uint32_t index;
     uint32_t typeId;
     std::string assetPath;
-    bool isRemote;
+    AssetRemoteMode remoteMode;
 };
 }  // namespace project
 }  // namespace h_core

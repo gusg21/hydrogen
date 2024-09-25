@@ -14,9 +14,10 @@
 #include "core/assetindex.h"
 #include "core/log.h"
 #include "core/project/projectassetentry.h"
-#include "core/scenespecasset.h"
 #include "core/render/modelasset.h"
+#include "core/scenespecasset.h"
 #include "core/script/scriptasset.h"
+#include "project/project.h"
 
 #define TYPED_SWITCH_CASE(type, func, ...) \
     case type::getTypeId(): {              \
@@ -83,6 +84,7 @@ class Assets
     std::unordered_map<h_core::AssetHash, h_core::AssetIndex> m_assetIndexMap {};  // hash -> asset index
     h_core::AssetIndex m_nextAssetIndex = 0;
     uint32_t m_assetCount = 0;
+    const project::Project* m_project = nullptr;
 };
 }  // namespace h_core
 
@@ -91,7 +93,7 @@ uint32_t h_core::Assets::loadAssetFromFile(h_core::Asset** out_asset, const h_co
     ASSERT_TYPE_IS_ASSET_TYPE(AssetType, "Can't load asset type that does not derive from Asset");
 
     // Load file
-    const char* fileText = (const char*)SDL_LoadFile(desc.path.c_str(), nullptr);
+    const char* fileText = (const char*)SDL_LoadFile((m_project->baseProjectPath + desc.path).c_str(), nullptr);
 
     if (fileText == nullptr) {
         HYLOG_DEBUG("ASSETS: Wrong file path %s", desc.path.c_str());

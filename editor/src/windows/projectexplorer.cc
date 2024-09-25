@@ -13,6 +13,7 @@
 #include "core/assets.h"
 #include "core/log.h"
 #include "core/theming/guicolors.h"
+#include "core/widgets.h"
 #include "editor/editor.h"
 #include "editor/errors.h"
 #include "editor/platform/path.h"
@@ -174,10 +175,10 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
                         // Add Asset Popup
                         if (ImGui::BeginPopup("Add Asset Details")) {
-                            if (!m_addRemoteEntry) { ImGui::InputText("Path", &m_addAssetPathEntry); }
+                            if (m_addRemoteEntry == h_core::AssetRemoteMode::LOCAL) { ImGui::InputText("Path", &m_addAssetPathEntry); }
                             ImGui::InputInt("Type", (int*)&m_addTypeEntry);
                             ImGui::InputInt("Index", (int*)&m_addIndexEntry);
-                            ImGui::Checkbox("Remote", &m_addRemoteEntry);
+                            h_core::widgets::doAssetRemoteModeGui(&m_addRemoteEntry);
 
                             if (ImGui::Button("Add")) {
                                 doAddAsset();
@@ -350,7 +351,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 ImGui::TableNextColumn();
                 {
                     ImGui::PushItemWidth(-1);
-                    if (projectAsset.isRemote) { ImGui::TextDisabled("Remote Asset"); }
+                    if (projectAsset.remoteMode != h_core::AssetRemoteMode::LOCAL) { ImGui::TextDisabled("Remote Asset"); }
                     else {
                         ImGui::InputText(
                             ("##path" + std::to_string(projectAsset.index)).c_str(), &projectAsset.assetPath);
@@ -376,7 +377,7 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                     ImGui::PopItemWidth();
                 }
                 ImGui::TableNextColumn();
-                { ImGui::Checkbox(("##remote" + std::to_string(projectAsset.index)).c_str(), &projectAsset.isRemote); }
+                { h_core::widgets::doAssetRemoteModeGui(&projectAsset.remoteMode); }
 
             }
 
@@ -418,7 +419,7 @@ void h_editor::windows::ProjectExplorer::setAddAssetDefaults(const std::string& 
     m_addAssetPathEntry = path;
     m_addIndexEntry = getEditor()->getProject()->getOpenIndex();
     m_addTypeEntry = h_core::Assets::determineAssetTypeFromExtension(h_editor::platform::getFileExtension(path));
-    m_addRemoteEntry = false;
+    m_addRemoteEntry = h_core::AssetRemoteMode::LOCAL;
 }
 
 void h_editor::windows::ProjectExplorer::doAddAsset() {

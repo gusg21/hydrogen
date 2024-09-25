@@ -18,6 +18,7 @@ class Project {
 
     /// @brief the name of the project
     std::string name = "Unnamed Project";
+    std::string baseProjectPath = "";
 
     uint32_t windowWidth = 1600;
     uint32_t windowHeight = 900;

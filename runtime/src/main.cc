@@ -8,7 +8,7 @@ int main(int argc, char* args[]) {
     h_core::RuntimeEngine* engine = new h_core::RuntimeEngine();
 
     h_core::project::Project project {};
-    project.loadFromFile("assets/project.hyproject", "");
+    project.loadFromFile("project.hyproject", args[1]);
 
     uint32_t engineInitResult = engine->init(&project);
     if (engineInitResult != 0) { return engineInitResult; }

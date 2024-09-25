@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core/asset.h"
 #include "editor/asseteditorwindow.h"
 #include "editor/editorwindow.h"
 #include "editor/platform/path.h"
@@ -52,7 +53,7 @@ class ProjectExplorer : public h_editor::EditorWindow {
     std::string m_addAssetPathEntry {};
     uint32_t m_addIndexEntry = 0;
     uint32_t m_addTypeEntry = 0;
-    bool m_addRemoteEntry = false;
+    h_core::AssetRemoteMode m_addRemoteEntry = h_core::AssetRemoteMode::LOCAL;
 
     std::unordered_map<std::string, AssetOpener> m_assetOpenerLut {};
 };

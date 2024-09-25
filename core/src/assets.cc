@@ -10,15 +10,17 @@ h_core::AssetHash h_core::Assets::getAssetHashFromString(const std::string& stri
 }
 
 void h_core::Assets::loadFromProject(const h_core::project::Project* project) {
+    m_project = project;
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
         loadAsset(h_core::AssetDescription {
-            assetInfo.index, assetInfo.typeId, assetInfo.assetPath, false  // never remote in base assets
+            assetInfo.index, assetInfo.typeId, assetInfo.assetPath, AssetRemoteMode::LOCAL  // never remote in base assets
         });
     }
 }
 
 void h_core::Assets::loadAsset(const AssetDescription& desc) {
     // Load from file
+
     h_core::Asset* asset = nullptr;
     CALL_TYPED_FUNC_WITH_ASSET_ID(desc.type, loadAssetFromFile, &asset, desc);
     m_assets[desc.index] = static_cast<h_core::Asset*>(asset);

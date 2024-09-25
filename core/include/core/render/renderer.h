@@ -39,6 +39,8 @@ class Renderer : public RuntimeSystem {
 
     HYSYSTEM(h_core::Transform::getMask() | h_core::render::ModelComp::getMask());
 
+    h_core::math::Vector3 getCameraPosition();
+
   protected:
     void setRendererName(const std::string& name);
     void setIsGles3(bool isGles3);

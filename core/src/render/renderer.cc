@@ -197,6 +197,10 @@ SDL_GLContext h_core::render::Renderer::getGLContext() const {
     return m_glContext;
 }
 
+h_core::math::Vector3 h_core::render::Renderer::getCameraPosition() {
+    return m_cameraPosition;
+}
+
 void h_core::render::Renderer::setRendererName(const std::string& name) {
     m_rendererName = name;
 }

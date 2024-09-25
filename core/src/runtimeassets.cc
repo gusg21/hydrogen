@@ -30,13 +30,13 @@ uint32_t h_core::RuntimeAssets::command_loadAsset(const std::string& arguments, 
     uint32_t assetType = yaml["type"].as<uint32_t>(UINT32_MAX);
     h_core::AssetIndex assetIndex = yaml["index"].as<h_core::AssetIndex>(ASSET_INDEX_BAD);
     std::string assetPath = yaml["path"].as<std::string>("");
-    bool isRemote = yaml["remote"].as<bool>(false);
+    AssetRemoteMode remoteMode = static_cast<AssetRemoteMode>(yaml["remote"].as<uint32_t>(0));
 
     if (assetType == UINT32_MAX) { return 2; }
     if (assetIndex == ASSET_INDEX_BAD) { return 3; }
-    if (assetPath.empty() && !isRemote) { return 4; }
+    if (assetPath.empty() && remoteMode == AssetRemoteMode::LOCAL) { return 4; }
 
-    assets->queueLoadAsset(h_core::AssetDescription { assetIndex, assetType, assetPath, isRemote });
+    assets->queueLoadAsset(h_core::AssetDescription { assetIndex, assetType, assetPath, remoteMode });
     //    assets->m_assets[assetIndex]->precompile(assets->m_systems);
 
     return 0;
@@ -121,9 +121,10 @@ void h_core::RuntimeAssets::doGUI() {
 }
 
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
+    m_project = project;
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
          RuntimeAssets::loadAsset(
-            h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.isRemote });
+            h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.remoteMode });
     }
 }
 
@@ -141,7 +142,7 @@ void h_core::RuntimeAssets::flushAndPrecompileNetAssets() {
 
         h_core::Asset* oldAsset = m_assets[desc.index];
         loadAsset(desc);
-        if (!desc.remote) {
+        if (desc.remote == AssetRemoteMode::LOCAL) {
             int precompileResult = m_assets[desc.index]->precompile(m_systems);
             if (precompileResult == 0) { delete oldAsset; }
             else {
@@ -238,7 +239,7 @@ bool h_core::RuntimeAssets::hasServerConnection() const {
 }
 
 void h_core::RuntimeAssets::loadAsset(const AssetDescription& desc) {
-    if (desc.remote) {
+    if (desc.remote == AssetRemoteMode::REMOTE_IMMEDIATE) {
         // Load from server
         CALL_TYPED_FUNC_WITH_ASSET_ID(desc.type, requestNetAsset, desc.index);
     }

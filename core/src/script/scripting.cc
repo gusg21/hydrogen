@@ -5,6 +5,8 @@
 #include "core/engine.h"
 #include "core/log.h"
 #include "core/math/math.h"
+#include "core/render/renderer.h"
+#include "core/runtimeengine.h"
 #include "core/script/scriptcomp.h"
 #include "core/transform.h"
 
@@ -26,7 +28,6 @@ void angelScriptMessageCallback(const asSMessageInfo* message, void* params) {
             HYLOG_ERROR("SCRIPTING: %s:%d,%d\n%s\n", message->section, message->row, message->col, message->message);
             break;
     }
-
 }
 
 h_core::math::Vector3 newVector3(float x, float y, float z) {
@@ -43,7 +44,9 @@ std::string actorIdToString(h_core::ActorId id) {
 
 void RegisterVector3(asIScriptEngine* scriptingEngine) {
     scriptingEngine->RegisterObjectType(
-        "Vector3", sizeof(h_core::math::Vector3), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
+        "Vector3", sizeof(h_core::math::Vector3),
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS |
+            asOBJ_APP_CLASS_ALLFLOATS);
     scriptingEngine->RegisterObjectProperty("Vector3", "float x", asOFFSET(h_core::math::Vector3, x));
     scriptingEngine->RegisterObjectProperty("Vector3", "float y", asOFFSET(h_core::math::Vector3, y));
     scriptingEngine->RegisterObjectProperty("Vector3", "float z", asOFFSET(h_core::math::Vector3, z));
@@ -60,7 +63,8 @@ void RegisterVector3(asIScriptEngine* scriptingEngine) {
 void RegisterQuaternion(asIScriptEngine* scriptingEngine) {
     scriptingEngine->RegisterObjectType(
         "Quaternion", sizeof(h_core::math::Quaternion),
-        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS |
+            asOBJ_APP_CLASS_ALLFLOATS);
 
     scriptingEngine->RegisterObjectProperty("Quaternion", "float x", asOFFSET(h_core::math::Quaternion, x));
     scriptingEngine->RegisterObjectProperty("Quaternion", "float y", asOFFSET(h_core::math::Quaternion, y));
@@ -86,6 +90,27 @@ void RegisterQuaternion(asIScriptEngine* scriptingEngine) {
         "Quaternion rotate(Quaternion a, Quaternion b)", asFUNCTION(h_core::math::Quaternion::multiply), asCALL_CDECL);
 }
 
+void RegisterAssetDescription(asIScriptEngine* scriptingEngine) {
+    scriptingEngine->RegisterObjectType(
+        "AssetDescription", sizeof(h_core::AssetDescription),
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS |
+            asOBJ_APP_CLASS_ALLFLOATS);
+
+    scriptingEngine->RegisterObjectProperty("AssetDescription", "AssetIndex index", asOFFSET(h_core::AssetDescription, index));
+    scriptingEngine->RegisterObjectProperty("AssetDescription", "int type", asOFFSET(h_core::AssetDescription, type));
+    scriptingEngine->RegisterObjectProperty(
+        "AssetDescription", "AssetRemoteMode remote", asOFFSET(h_core::AssetDescription, remote));
+    scriptingEngine->RegisterObjectProperty(
+        "AssetDescription", "string path", asOFFSET(h_core::AssetDescription, path));
+}
+
+void RegisterAssetRemoteModeEnum(asIScriptEngine* scriptingEngine) {
+    scriptingEngine->RegisterEnum("AssetRemoteMode");
+    scriptingEngine->RegisterEnumValue("AssetRemoteMode", "LOCAL", 0);
+    scriptingEngine->RegisterEnumValue("AssetRemoteMode", "REMOTE_IMMEDIATE", 1);
+    scriptingEngine->RegisterEnumValue("AssetRemoteMode", "REMOTE_ON_REQUEST", 2);
+}
+
 uint32_t h_core::script::Scripting::init(h_core::RuntimeEngine* engine) {
     h_core::RuntimeSystem::init(engine);
 
@@ -106,16 +131,23 @@ uint32_t h_core::script::Scripting::init(h_core::RuntimeEngine* engine) {
 
     // Vector2
     m_scriptEngine->RegisterObjectType(
-        "Vector2", sizeof(h_core::math::Vector2), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
+        "Vector2", sizeof(h_core::math::Vector2),
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS |
+            asOBJ_APP_CLASS_ALLFLOATS);
     m_scriptEngine->RegisterObjectProperty("Vector2", "float x", asOFFSET(h_core::math::Vector2, x));
     m_scriptEngine->RegisterObjectProperty("Vector2", "float y", asOFFSET(h_core::math::Vector2, y));
+    m_scriptEngine->RegisterTypedef("AssetIndex", "uint32_t");
 
     RegisterVector3(m_scriptEngine);
     RegisterQuaternion(m_scriptEngine);
+    RegisterAssetRemoteModeEnum(m_scriptEngine);
+    RegisterAssetDescription(m_scriptEngine);
 
     // Transform
     m_scriptEngine->RegisterObjectType(
-        "Transform", sizeof(h_core::Transform), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS | asOBJ_APP_CLASS_ALLFLOATS);
+        "Transform", sizeof(h_core::Transform),
+        asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_MORE_CONSTRUCTORS |
+            asOBJ_APP_CLASS_ALLFLOATS);
     m_scriptEngine->RegisterObjectProperty("Transform", "Vector3 position", asOFFSET(h_core::Transform, position));
     m_scriptEngine->RegisterObjectProperty("Transform", "Quaternion rotation", asOFFSET(h_core::Transform, rotation));
     m_scriptEngine->RegisterObjectProperty("Transform", "Vector3 scale", asOFFSET(h_core::Transform, scale));
@@ -133,7 +165,13 @@ uint32_t h_core::script::Scripting::init(h_core::RuntimeEngine* engine) {
         "string toString(ActorId id)", asFUNCTIONPR(actorIdToString, (ActorId), std::string), asCALL_CDECL);
     m_scriptEngine->RegisterGlobalFunction(
         "double getDeltaTime()", asMETHOD(Engine, getDeltaSecs), asCALL_THISCALL_ASGLOBAL, engine);
-
+    m_scriptEngine->RegisterGlobalFunction(
+        "float getDistanceToCamera()", asMETHOD(Scripting, getDistanceToCamera), asCALL_THISCALL_ASGLOBAL, this);
+    m_scriptEngine->RegisterGlobalFunction(
+        "void loadAsset(const AssetDescription desc)", asMETHOD(Assets, loadAsset), asCALL_THISCALL_ASGLOBAL,
+        engine->getRuntimeAssets());
+    m_scriptEngine->RegisterGlobalFunction(
+        "h_core::AssetIndex getBoundModel()", asMETHOD(Scripting, getBoundModel), asCALL_THISCALL_ASGLOBAL, this);
     // ENGINE INTERFACE END
 
     return 0;
@@ -168,10 +206,18 @@ h_core::Transform h_core::script::Scripting::getBoundTransform() {
     return *transform;
 }
 
+h_core::AssetIndex h_core::script::Scripting::getBoundModel() {
+    return meshComp->model;
+}
+
 void h_core::script::Scripting::setBoundTransform(h_core::Transform newTrans) {
     *transform = newTrans;
 }
 
 asIScriptModule* h_core::script::Scripting::getModule() const {
     return m_scriptModule;
+}
+
+float h_core::script::Scripting::getDistanceToCamera() {
+    return (transform->position - engine->getSystems()->renderer->getCameraPosition()).getLength();
 }
