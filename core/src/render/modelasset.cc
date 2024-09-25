@@ -227,6 +227,7 @@ void h_core::render::Mesh::precompile(bool useGles3) {
 }
 
 void h_core::render::Mesh::uploadDataToGPU(MeshAccessType access) const {
+    #ifndef HYCORE_HEADLESS
     GLuint accessGl = access == MeshAccessType::STATIC ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
 
     // Mark buffers for static drawing (not updated)
@@ -255,6 +256,7 @@ void h_core::render::Mesh::uploadDataToGPU(MeshAccessType access) const {
 
         ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * numIndices, indices, accessGl);
     }
+    #endif
 }
 
 
