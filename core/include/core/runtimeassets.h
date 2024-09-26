@@ -118,9 +118,12 @@ void h_core::RuntimeAssets::requestNetAssetNow(
 
     // Setup the transfer
     curl_easy_setopt(netHandle, CURLOPT_URL, (void*)url.c_str());
+    curl_easy_setopt(netHandle, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(netHandle, CURLOPT_WRITEFUNCTION, &netAssetWrite<AssetType>);
     curl_easy_setopt(netHandle, CURLOPT_WRITEDATA, &bytes);
-    curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 0.5);
+    curl_easy_setopt(netHandle, CURLOPT_CONNECTTIMEOUT, 1L);
+    curl_easy_setopt(netHandle, CURLOPT_TIMEOUT, 12L);
+
 
     // Do the transfer
     CURLcode result = curl_easy_perform(netHandle);

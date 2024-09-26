@@ -103,7 +103,7 @@ void h_core::RuntimeAssets::doGUI() {
                         {
                             ImGui::Text("Packed Size: %zu", asset->getPackedSize());
                             if (ImGui::Button("Pack")) {
-                                uint8_t* packed = new uint8_t [asset->getPackedSize()];
+                                uint8_t* packed = new uint8_t[asset->getPackedSize()];
                                 asset->toPacked(packed);
                             }
                             ImGui::Separator();
@@ -123,7 +123,7 @@ void h_core::RuntimeAssets::doGUI() {
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     m_project = project;
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        if(assetInfo.remoteMode == AssetRemoteMode::REMOTE_ON_REQUEST) continue;
+        if (assetInfo.remoteMode == AssetRemoteMode::REMOTE_ON_REQUEST) continue;
 
         RuntimeAssets::loadAsset(
             h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.remoteMode });
@@ -196,9 +196,16 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
 
     while (!context->netRequestThreadAlive) {
         // Do jobs if needed
-        if (!context->jobs.empty() && context->hasServerConnection) {
+        context->jobQueueLock.lock();
+        bool hasJobs = !context->jobs.empty();
+        context->jobQueueLock.unlock();
+        if (hasJobs && context->hasServerConnection) {
             // Request asset
-            NetRequestJob job = context->jobs.front();
+            NetRequestJob job;
+            context->jobQueueLock.lock();
+            { job = context->jobs.front(); }
+            context->jobQueueLock.unlock();
+
             HYLOG_DEBUG("ASSETS: THREAD: got job request for asset %d\n", job.assetIndex);
             h_core::Asset* newAsset = nullptr;
             CURLcode result;
@@ -219,7 +226,9 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
             HYLOG_DEBUG("ASSETS: THREAD: updated asset list \n");
 
             // remove job
-            context->jobs.pop_front();
+            context->jobQueueLock.lock();
+            { context->jobs.pop_front(); }
+            context->jobQueueLock.unlock();
         }
 
         // Update connection test
@@ -231,6 +240,7 @@ void h_core::RuntimeAssets::netRequestThreadFunction(h_core::NetRequestThreadCon
             HYLOG_WARN("ASSETS: Ping attempt returned curl error code %d\n", result);
         }
         context->hasServerConnection = result == CURLE_OK;
+        curl_easy_cleanup(connectTest);
     }
 
     HYLOG_DEBUG("ASSETS: Killing net request thread...\n");

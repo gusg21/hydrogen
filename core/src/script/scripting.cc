@@ -50,8 +50,6 @@ std::string actorIdToString(h_core::ActorId id) {
     return std::to_string(id);
 }
 
-void loadAsset(h_core::AssetDescription& desc) {}
-
 void RegisterVector3(asIScriptEngine* scriptingEngine) {
     scriptingEngine->RegisterObjectType(
         "Vector3", sizeof(h_core::math::Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<h_core::math::Vector3>());
@@ -235,5 +233,5 @@ float h_core::script::Scripting::getDistanceToCamera() {
 }
 
 void h_core::script::Scripting::loadAsset(AssetDescription desc) {
-    engine->getRuntimeAssets()->loadAsset(desc);
+    engine->getRuntimeAssets()->queueLoadAsset(desc);
 }

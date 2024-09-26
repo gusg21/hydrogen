@@ -9,6 +9,7 @@
 namespace h_core {
 class NetRequestJob {
   public:
+    NetRequestJob() = default;
     NetRequestJob(const std::string& serverAddress, AssetIndex assetIndex, uint32_t assetType)
         : serverAddress(serverAddress), assetIndex(assetIndex), assetType(assetType) {}
 
