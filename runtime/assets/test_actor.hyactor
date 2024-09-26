@@ -1,9 +1,9 @@
 mask: 15
 transform:
   position:
-    x: 0
-    y: 18
-    z: -694
+    x: 5
+    y: 10
+    z: 0
   rotation:
     x: 0
     y: 0
