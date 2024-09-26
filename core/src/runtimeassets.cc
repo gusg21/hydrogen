@@ -123,7 +123,9 @@ void h_core::RuntimeAssets::doGUI() {
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     m_project = project;
     for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-         RuntimeAssets::loadAsset(
+        if(assetInfo.remoteMode == AssetRemoteMode::REMOTE_ON_REQUEST) continue;
+
+        RuntimeAssets::loadAsset(
             h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.remoteMode });
     }
 }
@@ -239,7 +241,7 @@ bool h_core::RuntimeAssets::hasServerConnection() const {
 }
 
 void h_core::RuntimeAssets::loadAsset(const AssetDescription& desc) {
-    if (desc.remote == AssetRemoteMode::REMOTE_IMMEDIATE) {
+    if (desc.remote != AssetRemoteMode::LOCAL) {
         // Load from server
         CALL_TYPED_FUNC_WITH_ASSET_ID(desc.type, requestNetAsset, desc.index);
     }

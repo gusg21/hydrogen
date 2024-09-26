@@ -13,13 +13,13 @@ class ActorSpecAsset : public Asset {
   public:
     ActorSpecAsset() = default;
 
-    uint32_t initFromYaml(const YAML::Node& yaml) override;
+    uint32_t initFromYaml(const std::string& basePath, const YAML::Node& yaml) override;
     void saveToYaml(YAML::Node& yaml) override;
 
     h_core::ComponentBitmask mask;
     h_core::Transform transform;
-    h_core::AssetIndex meshIndex;
-    h_core::AssetIndex scriptIndex;
+    h_core::AssetIndex meshIndex = ASSET_INDEX_BAD;
+    h_core::AssetIndex scriptIndex = ASSET_INDEX_BAD;
     h_core::physics::Rigidbody* rigidbody = nullptr;
 
     HYASSET(1);

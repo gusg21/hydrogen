@@ -385,8 +385,8 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
 }
 
 
-uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(yaml);
+uint32_t h_core::render::ModelAsset::initFromYaml(const std::string& basePath, const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(basePath, yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");
 
@@ -408,16 +408,14 @@ uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
     std::string warningText {};
 
     bool success;
+    size_t textLength;
+    const void* text = SDL_LoadFile((basePath + gltfFilePath).c_str(), &textLength);
     if (!gltfBinaryMode) {
-        size_t gltfTextLength;
-        const char* gltfText = (const char*)SDL_LoadFile(gltfFilePath.c_str(), &gltfTextLength);
         success =
-            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, gltfText, gltfTextLength, gltfBasePath);
+            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, static_cast<const char*>(text), textLength, gltfBasePath);
     }
     else {
-        size_t glbDataLength;
-        const uint8_t* glbData = (const uint8_t*)SDL_LoadFile(gltfFilePath.c_str(), &glbDataLength);
-        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, glbData, glbDataLength, gltfBasePath);
+        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, static_cast<const unsigned char*>(text), textLength, gltfBasePath);
     }
 
     if (!warningText.empty()) { HYLOG_WARN("MODEL: %s\n", warningText.c_str()); }

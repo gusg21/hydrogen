@@ -1,5 +1,6 @@
 class Test1 {
     engine::ActorId id;
+    bool hasLoaded = false;
 
     Test1(engine::ActorId _id) {
         id = _id;
@@ -14,13 +15,12 @@ class Test1 {
         // trans.position.x += 0.01f; // Changes position
         engine::setBoundTransform(trans); // Reapply to current actor
 
-        if(engine::getDistanceToCamera() < 10) {
+        if(engine::getDistanceToCamera() < 10 && !hasLoaded) {
             print("CAMERA! CAMERA!! LOAD GOD DAMNITTT!!!!");
-
             engine::AssetIndex index = engine::getBoundModel();
-            engine::AssetDescription desc(index, 3, "", engine::AssetRemoteMode.REMOTE_ON_REQUEST);
-
+            engine::AssetDescription desc = engine::newAssetDescription(index, 3, engine::AssetRemoteMode::REMOTE_ON_REQUEST);
             engine::loadAsset(desc);
+            hasLoaded = true;
         }
     }
 }

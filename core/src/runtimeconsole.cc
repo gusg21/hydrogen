@@ -217,6 +217,7 @@ void h_core::RuntimeConsole::logCallback(void* userdata, int category, SDL_LogPr
 
     self->printToConsoleColored(message, level, color);
     printf("%s\n", fullMessage.c_str());
+    fflush(stdout);
 }
 
 void h_core::RuntimeConsole::newCommand(

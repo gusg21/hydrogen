@@ -25,7 +25,7 @@ assets:
   # - index: 40
   #   type: 3
   #   path: "test_model2.hymodel"
-#    remote: true
+#    remote: 1
   - index: 7
     type: 0
     path: "test_scene.hyscene"
@@ -38,4 +38,4 @@ assets:
   - index: 100
     type: 3
     # path: "helmet.hymodel"
-    remote: true
+    remote: 2

@@ -5,7 +5,7 @@
 
 uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath) {
     HYLOG_INFO("PROJECT: Loading from path %s\n", yamlPath.c_str());
-    HYLOG_INFO("PROJECT: SDL_GetBasePath() = %s\n", ::SDL_GetBasePath());
+    HYLOG_INFO("PROJECT: assetsBasePath = %s\n", assetsBasePath.c_str());
 
     // Determine full path
     std::string projectYamlPath = assetsBasePath + yamlPath;

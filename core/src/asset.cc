@@ -4,7 +4,7 @@
 #include "core/log.h"
 #include "imgui.h"
 
-uint32_t h_core::Asset::initFromYaml(const YAML::Node& yaml) {
+uint32_t h_core::Asset::initFromYaml(const std::string& basePath, const YAML::Node& yaml) {
     //    HYLOG_WARN("ASSET: Undefined initFromYaml method.\n");
 
     // this->desc = desc;

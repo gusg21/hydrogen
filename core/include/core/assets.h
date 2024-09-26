@@ -104,7 +104,7 @@ uint32_t h_core::Assets::loadAssetFromFile(h_core::Asset** out_asset, const h_co
     YAML::Node yaml = YAML::Load(fileText);
 
     (*out_asset) = new AssetType();
-    (*out_asset)->initFromYaml(yaml);
+    (*out_asset)->initFromYaml(m_project->baseProjectPath, yaml);
 
     m_assetCount++;
 

@@ -15,5 +15,5 @@ transform:
     z: 1
 model:
   index: 100
-scripts:
-  index: 0
+script:
+  index: 2

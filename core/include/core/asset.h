@@ -18,7 +18,7 @@ class Asset {
     // Asset(const h_core::Asset& asset) = delete;
     Asset& operator=(const h_core::Asset& asset) = delete;
 
-    virtual uint32_t initFromYaml(const YAML::Node& node);
+    virtual uint32_t initFromYaml(const std::string& basePath, const YAML::Node& node);
     virtual void saveToYaml(YAML::Node& yaml);
     virtual uint32_t precompile(h_core::RuntimeSystems* systems);
     [[nodiscard]] virtual size_t getPackedSize() const;

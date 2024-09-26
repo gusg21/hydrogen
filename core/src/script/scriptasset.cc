@@ -7,8 +7,8 @@
 #include "core/runtimesystems.h"
 #include "core/script/scripting.h"
 
-uint32_t h_core::script::ScriptAsset::initFromYaml(const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(yaml);
+uint32_t h_core::script::ScriptAsset::initFromYaml(const std::string& basePath, const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(basePath, yaml);
 
     std::string filePath = yaml["file"].as<std::string>("");
 
@@ -21,7 +21,7 @@ uint32_t h_core::script::ScriptAsset::initFromYaml(const YAML::Node& yaml) {
     }
     else {
         // Load script from file
-        code = (const char*)SDL_LoadFile(filePath.c_str(), nullptr);
+        code = (const char*)SDL_LoadFile((basePath + filePath).c_str(), nullptr);
 
         if (yamlName == "UNNAMED_SCRIPT") {
             size_t slashIndex = filePath.find_last_of('/');
@@ -55,14 +55,18 @@ uint32_t h_core::script::ScriptAsset::precompile(h_core::RuntimeSystems* systems
 // NOTE: Automatically AddRef()'s the instance created
 asIScriptObject* h_core::script::ScriptAsset::constructInstance(asIScriptContext* context, h_core::ActorId id) const {
     // Construct object
-    context->Prepare(typeConstructor);
-    context->SetArgObject(0, &id);
-    context->Execute();
+    if(typeConstructor == nullptr) {
+        HYLOG_ERROR("SCRIPTING:  Type constructor uninitialized");
+        return nullptr;
+    }
+    SCRIPTING_ASVERIFY(context->Prepare(typeConstructor));
+    SCRIPTING_ASVERIFY(context->SetArgObject(0, &id));
+    SCRIPTING_ASVERIFY(context->Execute());
 
     // Retrieve instance pointer
     asIScriptObject* instance = *(asIScriptObject**)context->GetAddressOfReturnValue();
 
-    instance->AddRef();
+    SCRIPTING_ASVERIFY(instance->AddRef());
 
     return instance;
 }

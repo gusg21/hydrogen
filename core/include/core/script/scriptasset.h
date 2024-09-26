@@ -23,7 +23,7 @@ class ScriptAsset : public Asset {
   public:
     ScriptAsset() = default;
 
-    uint32_t initFromYaml(const YAML::Node& yaml) override;
+    uint32_t initFromYaml(const std::string& basePath, const YAML::Node& yaml) override;
     uint32_t precompile(h_core::RuntimeSystems* systems) override;
 
     void loadCode(asIScriptModule* module) const;
