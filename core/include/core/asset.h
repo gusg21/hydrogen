@@ -16,7 +16,7 @@ class Asset {
   public:
     Asset() = default;
     // Asset(const h_core::Asset& asset) = delete;
-    Asset& operator=(const h_core::Asset& asset) = delete;
+    // Asset& operator=(const h_core::Asset& asset) = delete;
 
     virtual uint32_t initFromYaml(const std::string& basePath, const YAML::Node& node);
     virtual void saveToYaml(YAML::Node& yaml);

@@ -24,6 +24,8 @@ class Editor {
 
     std::string getProjectBasePath();
     h_core::project::Project* getProject();
+    [[nodiscard]] h_core::input::Input* getInput() const;
+    [[nodiscard]] double getDeltaSecs() const;
 
     void addNewWindow(h_editor::EditorWindow* window);
     void closeWindow(h_editor::EditorWindow* window);
@@ -36,6 +38,9 @@ class Editor {
 
     h_core::Window* m_window = nullptr;
     h_core::EventQueue m_events {};
+    h_core::input::Input* m_input = nullptr;
+
+    uint32_t m_deltaNanosecs = 0;
 
     std::vector<h_editor::EditorWindow*> m_windows {};
     std::vector<h_editor::EditorWindow*> m_windowsToClose {};

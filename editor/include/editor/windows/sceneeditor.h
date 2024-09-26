@@ -5,6 +5,7 @@
 #pragma once
 
 #include "core/actorspecasset.h"
+#include "core/input/input.h"
 #include "core/scenespecasset.h"
 #include "editor/asseteditorwindow.h"
 #include "editor/visuals/scenespecrenderer.h"
@@ -26,7 +27,7 @@ struct EditorActorSpec {
 class SceneEditor : public h_editor::AssetEditorWindow {
   public:
     explicit SceneEditor(h_editor::Editor* editor)
-        : AssetEditorWindow(editor, "Scene Editor", h_core::math::Vector2 { 1040, 680 }) {}
+        : AssetEditorWindow(editor, "Scene Editor", h_core::math::Vector2 { 1060, 700 }) {}
 
     void open(const std::string& assetPath) override;
     void close() override;
@@ -49,6 +50,15 @@ class SceneEditor : public h_editor::AssetEditorWindow {
     std::vector<EditorActorSpec> m_actorSpecs {};
     std::string m_assetPath;
     std::unordered_map<std::string, h_core::render::ModelAsset*> m_cachedModels {};
+
+    float m_flyCamPitch = 0.f, m_flyCamYaw = 0.f;
+    float m_flyCamSensitivity = 200.f;
+    float m_flyCamSpeed = 0.5f;
+    h_core::math::Vector2 m_mouseGrabPos {};
+
+    h_core::input::InputActionIndex m_camRightInputIndex = 0;
+    h_core::input::InputActionIndex m_camForwardInputIndex = 0;
+    h_core::input::InputActionIndex m_reclaimMouseInputIndex = 0;
 };
 
 }  // namespace windows

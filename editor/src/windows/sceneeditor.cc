@@ -4,9 +4,13 @@
 
 #include "editor/windows/sceneeditor.h"
 
+#include <core/theming/guicolors.h>
 #include <imgui.h>
 
 #include "core/actorspecasset.h"
+#include "core/input/dualkeyinputactionsource.h"
+#include "core/input/input.h"
+#include "core/input/keyinputactionsource.h"
 #include "core/log.h"
 #include "editor/editor.h"
 
@@ -45,6 +49,25 @@ void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
             }
         }
     }
+
+    // Inputs
+    m_camForwardInputIndex = getEditor()->getInput()->newAction("cam_forward");
+    getEditor()
+        ->getInput()
+        ->getAction(m_camForwardInputIndex)
+        ->sources.push_back(new h_core::input::DualKeyInputActionSource(SDL_SCANCODE_W, SDL_SCANCODE_S));
+
+    m_camRightInputIndex = getEditor()->getInput()->newAction("cam_right");
+    getEditor()
+        ->getInput()
+        ->getAction(m_camRightInputIndex)
+        ->sources.push_back(new h_core::input::DualKeyInputActionSource(SDL_SCANCODE_D, SDL_SCANCODE_A));
+
+    m_reclaimMouseInputIndex = getEditor()->getInput()->newAction("reclaim_mouse");
+    getEditor()
+        ->getInput()
+        ->getAction(m_reclaimMouseInputIndex)
+        ->sources.push_back(new h_core::input::KeyInputActionSource(SDL_SCANCODE_ESCAPE));
 }
 
 void h_editor::windows::SceneEditor::close() {
@@ -72,40 +95,105 @@ void h_editor::windows::SceneEditor::paintContent() {
     // Hacky solution, currently just for testing
     if (ImGui::BeginChild("Scene Text Editor", ImVec2 { 200, -0.1f })) {
         ImGui::Text("Window Size: %.2fx%.2f", size.x, size.y);
+        ImGui::SeparatorText("Renderer");
         ImGui::DragFloat("FOV", &m_renderer->fovY, 1, 30.f, 160.f);
+        ImGui::DragFloat3("Position", &m_renderer->cameraPosition.x);
+        ImGui::DragFloat3("Direction", &m_renderer->cameraDirection.x);
+
+        ImGui::SeparatorText("FlyCam");
+        ImGui::DragFloat("Sensitivity", &m_flyCamSensitivity);
+        ImGui::DragFloat("Speed", &m_flyCamSpeed);
         ImGui::Separator();
 
+        ImGui::SeparatorText("Actors");
+        std::vector<uint32_t> specsToRemove {};
         for (uint32_t specIndex = 0; specIndex < m_actorSpecs.size(); specIndex++) {
             ImGui::PushID(static_cast<int>(m_actorSpecs[specIndex].index));
-            ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
-            ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
-            ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
+            {
+                if (ImGui::SmallButton("-")) {
+                    specsToRemove.push_back(specIndex);
+                }
+                ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
+                ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
+                ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
+                ImGui::DragFloat4("Rotation", &m_actorSpecs[specIndex].actorSpec.transform.rotation.x);
+                ImGui::DragFloat3("Scale", &m_actorSpecs[specIndex].actorSpec.transform.scale.x);
+            }
             ImGui::PopID();
 
             ImGui::Separator();
+        }
+
+        for (uint32_t spec : specsToRemove) {
+            m_actorSpecs.erase(m_actorSpecs.begin() + spec);
         }
     }
     ImGui::EndChild();
 
     ImGui::SameLine();
 
-    if (ImGui::BeginChild("Scene Viewport", ImVec2 { 810, 610 })) {
-        m_renderer->render(this);
-        ImGui::SetCursorPos(ImVec2 { 5, 5 });
-        ImGui::Image(m_renderer->getTexture(), ImVec2 { 800, 600 }, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    // Cam controls
+    h_core::input::Input* input = getEditor()->getInput();
+    double delta = getEditor()->getDeltaSecs();
+
+    // Viewport
+    if (ImGui::BeginChild("Scene Viewport Container", ImVec2 { -0.1, -0.1f }, 0, ImGuiWindowFlags_NoScrollbar)) {
+        bool viewportBorder = input->mouseCaptured;
+        if (viewportBorder) { ImGui::PushStyleColor(ImGuiCol_Border, IMGUI_COLOR_WARN); }
+
+        if (ImGui::BeginChild("Scene Viewport", ImVec2 { 810, 610 }, ImGuiChildFlags_Border)) {
+            m_renderer->render(this);
+            ImGui::SetCursorPos(ImVec2 { 5, 5 });
+            ImGui::Image(m_renderer->getTexture(), ImVec2 { 800, 600 }, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+        }
+        ImGui::EndChild();
+
+        // Toggle mouse capture
+        if (!input->mouseCaptured && ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemClicked(0)) {
+            // Clicked on viewport
+            input->mouseCaptured = true;
+            m_mouseGrabPos = { input->getMouseX(), input->getMouseY() };
+        }
+        else if (input->mouseCaptured && input->getDigitalPressed(m_reclaimMouseInputIndex)) {
+            input->mouseCaptured = false;
+        }
+
+        if (viewportBorder) { ImGui::PopStyleColor(); }
+
+        ImGui::TextDisabled("Double-click to FlyCam");
     }
     ImGui::EndChild();
 
-    /*// TODO: only accept if the object is a hyactor (or our other defined stuffs for putting into the scene)
-    // TODO: figure out why it isn't getting the drop target, different windows?
-    if (ImGui::BeginDragDropTarget()) {
-        HYLOG_INFO("SCENE EDITOR: received drop info...");
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Actor")) {
-            HYLOG_INFO("SCENE EDITOR: accepted a payload");
-        }
+    // Mouse looking (if captured)
+    if (input->mouseCaptured) {
+        m_flyCamYaw += input->getMouseDeltaX() * m_flyCamSensitivity * delta;
+        m_flyCamPitch -= input->getMouseDeltaY() * m_flyCamSensitivity * delta;
+        m_flyCamPitch = MATH_CLAMP(m_flyCamPitch, -89.0f, 89.0f);
 
-        ImGui::EndDragDropSource();
-    }*/
+        // Calculate camera orientation space
+        float yawRad = (m_flyCamYaw / 360.f) * MATH_TAU;
+        float pitchRad = (m_flyCamPitch / 360.f) * MATH_TAU;
+        h_core::math::Vector3 forward {};
+        forward.x = ::cosf(pitchRad) * ::sinf(yawRad);
+        forward.y = ::sinf(pitchRad);
+        forward.z = ::cosf(pitchRad) * -::cosf(yawRad);
+        forward = h_core::math::Vector3::normalize(forward);
+        h_core::math::Vector3 right = h_core::math::Vector3::normalize(
+            h_core::math::Vector3::cross(forward, h_core::math::Vector3 { 0.f, 1.f, 0.f }));
+        m_renderer->cameraDirection = forward;
+
+        // Move along axes in cam orientation space
+        float forwardAmount = input->getAnalogValue(m_camForwardInputIndex);
+        m_renderer->cameraPosition += forward * forwardAmount * delta * m_flyCamSpeed;
+
+        float rightAmount = input->getAnalogValue(m_camRightInputIndex);
+        m_renderer->cameraPosition += right * rightAmount * delta * m_flyCamSpeed;
+
+        // Grab mouse fully
+        input->setMousePos(m_mouseGrabPos.x, m_mouseGrabPos.y);
+        ImGui::GetIO().MouseClicked[0] = false;
+        ImGui::GetIO().MousePos = ImVec2 { m_mouseGrabPos.x, m_mouseGrabPos.y };
+    }
 }
 
 void h_editor::windows::SceneEditor::addActor(const YAML::Node& yaml, h_core::AssetIndex index) {
