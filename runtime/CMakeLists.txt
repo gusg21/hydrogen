@@ -14,15 +14,11 @@ endif ()
 
 target_link_libraries(HydrogenRuntime PUBLIC HydrogenCore)
 
-if (ANDROID)
-    add_custom_target(HydrogenRuntime_Assets
-                      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_SOURCE_DIR}/android/hydrogen/app/src/main/assets/assets
-    )
-else ()
-    add_custom_target(HydrogenRuntime_Assets
-                      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
-    )
-endif ()
+
+add_custom_target(HydrogenRuntime_Assets
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+)
+
 add_dependencies(HydrogenRuntime HydrogenRuntime_Assets)
 set_target_properties(HydrogenRuntime_Assets PROPERTIES FOLDER "HyRuntimeSupport")
 

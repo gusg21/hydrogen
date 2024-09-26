@@ -59,6 +59,8 @@ int main(int argc, char* args[]) {
 
         res.set_content((char*)packed, packedSize, "bin/hy");
 
+        delete packed;
+
         HYLOG_INFO("SERVER: Done serving asset index %d...", assetIndex);
     });
 

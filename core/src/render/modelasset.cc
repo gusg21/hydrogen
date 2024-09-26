@@ -62,6 +62,25 @@
 //     6, 3, 7,
 // };
 
+void h_core::render::Vertex::setUpVertexAttributes() {
+    #ifndef HYCORE_HEADLESS
+    ::glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, position));
+    ::glEnableVertexAttribArray(0);
+
+    ::glVertexAttribPointer(
+        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, normal));
+    ::glEnableVertexAttribArray(1);
+
+    ::glVertexAttribPointer(
+        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, texCoord));
+    ::glEnableVertexAttribArray(2);
+    #endif
+}
+
 uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const tinygltf::Node& node) {
     tinygltf::Mesh mesh = model.meshes[node.mesh];
     tinygltf::Primitive primitiveInfo = mesh.primitives.front();
@@ -192,28 +211,30 @@ void h_core::render::Mesh::precompile(bool useGles3) {
     ::glGenBuffers(1, &indexBufferHandle);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle);
 
-    ::glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
-        (const void*)offsetof(h_core::render::Vertex, position));
-    ::glEnableVertexAttribArray(0);
+    Vertex::setUpVertexAttributes();
 
-    ::glVertexAttribPointer(
-        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
-        (const void*)offsetof(h_core::render::Vertex, normal));
-    ::glEnableVertexAttribArray(1);
+    uploadDataToGPU(MeshAccessType::STATIC); // TODO: specify
 
-    ::glVertexAttribPointer(
-        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
-        (const void*)offsetof(h_core::render::Vertex, texCoord));
-    ::glEnableVertexAttribArray(2);
+    // Clean up
+    ::glBindBuffer(GL_ARRAY_BUFFER, 0);
+    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    //    // Bind the vertex and index buffers to this VAO
-    //    ::glBindBuffer(GL_ARRAY_BUFFER, vertexBufferHandle);
-    //    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle);
+    if (!useGles3) { ::glBindVertexArray(0); }
+
+    // Precompile our texture
+    texture.precompile();
+#else
+    HYLOG_INFO("MESH: Can't precompile (headless)");
+#endif
+}
+
+void h_core::render::Mesh::uploadDataToGPU(MeshAccessType access) const {
+    #ifndef HYCORE_HEADLESS
+    GLuint accessGl = access == MeshAccessType::STATIC ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
 
     // Mark buffers for static drawing (not updated)
     if (numVertices > 0) {
-        ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * numVertices, vertices, GL_STATIC_DRAW);
+        ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * numVertices, vertices, accessGl);
     }
 
     if (numIndices > 0) {
@@ -235,20 +256,9 @@ void h_core::render::Mesh::precompile(bool useGles3) {
                 break;
         }
 
-        ::glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, static_cast<uint64_t>(indexTypeSize) * numIndices, indices, GL_STATIC_DRAW);
+        ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * numIndices, indices, accessGl);
     }
-
-    // Clean up
-    if (!useGles3) { ::glBindVertexArray(0); }
-    ::glBindBuffer(GL_ARRAY_BUFFER, 0);
-    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // Precompile our texture
-    texture.precompile();
-#else
-    HYLOG_INFO("MESH: Can't precompile (headless)");
-#endif
+    #endif
 }
 
 
@@ -334,8 +344,7 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     for (uint32_t vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
         vertices[vertexIndex] = newVerts[vertexIndex];
     }
-    memcpy(
-        vertices, readHead, numVertices * sizeof(h_core::render::Vertex));
+    memcpy(vertices, readHead, numVertices * sizeof(h_core::render::Vertex));
     readHead += numVertices * sizeof(h_core::render::Vertex);
 
     // index type
@@ -384,9 +393,8 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     primitiveMode = MeshPrimitiveMode::TRIANGLES;  // TODO: make dynamic
 }
 
-
-uint32_t h_core::render::ModelAsset::initFromYaml(const std::string& basePath, const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(basePath, yaml);
+uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");
 
@@ -408,14 +416,16 @@ uint32_t h_core::render::ModelAsset::initFromYaml(const std::string& basePath, c
     std::string warningText {};
 
     bool success;
-    size_t textLength;
-    const void* text = SDL_LoadFile((basePath + gltfFilePath).c_str(), &textLength);
     if (!gltfBinaryMode) {
+        size_t gltfTextLength;
+        const char* gltfText = (const char*)SDL_LoadFile(gltfFilePath.c_str(), &gltfTextLength);
         success =
-            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, static_cast<const char*>(text), textLength, gltfBasePath);
+            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, gltfText, gltfTextLength, gltfBasePath);
     }
     else {
-        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, static_cast<const unsigned char*>(text), textLength, gltfBasePath);
+        size_t glbDataLength;
+        const uint8_t* glbData = (const uint8_t*)SDL_LoadFile(gltfFilePath.c_str(), &glbDataLength);
+        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, glbData, glbDataLength, gltfBasePath);
     }
 
     if (!warningText.empty()) { HYLOG_WARN("MODEL: %s\n", warningText.c_str()); }
@@ -506,7 +516,7 @@ void h_core::render::ModelAsset::toPacked(uint8_t* _writeHead) {
 
 void h_core::render::ModelAsset::fromPacked(const uint8_t* _readHead) {
     const uint8_t* readHead = _readHead;
-    if(readHead == nullptr) return;
+    if (readHead == nullptr) return;
 
     uint32_t meshCount = *(uint32_t*)readHead;
     readHead += sizeof(uint32_t);

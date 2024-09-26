@@ -13,13 +13,15 @@
 h_editor::windows::SceneEditor* h_editor::windows::SceneEditor::instance = nullptr;
 
 void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
-    if(instance != nullptr) {
+    if (instance != nullptr) {
         close();
         return;
     }
 
     instance = this;
     m_assetPath = assetPath;
+    m_renderer = new visuals::SceneSpecRenderer();
+    m_renderer->init(getEditor());
 
     void* yamlText = SDL_LoadFile((getEditor()->getProjectBasePath() + assetPath).c_str(), nullptr);
     m_sceneSpecYaml = YAML::Load(static_cast<char*>(yamlText));
@@ -56,24 +58,43 @@ void h_editor::windows::SceneEditor::paintContent() {
     //     ImGui::InputInt("Index", reinterpret_cast<int*>(&spec.actorSpecIndices[instIndex]));
     // }
 
+    ImVec2 size = ImGui::GetWindowSize();
+
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if(ImGui::MenuItem("Save")) {
-                saveToYaml();
-            }
+            if (ImGui::MenuItem("Save")) { saveToYaml(); }
+            if (ImGui::MenuItem("Quit")) { close(); }
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
     }
 
     // Hacky solution, currently just for testing
-    for (uint32_t specIndex = 0; specIndex < m_actorSpecs.size(); specIndex++) {
-        ImGui::PushID(static_cast<int>(m_actorSpecs[specIndex].index));
-        ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
-        ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
-        ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
-        ImGui::PopID();
+    if (ImGui::BeginChild("Scene Text Editor", ImVec2 { 200, -0.1f })) {
+        ImGui::Text("Window Size: %.2fx%.2f", size.x, size.y);
+        ImGui::DragFloat("FOV", &m_renderer->fovY, 1, 30.f, 160.f);
+        ImGui::Separator();
+
+        for (uint32_t specIndex = 0; specIndex < m_actorSpecs.size(); specIndex++) {
+            ImGui::PushID(static_cast<int>(m_actorSpecs[specIndex].index));
+            ImGui::Text("Actor Spec Index: %d", m_actorSpecs[specIndex].index);
+            ImGui::Text("Mask: %d", m_actorSpecs[specIndex].actorSpec.mask);
+            ImGui::DragFloat3("Position", &m_actorSpecs[specIndex].actorSpec.transform.position.x);
+            ImGui::PopID();
+
+            ImGui::Separator();
+        }
     }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    if (ImGui::BeginChild("Scene Viewport", ImVec2 { 810, 610 })) {
+        m_renderer->render(this);
+        ImGui::SetCursorPos(ImVec2 { 5, 5 });
+        ImGui::Image(m_renderer->getTexture(), ImVec2 { 800, 600 }, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    }
+    ImGui::EndChild();
 
     /*// TODO: only accept if the object is a hyactor (or our other defined stuffs for putting into the scene)
     // TODO: figure out why it isn't getting the drop target, different windows?
@@ -85,8 +106,6 @@ void h_editor::windows::SceneEditor::paintContent() {
 
         ImGui::EndDragDropSource();
     }*/
-
-
 }
 
 void h_editor::windows::SceneEditor::addActor(const YAML::Node& yaml, h_core::AssetIndex index) {
@@ -96,8 +115,38 @@ void h_editor::windows::SceneEditor::addActor(const YAML::Node& yaml, h_core::As
     m_spec.actorSpecIndices.push_back(index);
 }
 
+uint32_t h_editor::windows::SceneEditor::getActorCount() const {
+    return m_actorSpecs.size();
+}
+
+h_core::ActorId h_editor::windows::SceneEditor::getActorIdAtIndex(uint32_t index) const {
+    return m_spec.actorSpecIndices[index];
+}
+
+h_core::render::ModelAsset* h_editor::windows::SceneEditor::getActorModelAtIndex(uint32_t index) {
+    EditorActorSpec actorSpec = m_actorSpecs[index];
+    std::string path = getEditor()->getProject()->getPathByIndex(actorSpec.actorSpec.meshIndex);
+
+    // Load if unloaded
+    if (m_cachedModels.find(path) == m_cachedModels.end()) {
+        h_core::render::ModelAsset* model = new h_core::render::ModelAsset();
+        YAML::Node yaml = YAML::Load(path);
+        model->initFromYaml(yaml);
+        m_cachedModels[path] = model;
+    }
+
+    return m_cachedModels[path];
+}
+h_core::Transform h_editor::windows::SceneEditor::getActorTransformAtIndex(uint32_t index) {
+    return m_actorSpecs[index].actorSpec.transform;
+}
+bool h_editor::windows::SceneEditor::actorHasModel(uint32_t index) {
+    EditorActorSpec actorSpec = m_actorSpecs[index];
+    return actorSpec.actorSpec.meshIndex != ASSET_INDEX_BAD;
+}
+
 void h_editor::windows::SceneEditor::saveToYaml() {
-    for(EditorActorSpec& actorSpec : m_actorSpecs) {
+    for (EditorActorSpec& actorSpec : m_actorSpecs) {
         // Create YAML file
         std::string path = getEditor()->getProject()->getPathByIndex(actorSpec.index);
         YAML::Node yaml;

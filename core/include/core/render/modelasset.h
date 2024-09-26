@@ -20,6 +20,8 @@ struct Vertex {
     h_core::math::Vector3 normal;
     h_core::math::Vector2 texCoord;
 
+    static void setUpVertexAttributes();
+
     // static bgfx::VertexLayout layout;
 };
 
@@ -33,6 +35,8 @@ enum class MeshIndexType { BYTE, SHORT, INT };
 
 enum class MeshPrimitiveMode { TRIANGLES = 4 };
 
+enum class MeshAccessType { STATIC, DYNAMIC };
+
 class Mesh {
   public:
     Mesh() = default;
@@ -42,6 +46,8 @@ class Mesh {
     [[nodiscard]] size_t getPackedSize() const;
     void addToPacked(uint8_t* _writeHead);
     void readFromPacked(const uint8_t* _readHead);
+
+    void uploadDataToGPU(MeshAccessType access) const;
 
     h_core::render::Texture texture;
 
