@@ -15,27 +15,28 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="Hydrogen" targetName="HydrogenCore_CopyShaders" />
-      <config projectName="Hydrogen" targetName="libcurl_object" />
-      <config projectName="Hydrogen" targetName="tinygltf" />
       <config projectName="Hydrogen" targetName="angelscript" />
       <config projectName="Hydrogen" targetName="sdl_headers_copy" />
       <config projectName="Hydrogen" targetName="uninstall" />
       <config projectName="Hydrogen" targetName="libcurl_static" />
-      <config projectName="Hydrogen" targetName="Nightly" />
       <config projectName="Hydrogen" targetName="HydrogenCore_Shared" />
       <config projectName="Hydrogen" targetName="HydrogenCore" />
-      <config projectName="Hydrogen" targetName="glad" />
+      <config projectName="Hydrogen" targetName="HydrogenRuntime_Assets" />
       <config projectName="Hydrogen" targetName="SDL2main" />
       <config projectName="Hydrogen" targetName="NightlyMemoryCheck" />
+      <config projectName="Hydrogen" targetName="SDL2_test" />
+      <config projectName="Hydrogen" targetName="Experimental" />
+      <config projectName="Hydrogen" targetName="yaml-cpp" />
+      <config projectName="Hydrogen" targetName="HydrogenRuntime" />
+      <config projectName="Hydrogen" targetName="libcurl_object" />
+      <config projectName="Hydrogen" targetName="tinygltf" />
+      <config projectName="Hydrogen" targetName="Nightly" />
+      <config projectName="Hydrogen" targetName="glad" />
       <config projectName="Hydrogen" targetName="SDL2-static" />
       <config projectName="Hydrogen" targetName="SDL2" />
       <config projectName="Hydrogen" targetName="imgui.cmake" />
       <config projectName="Hydrogen" targetName="Continuous" />
-      <config projectName="Hydrogen" targetName="SDL2_test" />
-      <config projectName="Hydrogen" targetName="Experimental" />
-      <config projectName="Hydrogen" targetName="yaml-cpp" />
       <config projectName="Hydrogen" targetName="HydrogenCore_AngelScriptExtensions" />
-      <config projectName="Hydrogen" targetName="HydrogenEditor" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -44,39 +45,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] batch importing">
-      <change afterPath="$PROJECT_DIR$/editor/include/editor/windows/sceneeditor.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/editor/src/windows/sceneeditor.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="b7057f5c-305f-4c98-9fc0-3c11825fbbe1" name="Changes" comment="[nobuild] nested assets now properly pathed to">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/actorspecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/actorspecasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/asset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/assets.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/assets.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/project/project.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/project/project.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/render/modelasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/render/modelasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/scenespecasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/scenespecasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/include/core/script/scriptasset.h" beforeDir="false" afterPath="$PROJECT_DIR$/core/include/core/script/scriptasset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/actorspecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/actorspecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/asset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/asset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/project/project.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/project/project.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/shaders/core/fs_default.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/core/shaders/core/fs_default.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/src/render/modelasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/render/modelasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/scenespecasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/scenespecasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/script/scriptasset.cc" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/script/scriptasset.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/editor/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/asseteditorwindow.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/editor.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/editor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/platform/path.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/platform/path.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" beforeDir="false" afterPath="$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/editor.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editor.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/editorwindow.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/editorwindow.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/main.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/platform/win32/path_win32.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/meshimporter.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" beforeDir="false" afterPath="$PROJECT_DIR$/editor/src/windows/projectexplorer.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/bush01.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/bush01.hymodel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/helmet.hymodel" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/helmet.hymodel" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/project.hyproject" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/project.hyproject" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runtime/assets/test_scene.hyscene" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/assets/test_scene.hyscene" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runtime/src/main.cc" beforeDir="false" afterPath="$PROJECT_DIR$/runtime/src/main.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +70,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dev" />
+        <entry key="$PROJECT_DIR$" value="working-editor" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -114,63 +88,6 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/assets.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/engine.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/input/input.h" root0="FORCE_HIGHLIGHTING" />
@@ -184,9 +101,17 @@
     <setting file="file://$PROJECT_DIR$/core/include/core/render/texture.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/runtimeassets.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/core/include/core/runtimeengine.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/editor/include/editor/editor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/editor.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/editorwindow.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/visuals/scenespecrenderer.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/editor/include/editor/windows/meshimporter.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/windows/projectexplorer.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/include/editor/windows/sceneeditor.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/src/editor.cc" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/src/editorwindow.cc" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/editor/src/main.cc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/src/visuals/scenespecrenderer.cc" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/editor/src/windows/sceneeditor.cc" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/runtime/src/main.cc" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server/src/main.cc" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -235,7 +160,7 @@
     "cf.advertisement.text.overridden": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "5d2818bb",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Projects/hydrogen/runtime/assets",
     "node.js.detected.package.eslint": "true",
@@ -269,7 +194,7 @@
       <recent name="com.jetbrains.cidr.cpp.execution.debugger.backend.CLionGDBDriverConfiguration:C:\Program Files\JetBrains\CLion 2024.1.1\bin\gdb\win\x64\bin\gdb.exe" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.HydrogenEditor">
+  <component name="RunManager" selected="CMake Application.HydrogenRuntime">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -306,6 +231,16 @@
       </method>
     </configuration>
     <configuration name="HydrogenEditor" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$ProjectFileDir$\runtime\assets\" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenEditor" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenEditor">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="HydrogenRuntime" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="D:/" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime" CONFIG_NAME="Debug-Visual Studio" RUN_TARGET_PROJECT_NAME="Hydrogen" RUN_TARGET_NAME="HydrogenRuntime">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="HydrogenRuntime_Assets" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hydrogen" TARGET_NAME="HydrogenRuntime_Assets" CONFIG_NAME="Debug-Visual Studio">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -430,10 +365,13 @@
       <item itemvalue="CMake Application.tinygltf" />
       <item itemvalue="CMake Application.uninstall" />
       <item itemvalue="CMake Application.yaml-cpp" />
+      <item itemvalue="CMake Application.HydrogenRuntime" />
+      <item itemvalue="CMake Application.HydrogenRuntime_Assets" />
       <item itemvalue="Python.main" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.main" />
       </list>
@@ -466,7 +404,13 @@
       <workItem from="1726385455601" duration="27437000" />
       <workItem from="1726557201499" duration="14989000" />
       <workItem from="1727184251754" duration="5000" />
-      <workItem from="1727184355539" duration="13606000" />
+      <workItem from="1727184355539" duration="15041000" />
+      <workItem from="1727209178684" duration="7208000" />
+      <workItem from="1727221161613" duration="3954000" />
+      <workItem from="1727287964356" duration="8102000" />
+      <workItem from="1727312592786" duration="3245000" />
+      <workItem from="1727373168818" duration="5168000" />
+      <workItem from="1727391746450" duration="1019000" />
     </task>
     <task id="LOCAL-00001" summary="misc">
       <option name="closed" value="true" />
@@ -756,7 +700,31 @@
       <option name="project" value="LOCAL" />
       <updated>1727189119731</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="[nobuild] bulk add to project">
+      <option name="closed" value="true" />
+      <created>1727198684539</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1727198684539</updated>
+    </task>
+    <task id="LOCAL-00038" summary="[nobuild] nested assets now properly pathed to">
+      <option name="closed" value="true" />
+      <created>1727199848264</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1727199848264</updated>
+    </task>
+    <task id="LOCAL-00039" summary="[nobuild] nested assets now properly pathed to">
+      <option name="closed" value="true" />
+      <created>1727315466384</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1727315466384</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -768,8 +736,6 @@
     <isAutomaticReloadCMake value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="removed more accidental bad platform pairs from  autobuild" />
-    <MESSAGE value="use same compiler for c and c++ in autobuild" />
     <MESSAGE value="[nobuild] bye bye macos autobuild support" />
     <MESSAGE value="added input system" />
     <MESSAGE value="added flycam + mouse grabbing" />
@@ -793,14 +759,16 @@
     <MESSAGE value="[nobuild] server args" />
     <MESSAGE value="[nobuild] IT'S WORKING" />
     <MESSAGE value="[nobuild] batch importing" />
-    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] batch importing" />
+    <MESSAGE value="[nobuild] bulk add to project" />
+    <MESSAGE value="[nobuild] nested assets now properly pathed to" />
+    <option name="LAST_COMMIT_MESSAGE" value="[nobuild] nested assets now properly pathed to" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/core/src/project/project.cc</url>
-          <line>89</line>
+          <line>100</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>

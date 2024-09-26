@@ -211,15 +211,57 @@ void h_core::render::Mesh::precompile(bool useGles3) {
     ::glGenBuffers(1, &indexBufferHandle);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle);
 
-    Vertex::setUpVertexAttributes();
+    ::glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, position));
+    ::glEnableVertexAttribArray(0);
 
-    uploadDataToGPU(MeshAccessType::STATIC);  // TODO: specify
+    ::glVertexAttribPointer(
+        1, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, normal));
+    ::glEnableVertexAttribArray(1);
+
+    ::glVertexAttribPointer(
+        2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
+        (const void*)offsetof(h_core::render::Vertex, texCoord));
+    ::glEnableVertexAttribArray(2);
+
+    //    // Bind the vertex and index buffers to this VAO
+    //    ::glBindBuffer(GL_ARRAY_BUFFER, vertexBufferHandle);
+    //    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferHandle);
+
+    // Mark buffers for static drawing (not updated)
+    if (numVertices > 0) {
+        ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * numVertices, vertices, GL_STATIC_DRAW);
+    }
+
+    if (numIndices > 0) {
+        // Determine index type size
+        size_t indexTypeSize = 0;
+        switch (meshIndexType) {
+            case MeshIndexType::BYTE:
+                indexTypeSize = sizeof(uint8_t);
+                break;
+            case MeshIndexType::SHORT:
+                indexTypeSize = sizeof(uint16_t);
+                break;
+            case MeshIndexType::INT:
+                indexTypeSize = sizeof(uint32_t);
+                break;
+            default:
+                HYLOG_ERROR("Undefined mesh index type value\n");
+                indexTypeSize = sizeof(uint16_t);
+                break;
+        }
+
+        ::glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER, static_cast<uint64_t>(indexTypeSize) * numIndices, indices, GL_STATIC_DRAW);
+    }
 
     // Clean up
+    if (!useGles3) { ::glBindVertexArray(0); }
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
     ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    if (!useGles3) { ::glBindVertexArray(0); }
 
     // Precompile our texture
     texture.precompile();
