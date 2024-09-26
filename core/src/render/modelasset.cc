@@ -63,7 +63,7 @@
 // };
 
 void h_core::render::Vertex::setUpVertexAttributes() {
-    #ifndef HYCORE_HEADLESS
+#ifndef HYCORE_HEADLESS
     ::glVertexAttribPointer(
         0, 3, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, position));
@@ -78,7 +78,7 @@ void h_core::render::Vertex::setUpVertexAttributes() {
         2, 2, GL_FLOAT, GL_FALSE, sizeof(h_core::render::Vertex),
         (const void*)offsetof(h_core::render::Vertex, texCoord));
     ::glEnableVertexAttribArray(2);
-    #endif
+#endif
 }
 
 uint32_t h_core::render::Mesh::initFromNode(const tinygltf::Model& model, const tinygltf::Node& node) {
@@ -213,7 +213,7 @@ void h_core::render::Mesh::precompile(bool useGles3) {
 
     Vertex::setUpVertexAttributes();
 
-    uploadDataToGPU(MeshAccessType::STATIC); // TODO: specify
+    uploadDataToGPU(MeshAccessType::STATIC);  // TODO: specify
 
     // Clean up
     ::glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -229,7 +229,7 @@ void h_core::render::Mesh::precompile(bool useGles3) {
 }
 
 void h_core::render::Mesh::uploadDataToGPU(MeshAccessType access) const {
-    #ifndef HYCORE_HEADLESS
+#ifndef HYCORE_HEADLESS
     GLuint accessGl = access == MeshAccessType::STATIC ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
 
     // Mark buffers for static drawing (not updated)
@@ -258,7 +258,7 @@ void h_core::render::Mesh::uploadDataToGPU(MeshAccessType access) const {
 
         ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexTypeSize * numIndices, indices, accessGl);
     }
-    #endif
+#endif
 }
 
 
@@ -393,8 +393,8 @@ void h_core::render::Mesh::readFromPacked(const uint8_t* _readHead) {
     primitiveMode = MeshPrimitiveMode::TRIANGLES;  // TODO: make dynamic
 }
 
-uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
-    h_core::Asset::initFromYaml(yaml);
+uint32_t h_core::render::ModelAsset::initFromYaml(const std::string& basePath, const YAML::Node& yaml) {
+    h_core::Asset::initFromYaml(basePath, yaml);
 
     HYLOG_INFO("MESH: loading model from YAML spec...\n");
 
@@ -416,16 +416,14 @@ uint32_t h_core::render::ModelAsset::initFromYaml(const YAML::Node& yaml) {
     std::string warningText {};
 
     bool success;
+    size_t length;
+    const char* gltfText = (const char*)SDL_LoadFile((basePath + gltfFilePath).c_str(), &length);
     if (!gltfBinaryMode) {
-        size_t gltfTextLength;
-        const char* gltfText = (const char*)SDL_LoadFile(gltfFilePath.c_str(), &gltfTextLength);
-        success =
-            loader.LoadASCIIFromString(&m_model, &errorText, &warningText, gltfText, gltfTextLength, gltfBasePath);
+        success = loader.LoadASCIIFromString(&m_model, &errorText, &warningText, gltfText, length, basePath + gltfBasePath);
     }
     else {
-        size_t glbDataLength;
-        const uint8_t* glbData = (const uint8_t*)SDL_LoadFile(gltfFilePath.c_str(), &glbDataLength);
-        success = loader.LoadBinaryFromMemory(&m_model, &errorText, &warningText, glbData, glbDataLength, gltfBasePath);
+        success = loader.LoadBinaryFromMemory(
+            &m_model, &errorText, &warningText, reinterpret_cast<const unsigned char*>(gltfText), length, basePath + gltfBasePath);
     }
 
     if (!warningText.empty()) { HYLOG_WARN("MODEL: %s\n", warningText.c_str()); }

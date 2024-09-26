@@ -36,7 +36,9 @@ void h_editor::visuals::SceneSpecRenderer::init(h_editor::Editor* editor) {
     ::glBindVertexArray(m_vao);
 
     ::glGenBuffers(1, &m_vbo);
+    ::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
     ::glGenBuffers(1, &m_ebo);
+    ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 
     h_core::render::Vertex::setUpVertexAttributes();
 
@@ -92,47 +94,53 @@ void h_editor::visuals::SceneSpecRenderer::render(h_editor::windows::SceneEditor
     for (uint32_t actorIndex = 0; actorIndex < editor->getActorCount(); actorIndex++) {
         h_core::Transform transform = editor->getActorTransformAtIndex(actorIndex);
 
-        ::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-        ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-
         m_shader.setMat4(
             "uni_modelMatrix",
             h_core::math::Mat4x4::createTransformMatrix(transform.position, transform.rotation, transform.scale));
 
+        bool drawPoint = true;
+
         if (editor->actorHasModel(actorIndex)) {
             h_core::render::ModelAsset* model = editor->getActorModelAtIndex(actorIndex);
 
-            if (model->getMeshCount() != 0) {
-                for (uint32_t meshIndex = 0; meshIndex < model->getMeshCount(); meshIndex++) {
-                    h_core::render::Mesh* mesh = &model->getMeshes()[meshIndex];
-                    mesh->uploadDataToGPU(h_core::render::MeshAccessType::DYNAMIC);
+            if (model != nullptr) {
+                if (model->getMeshCount() != 0) {
+                    for (uint32_t meshIndex = 0; meshIndex < model->getMeshCount(); meshIndex++) {
+                        h_core::render::Mesh* mesh = &model->getMeshes()[meshIndex];
 
-                    GLenum glElementType;
-                    switch (mesh->meshIndexType) {
-                        case h_core::render::MeshIndexType::BYTE:
-                            glElementType = GL_UNSIGNED_BYTE;
-                            break;
-                        case h_core::render::MeshIndexType::SHORT:
-                            glElementType = GL_UNSIGNED_SHORT;
-                            break;
-                        case h_core::render::MeshIndexType::INT:
-                            glElementType = GL_UNSIGNED_INT;
-                            break;
-                        default:
-                            glElementType = GL_UNSIGNED_INT;  // clion was giving a warning about glElementType, it was
-                                                              // annoying. I wrote a useless default
+                        ::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+                        ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+                        mesh->uploadDataToGPU(h_core::render::MeshAccessType::DYNAMIC);
+
+                        GLenum glElementType;
+                        switch (mesh->meshIndexType) {
+                            case h_core::render::MeshIndexType::BYTE:
+                                glElementType = GL_UNSIGNED_BYTE;
+                                break;
+                            case h_core::render::MeshIndexType::SHORT:
+                                glElementType = GL_UNSIGNED_SHORT;
+                                break;
+                            case h_core::render::MeshIndexType::INT:
+                                glElementType = GL_UNSIGNED_INT;
+                                break;
+                            default:
+                                glElementType =
+                                    GL_UNSIGNED_INT;  // clion was giving a warning about glElementType, it was
+                                // annoying. I wrote a useless default
+                        }
+
+                        ::glDrawElements(GL_TRIANGLES, mesh->numIndices, glElementType, nullptr);
                     }
 
-                    ::glDrawElements(GL_TRIANGLES, mesh->numIndices, glElementType, nullptr);
+                    drawPoint = false;
                 }
-            } else {
-                ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * 6, crossVerts, GL_DYNAMIC_DRAW);
-                ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 9, crossIndices, GL_DYNAMIC_DRAW);
-
-                ::glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr);
             }
         }
-        else {
+
+        if (drawPoint) {
+            ::glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            ::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+
             ::glBufferData(GL_ARRAY_BUFFER, sizeof(h_core::render::Vertex) * 6, crossVerts, GL_DYNAMIC_DRAW);
             ::glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 9, crossIndices, GL_DYNAMIC_DRAW);
 

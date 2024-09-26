@@ -27,7 +27,7 @@ void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
     m_sceneSpecYaml = YAML::Load(static_cast<char*>(yamlText));
     SDL_free(yamlText);
 
-    m_spec.initFromYaml(m_sceneSpecYaml);
+    m_spec.initFromYaml(getEditor()->getProjectBasePath(), m_sceneSpecYaml);
 
     for (const h_core::project::ProjectAssetEntry& requiredAsset : getEditor()->getProject()->requiredAssets) {
         for (const uint32_t actorSpecIndex : m_spec.actorSpecIndices) {
@@ -39,7 +39,7 @@ void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
                 YAML::Node actorYaml = YAML::Load(static_cast<char*>(actorYamlText));
                 SDL_free(actorYamlText);
 
-                actorSpec.actorSpec.initFromYaml(actorYaml);
+                actorSpec.actorSpec.initFromYaml(getEditor()->getProjectBasePath(), actorYaml);
                 actorSpec.index = actorSpecIndex;
                 m_actorSpecs.push_back(actorSpec);
             }
@@ -110,7 +110,7 @@ void h_editor::windows::SceneEditor::paintContent() {
 
 void h_editor::windows::SceneEditor::addActor(const YAML::Node& yaml, h_core::AssetIndex index) {
     h_core::ActorSpecAsset actorSpec {};
-    actorSpec.initFromYaml(yaml);
+    actorSpec.initFromYaml(getEditor()->getProjectBasePath(), yaml);
     m_actorSpecs.emplace_back(actorSpec, index);
     m_spec.actorSpecIndices.push_back(index);
 }
@@ -127,11 +127,17 @@ h_core::render::ModelAsset* h_editor::windows::SceneEditor::getActorModelAtIndex
     EditorActorSpec actorSpec = m_actorSpecs[index];
     std::string path = getEditor()->getProject()->getPathByIndex(actorSpec.actorSpec.meshIndex);
 
+    if (path.empty()) {
+        // Don't try to load remote assets
+        return nullptr;
+    }
+
     // Load if unloaded
     if (m_cachedModels.find(path) == m_cachedModels.end()) {
         h_core::render::ModelAsset* model = new h_core::render::ModelAsset();
-        YAML::Node yaml = YAML::Load(path);
-        model->initFromYaml(yaml);
+        char* yamlText = (char*)SDL_LoadFile((getEditor()->getProjectBasePath() + path).c_str(), nullptr);
+        YAML::Node yaml = YAML::Load(yamlText);
+        model->initFromYaml(getEditor()->getProjectBasePath(), yaml);
         m_cachedModels[path] = model;
     }
 
