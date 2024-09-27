@@ -95,7 +95,7 @@ uint32_t h_core::Assets::loadAssetFromFile(h_core::Asset** out_asset, const h_co
     const char* fileText = (const char*)SDL_LoadFile((m_project->baseProjectPath + desc.path).c_str(), nullptr);
 
     if (fileText == nullptr) {
-        HYLOG_DEBUG("ASSETS: Wrong file path %s", (m_project->baseProjectPath + desc.path).c_str());
+        HYLOG_DEBUG("ASSETS: Wrong file path (base %s) (desc %s)", m_project->baseProjectPath.c_str(),  desc.path.c_str());
         return 1;  // TODO: Fix
     }
 
