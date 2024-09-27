@@ -109,7 +109,7 @@ void h_editor::windows::MeshImporter::import() {
     YAML::Node yaml {};
     yaml["gltf"] = gltfFile;
     if (m_needsBasePath) {
-        yaml["gltf_base_path"] = h_editor::platform::getBaseFromPath(m_meshFile) + '\\';
+        yaml["gltf_base_path"] = h_editor::platform::getDirectoryFromPath(m_meshFile) + '\\';
     } else {
         yaml["gltf_binary"] = true;
     }

@@ -13,7 +13,6 @@
 #include "core/actorspecasset.h"
 #include "core/assetindex.h"
 #include "core/log.h"
-#include "core/project/projectassetentry.h"
 #include "core/render/modelasset.h"
 #include "core/scenespecasset.h"
 #include "core/script/scriptasset.h"

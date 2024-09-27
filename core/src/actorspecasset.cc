@@ -39,6 +39,6 @@ void h_core::ActorSpecAsset::saveToYaml(YAML::Node& yaml) {
     }
 
     if(scriptIndex != ASSET_INDEX_BAD) {
-        yaml["scripts"]["index"] = scriptIndex;
+        yaml["script"]["index"] = scriptIndex;
     }
 }

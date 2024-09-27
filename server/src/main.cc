@@ -21,7 +21,7 @@ int main(int argc, char* args[]) {
     // Load assets
     h_core::Assets assets {};
     h_core::project::Project project {};
-    project.loadFromFile("assets/project.hyproject", SDL_GetBasePath());
+    project.loadFromFile("project.hyproject", SDL_GetBasePath());
     assets.loadFromProject(&project);
 
     // Configure server

@@ -11,10 +11,8 @@ h_core::AssetHash h_core::Assets::getAssetHashFromString(const std::string& stri
 
 void h_core::Assets::loadFromProject(const h_core::project::Project* project) {
     m_project = project;
-    for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        loadAsset(h_core::AssetDescription {
-            assetInfo.index, assetInfo.typeId, assetInfo.assetPath, AssetRemoteMode::LOCAL  // never remote in base assets
-        });
+    for (const h_core::AssetDescription& assetInfo : project->requiredAssets) {
+        loadAsset(assetInfo);
     }
 }
 

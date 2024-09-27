@@ -33,13 +33,13 @@ void h_editor::windows::SceneEditor::open(const std::string& assetPath) {
 
     m_spec.initFromYaml(getEditor()->getProjectBasePath(), m_sceneSpecYaml);
 
-    for (const h_core::project::ProjectAssetEntry& requiredAsset : getEditor()->getProject()->requiredAssets) {
+    for (const h_core::AssetDescription& requiredAsset : getEditor()->getProject()->requiredAssets) {
         for (const uint32_t actorSpecIndex : m_spec.actorSpecIndices) {
             if (requiredAsset.index == actorSpecIndex) {
                 EditorActorSpec actorSpec {};
 
                 void* actorYamlText =
-                    SDL_LoadFile((getEditor()->getProjectBasePath() + requiredAsset.assetPath).c_str(), nullptr);
+                    SDL_LoadFile((getEditor()->getProjectBasePath() + requiredAsset.path).c_str(), nullptr);
                 YAML::Node actorYaml = YAML::Load(static_cast<char*>(actorYamlText));
                 SDL_free(actorYamlText);
 

@@ -5,7 +5,6 @@
 
 #include "core/math/color.h"
 #include "core/scenespecasset.h"
-#include "core/project/projectassetentry.h"
 #include "core/project/projectactionentry.h"
 
 namespace h_core {
@@ -15,6 +14,7 @@ class Project {
     Project() noexcept = default;
 
     uint32_t loadFromFile(const std::string& yamlPath, const std::string& assetsBasePath);
+    void saveToYaml(YAML::Node& yaml);
 
     /// @brief the name of the project
     std::string name = "Unnamed Project";
@@ -29,7 +29,7 @@ class Project {
 
     std::string assetServerAddress {};
 
-    std::vector<h_core::project::ProjectAssetEntry> requiredAssets {};
+    std::vector<h_core::AssetDescription> requiredAssets {};
     std::vector<h_core::project::ProjectActionEntry> actions {};
 
     // Helpers

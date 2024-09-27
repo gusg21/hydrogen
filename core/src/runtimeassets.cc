@@ -122,11 +122,10 @@ void h_core::RuntimeAssets::doGUI() {
 
 void h_core::RuntimeAssets::loadFromProject(const h_core::project::Project* project) {
     m_project = project;
-    for (const h_core::project::ProjectAssetEntry& assetInfo : project->requiredAssets) {
-        if (assetInfo.remoteMode == AssetRemoteMode::REMOTE_ON_REQUEST) continue;
+    for (const h_core::AssetDescription& assetInfo : project->requiredAssets) {
+        if (assetInfo.remote == AssetRemoteMode::REMOTE_ON_REQUEST) continue;
 
-        RuntimeAssets::loadAsset(
-            h_core::AssetDescription { assetInfo.index, assetInfo.typeId, assetInfo.assetPath, assetInfo.remoteMode });
+        RuntimeAssets::loadAsset(assetInfo);
     }
 }
 

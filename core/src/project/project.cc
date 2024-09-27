@@ -72,15 +72,15 @@ uint32_t h_core::project::Project::loadFromFile(const std::string& yamlPath, con
 }
 
 bool h_core::project::Project::hasAssetPath(const std::string& assetPath) const {
-    for (const ProjectAssetEntry& entry : requiredAssets) {
-        if (entry.assetPath == assetPath) { return true; }
+    for (const AssetDescription& entry : requiredAssets) {
+        if (entry.path == assetPath) { return true; }
     }
     return false;
 }
 
 std::string h_core::project::Project::getPathByIndex(AssetIndex index) const {
-    for (const ProjectAssetEntry& entry : requiredAssets) {
-        if (entry.index == index) { return entry.assetPath; }
+    for (const AssetDescription& entry : requiredAssets) {
+        if (entry.index == index) { return entry.path; }
     }
 
     return "";
@@ -89,7 +89,7 @@ std::string h_core::project::Project::getPathByIndex(AssetIndex index) const {
 h_core::AssetIndex h_core::project::Project::getOpenIndex() const {
     for (AssetIndex index = 0; index < UINT32_MAX; index++) {
         bool indexOccupied = false;
-        for (const ProjectAssetEntry& entry : requiredAssets) {
+        for (const AssetDescription& entry : requiredAssets) {
             if (entry.index == index) { indexOccupied = true; }
         }
         if (!indexOccupied) { return index; }
@@ -100,12 +100,54 @@ h_core::AssetIndex h_core::project::Project::getOpenIndex() const {
 void h_core::project::Project::removeByPath(const std::string& assetPath) {
     auto found = requiredAssets.end();
     for (auto entryIter = requiredAssets.begin(); entryIter < requiredAssets.end(); ++entryIter) {
-        if (entryIter->assetPath == assetPath) {
+        if (entryIter->path == assetPath) {
             found = entryIter;
             break;
         }
     }
-    if (found != requiredAssets.end()) {
-        requiredAssets.erase(found);
+    if (found != requiredAssets.end()) { requiredAssets.erase(found); }
+}
+void h_core::project::Project::saveToYaml(YAML::Node& yaml) {
+    yaml["initial_scene_spec"] = initialSceneSpec;
+    yaml["name"] = name;
+    yaml["asset_server_address"] = assetServerAddress;
+    std::vector<YAML::Node> yamlInputActions {};
+
+    // Actions
+    for (auto action : actions) {
+        YAML::Node yamlAction {};
+        yamlAction["name"] = action.name;
+
+        std::vector<YAML::Node> yamlSources {};
+        for (auto source : action.sources) {
+            YAML::Node yamlSource {};
+            switch (source.type) {
+                case input::InputActionSourceType::KEY:
+                    yamlSource["key"] = (uint32_t)source.value.scanCode;
+                    break;
+                case input::InputActionSourceType::DUAL_KEY:
+                    yamlSource["negative_key"] = (uint32_t)source.value.dualScanCodes[0];
+                    yamlSource["positive_key"] = (uint32_t)source.value.dualScanCodes[1];
+                    break;
+            }
+            yamlSources.push_back(yamlSource);
+        }
+        yamlAction["sources"] = yamlSources;
+        yamlInputActions.push_back(yamlAction);
     }
+    yaml["input_actions"] = yamlInputActions;
+
+    // Assets
+    std::vector<YAML::Node> yamlAssets {};
+    for (auto assetData : requiredAssets) {
+        YAML::Node yamlAsset {};
+        yamlAsset["index"] = assetData.index;
+        yamlAsset["type"] = assetData.type;
+
+        if (assetData.remote == AssetRemoteMode::LOCAL) { yamlAsset["path"] = assetData.path; }
+        else { yamlAsset["remote"] = (uint32_t)assetData.remote; }
+
+        yamlAssets.push_back(yamlAsset);
+    }
+    yaml["assets"] = yamlAssets;
 }

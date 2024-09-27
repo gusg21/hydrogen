@@ -309,7 +309,20 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
     ImGui::SeparatorText("Project View");
     if (ImGui::BeginChild("Project Explorer", ImVec2 {}, ImGuiChildFlags_Border)) {
-        ImGui::Text("Asset Count: %d", project->requiredAssets.size());
+        ImGui::Text("Asset Count: %zu", project->requiredAssets.size());
+        ImGui::SameLine();
+        if (ImGui::Button("Save Project")) {
+            // YAML write
+            YAML::Node yaml;
+            getEditor()->getProject()->saveToYaml(yaml);
+
+            // Write to file
+            HYLOG_INFO("PROJECT EXPLORER: Saving project to file %s", (getEditor()->getProjectBasePath() + "project.hyproject").c_str());
+            SDL_RWops* yamlFile = SDL_RWFromFile((getEditor()->getProjectBasePath() + "project.hyproject").c_str(), "w+");
+            std::string outputYaml = YAML::Dump(yaml);
+            yamlFile->write(yamlFile, outputYaml.c_str(), sizeof(char), outputYaml.size());
+            SDL_RWclose(yamlFile);
+        }
 
         ImGui::Separator();
 
@@ -326,20 +339,20 @@ void h_editor::windows::ProjectExplorer::paintContent() {
 
             ImGui::TableHeadersRow();
 
-            for (h_core::project::ProjectAssetEntry& projectAsset : project->requiredAssets) {
+            for (h_core::AssetDescription& projectAsset : project->requiredAssets) {
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
                 {
                     if (ImGui::Button(("Remove##" + std::to_string(projectAsset.index)).c_str(), ImVec2 { -0.1f, 20.f })) {
-                        project->removeByPath(projectAsset.assetPath);
+                        project->removeByPath(projectAsset.path);
                     }
 
-                    ImGui::BeginDisabled(SceneEditor::instance == nullptr || projectAsset.typeId != h_core::ActorSpecAsset::getTypeId());
+                    ImGui::BeginDisabled(SceneEditor::instance == nullptr || projectAsset.type != h_core::ActorSpecAsset::getTypeId());
                     if (ImGui::Button(
                             ("Scene Add##" + std::to_string(projectAsset.index)).c_str(), ImVec2 { -0.1f, 20.f })) {
                         void* actorYamlText =
-                            SDL_LoadFile((getEditor()->getProjectBasePath() + projectAsset.assetPath).c_str(), nullptr);
+                            SDL_LoadFile((getEditor()->getProjectBasePath() + projectAsset.path).c_str(), nullptr);
                         YAML::Node actorYaml = YAML::Load(static_cast<char*>(actorYamlText));
                         SDL_free(actorYamlText);
 
@@ -351,10 +364,10 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                 ImGui::TableNextColumn();
                 {
                     ImGui::PushItemWidth(-1);
-                    if (projectAsset.remoteMode != h_core::AssetRemoteMode::LOCAL) { ImGui::TextDisabled("Remote Asset"); }
+                    if (projectAsset.remote != h_core::AssetRemoteMode::LOCAL) { ImGui::TextDisabled("Remote Asset"); }
                     else {
                         ImGui::InputText(
-                            ("##path" + std::to_string(projectAsset.index)).c_str(), &projectAsset.assetPath);
+                            ("##path" + std::to_string(projectAsset.index)).c_str(), &projectAsset.path);
                     }
                     ImGui::PopItemWidth();
                 }
@@ -363,8 +376,8 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                     ImGui::PushItemWidth(-1);
                     ImGui::InputInt(
                         ("##type" + std::to_string(projectAsset.index)).c_str(),
-                        reinterpret_cast<int*>(&projectAsset.typeId));
-                    ImGui::TextDisabled("%s", h_core::Assets::getAssetTypeName(projectAsset.typeId));
+                        reinterpret_cast<int*>(&projectAsset.type));
+                    ImGui::TextDisabled("%s", h_core::Assets::getAssetTypeName(projectAsset.type));
 
                     ImGui::PopItemWidth();
                 }
@@ -377,34 +390,12 @@ void h_editor::windows::ProjectExplorer::paintContent() {
                     ImGui::PopItemWidth();
                 }
                 ImGui::TableNextColumn();
-                { h_core::widgets::doAssetRemoteModeGui(&projectAsset.remoteMode); }
+                { h_core::widgets::doAssetRemoteModeGui(&projectAsset.remote); }
 
             }
 
             ImGui::EndTable();
         }
-
-
-
-        // uint32_t itemWidth = 70.f;
-        // uint32_t width = ImGui::GetContentRegionAvail().x;
-        // if (ImGui::BeginTable(
-        //         "Project Explorer Files", width / itemWidth, 0,
-        //         ImVec2 { static_cast<float>((width / itemWidth) * itemWidth), -0.1f })) {  //
-        //         NOLINT(*-integer-division)
-        //     for (const h_core::project::ProjectAssetEntry& projectAsset : project->requiredAssets) {
-        //         ImGui::TableNextColumn();
-        //
-        //         // File
-        //         if (ImGui::BeginChild(projectAsset.index, ImVec2 { static_cast<float>(itemWidth), 70.f })) {
-        //             ImGui::TextWrapped("%s",
-        //             projectAsset.assetPath.substr(projectAsset.assetPath.find_last_of('/')).c_str());
-        //         }
-        //         ImGui::EndChild();
-        //     }
-        //
-        //     ImGui::EndTable();
-        // }
     }
     ImGui::EndChild();
 

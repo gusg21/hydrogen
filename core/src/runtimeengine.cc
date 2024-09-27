@@ -85,19 +85,19 @@ void h_core::RuntimeEngine::doGUI() {
             ImGui::TableSetupColumn("Remote", 0, 30);
             ImGui::TableHeadersRow();
 
-            for (const h_core::project::ProjectAssetEntry& entry : getProject()->requiredAssets) {
+            for (const h_core::AssetDescription& entry : getProject()->requiredAssets) {
                 ImGui::TableNextColumn();
                 ImGui::Text("%u", entry.index);
                 ImGui::TableNextColumn();
-                ImGui::Text("%u", entry.typeId);
+                ImGui::Text("%u", entry.type);
                 ImGui::TableNextColumn();
-                ImGui::Text("%s", entry.assetPath.c_str());
+                ImGui::Text("%s", entry.path.c_str());
                 ImGui::TableNextColumn();
-                if (entry.remoteMode == AssetRemoteMode::REMOTE_IMMEDIATE) {
+                if (entry.remote == AssetRemoteMode::REMOTE_IMMEDIATE) {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4 { 0, 0, 0, 1 });
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(IMGUI_COLOR_GOOD));
                 }
-                if (entry.remoteMode == AssetRemoteMode::REMOTE_IMMEDIATE) { ImGui::PopStyleColor(); }
+                if (entry.remote == AssetRemoteMode::REMOTE_IMMEDIATE) { ImGui::PopStyleColor(); }
             }
             ImGui::EndTable();
         }
