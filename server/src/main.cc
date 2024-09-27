@@ -11,7 +11,7 @@
 #include "httplib.h"
 
 int main(int argc, char* args[]) {
-    if (argc < 3) {
+    if (argc < 4) {
         printf("Not enough arguments!\n");
         return 1;
     }
@@ -21,7 +21,7 @@ int main(int argc, char* args[]) {
     // Load assets
     h_core::Assets assets {};
     h_core::project::Project project {};
-    project.loadFromFile("project.hyproject", SDL_GetBasePath());
+    project.loadFromFile("project.hyproject", args[1]);
     assets.loadFromProject(&project);
 
     // Configure server
@@ -65,8 +65,8 @@ int main(int argc, char* args[]) {
     });
 
     // Listen
-    const char* host = args[1];
-    uint32_t port = std::atoi(args[2]);
+    const char* host = args[2];
+    uint32_t port = std::atoi(args[3]);
     HYLOG_INFO("SERVER: Listening on %s:%d...", host, port);
     svr.listen(host, port);
 
