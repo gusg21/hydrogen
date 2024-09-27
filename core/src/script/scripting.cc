@@ -229,7 +229,11 @@ asIScriptModule* h_core::script::Scripting::getModule() const {
 }
 
 float h_core::script::Scripting::getDistanceToCamera() {
+#ifndef HYCORE_HEADLESS
     return (transform->position - engine->getSystems()->renderer->getCameraPosition()).getLength();
+#else
+    return INFINITY;
+#endif
 }
 
 void h_core::script::Scripting::loadAsset(AssetDescription desc) {
